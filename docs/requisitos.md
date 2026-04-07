@@ -1,9 +1,8 @@
 # Desafio Tech: Projeto "OmniConnect – Gestão Inteligente de Serviços"
 
 📋 O Cenário
-Muitas empresas de serviços (clínicas, escritórios de advocacia, oficinas premium) sofrem com dois problemas:
-Fricção no Atendimento: Clientes preferem o WhatsApp, mas os dados se perdem em conversas informais.
-Falta de Visibilidade: O prestador de serviço não consegue gerir a demanda e o cliente não tem um histórico estruturado do que foi tratado.
+- Fricção no Atendimento: Clientes preferem o WhatsApp para tirar dúvidas sobre seus processos ou iniciar consultas jurídicas, mas os dados se perdem em conversas informais.
+- Falta de Visibilidade: Advogados perdem tempo com triagens manuais e o cliente não possui um histórico estruturado da sua demanda jurídica.
 O Objetivo: Criar uma plataforma onde o cliente inicia o atendimento via WhatsApp (Chatbot com IA), os dados são processados e sincronizados em tempo real, e ambos (Cliente e Fornecedor) utilizam um App em Flutter para gerir o ciclo de vida do serviço.
 
 🛠️ Requisitos Técnicos (Obrigatórios)
@@ -47,11 +46,11 @@ Infraestrutura e Dados:
 
 👥 Formação dos Grupos (5 a 6 Integrantes)
 Sugestão de papéis para os alunos:
-- **Tech Lead / Backend**: Responsável pela arquitetura da API e segurança.
-- **AI Specialist**: Focado em LangChain, RAG e integração com LLM.
-- **Flutter Developer (Client-side)**: UI/UX e consumo da API para o cliente.
-- **Flutter Developer (Provider-side)**: Dashboards e regras de negócio do fornecedor.
-- **DevOps & QA**: Firebase, notificações, deploy (LXC/Docker) e testes integrados.
+- **Tech Lead / Backend**: Maurício (Responsável pela arquitetura da API e segurança).
+- **AI Specialist**: Douglas (Focado em LangChain, RAG e integração com LLM).
+- **Flutter Developer (Client-side)**: Lucas / Aline (UI/UX e consumo da API para o cliente).
+- **Flutter Developer (Provider-side)**: Alan (Dashboards e regras de negócio do fornecedor).
+- **DevOps & QA / Coringa**: Thiago (Firebase, notificações, deploy e suporte geral).
 
 🎯 Critérios de Avaliação
 - **Integração Real**: O dado enviado no WhatsApp aparece no App Flutter em < 2 segundos?

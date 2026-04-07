@@ -38,7 +38,11 @@ Ao realizar commits na sua branch detalhada, utilize o padrão "Conventional Com
 
 ---
 
-## 🚀 Fluxo de Trabalho (Step-by-Step)
+## 🌍 Idioma Padronizado
+1. **Commits e PRs**: Todas as mensagens de commit, títulos de Pull Requests e descrições no GitHub devem ser escritas obrigatoriamente em **Português (Brasil)**.
+2. **Contexto**: Como a equipe é brasileira, isso garante clareza e agilidade na revisão de código entre os membros.
+
+---
 1. Faça a tarefa na sua branch `tipo/nome`.
 2. Adicione os arquivos: `git add .`
 3. Faça o commit padronizado: `git commit -m "feat: sua mensagem"`.

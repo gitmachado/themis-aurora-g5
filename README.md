@@ -3,7 +3,7 @@
 Bem-vindo ao repositório do **OmniConnect**, plataforma desenvolvida pelo **Grupo 5** para o **Desafio Final da Turma Aurora (Selene) - Ciclo I**.
 
 ## 📋 Sobre o Projeto
-Muitas empresas de serviços (clínicas, advocacia, oficinas premium) enfrentam fricção no atendimento e falta de visibilidade sobre as demandas de clientes atendidos informalmente. 
+Muitas empresas de serviços, especialmente **escritórios de advocacia**, enfrentam fricção no atendimento inicial de clientes e falta de visibilidade sobre o andamento de processos consultados informalmente via chat.
 
 O **OmniConnect** resolve isso eliminando a barreira inicial: o cliente inicia o atendimento via **WhatsApp**, onde um **chatbot alimentado por IA (RAG via LangChain)** interage e extrai os dados relevantes. Essas interações são sincronizadas em tempo real com uma aplicação em **Flutter**, usada tanto pelo cliente quanto pelo fornecedor, para gerir o ciclo de vida do serviço de forma ágil, organizada e profissional.
 
@@ -16,7 +16,7 @@ O **OmniConnect** resolve isso eliminando a barreira inicial: o cliente inicia o
 - **Perfis:** Cliente (Histórico, acompanhamento, notificações) & Fornecedor (Dashboard, agenda, relatórios)
 
 ### Backend & Integração
-- **Linguagem/Framework:** Node.js ou FastAPI (A ser definido via Decision Record)
+- **Linguagem/Framework:** Node.js com TypeScript (Conforme [ADR 0001](./.agents/decisions/0001-stack-tecnologica-backend.md))
 - **WhatsApp:** Cloud API (Webhooks)
 - **Tempo Real & Push:** WebSockets / Firebase Cloud Messaging (FCM)
 
@@ -35,11 +35,10 @@ Toda documentação do projeto está localizada essencialmente nestas frentes:
 ---
 
 ## 👥 Equipe (Grupo 5)
-- Alan
-- Aline
-- Douglas
-- Lucas
-- Mauricio
-- Thiago
+- **Maurício**: Tech Lead / Backend
+- **Douglas**: AI Specialist
+- **Lucas / Aline**: Flutter Developer (Client-side)
+- **Alan**: Flutter Developer (Provider-side)
+- **Thiago**: DevOps & QA / Coringa
 
 📅 **Apresentação Oficial:** 15/05/2026 às 14:00
