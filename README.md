@@ -1,6 +1,10 @@
-# OmniConnect – Gestão Inteligente de Serviços 🚀
+## 🎯 OmniConnect
 
 Bem-vindo ao repositório do **OmniConnect**, plataforma desenvolvida pelo **Grupo 5** para o **Desafio Final da Turma Aurora (Selene) - Ciclo I**.
+
+Uma plataforma de **gestão inteligente de atendimento jurídico**, onde clientes de escritórios de advocacia iniciam o contato via **WhatsApp com um chatbot de IA**, e tanto o cliente quanto o advogado usam um **app Flutter** para acompanhar o ciclo de vida do caso.
+
+---
 
 ## 📋 Sobre o Projeto
 Muitas empresas de serviços, especialmente **escritórios de advocacia**, enfrentam fricção no atendimento inicial de clientes e falta de visibilidade sobre o andamento de processos consultados informalmente via chat.
@@ -9,11 +13,11 @@ O **OmniConnect** resolve isso eliminando a barreira inicial: o cliente inicia o
 
 ---
 
-## 🛠️ Tecnologias Principais
+## ⚖️ Nicho Escolhido: Advocacia
 
-### Frontend (Mobile/Web)
-- **Framework:** Flutter
-- **Perfis:** Cliente (Histórico, acompanhamento, notificações) & Fornecedor (Dashboard, agenda, relatórios)
+O foco é resolver dois problemas comuns em escritórios:
+- **Triagem inteligente de casos** — o bot coleta as informações iniciais do cliente automaticamente via WhatsApp, sem precisar de um atendente humano pra isso.
+- **Consulta de status de processos** — o cliente consegue perguntar no WhatsApp (ou ver no app) em que pé está o seu caso.
 
 ### Backend & Integração
 - **Linguagem/Framework:** Node.js com TypeScript (Conforme [ADR 0001](./.agents/decisions/0001-stack-tecnologica-backend.md))
@@ -26,19 +30,37 @@ O **OmniConnect** resolve isso eliminando a barreira inicial: o cliente inicia o
 
 ---
 
-## 📚 Documentação
-Toda documentação do projeto está localizada essencialmente nestas frentes:
-- **[Requisitos Técnicos Oficiais](./docs/requisitos.md)** 
-- **[Anotações sobre a Equipe](./docs/about_g5.md)**
-- **[Registros de Decisões Importantes e ADRs](./.agents/decisions/):** Para a memória técnica e uso futuro pela nossa IA.
+## 🛠️ Stack Tecnológica
+
+| Camada | Tecnologia |
+|---|---|
+| Backend | Node.js + TypeScript |
+| Banco de Dados | PostgreSQL (via Docker) |
+| IA / Orquestração | LangChain + RAG |
+| Frontend Mobile | Flutter |
+| Mensageria | WhatsApp Business Cloud API |
+| Notificações | Firebase Cloud Messaging (FCM) |
+| Gestão do Projeto | Linear (integrado via MCP) |
 
 ---
 
-## 👥 Equipe (Grupo 5)
-- **Maurício**: Tech Lead / Backend
-- **Douglas**: AI Specialist
-- **Lucas / Aline**: Flutter Developer (Client-side)
-- **Alan**: Flutter Developer (Provider-side)
-- **Thiago**: DevOps & QA / Coringa
+## 👥 Equipe e Papéis (Grupo 5)
 
-📅 **Apresentação Oficial:** 15/05/2026 às 14:00
+| Papel | Pessoa |
+|---|---|
+| Tech Lead / Backend | Maurício |
+| AI Specialist | Douglas |
+| Flutter — lado do cliente | Lucas e Aline |
+| Flutter — lado do fornecedor (advogado) | Alan |
+| DevOps & QA | Thiago |
+
+---
+
+## 📅 Cronograma Recomendado (4 semanas)
+
+1. **Semana 1** — Setup da API, banco, WhatsApp webhook e base do app Flutter
+2. **Semana 2** — Implementação da IA com LangChain e RAG (base de conhecimento jurídico)
+3. **Semana 3** — UX dos dois apps + notificações Firebase
+4. **Semana 4** — Testes, documentação e demo de 10 minutos ponta a ponta
+
+**Apresentação final:** 15/05/2026 às 14h
