@@ -1,1 +1,1 @@
-# Architecture in progressS
+# Architecture in progress
