@@ -20,8 +20,13 @@ sempre rastreavel ao ticket do Linear.
 
 - O titulo deve iniciar com o ticket do Linear.
 - O texto deve ser conciso, tecnico e verificavel.
+- O branch base padrao dos PRs deve ser `development`, nao `main`.
+- So use `main` como base se o usuario pedir explicitamente ou se houver uma
+  excecao documentada no fluxo do repositorio.
 - Se o usuario pedir para abrir o PR, use `gh` apenas se o repositorio remoto
   estiver configurado e a branch ja tiver sido enviada.
+- Ao abrir o PR com `gh`, especifique explicitamente `--base development`, salvo
+  quando houver excecao justificada.
 - Se faltarem dados para abrir o PR, gere o titulo e o body prontos para uso.
 
 ## Titulo
@@ -57,5 +62,6 @@ Formato:
 
 - Titulo final
 - Body final
+- Base branch utilizada no PR
 - Comando `gh pr create` usado, se o PR for aberto de fato
 - URL do PR, se a criacao for bem-sucedida
