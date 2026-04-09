@@ -111,3 +111,10 @@ Desktop.ini
 *.bak
 *.tmp
 *.temp
+
+.agent
+.claude
+.codex
+.cursor
+.github
+.opencode
