@@ -1,45 +1,49 @@
-# OmniConnect – Gestão Inteligente de Serviços 🚀
+## 🎯  OmniConnect
 
-Bem-vindo ao repositório do **OmniConnect**, plataforma desenvolvida pelo **Grupo 5** para o **Desafio Final da Turma Aurora (Selene) - Ciclo I**.
-
-## 📋 Sobre o Projeto
-Muitas empresas de serviços (clínicas, advocacia, oficinas premium) enfrentam fricção no atendimento e falta de visibilidade sobre as demandas de clientes atendidos informalmente. 
-
-O **OmniConnect** resolve isso eliminando a barreira inicial: o cliente inicia o atendimento via **WhatsApp**, onde um **chatbot alimentado por IA (RAG via LangChain)** interage e extrai os dados relevantes. Essas interações são sincronizadas em tempo real com uma aplicação em **Flutter**, usada tanto pelo cliente quanto pelo fornecedor, para gerir o ciclo de vida do serviço de forma ágil, organizada e profissional.
+Uma plataforma de **gestão inteligente de atendimento jurídico**, onde clientes de escritórios de advocacia iniciam o contato via **WhatsApp com um chatbot de IA**, e tanto o cliente quanto o advogado usam um **app Flutter** para acompanhar o ciclo de vida do caso.
 
 ---
 
-## 🛠️ Tecnologias Principais
+## ⚖️ Nicho Escolhido: Advocacia
 
-### Frontend (Mobile/Web)
-- **Framework:** Flutter
-- **Perfis:** Cliente (Histórico, acompanhamento, notificações) & Fornecedor (Dashboard, agenda, relatórios)
+O foco é resolver dois problemas comuns em escritórios:
 
-### Backend & Integração
-- **Linguagem/Framework:** Node.js ou FastAPI (A ser definido via Decision Record)
-- **WhatsApp:** Cloud API (Webhooks)
-- **Tempo Real & Push:** WebSockets / Firebase Cloud Messaging (FCM)
-
-### Inteligência Artificial
-- **Orquestração:** LangChain
-- **Conhecimento (RAG):** Pinecone/Chroma/PGVector (a ser definido em ADRs futuros)
+- **Triagem inteligente de casos** — o bot coleta as informações iniciais do cliente automaticamente via WhatsApp, sem precisar de um atendente humano pra isso.
+- **Consulta de status de processos** — o cliente consegue perguntar no WhatsApp (ou ver no app) em que pé está o seu caso.
 
 ---
 
-## 📚 Documentação
-Toda documentação do projeto está localizada essencialmente nestas frentes:
-- **[Requisitos Técnicos Oficiais](./docs/requisitos.md)** 
-- **[Anotações sobre a Equipe](./docs/about_g5.md)**
-- **[Registros de Decisões Importantes e ADRs](./.agents/decisions/):** Para a memória técnica e uso futuro pela nossa IA.
+## 🛠️ Stack Tecnológica
+
+| Camada | Tecnologia |
+|---|---|
+| Backend | Node.js + TypeScript |
+| Banco de Dados | PostgreSQL (via Docker) |
+| IA / Orquestração | LangChain + RAG |
+| Frontend Mobile | Flutter |
+| Mensageria | WhatsApp Business Cloud API |
+| Notificações | Firebase Cloud Messaging (FCM) |
+| Gestão do Projeto | Linear (integrado via MCP) |
 
 ---
 
-## 👥 Equipe (Grupo 5)
-- Alan
-- Aline
-- Douglas
-- Lucas
-- Mauricio
-- Thiago
+## 👥 Equipe e Papéis
 
-📅 **Apresentação Oficial:** 15/05/2026 às 14:00
+| Papel | Pessoa |
+|---|---|
+| Tech Lead / Backend | Mauricio |
+| AI Specialist | Douglas |
+| Flutter — lado do cliente | Lucas e Aline |
+| Flutter — lado do fornecedor (advogado) | Alan |
+| DevOps & QA | Thiago |
+
+---
+
+## 📅 Cronograma Recomendado (4 semanas)
+
+1. **Semana 1** — Setup da API, banco, WhatsApp webhook e base do app Flutter
+2. **Semana 2** — Implementação da IA com LangChain e RAG (base de conhecimento jurídico)
+3. **Semana 3** — UX dos dois apps + notificações Firebase
+4. **Semana 4** — Testes, documentação e demo de 10 minutos ponta a ponta
+
+**Apresentação final:** 15/05/2026 às 14h
