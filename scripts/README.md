@@ -11,7 +11,7 @@ pelos agentes configurados no projeto.
 - OpenCode: `.opencode/commands/*.md`
 - Claude Code: `.claude/commands/*.md`
 - Codex: `.codex/prompts/*.md`
-- Antigravity: `.agent/workflows/*.md`
+- Antigravity: `.agents/workflows/*.md`
 - GitHub Copilot: `.github/prompts/*.prompt.md`
 
 ### Uso

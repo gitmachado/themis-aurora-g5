@@ -112,7 +112,7 @@ Desktop.ini
 *.tmp
 *.temp
 
-.agent
+.agents
 .claude
 .codex
 .cursor
