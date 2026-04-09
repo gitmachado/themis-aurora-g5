@@ -1,15 +1,32 @@
-## 🎯  OmniConnect
+## 🎯 OmniConnect
+
+Bem-vindo ao repositório do **OmniConnect**, plataforma desenvolvida pelo **Grupo 5** para o **Desafio Final da Turma Aurora (Selene) - Ciclo I**.
 
 Uma plataforma de **gestão inteligente de atendimento jurídico**, onde clientes de escritórios de advocacia iniciam o contato via **WhatsApp com um chatbot de IA**, e tanto o cliente quanto o advogado usam um **app Flutter** para acompanhar o ciclo de vida do caso.
+
+---
+
+## 📋 Sobre o Projeto
+Muitas empresas de serviços, especialmente **escritórios de advocacia**, enfrentam fricção no atendimento inicial de clientes e falta de visibilidade sobre o andamento de processos consultados informalmente via chat.
+
+O **OmniConnect** resolve isso eliminando a barreira inicial: o cliente inicia o atendimento via **WhatsApp**, onde um **chatbot alimentado por IA (RAG via LangChain)** interage e extrai os dados relevantes. Essas interações são sincronizadas em tempo real com uma aplicação em **Flutter**, usada tanto pelo cliente quanto pelo fornecedor, para gerir o ciclo de vida do serviço de forma ágil, organizada e profissional.
 
 ---
 
 ## ⚖️ Nicho Escolhido: Advocacia
 
 O foco é resolver dois problemas comuns em escritórios:
-
 - **Triagem inteligente de casos** — o bot coleta as informações iniciais do cliente automaticamente via WhatsApp, sem precisar de um atendente humano pra isso.
 - **Consulta de status de processos** — o cliente consegue perguntar no WhatsApp (ou ver no app) em que pé está o seu caso.
+
+### Backend & Integração
+- **Linguagem/Framework:** Node.js com TypeScript (Conforme [ADR 0001](./.agents/decisions/0001-stack-tecnologica-backend.md))
+- **WhatsApp:** Cloud API (Webhooks)
+- **Tempo Real & Push:** WebSockets / Firebase Cloud Messaging (FCM)
+
+### Inteligência Artificial
+- **Orquestração:** LangChain
+- **Conhecimento (RAG):** Pinecone/Chroma/PGVector (a ser definido em ADRs futuros)
 
 ---
 
@@ -27,11 +44,11 @@ O foco é resolver dois problemas comuns em escritórios:
 
 ---
 
-## 👥 Equipe e Papéis
+## 👥 Equipe e Papéis (Grupo 5)
 
 | Papel | Pessoa |
 |---|---|
-| Tech Lead / Backend | Mauricio |
+| Tech Lead / Backend | Maurício |
 | AI Specialist | Douglas |
 | Flutter — lado do cliente | Lucas e Aline |
 | Flutter — lado do fornecedor (advogado) | Alan |
