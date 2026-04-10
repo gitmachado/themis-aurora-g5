@@ -50,6 +50,10 @@ fluxo do OmniConnect.
 
 <resumo curto>
 
+## Branch Selecionada
+
+<nome-da-branch> (ex: `feat/g5-x-nome`)
+
 ## Fases
 
 ### Fase 1 - <nome>
@@ -75,5 +79,6 @@ fluxo do OmniConnect.
 ## Regras
 
 - Nao invente tarefas que nao derivem da spec.
+- Defina explicitamente em "Branch Selecionada" o nome da branch formatado com base no nome do ticket.
 - Nao replique o texto da spec sem transformacao em trabalho executavel.
 - Se houver duvida relevante, registre em `Bloqueios / Perguntas em aberto`.
