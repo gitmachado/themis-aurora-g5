@@ -1,16 +1,14 @@
 ---
 name: docs-sync
-description: Verificar e manter sincronizadas as duas bases de documentação do projeto — `.agents/` (consumida por agentes de IA) e `documentation/` (consumida pela equipe humana). Use essa skill sempre que o usuário alterar documentação em qualquer uma das duas bases, quando pedir para "sincronizar docs", "verificar consistência", ou quando houver uma mudança arquitetural significativa (como a unificação do app mobile) que impacte ambos os lados.
+description: Verificar e manter sincronizadas as duas bases de documentação do projeto — `.agents/` (focada no Antigravity) e `documentation/` (equipe humana e IAs em outros ambientes). Use essa skill sempre que o usuário alterar documentação em qualquer uma das duas bases, quando pedir para "sincronizar docs", "verificar consistência", ou quando houver uma mudança arquitetural significativa que impacte ambos os lados.
 ---
 
 # Docs Sync — Sincronização `.agents/` ↔ `documentation/`
 
 O projeto OmniConnect mantém duas bases de documentação paralelas:
 
-- **`documentation/`** — Consumida pela equipe humana. Contém o PRD, specs
-  técnicas, prompts, padrões de commit, e arquitetura.
-- **`.agents/`** — Consumida por agentes de IA (Antigravity, Claude Code, Cursor,
-  Copilot). Contém knowledge base, ADRs, workflows, rules e skills.
+- **`documentation/`** — Consumida pela equipe humana e IAs em outros ambientes (Cursor, Windsurf, etc.). Contém o PRD, specs técnicas, prompts e arquitetura.
+- **`.agents/`** — Focada no Antigravity. Contém knowledge base, ADRs, workflows e skills para automação avançada.
 
 Ambas descrevem o **mesmo projeto** mas para **audiências diferentes**. Quando uma
 muda, a outra precisa refletir a mudança ou o projeto fica inconsistente.
@@ -63,8 +61,8 @@ Para cada linha do Mapa de Sobreposição, leia os dois lados e responda:
 
 1. Comece pelo lado que é **fonte de verdade** — confirme que está correto.
 2. Propague as mudanças para o outro lado, adaptando o nível de detalhe:
-   - `documentation/` deve ser mais formal e orientada a requisitos
-   - `.agents/` deve ser mais direta e orientada a execução por IA
+   - `documentation/` deve ser mais legível para humanos e ferramentas externas
+   - `.agents/` deve ser otimizada para a execução e contexto do Antigravity
 3. Não duplique conteúdo desnecessariamente. Se um lado já cobre o assunto
    de forma completa, o outro pode apenas referenciar.
 
