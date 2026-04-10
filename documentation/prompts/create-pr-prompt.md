@@ -29,33 +29,30 @@ sempre rastreavel ao ticket do Linear.
   quando houver excecao justificada.
 - Se faltarem dados para abrir o PR, gere o titulo e o body prontos para uso.
 
-## Titulo
+## Título
 
 Formato:
 
 ```text
-[TIC-45] descreve a entrega em PT-BR
+[TIC-45] Descreve a entrega em PT-BR
 ```
 
 ## Corpo sugerido
 
 ```md
-## Objetivo
-- o que este PR entrega
+## 📝 Resumo
+[Breve descrição do objetivo deste PR]
 
-## O que mudou
-- mudanca 1
-- mudanca 2
+## 🚀 Mudanças
+- [ ] [Item alterado 1]
+- [ ] [Item alterado 2]
 
-## Como validar
-1. passo 1
-2. passo 2
+## ✅ Verificação
+- [x] [Validação realizada]
+- [x] [Link para walkthrough ou screenshots]
 
-## Checks executados
-- comando e resultado
-
-## Riscos ou observacoes
-- pontos que merecem atencao na revisao
+## 🔗 Links e Contexto
+- Relacionado à: [ID da Task ou Issue]
 ```
 
 ## Saida esperada
