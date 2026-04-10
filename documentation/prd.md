@@ -51,9 +51,9 @@ O OmniConnect e um ecossistema de gestao juridica que une a agilidade da IA no W
 
 - **Filtro de Contexto:** A IA (LangChain) so responde duvidas com base na base de conhecimento (PDFs/Docs) indexada.
 - **Handoff Humano:** Gatilho ativado por palavras-chave (`ajuda`, `falar com alguem`, `advogado`) ou falha na resposta da IA.
-- **Notificacao Critica:** Dispara Push FCM para o App do Advogado com o historico da conversa anexado.
+- **Notificacao Critica:** Dispara Push FCM para o usuário Advogado com o historico da conversa anexado.
 
-### 2.2. Bloco 2 - App Flutter (Perfis e Dashboard)
+### 2.2. Bloco 2 - App Flutter Único (Perfis e Dashboard)
 
 #### [ ] Perfil Cliente: Dashboard e Timeline
 
@@ -130,12 +130,12 @@ O OmniConnect e um ecossistema de gestao juridica que une a agilidade da IA no W
 - **Persistencia:** O sistema salva o Lead e notifica o advogado via Push: `Novo Lead: [NOME] - Caso [TIPO]`.
 - **Encerramento:** O bot informa a disponibilidade do advogado (baseado na agenda cadastrada no app).
 
-### 3.2. Jornada de Atualizacao (App Advogado -> App Cliente)
+### 3.2. Jornada de Atualizacao (Fluxo de Papéis no App)
 
 - **Acao:** O advogado acessa o Dashboard, seleciona um processo e altera o status para "Audiencia Marcada".
 - **Nota:** O advogado adiciona uma observacao: `A audiencia sera no dia 15/05 as 14h via Zoom`.
 - **Processamento:** O backend salva, atualiza a timeline e dispara o Push FCM.
-- **Recepcao:** O cliente recebe a notificacao, clica e o app abre direto na aba de Linha do Tempo do processo.
+- **Recepcao:** O cliente recebe a notificacao no mesmo app (sob seu perfil), clica e o app abre direto na aba de Linha do Tempo do processo.
 
 ### 3.3. Jornada de Consulta RAG (WhatsApp)
 

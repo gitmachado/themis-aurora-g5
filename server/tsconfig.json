@@ -15,6 +15,7 @@
     "declarationMap": true,
     "sourceMap": true,
     "baseUrl": ".",
+    "ignoreDeprecations": "6.0",
     "paths": {
       "@types/*": ["src/types/*"],
       "@dtos/*": ["src/types/dtos/*"],

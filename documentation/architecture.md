@@ -6,7 +6,7 @@ O OmniConnect segue uma arquitetura **monorepo** com três camadas principais:
 
 ```
 omniconnect-aurora-g5/
-├── mobile/          # App Flutter (Cliente + Advogado)
+├── mobile/          # App Flutter Único (Perfis Cliente e Advogado)
 ├── server/          # API Node.js + TypeScript (sem ORM)
 └── documentation/   # PRD, specs, decisões, arquitetura
 ```
@@ -140,14 +140,14 @@ flowchart LR
     WA[WhatsApp] -->|Webhook| BOT[Bot IA/RAG]
     BOT -->|Cria| LEAD[Lead]
     BOT -->|Salva| MSG[Mensagem]
-    ADV[App Advogado] -->|Converte| LEAD
+    APP[App Flutter] -->|Advogado: Converte| LEAD
     LEAD -->|Gera| USER[User/Cliente]
-    ADV -->|Cria| PROC[Processo]
-    ADV -->|Atualiza Status| TL[Timeline]
+    APP -->|Advogado: Cria| PROC[Processo]
+    APP -->|Advogado: Atualiza Status| TL[Timeline]
     TL -->|Dispara| NOTIF[Notificação FCM]
-    NOTIF -->|Push| CLI[App Cliente]
-    CLI -->|Upload| DOC[Documento]
-    CLI -->|Leitura| MSG
+    NOTIF -->|Push| USER
+    USER -->|Cliente: Upload| DOC[Documento]
+    USER -->|Cliente: Leitura| MSG
 ```
 
 ---
