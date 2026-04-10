@@ -43,3 +43,46 @@ Exemplos válidos:
 📝docs: TIC-61 document authentication flow
 🔧chore: TIC-70 update commit hooks
 ```
+
+---
+
+# Branch pattern
+
+O padrão de branch do projeto segue esta estrutura:
+
+```text
+<tipo>/G5-<número>-<descrição-curta>
+```
+
+Formato esperado:
+
+```text
+feat/G5-8-modelagem-dados-backend
+```
+
+Regras:
+
+- A branch deve começar com o tipo (mesmos tipos do commit, sem emoji).
+- Depois do tipo vem `/`.
+- Depois da barra vem o ticket do Linear (`G5-XX`).
+- Depois do ticket vem `-` e uma descrição curta em kebab-case.
+- A descrição deve ser objetiva (2 a 5 palavras).
+
+Tipos de branch recomendados:
+
+- `feat/` — nova funcionalidade
+- `fix/` — correção de bug
+- `docs/` — documentação
+- `refactor/` — refatoração
+- `infra/` — infraestrutura e DevOps
+- `test/` — testes
+- `chore/` — manutenção geral
+
+Exemplos válidos:
+
+```text
+feat/G5-6-setup-flutter-provider
+feat/G5-8-modelagem-dados-backend
+infra/G5-7-estudo-hospedagem
+docs/G5-10-commit-lint-docs
+```
