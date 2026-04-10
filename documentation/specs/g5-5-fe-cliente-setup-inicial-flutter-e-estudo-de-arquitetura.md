@@ -1,5 +1,5 @@
 ---
-title: FE Cliente - setup inicial Flutter e estudo de arquitetura
+title: FE Core - setup inicial Flutter e arquitetura unificada (Cliente/Fornecedor)
 ticket: G5-5
 status: open
 last_updated_at: 2026-04-09
@@ -7,7 +7,7 @@ last_updated_at: 2026-04-09
 
 # 1. Objetivo
 
-Estabelecer a base tecnica do app Flutter em `mobile/`, criando um bootstrap executavel do projeto e registrando a arquitetura inicial que sera usada nas proximas entregas. O resultado esperado deste ticket nao e a implementacao dos fluxos juridicos do cliente, e sim uma fundacao valida para navegacao, tema, organizacao de codigo e evolucao futura.
+Estabelecer a base técnica do app Flutter em `mobile/`, criando um bootstrap executável do projeto e registrando a arquitetura inicial unificada (perfil Cliente e Advogado) que será usada nas próximas entregas. O resultado esperado deste ticket não é a implementação dos fluxos jurídicos, e sim uma fundação válida para navegação entre perfis, tema, organização de código e evolução futura.
 
 # 2. Escopo
 
@@ -26,7 +26,7 @@ Estabelecer a base tecnica do app Flutter em `mobile/`, criando um bootstrap exe
 
 - Integracao real com backend, banco, Firebase, WhatsApp ou qualquer servico externo.
 - Implementacao funcional de timeline, chat espelhado, documentos, notificacoes ou consulta de processos.
-- Perfil advogado no app Flutter.
+- Provisionar os perfis cliente e advogado no mesmo app Flutter.
 - Persistencia offline, cache local ou estrategia de sincronizacao em tempo real.
 - Definicao de design system completo ou biblioteca extensa de componentes.
 - Decisao definitiva sobre autenticacao de producao; neste ticket entram apenas placeholders e pontos de extensao.
@@ -169,4 +169,4 @@ Estabelecer a base tecnica do app Flutter em `mobile/`, criando um bootstrap exe
 - O ticket do Linear fornecido so explicita `setup inicial Flutter` e `estudo de arquitetura`; nao ha descricao adicional do fluxo esperado no repositorio. Esta spec assume que o objetivo e criar a fundacao do app do cliente, nao implementar features finais de negocio.
 - Ainda nao existe contrato de autenticacao nem API do backend. Por isso, login entra apenas como placeholder navegavel.
 - `documentation/architecture.md` esta vazio hoje; se o time quiser definir uma arquitetura mais robusta (ex.: estado global, client HTTP, injecao de dependencia), isso deve ser registrado como extensao futura e nao inflar este ticket.
-- O PRD fala em dois perfis no app Flutter. Esta spec assume foco no perfil cliente, conforme o titulo do ticket. Se o time decidir unificar desde ja cliente e advogado na mesma navegacao base, a spec deve ser refinada antes da implementacao.
+- O time decidiu unificar desde já cliente e advogado na mesma navegação base (App Único), por isso esta spec cobre a base para ambos os perfis.

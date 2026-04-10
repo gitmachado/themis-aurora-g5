@@ -2,14 +2,14 @@
 
 Bem-vindo ao repositório do **OmniConnect**, plataforma desenvolvida pelo **Grupo 5** para o **Desafio Final da Turma Aurora (Selene) - Ciclo I**.
 
-Uma plataforma de **gestão inteligente de atendimento jurídico**, onde clientes de escritórios de advocacia iniciam o contato via **WhatsApp com um chatbot de IA**, e tanto o cliente quanto o advogado usam um **app Flutter** para acompanhar o ciclo de vida do caso.
+Uma plataforma de **gestão inteligente de atendimento jurídico**, onde clientes de escritórios de advocacia iniciam o contato via **WhatsApp com um chatbot de IA**, e os usuários (cliente e advogado) utilizam um **único app Flutter** com perfis distintos para acompanhar o ciclo de vida do caso.
 
 ---
 
 ## 📋 Sobre o Projeto
 Muitas empresas de serviços, especialmente **escritórios de advocacia**, enfrentam fricção no atendimento inicial de clientes e falta de visibilidade sobre o andamento de processos consultados informalmente via chat.
 
-O **OmniConnect** resolve isso eliminando a barreira inicial: o cliente inicia o atendimento via **WhatsApp**, onde um **chatbot alimentado por IA (RAG via LangChain)** interage e extrai os dados relevantes. Essas interações são sincronizadas em tempo real com uma aplicação em **Flutter**, usada tanto pelo cliente quanto pelo fornecedor, para gerir o ciclo de vida do serviço de forma ágil, organizada e profissional.
+O **OmniConnect** resolve isso eliminando a barreira inicial: o cliente inicia o atendimento via **WhatsApp**, onde um **chatbot alimentado por IA (RAG via LangChain)** interage e extrai os dados relevantes. Essas interações são sincronizadas em tempo real com uma aplicação central em **Flutter**, que oferece dashboards específicos para o cliente e para o advogado, permitindo gerir o ciclo de vida do serviço de forma ágil e organizada.
 
 ---
 
@@ -50,8 +50,7 @@ O foco é resolver dois problemas comuns em escritórios:
 |---|---|
 | Tech Lead / Backend | Maurício |
 | AI Specialist | Douglas |
-| Flutter — lado do cliente | Lucas e Aline |
-| Flutter — lado do fornecedor (advogado) | Alan |
+| Flutter — Mobile (Cliente e Fornecedor) | Lucas, Aline e Alan |
 | DevOps & QA | Thiago |
 
 ---
@@ -60,7 +59,7 @@ O foco é resolver dois problemas comuns em escritórios:
 
 1. **Semana 1** — Setup da API, banco, WhatsApp webhook e base do app Flutter
 2. **Semana 2** — Implementação da IA com LangChain e RAG (base de conhecimento jurídico)
-3. **Semana 3** — UX dos dois apps + notificações Firebase
+3. **Semana 3** — UX do app único (Perfís) + notificações Firebase
 4. **Semana 4** — Testes, documentação e demo de 10 minutos ponta a ponta
 
 **Apresentação final:** 15/05/2026 às 14h

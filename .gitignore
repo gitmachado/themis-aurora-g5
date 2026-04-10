@@ -112,9 +112,12 @@ Desktop.ini
 *.tmp
 *.temp
 
-.agents
+# Agent/AI tool configs (pessoais, não versionados)
 .claude
 .codex
 .cursor
 .github
 .opencode
+
+# .agents — versionar apenas conteúdo de projeto
+# (skills, knowledge, workflows, decisions e rules fazem parte do repo)

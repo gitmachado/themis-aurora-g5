@@ -6,13 +6,14 @@ Esta pasta foi simplificada para refletir o fluxo real do OmniConnect.
 
 1. `create-prd-prompt.md`
 2. `refine-prd-prompt.md` - para ajustes no PRD, se necessario
-3. `create-spec-prompt.md`
-4. `create-plan-prompt.md`
-5. `implement-spec-prompt.md`
-6. `create-tests-prompt.md` - quando for preciso criar ou reforcar cobertura de testes
-7. `review-code-prompt.md`
-8. `commit-code-prompt.md`
-9. `create-pr-prompt.md`
+3. `create-task-prompt.md` - para criar ou refinar issues no Linear
+4. `create-spec-prompt.md`
+5. `create-plan-prompt.md`
+6. `implement-spec-prompt.md`
+7. `create-tests-prompt.md` - quando for preciso criar ou reforcar cobertura de testes
+8. `review-code-prompt.md`
+9. `commit-code-prompt.md`
+10. `create-pr-prompt.md`
 
 ## O que foi consolidado
 

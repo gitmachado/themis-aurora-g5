@@ -59,6 +59,7 @@ ficar coerente com o PRD, com a codebase e com o caminho real de implementacao.
 ---
 title: <titulo da spec>
 ticket: <LINEAR-ID ou N/A>
+branch: <nome-sugerido-da-branch>
 status: open
 last_updated_at: <YYYY-MM-DD>
 ---
@@ -88,6 +89,7 @@ last_updated_at: <YYYY-MM-DD>
 
 - Nao invente arquitetura que nao exista no repositorio.
 - Nao replique o PRD; detalhe apenas o necessario para implementar.
+- Defina o nome da branch usando os padroes de Conventional Commits (ex: `feat/g5-x-nome`).
 - Use caminhos reais, por exemplo `mobile/`, `server/` e `documentation/`.
 - Quando algum arquivo ainda nao existir, marque como `novo arquivo`.
 - Se a entrega depender de algo fora do escopo atual, registre em `Riscos / Pendencias`.

@@ -1,0 +1,49 @@
+// ========================
+// OmniConnect Domain Enums
+// ========================
+
+/** Supported legal practice niches */
+export type CaseType =
+  | 'Labor'
+  | 'Civil'
+  | 'Family'
+  | 'Criminal'
+  | 'SocialSecurity';
+
+/** Urgency level reported by the lead */
+export type UrgencyLevel = 'High' | 'Medium' | 'Low';
+
+/** State of the lead in the conversion funnel */
+export type LeadStatus = 'PENDING' | 'IN_CONTACT' | 'CONVERTED' | 'DISCARDED';
+
+/** Legal process status */
+export type LegalProcessStatus =
+  | 'OPEN'
+  | 'UNDER_ANALYSIS'
+  | 'AWAITING_DOCUMENT'
+  | 'COMPLETED'
+  | 'ARCHIVED';
+
+/** System access roles */
+export type UserRole = 'LAWYER' | 'CLIENT';
+
+/** Event types in a legal process timeline */
+export type TimelineEventType =
+  | 'STATUS_UPDATE'
+  | 'LAWYER_NOTE'
+  | 'DOCUMENT_SENT'
+  | 'PROCESS_CREATED';
+
+/** Contact availability reported by the lead */
+export type ContactAvailability = 'Morning' | 'Afternoon' | 'Evening';
+
+/** Push notification types (FCM) */
+export type NotificationType =
+  | 'NEW_LEAD'
+  | 'STATUS_CHANGED'
+  | 'DOCUMENT_SENT'
+  | 'HUMAN_SUPPORT';
+
+/** Who sent the message in the chat */
+export type MessageSender = 'BOT' | 'CLIENT' | 'LAWYER';
+
