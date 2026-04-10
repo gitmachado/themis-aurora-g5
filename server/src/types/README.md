@@ -1,63 +1,63 @@
-# Types Module Documentation (`src/types`)
+# Documentação do Módulo de Tipos (`src/types`)
 
-This directory centralizes all type definitions, interfaces, and data schemas used in the OmniConnect backend. The organization follows Clean Architecture principles, the **Nested Barrels** pattern, and **Separation of Concerns**.
+Este diretório centraliza todas as definições de tipos, interfaces e esquemas de dados usados no backend do projeto OmniConnect. A organização segue princípios de Arquitetura Limpa (Clean Architecture), o padrão de **Barrels Nidificados (Nested Barrels)** e **Separação de Preocupações (Separation of Concerns)**.
 
-## 📂 Directory Structure
+## 📂 Estrutura de Diretórios
 
-The module is divided into specific categories to keep responsibilities clear:
+O módulo está dividido em categorias específicas para manter as responsabilidades claras:
 
 ### 1. `models/` (`@models`)
-Contains interfaces representing the domain's "truth" and how data is structured in the database.
-- **Usage:** Represent real entities (e.g., `User`, `Lead`, `LegalProcess`).
-- **Pattern:** Always include system-managed properties such as `id`, `createdAt`, and `updatedAt`.
+Contém as interfaces que representam a "verdade" do domínio e como os dados são estruturados no banco de dados.
+- **Uso:** Representam entidades reais (ex: `User`, `Lead`, `LegalProcess`).
+- **Padrão:** Sempre possuem propriedades gerenciadas pelo sistema como `id`, `createdAt` e `updatedAt`.
 
 ### 2. `dtos/` (`@dtos`)
-**Data Transfer Objects**. Define the API input and output contracts. This is how the external world communicates with the system. Files are organized by **intent**:
+**Data Transfer Objects**. Definem os contratos de entrada e saída da API. É como o mundo externo se comunica com o sistema. Estes arquivos são organizados por sua **intenção**:
 
-*   **Create DTOs:** Focused on strictly necessary fields to generate something new. Most fields are mandatory and *never* includes `id` or system dates.
-*   **Update DTOs:** Focused on modification. Fields are generally optional (`Partial`), allowing the client to send only what changed. May contain stricter validations than *Create*.
-*   **Convert DTOs:** Focused on state/entity transition (e.g., `ConvertLeadDTO`). Carries metadata logic to transform one entity (Lead) into another (User/Client).
-*   **Auth DTOs:** Isolate security, session, login, and registration contracts.
+*   **Create DTOs:** Focados no que é estritamente necessário para gerar algo novo. A maioria dos campos é obrigatória e *nunca* possuem `id` ou datas de sistema.
+*   **Update DTOs:** Focados em modificação. Os campos são geralmente opcionais (`Partial`), permitindo que o cliente envie apenas o que mudou. Pode conter validações mais restritas que o *Create*.
+*   **Convert DTOs:** Focados em transição de estado/entidade (ex: `ConvertLeadDTO`). Carregam lógicas de metadados para transformar uma entidade (Lead) em outra (User/Cliente), o que difere de um simples *Update*.
+*   **Auth DTOs:** Isolam contratos de segurança, sessão, login e registro.
 
 ### 3. `enums/` (`@enums`)
-Centralizes literal types, constant union types, and enums shared between `models` and `dtos`.
-- **Examples:** `LeadStatus`, `CaseType`, `UserRole`.
+Centraliza tipos literais, union types constantes e enums que são compartilhados entre `models` e `dtos`.
+- **Exemplos:** `LeadStatus`, `CaseType`, `UserRole`.
 
 ### 4. `common/` (`@common`)
-Intended for purely utility type definitions shared globally.
-- **Examples:** Pagination interfaces (`IPaginatedResponse<T>`), global API responses, and generic TypeScript Utility Types.
+Destinado a definições de tipos puramente utilitárias que são compartilhadas globalmente.
+- **Exemplos:** Interfaces de paginação (`IPaginatedResponse<T>`), respostas globais da API, e TypeScript Utility Types genéricos.
 
 ---
 
-## 🛠️ Nested Barrels Pattern
+## 🛠️ Padrão de Barrels Nidificados (Nested Barrels)
 
-To keep the root clean and facilitate imports, we use the *Nested Barrels* pattern.
+Para manter a raiz limpa e facilitar importações, usamos o padrão de *Nested Barrels*.
 
-Inside `models/`, `dtos/`, and `enums/`, the actual code files reside within a `src/` subfolder. At the root of each of these folders, there is an `index.ts` file acting as a public exporter (Barrel).
+Dentro de `models/`, `dtos/` e `enums/`, os arquivos reais de código ficam dentro de uma subpasta `src/`. Na raiz de cada uma dessas pastas, há um arquivo `index.ts` que atua como um exportador público (Barrel).
 
-**Visual Structure:**
+**Estrutura visual:**
 ```
 src/types/
 ├── models/
-│   ├── index.ts        <-- Barrel exporting everything
-│   └── src/            <-- Concrete files (.model.ts)
+│   ├── index.ts        <-- Barrel exportando tudo
+│   └── src/            <-- Arquivos concretos (.model.ts)
 ```
 
 ---
 
-## 🚀 How to Import (Path Aliases)
+## 🚀 Como Importar (Path Aliases)
 
-The project is configured (`tsconfig.json`) with absolute aliases to facilitate importing types from anywhere in the project cleanly, without using complex relative paths (like `../../../../`).
+O projeto está configurado (`tsconfig.json`) com aliases absolutos para facilitar a importação de tipos de qualquer lugar do projeto de forma limpa, sem usar caminhos relativos complexos (como `../../../../`).
 
-Always import from the "Barrel" using the aliases:
+Sempre importe a partir do "Barrel" usando os aliases:
 
-❌ **Incorrect (Don't do this):**
+❌ **Incorreto (Não faça):**
 ```typescript
 import { User } from '../../types/models/src/user.model';
 import { CreateLeadDTO } from '../dtos/src/create-lead.dto';
 ```
 
-✅ **Correct:**
+✅ **Correto:**
 ```typescript
 import { User, Lead } from '@models';
 import { CreateLeadDTO, ConvertLeadDTO } from '@dtos';
