@@ -1,47 +1,41 @@
-# Commit pattern
+# Padrão de Commit
 
-O padrão de commit do projeto segue esta estrutura:
+O projeto OmniConnect segue o padrão **Conventional Commits** e exige que todas as mensagens de commit estejam em **Português (Brasil)**.
+
+### Formato Base:
 
 ```text
-<emoji><tipo>: <TICKET> <descrição>
+<tipo>(<escopo-opcional>): <descrição em português no imperativo>
 ```
 
-Formato esperado:
+O uso de emojis e identificadores do Linear (TICKET) são **opcionais**, resultando no seguinte formato estendido:
 
 ```text
-🌟feat: TIC-45 create auth routes
+<emoji><tipo>(<escopo-opcional>): <TICKET> <descrição em português>
 ```
 
-Regras:
+### Regras Principais:
+1. **Idioma:** Todas as mensagens devem ser em Português para dar visibilidade rápida à equipe inteira.
+2. **Clareza:** A descrição deve ser imperativa e objetiva (ex: "adiciona rota", em vez de "adicionando rota" ou "adicionei rota").
+3. **Escopo:** Quando uma alteração for contida em uma camada específica, use o escopo para clareza (ex: `feat(mobile):` ou `fix(api):`).
 
-- O commit deve começar com um emoji.
-- Depois do emoji vem o tipo do commit, sem espaço.
-- Depois do tipo vem `:`.
-- Depois de `:` vem um espaço.
-- A descrição deve começar pelo ticket da tarefa no Linear.
-- Depois do ticket vem um espaço e a descrição em inglês, objetiva e no imperativo quando fizer sentido.
+### Tipos Comuns (com seus Emojis Opcionais):
 
-Tipos e emojis recomendados:
+- `feat` ou `🌟feat`: nova funcionalidade
+- `fix` ou `🐛fix`: correção de bug
+- `docs` ou `📝docs` / `🌟docs`: documentação
+- `style` ou `🎨style`: ajustes visuais ou de formatação
+- `refactor` ou `🏗️refactor` / `♻️refactor`: refatoração sem mudança funcional
+- `test` ou `✅test`: criação ou ajuste de testes
+- `chore` ou `🔧chore`: tarefa de manutenção e build
 
-- `🌟feat`: nova funcionalidade
-- `🐛fix`: correção de bug
-- `📝docs`: documentação
-- `🎨style`: ajustes visuais ou de formatação
-- `♻️refactor`: refatoração sem mudança funcional
-- `⚡perf`: melhoria de performance
-- `✅test`: criação ou ajuste de testes
-- `🔧chore`: tarefa de manutenção
-- `🚀ci`: integração ou entrega contínua
-- `📦build`: build, dependências ou empacotamento
-- `⏪revert`: reversão de commit
-
-Exemplos válidos:
+### Exemplos Válidos (baseados no histórico do repositório):
 
 ```text
-🌟feat: TIC-45 create auth routes
-🐛fix: TIC-52 handle token refresh race condition
-📝docs: TIC-61 document authentication flow
-🔧chore: TIC-70 update commit hooks
+feat(backend): implementa modelagem de dados, DTOs e interfaces
+docs: atualiza distinção de audiências na skill docs-sync
+🏗️refactor: versionar .agents/ e adicionar skills
+🌟docs: unificação da arquitetura mobile para app único
 ```
 
 ---

@@ -72,10 +72,14 @@ erDiagram
     Processo {
         uuid id PK
         uuid clienteId FK
+        uuid advogadoId FK
         string titulo
+        text descricao
         string statusAtual
         string numeroProcesso
         enum tipoCaso
+        text ultimaNota
+        timestamp dataUltimaMovimentacao
         timestamp createdAt
         timestamp updatedAt
     }

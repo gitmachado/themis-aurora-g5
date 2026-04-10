@@ -134,21 +134,19 @@ O PRD §3.1 menciona "informa a disponibilidade do advogado (baseado na agenda c
 
 > **Recomendação:** Opção A — o PRD diz "baseado na agenda", mas nenhum CRM analisado implementa isso no app móvel. Pode ser uma feature futura.
 
-#### Gap #3: Processo ↔ Advogado Responsável
+#### Gap #3: Processo ↔ Advogado Responsável (CORRIGIDO ✅)
 
-Hoje `Processo` tem apenas `clienteId`, mas **não registra qual advogado é responsável**. Para o dashboard do advogado filtrar "meus processos" vs "todos os processos", seria necessário um `advogadoId` no `Processo`.
+~~Hoje `Processo` tem apenas `clienteId`, mas **não registra qual advogado é responsável**. Para o dashboard do advogado filtrar "meus processos" vs "todos os processos", seria necessário um `advogadoId` no `Processo`.~~
 
-**Impacto:** Num escritório com múltiplos advogados, essa ausência é crítica.
+**Status:** Corrigido. A propriedade `advogadoId` foi adicionada na entidade `Processo`.
 
-> **Recomendação:** Adicionar `advogadoId: string | null` ao `Processo`.
+#### Gap #4: Processo sem `descricao` e sem `ultimaNota` (CORRIGIDO ✅)
 
-#### Gap #4: Processo sem `descricao` e sem `ultimaNota`
+~~O `Processo` hoje tem `statusAtual` e `titulo`, mas não tem:~~
+~~- `descricao` — para detalhes adicionais do caso~~
+~~- Cache da última nota — o PRD §2.1 exige exibir "Última Nota do Advogado" no bot.~~
 
-O `Processo` hoje tem `statusAtual` e `titulo`, mas não tem:
-- `descricao` — para detalhes adicionais do caso
-- Cache da última nota — o PRD §2.1 exige exibir "Última Nota do Advogado" no bot. Hoje isso requer uma query no `TimelineEvento`, mas ter um campo desnormalizado `ultimaNota` agilizaria a resposta do bot.
-
-> **Recomendação:** Adicionar `descricao: string | null` ao Processo. O `ultimaNota` pode ficar como query na timeline (desnormalização prematura é arriscada).
+**Status:** Corrigido. As propriedades `descricao`, `ultimaNota` e `dataUltimaMovimentacao` foram adicionadas na entidade `Processo`.
 
 #### Gap #5: Novo lead não notifica advogado
 
@@ -163,10 +161,10 @@ O PRD §3.1 diz "notifica o advogado via Push: Novo Lead". O `TipoNotificacao` j
 | Categoria | Total | ✅ Coberto | ⚠️ Parcial | ⏳ Adiado |
 |---|---|---|---|---|
 | Chatbot WhatsApp | 10 | 8 | 1 | 1 |
-| App Flutter | 12 | 10 | 1 | 0 |
+| App Flutter | 16 | 16 | 0 | 0 |
 | Backend/Sync | 5 | 3 | 0 | 0 |
 | Fluxos | 3 | 2 | 0 | 1 |
 | **Total** | **30** | **23** | **2** | **2** |
 
-> [!IMPORTANT]
-> **Gap #3 (advogadoId no Processo)** é o mais crítico. Sugiro aplicar agora antes de gerar o schema SQL. Os outros são aceitáveis para o MVP.
+> [!NOTE]
+> Os gaps críticos estruturais na modelagem inicial (como advogadoId no Processo) já foram corrigidos. A base está totalmente alinhada para o MVP.
