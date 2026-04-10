@@ -1,36 +1,36 @@
 import type {
-  TipoCaso,
-  NivelUrgencia,
-  DisponibilidadeContato,
-  StatusLead,
+  CaseType,
+  UrgencyLevel,
+  ContactAvailability,
+  LeadStatus,
 } from '@enums';
 
-/** DTO para criação progressiva de lead via bot WhatsApp */
+/** DTO for progressive lead creation via WhatsApp bot */
 export interface CreateLeadDTO {
   whatsappNumber: string;
-  nome?: string;
+  name?: string;
   cpf?: string;
-  tipoCaso?: TipoCaso;
-  descricaoCaso?: string;
-  urgencia?: NivelUrgencia;
-  disponibilidadeContato?: DisponibilidadeContato;
+  caseType?: CaseType;
+  caseDescription?: string;
+  urgency?: UrgencyLevel;
+  contactAvailability?: ContactAvailability;
 }
 
 export interface UpdateLeadDTO {
-  nome?: string;
+  name?: string;
   cpf?: string;
-  tipoCaso?: TipoCaso;
-  descricaoCaso?: string;
-  urgencia?: NivelUrgencia;
-  disponibilidadeContato?: DisponibilidadeContato;
-  status?: StatusLead;
+  caseType?: CaseType;
+  caseDescription?: string;
+  urgency?: UrgencyLevel;
+  contactAvailability?: ContactAvailability;
+  status?: LeadStatus;
   convertedUserId?: string;
-  observacoesAdvogado?: string;
-  motivoDescarte?: string;
+  lawyerNotes?: string;
+  discardReason?: string;
 }
 
-/** DTO para conversão de Lead em Cliente (User) */
+/** DTO for converting a Lead into a Client (User) */
 export interface ConvertLeadDTO {
   leadId: string;
-  senhaTemporaria?: string;
+  temporaryPassword?: string;
 }

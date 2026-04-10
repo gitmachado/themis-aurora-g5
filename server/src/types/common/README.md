@@ -1,14 +1,14 @@
-# Types Comuns e Utilitários
+# Common and Utility Types
 
-Pasta destinada a definições de tipos que são compartilhados por múltiplas entidades ou que representam estruturas globais do sistema.
+This folder is intended for type definitions shared across multiple entities or representing global system structures.
 
-### Exemplos do que colocar aqui:
-- Interfaces de Paginação (ex: `IPaginatedResponse<T>`)
-- Tipos de Resposta Global de API
-- Utilitários de Tipo (ex: `DeepPartial`, `OmitID`)
+### Examples of what to place here:
+- Pagination interfaces (e.g., `IPaginatedResponse<T>`)
+- Global API response types
+- Type utilities (e.g., `DeepPartial`, `OmitID`)
 
-### Como importar:
-Sempre utilize o alias `@common/...`:
+### How to Import:
+Always use the `@common/...` alias:
 ```typescript
 import { IPaginatedResponse } from '@common/pagination.type';
 ```

@@ -1,13 +1,13 @@
 export interface LoginDTO {
   whatsappNumber: string;
-  senha: string;
+  password: string;
 }
 
 export interface RegisterDTO {
-  nome: string;
+  name: string;
   whatsappNumber: string;
   cpf: string;
-  senha: string;
+  password: string;
 }
 
 export interface AuthResponseDTO {

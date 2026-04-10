@@ -1,48 +1,49 @@
 // ========================
-// Enums do Domínio OmniConnect
+// OmniConnect Domain Enums
 // ========================
 
-/** Nichos de atuação jurídica suportados */
-export type TipoCaso =
-  | 'Trabalhista'
-  | 'Cível'
-  | 'Família'
+/** Supported legal practice niches */
+export type CaseType =
+  | 'Labor'
+  | 'Civil'
+  | 'Family'
   | 'Criminal'
-  | 'Previdenciário';
+  | 'SocialSecurity';
 
-/** Nível de urgência informado pelo lead */
-export type NivelUrgencia = 'Alta' | 'Média' | 'Baixa';
+/** Urgency level reported by the lead */
+export type UrgencyLevel = 'High' | 'Medium' | 'Low';
 
-/** Estado do lead no funil de conversão */
-export type StatusLead = 'PENDENTE' | 'EM_CONTATO' | 'CONVERTIDO' | 'DESCARTADO';
+/** State of the lead in the conversion funnel */
+export type LeadStatus = 'PENDING' | 'IN_CONTACT' | 'CONVERTED' | 'DISCARDED';
 
-/** Status do processo jurídico */
-export type StatusProcesso =
-  | 'EM_ABERTO'
-  | 'EM_ANALISE'
-  | 'AGUARDANDO_DOCUMENTO'
-  | 'CONCLUIDO'
-  | 'ARQUIVADO';
+/** Legal process status */
+export type LegalProcessStatus =
+  | 'OPEN'
+  | 'UNDER_ANALYSIS'
+  | 'AWAITING_DOCUMENT'
+  | 'COMPLETED'
+  | 'ARCHIVED';
 
-/** Perfis de acesso ao sistema */
-export type UserRole = 'ADVOGADO' | 'CLIENTE';
+/** System access roles */
+export type UserRole = 'LAWYER' | 'CLIENT';
 
-/** Tipos de evento na timeline de um processo */
-export type TipoEvento =
-  | 'ATUALIZACAO_STATUS'
-  | 'NOTA_ADVOGADO'
-  | 'ENVIO_DOCUMENTO'
-  | 'CRIACAO_PROCESSO';
+/** Event types in a legal process timeline */
+export type TimelineEventType =
+  | 'STATUS_UPDATE'
+  | 'LAWYER_NOTE'
+  | 'DOCUMENT_SENT'
+  | 'PROCESS_CREATED';
 
-/** Disponibilidade de contato informada pelo lead */
-export type DisponibilidadeContato = 'Manhã' | 'Tarde' | 'Noite';
+/** Contact availability reported by the lead */
+export type ContactAvailability = 'Morning' | 'Afternoon' | 'Evening';
 
-/** Tipos de notificação push (FCM) */
-export type TipoNotificacao =
-  | 'NOVO_LEAD'
-  | 'STATUS_ALTERADO'
-  | 'DOCUMENTO_ENVIADO'
-  | 'SUPORTE_HUMANO';
+/** Push notification types (FCM) */
+export type NotificationType =
+  | 'NEW_LEAD'
+  | 'STATUS_CHANGED'
+  | 'DOCUMENT_SENT'
+  | 'HUMAN_SUPPORT';
 
-/** Quem enviou a mensagem no chat */
-export type RemetenteMensagem = 'BOT' | 'CLIENTE' | 'ADVOGADO';
+/** Who sent the message in the chat */
+export type MessageSender = 'BOT' | 'CLIENT' | 'LAWYER';
+

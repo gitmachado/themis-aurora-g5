@@ -1,23 +1,23 @@
 import type {
-  TipoCaso,
-  NivelUrgencia,
-  StatusLead,
-  DisponibilidadeContato,
+  CaseType,
+  UrgencyLevel,
+  LeadStatus,
+  ContactAvailability,
 } from '@enums';
 
 export interface Lead {
   id: string;
   whatsappNumber: string;
-  nome: string | null;
+  name: string | null;
   cpf: string | null;
-  tipoCaso: TipoCaso | null;
-  descricaoCaso: string | null;
-  urgencia: NivelUrgencia | null;
-  disponibilidadeContato: DisponibilidadeContato | null;
-  status: StatusLead;
+  caseType: CaseType | null;
+  caseDescription: string | null;
+  urgency: UrgencyLevel | null;
+  contactAvailability: ContactAvailability | null;
+  status: LeadStatus;
   convertedUserId: string | null;
-  observacoesAdvogado: string | null;
-  motivoDescarte: string | null;
+  lawyerNotes: string | null;
+  discardReason: string | null;
   createdAt: Date;
   updatedAt: Date;
 }

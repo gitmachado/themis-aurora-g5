@@ -1,7 +1,7 @@
-import type { TimelineEvento } from '@models';
-import type { CreateTimelineEventoDTO } from '@dtos';
+import type { TimelineEvent } from '@models';
+import type { CreateTimelineEventDTO } from '@dtos';
 
 export interface ITimelineService {
-  addEvent(dto: CreateTimelineEventoDTO): Promise<TimelineEvento>;
-  getByProcesso(processoId: string): Promise<TimelineEvento[]>;
+  addEvent(dto: CreateTimelineEventDTO): Promise<TimelineEvent>;
+  getByLegalProcess(legalProcessId: string): Promise<TimelineEvent[]>;
 }
