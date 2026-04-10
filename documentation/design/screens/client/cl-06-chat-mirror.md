@@ -9,11 +9,15 @@
 - **Topo**: Nome da IA/Escritório e status (Online/Via Bot).
 
 ## 📊 Mapeamento de Dados (`feat/G5-8`)
-| Componente | Campo do Modelo | Regra de Exibição |
+| UI Component | Model Field | Display Rule |
 | :--- | :--- | :--- |
-| Texto | `Mensagem.conteudo` | Balões de chat. |
-| Hora | `Mensagem.createdAt` | Exibir dentro do balão. |
-| Lado do balão | `Mensagem.remetente` | Se for Cliente -> Direita. Se for Bot/Advogado -> Esquerda. |
+| Texto | `Message.content` | Balões de chat. |
+| Hora | `Message.createdAt` | Exibir dentro do balão. |
+| Lado do balão | `Message.sender` | Se for `CLIENT` -> Direita. Se for `BOT`/`LAWYER` -> Esquerda. |
 
 ## 🕹️ Ações
-- **Ir para WhatsApp**: Botão proeminente no footer "Precisa falar agora? Abra o WhatsApp".
+- **Solicitar Humano**: Alerta o advogado para intervir.
+
+## 💡 Sugestões do Gemini
+- **Reading Mode Banner**: Faixa no topo indicando que o chat é apenas para leitura.
+- **Classic Layout**: Layout estilo WhatsApp para familiaridade imediata.

@@ -11,13 +11,18 @@
   - Cada item da timeline é um "Evento".
 
 ## 📊 Mapeamento de Dados (`feat/G5-8`)
-| Componente | Campo do Modelo | Regra de Exibição |
+| UI Component | Model Field | Display Rule |
 | :--- | :--- | :--- |
-| Header Título | `Processo.titulo` | - |
-| Data Evento | `TimelineEvento.createdAt` | Formato: DD/MM/AAAA às HH:mm. |
-| Conteúdo da Nota | `TimelineEvento.conteudo` | Renderizar como **Markdown** (permite negrito, links e listas). |
-| Tipo de Ícone | `TimelineEvento.tipo` | `AUDIENCIA` (calendário), `DESPACHO` (martelo), `PETICAO` (papel). |
+| Header Título | `LegalProcess.title` | - |
+| Data Evento | `TimelineEvent.createdAt` | Formato: DD/MM/AAAA às HH:mm. |
+| Conteúdo da Nota | `TimelineEvent.content` | Renderizar como **Markdown** (permite negrito, links e listas). |
+| Tipo de Ícone | `TimelineEvent.type` | Mapear conforme `TimelineEventType` (ex: STATUS_UPDATE, LAWYER_NOTE). |
 
 ## 🕹️ Ações
 - **Compartilhar**: Gerar um PDF resumido da timeline (Opcional).
 - **Dúvida sobre este evento**: Botão que leva ao WhatsApp pré-preenchido com o ID do processo.
+- **Entender melhor**: IA explica o status atual do processo.
+
+## 💡 Sugestões do Gemini
+- **Iconography**: Ícones amigáveis para eventos (ex: 💰 para honorários, 🔨 para decisão).
+- **Share Button**: Botão de exportação/compartilhamento no topo da tela.

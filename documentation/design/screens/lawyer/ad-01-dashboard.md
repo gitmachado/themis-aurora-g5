@@ -9,12 +9,17 @@
 - **Lista Rápida**: Últimos 3 leads que chegaram hoje.
 
 ## 📊 Mapeamento de Dados (`feat/G5-8`)
-| Componente | Campo do Modelo | Regra de Exibição |
+| UI Component | Model Field | Display Rule |
 | :--- | :--- | :--- |
-| Contador | `Processo.count` | Total de processos ativos. |
-| Contador Leads | `Lead.count` | Mostrar apenas status `PENDENTE`. |
-| Gráfico | `Processo.tipoCaso` | Contar ocorrências de cada enum. |
+| Contador | `LegalProcess.count` | Total de processos ativos. |
+| Contador Leads | `Lead.count` | Mostrar apenas status `PENDING`. |
+| Gráfico | `LegalProcess.caseType` | Contar ocorrências de cada enum. |
 
 ## 🕹️ Ações
 - **Clique na Métrica**: Filtra as listas correspondentes.
 - **Handoff Urgente**: Botão "Assumir Conversa" direto do card.
+
+## 💡 Sugestões do Gemini
+- **Cards de Métricas**: Usar bordas coloridas ou sombreadas para destacar números (Total Processos, Leads).
+- **Gráfico de Rosca**: Para visualização da distribuição de `caseType` (Cível, Trabalhista, etc).
+- **Lista Compacta**: Card "Últimos Leads" com layout denso para visualização rápida.

@@ -10,12 +10,16 @@
   - Botões de decisão: "Aprovar" / "Recusar (Pedir novo)".
 
 ## 📊 Mapeamento de Dados (`feat/G5-8`)
-| Componente | Campo do Modelo | Regra de Exibição |
+| UI Component | Model Field | Display Rule |
 | :--- | :--- | :--- |
-| Arquivo | `Documento.url` | Link do S3/Firebase. |
-| Cliente | `Documento.enviadoPorId` | - |
-| Status | `Documento.status` | Atualizar após decisão. |
+| Arquivo | `Document.fileUrl` | Link do S3/Firebase. |
+| Cliente | `Document.sentById` | - |
+| Status | `Document.status` | Atualizar após decisão (Aprovado/Recusado). |
 
 ## 🕹️ Ações
-- **Download**: Baixar arquivo para o dispositivo.
+- **Status Update**: Altera `Document.documentStatus` para `APPROVED` ou `REJECTED`.
+
+## 💡 Sugestões do Gemini
+- **Image Viewer**: Visualizador centralizado com fundo escuro (Lightroom style).
+- **Floating Decision Bar**: Botões de "Aprovar" e "Recusar" flutuando sobre a imagem.
 - **Comentário de Recusa**: Campo obrigatório se a decisão for recusar.

@@ -12,11 +12,16 @@
   - Tipo de Caso (Enum).
 
 ## 📊 Mapeamento de Dados (`feat/G5-8`)
-| Componente | Campo do Modelo | Regra de Exibição |
+| UI Component | Model Field | Display Rule |
 | :--- | :--- | :--- |
-| Busca Cliente | `User.nome` | Filtrar onde `role == CLIENTE`. |
-| Título | `Processo.titulo` | Obrigatório. |
-| Nicho | `Processo.tipoCaso` | Seletor de Chip. |
+| Busca Cliente | `User.name` | Filtrar onde `role == CLIENT`. |
+| Título | `LegalProcess.title` | Obrigatório. |
+| Nicho | `LegalProcess.caseType` | Seletor de Chip. |
 
 ## 🕹️ Ações
 - **Salvar e Notificar**: Cria o registro e dispara Push para o cliente.
+
+## 💡 Sugestões do Gemini
+- **Stepper Component**: Indicador visual de progresso (Etapa 1 de 3) no topo.
+- **Inputs Agrupados**: Agrupar campos de data e seleção para reduzir o scroll.
+- **Botão Avançar**: Botão de largura total na base da etapa.
