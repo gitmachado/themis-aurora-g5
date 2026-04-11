@@ -4,8 +4,17 @@ Esta camada é responsável por toda a interação direta com o banco de dados P
 
 ## 📂 Estrutura de Pastas
 
-- `/interfaces`: Contém os contratos (interfaces TypeScript) de cada repositório. Isso facilita a inversão de dependência e os testes unitários (mocks).
-- `/implementations`: Contém a implementação concreta dos repositórios utilizando SQL puro e os helpers do banco.
+- `/interfaces`: Contém os contratos (interfaces TypeScript).
+- `/implementations`: Contém a implementação concreta SQL puro.
+- `index.ts`: Ponto de entrada (barrel) consolidado.
+
+## 🔗 Aliases e Importações
+
+Utilizamos o alias `@repositories` para simplificar o acesso à camada de dados:
+
+```typescript
+import { IUserRepository, UserRepository } from '@repositories';
+```
 
 ## 📋 Padrões de Implementação
 
