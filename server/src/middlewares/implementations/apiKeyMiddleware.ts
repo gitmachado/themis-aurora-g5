@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction, RequestHandler } from 'express';
-import { UnauthorizedError } from '../services/implementations/errors';
+import { UnauthorizedError } from '../../services/implementations/errors';
 
 /**
  * Middleware to validate API Key for bot/system integration

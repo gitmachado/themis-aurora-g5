@@ -1,8 +1,8 @@
 import { Router } from 'express';
 import multer from 'multer';
 import path from 'path';
-import { DocumentController } from '../../controllers/document.controller';
-import { authMiddleware } from '../../middlewares/authMiddleware';
+import { DocumentController } from '../../controllers/implementations/document.controller';
+import { authMiddleware } from '../../middlewares/implementations/authMiddleware';
 
 const router = Router();
 const controller = new DocumentController();

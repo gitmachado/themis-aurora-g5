@@ -1,8 +1,8 @@
 import { Response, NextFunction, RequestHandler } from 'express';
 import { LegalProcessService, TimelineService, NotificationService } from '@services';
 import { LegalProcessRepository, TimelineEventRepository, NotificationRepository } from '@repositories';
-import { AuthRequest } from '../middlewares/authMiddleware';
-import { ForbiddenError, NotFoundError } from '../services/implementations/errors';
+import { AuthRequest } from '../../middlewares/implementations/authMiddleware';
+import { ForbiddenError, NotFoundError } from '../../services/implementations/errors';
 
 export class LegalProcessController {
   private legalProcessService: LegalProcessService;

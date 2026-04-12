@@ -3,9 +3,9 @@ import fs from 'fs';
 import path from 'path';
 import { DocumentService } from '@services';
 import { DocumentRepository, LegalProcessRepository } from '@repositories';
-import { LocalFileStorageProvider } from '../utils/storage/implementations/local-storage.provider';
-import { AuthRequest } from '../middlewares/authMiddleware';
-import { ValidationError, ForbiddenError, NotFoundError } from '../services/implementations/errors';
+import { LocalFileStorageProvider } from '../../utils/storage/implementations/local-storage.provider';
+import { AuthRequest } from '../../middlewares/implementations/authMiddleware';
+import { ValidationError, ForbiddenError, NotFoundError } from '../../services/implementations/errors';
 
 export class DocumentController {
   private documentService: DocumentService;
@@ -103,7 +103,7 @@ export class DocumentController {
       }
 
       // 3. Verificar arquivo físico
-      const filePath = path.resolve(__dirname, '../../../../uploads', filename as string);
+      const filePath = path.resolve(__dirname, '../../../../../uploads', filename as string);
       if (!fs.existsSync(filePath)) {
         throw new NotFoundError('Arquivo físico não encontrado no storage');
       }

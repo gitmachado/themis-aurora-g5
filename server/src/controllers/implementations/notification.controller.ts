@@ -1,8 +1,8 @@
 import { Response, NextFunction, RequestHandler } from 'express';
 import { NotificationService } from '@services';
 import { NotificationRepository } from '@repositories';
-import { AuthRequest } from '../middlewares/authMiddleware';
-import { ForbiddenError, NotFoundError } from '../services/implementations/errors';
+import { AuthRequest } from '../../middlewares/implementations/authMiddleware';
+import { ForbiddenError, NotFoundError } from '../../services/implementations/errors';
 
 export class NotificationController {
   private notificationService: NotificationService;

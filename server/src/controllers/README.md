@@ -2,6 +2,11 @@
 
 Esta camada é responsável por interceptar as requisições HTTP, validar as permissões de acesso e orquestrar a chamada para os serviços de negócio.
 
+## 🏗️ Estrutura
+
+- **`implementations/`**: Contém as classes concretas dos controladores.
+- **`README.md`**: Explicação da camada.
+
 ## 🏗️ Padrão de Implementação
 
 - **Classes**: Cada domínio possui seu próprio controlador implementado como uma classe.

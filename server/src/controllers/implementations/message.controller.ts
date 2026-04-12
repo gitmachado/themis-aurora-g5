@@ -1,8 +1,8 @@
 import { Request, Response, NextFunction, RequestHandler } from 'express';
 import { MessageService } from '@services';
 import { MessageRepository, UserRepository, LeadRepository } from '@repositories';
-import { AuthRequest } from '../middlewares/authMiddleware';
-import { ForbiddenError, NotFoundError } from '../services/implementations/errors';
+import { AuthRequest } from '../../middlewares/implementations/authMiddleware';
+import { ForbiddenError, NotFoundError } from '../../services/implementations/errors';
 
 export class MessageController {
   private messageService: MessageService;

@@ -1,9 +1,9 @@
 import { Router } from 'express';
-import { LeadController } from '../../controllers/lead.controller';
-import { authMiddleware } from '../../middlewares/authMiddleware';
-import { roleMiddleware } from '../../middlewares/roleMiddleware';
-import { apiKeyMiddleware } from '../../middlewares/apiKeyMiddleware';
-import { validate } from '../../middlewares/validationMiddleware';
+import { LeadController } from '../../controllers/implementations/lead.controller';
+import { authMiddleware } from '../../middlewares/implementations/authMiddleware';
+import { roleMiddleware } from '../../middlewares/implementations/roleMiddleware';
+import { apiKeyMiddleware } from '../../middlewares/implementations/apiKeyMiddleware';
+import { validate } from '../../middlewares/implementations/validationMiddleware';
 import { z } from 'zod';
 
 const router = Router();

@@ -1,6 +1,6 @@
 import { Router } from 'express';
-import { TimelineController } from '../../controllers/timeline.controller';
-import { authMiddleware } from '../../middlewares/authMiddleware';
+import { TimelineController } from '../../controllers/implementations/timeline.controller';
+import { authMiddleware } from '../../middlewares/implementations/authMiddleware';
 
 const router = Router();
 const controller = new TimelineController();

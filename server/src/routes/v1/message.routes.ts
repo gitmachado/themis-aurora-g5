@@ -1,8 +1,8 @@
 import { Router } from 'express';
-import { MessageController } from '../../controllers/message.controller';
-import { authMiddleware } from '../../middlewares/authMiddleware';
-import { apiKeyMiddleware } from '../../middlewares/apiKeyMiddleware';
-import { validate } from '../../middlewares/validationMiddleware';
+import { MessageController } from '../../controllers/implementations/message.controller';
+import { authMiddleware } from '../../middlewares/implementations/authMiddleware';
+import { apiKeyMiddleware } from '../../middlewares/implementations/apiKeyMiddleware';
+import { validate } from '../../middlewares/implementations/validationMiddleware';
 import { z } from 'zod';
 
 const router = Router();

@@ -1,6 +1,6 @@
 import { Response, NextFunction } from 'express';
 import { AuthRequest } from './authMiddleware';
-import { ForbiddenError } from '../services/implementations/errors';
+import { ForbiddenError } from '../../services/implementations/errors';
 
 /**
  * Middleware to check if the user has one of the required roles

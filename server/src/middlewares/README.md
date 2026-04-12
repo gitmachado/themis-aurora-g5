@@ -2,6 +2,10 @@
 
 Esta camada contém as funções de interceptação global e específica que garantem a segurança, integridade e padronização das requisições na API OmniConnect.
 
+## 🏗️ Estrutura
+
+- **`implementations/`**: Contém as funções concretas dos middlewares e o Error Handler.
+
 ## 🛡️ Middlewares de Segurança
 
 - **`authMiddleware`**: Valida o token JWT no header `Authorization`. Injeta o payload decodificado (id, role) no `req.user`.
@@ -15,6 +19,6 @@ Esta camada contém as funções de interceptação global e específica que gar
 
 ## 📝 Como adicionar um Middleware
 
-1. Crie o arquivo em `src/middlewares/`.
+1. Crie o arquivo em `src/middlewares/implementations/`.
 2. Exporte a função utilizando o tipo `RequestHandler` do Express.
 3. Se o middleware for global, configure-o no `app.ts`. Caso contrário, aplique-o diretamente na definição da rota.

@@ -1,8 +1,8 @@
 import { Response, NextFunction } from 'express';
 import { TimelineService } from '@services';
 import { TimelineEventRepository, LegalProcessRepository } from '@repositories';
-import { AuthRequest } from '../middlewares/authMiddleware';
-import { ForbiddenError, NotFoundError } from '../services/implementations/errors';
+import { AuthRequest } from '../../middlewares/implementations/authMiddleware';
+import { ForbiddenError, NotFoundError } from '../../services/implementations/errors';
 
 export class TimelineController {
   private timelineService: TimelineService;
