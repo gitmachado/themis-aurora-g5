@@ -57,6 +57,15 @@ Os controladores são implementados como classes, utilizando `RequestHandler` pa
 - **Injeção**: Repositórios são instanciados no construtor para permitir buscas rápidas de validação de acesso antes da chamada ao serviço.
 - **Resposta**: Sempre utilizam códigos HTTP semânticos (200, 201, 204, 401, 403, 404).
 
+### 2.7 Documentação da API (Swagger/OpenAPI)
+
+A API é 100% documentada utilizando o padrão **OpenAPI 3.0** via `swagger-jsdoc`.
+
+- **Acesso**: Disponível na rota `/api-docs` em ambiente de desenvolvimento.
+- **Integração com Zod**: Os esquemas de validação Zod (`src/types/dtos/schemas/`) são utilizados para gerar automaticamente as definições de `requestBody`.
+- **Modelos de Resposta**: As interfaces de domínio (`src/types/models/`) são mapeadas como componentes Swagger, garantindo agilidade no desenvolvimento do frontend Flutter.
+- **Segurança**: A documentação inclui suporte nativo para testes com `bearerAuth` (JWT) e `apiKeyAuth` (Bot Integration).
+
 ### 2.3 Diagrama de Entidades (ER)
 
 ```mermaid
