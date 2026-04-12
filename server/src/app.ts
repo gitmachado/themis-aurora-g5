@@ -5,6 +5,8 @@ import morgan from 'morgan';
 import path from 'path';
 import { errorHandler } from './middlewares/implementations/errorHandler';
 import routes from './routes';
+import swaggerUi from 'swagger-ui-express';
+import { swaggerSpec } from './config/swagger';
 
 const app = express();
 
@@ -16,6 +18,9 @@ app.use(express.json());
 
 // API Routes
 app.use('/api/v1', routes);
+
+// Swagger Documentation
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
 // Base route
 app.get('/', (req, res) => {

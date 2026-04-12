@@ -4,26 +4,128 @@ import { authMiddleware } from '../../middlewares/implementations/authMiddleware
 import { roleMiddleware } from '../../middlewares/implementations/roleMiddleware';
 import { apiKeyMiddleware } from '../../middlewares/implementations/apiKeyMiddleware';
 import { validate } from '../../middlewares/implementations/validationMiddleware';
-import { z } from 'zod';
+import { createLeadSchema } from '../../types/dtos/schemas';
 
 const router = Router();
 const controller = new LeadController();
 
-const createLeadSchema = z.object({
-  body: z.object({
-    name: z.string().min(3),
-    whatsappNumber: z.string().min(10),
-    cpf: z.string().length(11),
-    caseType: z.enum(['Labor', 'Civil', 'Family', 'Criminal', 'SocialSecurity']),
-    description: z.string(),
-    urgency: z.enum(['High', 'Medium', 'Low']),
-    contactAvailability: z.enum(['Morning', 'Afternoon', 'Evening']),
-  }),
-});
-
+/**
+ * @openapi
+ * /leads:
+ *   get:
+ *     summary: Lista todos os leads (Apenas Advogado)
+ *     tags: [Leads]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Lista de leads retornada com sucesso
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 $ref: '#/components/schemas/Lead'
+ *       403:
+ *         description: Acesso negado
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ */
 router.get('/', authMiddleware, roleMiddleware(['LAWYER']), controller.listAll);
+
+/**
+ * @openapi
+ * /leads/{id}:
+ *   get:
+ *     summary: Obtém detalhes de um lead por ID
+ *     tags: [Leads]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Detalhes do lead
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Lead'
+ *       404:
+ *         description: Lead não encontrado
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ */
 router.get('/:id', authMiddleware, roleMiddleware(['LAWYER']), controller.getById);
+
+/**
+ * @openapi
+ * /leads:
+ *   post:
+ *     summary: Cria um novo lead (Integração Bot/WhatsApp)
+ *     tags: [Leads]
+ *     security:
+ *       - apiKeyAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/LeadCreateRequest'
+ *     responses:
+ *       201:
+ *         description: Lead criado com sucesso
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Lead'
+ *       400:
+ *         description: Erro de validação
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ValidationError'
+ */
 router.post('/', apiKeyMiddleware, validate(createLeadSchema), controller.create);
+
+/**
+ * @openapi
+ * /leads/{id}/convert:
+ *   patch:
+ *     summary: Converte um lead em cliente (Cria usuário e processo)
+ *     tags: [Leads]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Lead convertido com sucesso
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message: { type: 'string' }
+ *                 processId: { type: 'string' }
+ *       404:
+ *         description: Lead não encontrado
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ */
 router.patch('/:id/convert', authMiddleware, roleMiddleware(['LAWYER']), controller.convert);
 
 export default router;

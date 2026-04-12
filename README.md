@@ -21,6 +21,7 @@ O foco é resolver dois problemas comuns em escritórios:
 
 ### Backend & Integração
 - **Linguagem/Framework:** Node.js com TypeScript (Conforme [ADR 0001](./.agents/decisions/0001-stack-tecnologica-backend.md))
+- **Documentação API:** Swagger/OpenAPI 3.0 disponível em `/api-docs` (local)
 - **WhatsApp:** Cloud API (Webhooks)
 - **Tempo Real & Push:** WebSockets / Firebase Cloud Messaging (FCM)
 
@@ -41,6 +42,18 @@ O foco é resolver dois problemas comuns em escritórios:
 | Mensageria | WhatsApp Business Cloud API |
 | Notificações | Firebase Cloud Messaging (FCM) |
 | Gestão do Projeto | Linear (integrado via MCP) |
+
+---
+
+## 📚 Documentação da API
+
+A plataforma utiliza **Swagger (OpenAPI 3.0)** para documentar todos os contratos de integração. A documentação é gerada automaticamente a partir do código fonte (JSDoc + Zod Schemas).
+
+### Como acessar (Ambiente Local):
+1. Certifique-se de que o servidor backend está rodando (`npm run dev`).
+2. Acesse: [http://localhost:3000/api-docs](http://localhost:3000/api-docs)
+
+A documentação cobre 100% dos módulos principais, incluindo descrições de modelos de dados (Request/Response) e tratamento de erros padronizado.
 
 ---
 
