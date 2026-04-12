@@ -37,6 +37,14 @@ export class DocumentService implements IDocumentService {
     return this.documentRepository.findByLegalProcessId(legalProcessId);
   }
 
+  async getById(id: string): Promise<Document | null> {
+    return this.documentRepository.findById(id);
+  }
+
+  async getByFileName(fileName: string): Promise<Document | null> {
+    return this.documentRepository.findByFileName(fileName);
+  }
+
   async delete(id: string): Promise<void> {
     const document = await this.documentRepository.findById(id);
     if (!document) {
