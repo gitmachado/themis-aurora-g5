@@ -1,4 +1,4 @@
-import type { CaseType } from '@enums';
+import type { CaseType, LegalProcessStatus } from '@enums';
 
 export interface CreateLegalProcessDTO {
   clientId: string;
@@ -12,7 +12,7 @@ export interface CreateLegalProcessDTO {
 /** DTO for updating a process status (generates a timeline event) */
 export interface UpdateLegalProcessStatusDTO {
   legalProcessId: string;
-  newStatus: string;
+  newStatus: LegalProcessStatus;
   lawyerNote?: string;
   updatedById: string;
 }
