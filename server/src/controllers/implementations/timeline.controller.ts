@@ -1,27 +1,27 @@
-import { Response, NextFunction } from 'express';
-import { TimelineService } from '@services';
-import { TimelineEventRepository, LegalProcessRepository } from '@repositories';
+import { Response, NextFunction, RequestHandler } from 'express';
+import { ITimelineService, ILegalProcessService } from '@services';
 import { AuthRequest } from '../../middlewares/implementations/authMiddleware';
-import { ForbiddenError, NotFoundError } from '../../services/implementations/errors';
+import { ForbiddenError } from '../../services/implementations/errors';
+import { TimelineEvent } from '@models';
 
 export class TimelineController {
-  private timelineService: TimelineService;
-  private legalProcessRepository: LegalProcessRepository;
+  constructor(
+    private readonly timelineService: ITimelineService,
+    private readonly legalProcessService: ILegalProcessService
+  ) {}
 
-  constructor() {
-    const repository = new TimelineEventRepository();
-    this.legalProcessRepository = new LegalProcessRepository();
-    this.timelineService = new TimelineService(repository);
-  }
-
-  listByProcess = async (req: AuthRequest, res: Response, next: NextFunction) => {
+  listByProcess: RequestHandler<{ processId: string }, TimelineEvent[]> = async (
+    req: AuthRequest<{ processId: string }, TimelineEvent[]>,
+    res: Response,
+    next: NextFunction
+  ) => {
     try {
-      const processId = req.params.processId as string;
+      const { processId } = req.params;
       const user = req.user!;
 
       // Ownership check: If client, check if they own the process
       if (user.role === 'CLIENT') {
-        const process = await this.legalProcessRepository.findById(processId);
+        const process = await this.legalProcessService.getById(processId);
         if (!process || process.clientId !== user.id) {
           throw new ForbiddenError('Você não tem permissão para visualizar o histórico deste processo');
         }

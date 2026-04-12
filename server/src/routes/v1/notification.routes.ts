@@ -1,9 +1,14 @@
 import { Router } from 'express';
 import { NotificationController } from '../../controllers/implementations/notification.controller';
+import { NotificationService } from '@services';
+import { NotificationRepository } from '@repositories';
 import { authMiddleware } from '../../middlewares/implementations/authMiddleware';
 
 const router = Router();
-const controller = new NotificationController();
+
+const notificationRepository = new NotificationRepository();
+const notificationService = new NotificationService(notificationRepository);
+const controller = new NotificationController(notificationService);
 
 /**
  * @openapi
