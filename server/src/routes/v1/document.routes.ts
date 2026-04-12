@@ -2,10 +2,35 @@ import { Router } from 'express';
 import multer from 'multer';
 import path from 'path';
 import { DocumentController } from '../../controllers/implementations/document.controller';
+import { DocumentService, LegalProcessService, TimelineService, NotificationService } from '@services';
+import { DocumentRepository, LegalProcessRepository, TimelineEventRepository, NotificationRepository } from '@repositories';
+import { LocalFileStorageProvider } from '../../utils/storage/implementations/local-storage.provider';
 import { authMiddleware } from '../../middlewares/implementations/authMiddleware';
 
 const router = Router();
-const controller = new DocumentController();
+
+// Wiring dependencies
+const documentRepository = new DocumentRepository();
+const documentService = new DocumentService(documentRepository);
+
+const legalProcessRepository = new LegalProcessRepository();
+const timelineRepository = new TimelineEventRepository();
+const timelineService = new TimelineService(timelineRepository);
+const notificationRepository = new NotificationRepository();
+const notificationService = new NotificationService(notificationRepository);
+const legalProcessService = new LegalProcessService(
+  legalProcessRepository,
+  timelineService,
+  notificationService
+);
+
+const storageProvider = new LocalFileStorageProvider();
+
+const controller = new DocumentController(
+  documentService,
+  legalProcessService,
+  storageProvider
+);
 
 // Multer configuration for temporary storage
 const upload = multer({ 

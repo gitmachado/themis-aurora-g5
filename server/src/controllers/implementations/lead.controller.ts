@@ -1,26 +1,16 @@
-import { Request, Response, NextFunction } from 'express';
-import { LeadService, AuthService, NotificationService } from '@services';
-import { LeadRepository, UserRepository, NotificationRepository } from '@repositories';
+import { Request, Response, NextFunction, RequestHandler } from 'express';
+import { ILeadService } from '@services';
+import { Lead, User } from '@models';
+import { CreateLeadDTO } from '@dtos';
 
 export class LeadController {
-  private leadService: LeadService;
+  constructor(private readonly leadService: ILeadService) {}
 
-  constructor() {
-    const leadRepository = new LeadRepository();
-    const userRepository = new UserRepository();
-    const authService = new AuthService(userRepository);
-    const notificationRepository = new NotificationRepository();
-    const notificationService = new NotificationService(notificationRepository);
-    
-    this.leadService = new LeadService(
-      leadRepository, 
-      userRepository, 
-      authService, 
-      notificationService
-    );
-  }
-
-  listAll = async (req: Request, res: Response, next: NextFunction) => {
+  listAll: RequestHandler<any, Lead[]> = async (
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ) => {
     try {
       const leads = await this.leadService.getPending();
       return res.status(200).json(leads);
@@ -29,16 +19,24 @@ export class LeadController {
     }
   };
 
-  getById = async (req: Request, res: Response, next: NextFunction) => {
+  getById: RequestHandler<{ id: string }, Lead> = async (
+    req: Request<{ id: string }, Lead>,
+    res: Response,
+    next: NextFunction
+  ) => {
     try {
-      const lead = await this.leadService.getById(req.params.id as string);
-      return res.status(200).json(lead);
+      const lead = await this.leadService.getById(req.params.id);
+      return res.status(200).json(lead!);
     } catch (error) {
       next(error);
     }
   };
 
-  create = async (req: Request, res: Response, next: NextFunction) => {
+  create: RequestHandler<any, Lead, CreateLeadDTO> = async (
+    req: Request<any, Lead, CreateLeadDTO>,
+    res: Response,
+    next: NextFunction
+  ) => {
     try {
       const lead = await this.leadService.createFromWhatsapp(req.body);
       return res.status(201).json(lead);
@@ -47,9 +45,13 @@ export class LeadController {
     }
   };
 
-  convert = async (req: Request, res: Response, next: NextFunction) => {
+  convert: RequestHandler<{ id: string }, User> = async (
+    req: Request<{ id: string }, User>,
+    res: Response,
+    next: NextFunction
+  ) => {
     try {
-      const result = await this.leadService.convertToClient({ leadId: req.params.id as string });
+      const result = await this.leadService.convertToClient({ leadId: req.params.id });
       return res.status(200).json(result);
     } catch (error) {
       next(error);

@@ -59,7 +59,7 @@ export class LegalProcessRepository implements ILegalProcessRepository {
       })
       .join(', ');
 
-    const values = fields.map(key => (data as any)[key]);
+    const values = fields.map(key => data[key as keyof LegalProcess]);
 
     return (await dbGet<LegalProcess>(
       `UPDATE legal_processes SET ${setClause} WHERE id = $1 RETURNING ${this.selectFields}`,

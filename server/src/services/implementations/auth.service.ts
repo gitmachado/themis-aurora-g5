@@ -77,9 +77,9 @@ export class AuthService implements IAuthService {
     return Math.random().toString(36).slice(-8).toUpperCase();
   }
 
-  async validateToken(token: string): Promise<{ userId: string; role: string }> {
+  async validateToken(token: string): Promise<{ userId: string; role: UserRole }> {
     try {
-      const decoded = jwt.verify(token, this.jwtSecret) as { sub: string; role: string };
+      const decoded = jwt.verify(token, this.jwtSecret) as { sub: string; role: UserRole };
       return {
         userId: decoded.sub,
         role: decoded.role,
@@ -89,7 +89,7 @@ export class AuthService implements IAuthService {
     }
   }
 
-  private generateToken(userId: string, role: string): string {
+  private generateToken(userId: string, role: UserRole): string {
     return jwt.sign({ role }, this.jwtSecret, {
       subject: userId,
       expiresIn: this.jwtExpiresIn as any,

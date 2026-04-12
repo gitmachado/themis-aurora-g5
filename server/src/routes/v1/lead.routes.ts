@@ -1,5 +1,7 @@
 import { Router } from 'express';
 import { LeadController } from '../../controllers/implementations/lead.controller';
+import { LeadService, AuthService, NotificationService } from '@services';
+import { LeadRepository, UserRepository, NotificationRepository } from '@repositories';
 import { authMiddleware } from '../../middlewares/implementations/authMiddleware';
 import { roleMiddleware } from '../../middlewares/implementations/roleMiddleware';
 import { apiKeyMiddleware } from '../../middlewares/implementations/apiKeyMiddleware';
@@ -7,7 +9,20 @@ import { validate } from '../../middlewares/implementations/validationMiddleware
 import { createLeadSchema } from '../../types/dtos/schemas';
 
 const router = Router();
-const controller = new LeadController();
+
+const leadRepository = new LeadRepository();
+const userRepository = new UserRepository();
+const authService = new AuthService(userRepository);
+const notificationRepository = new NotificationRepository();
+const notificationService = new NotificationService(notificationRepository);
+const leadService = new LeadService(
+  leadRepository,
+  userRepository,
+  authService,
+  notificationService
+);
+
+const controller = new LeadController(leadService);
 
 /**
  * @openapi

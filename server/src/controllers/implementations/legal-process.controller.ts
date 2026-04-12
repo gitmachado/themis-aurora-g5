@@ -1,28 +1,18 @@
 import { Response, NextFunction, RequestHandler } from 'express';
-import { LegalProcessService, TimelineService, NotificationService } from '@services';
-import { LegalProcessRepository, TimelineEventRepository, NotificationRepository } from '@repositories';
+import { ILegalProcessService } from '@services';
 import { AuthRequest } from '../../middlewares/implementations/authMiddleware';
 import { ForbiddenError, NotFoundError } from '../../services/implementations/errors';
+import { LegalProcess } from '@models';
+import { LegalProcessStatus } from '@enums';
 
 export class LegalProcessController {
-  private legalProcessService: LegalProcessService;
-  private legalProcessRepository: LegalProcessRepository;
+  constructor(private readonly legalProcessService: ILegalProcessService) {}
 
-  constructor() {
-    this.legalProcessRepository = new LegalProcessRepository();
-    const timelineRepository = new TimelineEventRepository();
-    const timelineService = new TimelineService(timelineRepository);
-    const notificationRepository = new NotificationRepository();
-    const notificationService = new NotificationService(notificationRepository);
-
-    this.legalProcessService = new LegalProcessService(
-      this.legalProcessRepository,
-      timelineService,
-      notificationService
-    );
-  }
-
-  listMyProcesses: RequestHandler = async (req: AuthRequest, res: Response, next: NextFunction) => {
+  listMyProcesses: RequestHandler<any, LegalProcess[]> = async (
+    req: AuthRequest<any, LegalProcess[]>,
+    res: Response,
+    next: NextFunction
+  ) => {
     try {
       const userId = req.user!.id;
       const processes = await this.legalProcessService.getByClientId(userId);
@@ -32,9 +22,13 @@ export class LegalProcessController {
     }
   };
 
-  getById: RequestHandler = async (req: AuthRequest, res: Response, next: NextFunction) => {
+  getById: RequestHandler<{ id: string }, LegalProcess> = async (
+    req: AuthRequest<{ id: string }, LegalProcess>,
+    res: Response,
+    next: NextFunction
+  ) => {
     try {
-      const processId = req.params.id as string;
+      const processId = req.params.id;
       const user = req.user!;
       
       const process = await this.legalProcessService.getById(processId);
@@ -54,20 +48,22 @@ export class LegalProcessController {
     }
   };
 
-  updateStatus: RequestHandler = async (req: AuthRequest, res: Response, next: NextFunction) => {
+  updateStatus: RequestHandler<
+    { id: string },
+    LegalProcess,
+    { status: LegalProcessStatus; reason?: string }
+  > = async (
+    req: AuthRequest<
+      { id: string },
+      LegalProcess,
+      { status: LegalProcessStatus; reason?: string }
+    >,
+    res: Response,
+    next: NextFunction
+  ) => {
     try {
-      const processId = req.params.id as string;
+      const processId = req.params.id;
       const user = req.user!;
-
-      // Refinement: Check if the lawyer is the tutor
-      const process = await this.legalProcessRepository.findById(processId);
-      if (!process) {
-        throw new NotFoundError('Processo não encontrado');
-      }
-
-      if (process.lawyerId && process.lawyerId !== user.id) {
-        throw new ForbiddenError('Apenas o advogado responsável por este processo pode alterar seu status');
-      }
 
       const updatedProcess = await this.legalProcessService.updateStatus({
         legalProcessId: processId,

@@ -49,7 +49,7 @@ export class UserRepository implements IUserRepository {
       })
       .join(', ');
 
-    const values = fields.map(key => (data as any)[key]);
+    const values = fields.map(key => data[key as keyof User]);
 
     return (await dbGet<User>(
       `UPDATE users SET ${setClause} WHERE id = $1 

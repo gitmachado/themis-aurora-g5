@@ -1,9 +1,25 @@
 import { Router } from 'express';
 import { TimelineController } from '../../controllers/implementations/timeline.controller';
+import { TimelineService, LegalProcessService, NotificationService } from '@services';
+import { TimelineEventRepository, LegalProcessRepository, NotificationRepository } from '@repositories';
 import { authMiddleware } from '../../middlewares/implementations/authMiddleware';
 
 const router = Router();
-const controller = new TimelineController();
+
+// Wiring dependencies
+const timelineRepository = new TimelineEventRepository();
+const timelineService = new TimelineService(timelineRepository);
+
+const legalProcessRepository = new LegalProcessRepository();
+const notificationRepository = new NotificationRepository();
+const notificationService = new NotificationService(notificationRepository);
+const legalProcessService = new LegalProcessService(
+  legalProcessRepository,
+  timelineService,
+  notificationService
+);
+
+const controller = new TimelineController(timelineService, legalProcessService);
 
 /**
  * @openapi

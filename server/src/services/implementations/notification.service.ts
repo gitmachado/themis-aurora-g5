@@ -32,6 +32,10 @@ export class NotificationService implements INotificationService {
     return this.notificationRepository.findByUserId(userId);
   }
 
+  async getById(id: string): Promise<Notification | null> {
+    return this.notificationRepository.findById(id);
+  }
+
   async getUnread(userId: string): Promise<Notification[]> {
     return this.notificationRepository.findUnreadByUserId(userId);
   }

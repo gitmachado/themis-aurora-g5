@@ -1,3 +1,5 @@
+import { UserRole } from '@enums';
+
 export interface LoginDTO {
   whatsappNumber: string;
   password: string;
@@ -13,5 +15,5 @@ export interface RegisterDTO {
 export interface AuthResponseDTO {
   token: string;
   userId: string;
-  role: string;
+  role: UserRole;
 }
