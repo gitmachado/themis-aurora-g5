@@ -34,10 +34,11 @@ server/src/
 | Decisão | Opção Escolhida | Justificativa |
 |---|---|---|
 | Banco de dados | PostgreSQL | Suporte nativo a JSON, PGVector para RAG |
-| ORM | **Nenhum** (driver `pg` nativo) | Controle total, performance, ADR-0003 |
+| ORM | **Nenhum** (driver `pg` nativo) | Controle total, performance, [ADR-0003](decisions/0003-data-access-pattern-native-pg.md) |
 | Linguagem | TypeScript (strict) | Tipagem forte sem ORM exige interfaces sólidas |
 | Arquitetura | Camadas (Controller → Service → Repository) | Separação clara de responsabilidades |
 | Proteção Bot | API Key | Garante que apenas o robô de WhatsApp acesse endpoints de ingestão |
+| Segurança | Ownership/Tutor | Proteção contra IDOR e acesso não autorizado ([ADR-0004](decisions/0004-fine-grained-security-and-tutor-ownership.md)) |
 
 ### 2.5 Middlewares Globais
 
@@ -192,5 +193,12 @@ Diretório: `mobile/lib/`
 |---|---|
 | Estratégia de cache/offline | Depende da definição de sincronização real-time |
 | Tabela `embeddings_rag` | Será definida no ticket de IA (PGVector) |
-| Autenticação JWT completa | Placeholders existem; implementação no ticket de API |
 | WebSocket para tempo real | Será avaliado junto com a latência de 2s do PRD |
+
+---
+
+## 5. Referências
+
+- [ADRs (Architectural Decision Records)](documentation/decisions/)
+- [Guia de Transição: Local para S3](documentation/specs/storage_aws_transition.md)
+- [Sistema de Segurança](documentation/specs/security_system.md)
