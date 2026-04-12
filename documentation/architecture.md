@@ -15,19 +15,16 @@ omniconnect-aurora-g5/
 
 ## 2. Backend — Arquitetura em Camadas
 
-### 2.1 Estrutura de Pastas
+### 2.1 Estrutura de Pastas (Diretório: `server/src/`)
 
-```
-server/src/
-├── models/                    # Entidades do domínio (interfaces TS)
-│   └── dtos/                  # Data Transfer Objects
-├── repositories/interfaces/   # Contratos de acesso a dados
-├── services/interfaces/       # Contratos de regras de negócio
-├── controllers/               # Endpoints HTTP e orquestração
-├── config/                    # Configurações globais e variáveis de ambiente
-├── middlewares/               # Auth, RBAC, Validação e Segurança
-└── utils/                     # Helpers (Storage, Erros, etc)
-```
+- **Entidades**: `models/` — Definição do domínio e interfaces.
+- **DTOs**: `models/dtos/` — Objetos de transferência de dados entrada/saída.
+- **Repositórios**: `repositories/implementations/` — Acesso a dados (SQL Nativo).
+- **Serviços**: `services/implementations/` — Regras de negócio e orquestração.
+- **Controladores**: `controllers/implementations/` — Endpoints HTTP e segurança (Ownership).
+- **Middlewares**: `middlewares/implementations/` — Auth, RBAC e Validação.
+- **Rotas**: `routes/v1/` — Definição de endpoints da API Versão 1.
+- **Utilitários**: `utils/` — Helpers globais (Storage, Logger, Errors).
 
 ### 2.2 Decisões Técnicas
 
@@ -180,10 +177,11 @@ flowchart LR
 
 > Documentado na task G5-5. Estrutura baseada em features com navegação centralizada.
 
-Diretório: `mobile/lib/`
-- `app/` — configuração central (tema, rotas, shell)
-- `features/` — features isoladas por domínio
-- `shared/` — componentes e utilitários reutilizáveis
+### 3.1 Estrutura de Pastas (Diretório: `mobile/lib/`)
+
+- **Configuração**: `app/` — Rotas, Temas, Global State.
+- **Domínios**: `features/` — Telas e lógica isoladas por domínio funcional.
+- **Reutilizáveis**: `shared/` — Widgets, componentes e utilitários globais.
 
 ---
 
