@@ -15,28 +15,45 @@ omniconnect-aurora-g5/
 
 ## 2. Backend — Arquitetura em Camadas
 
-### 2.1 Estrutura de Pastas
+### 2.1 Estrutura de Pastas (Diretório: `server/src/`)
 
-```
-server/src/
-├── models/                    # Entidades do domínio (interfaces TS)
-│   └── dtos/                  # Data Transfer Objects
-├── repositories/interfaces/   # Contratos de acesso a dados
-├── services/interfaces/       # Contratos de regras de negócio
-├── controllers/               # Endpoints HTTP (futuro)
-├── config/                    # Configuração do app (futuro)
-├── middlewares/               # Auth, validação, etc (futuro)
-└── utils/                     # Helpers compartilhados (futuro)
-```
+- **Entidades**: `models/` — Definição do domínio e interfaces.
+- **DTOs**: `models/dtos/` — Objetos de transferência de dados entrada/saída.
+- **Repositórios**: `repositories/implementations/` — Acesso a dados (SQL Nativo).
+- **Serviços**: `services/implementations/` — Regras de negócio e orquestração.
+- **Controladores**: `controllers/implementations/` — Endpoints HTTP e segurança (Ownership).
+- **Middlewares**: `middlewares/implementations/` — Auth, RBAC e Validação.
+- **Rotas**: `routes/v1/` — Definição de endpoints da API Versão 1.
+- **Utilitários**: `utils/` — Helpers globais (Storage, Logger, Errors).
 
 ### 2.2 Decisões Técnicas
 
 | Decisão | Opção Escolhida | Justificativa |
 |---|---|---|
 | Banco de dados | PostgreSQL | Suporte nativo a JSON, PGVector para RAG |
-| ORM | **Nenhum** (driver `pg` nativo) | Controle total, performance, ADR-0003 |
+| ORM | **Nenhum** (driver `pg` nativo) | Controle total, performance, [ADR-0003](decisions/0003-data-access-pattern-native-pg.md) |
 | Linguagem | TypeScript (strict) | Tipagem forte sem ORM exige interfaces sólidas |
 | Arquitetura | Camadas (Controller → Service → Repository) | Separação clara de responsabilidades |
+| Proteção Bot | API Key | Garante que apenas o robô de WhatsApp acesse endpoints de ingestão |
+| Segurança | Ownership/Tutor | Proteção contra IDOR e acesso não autorizado ([ADR-0004](decisions/0004-fine-grained-security-and-tutor-ownership.md)) |
+
+### 2.5 Middlewares Globais
+
+A aplicação utiliza um pipeline de middlewares para garantir segurança e consistência:
+
+1. **`errorHandler`**: Captura todas as exceções e as formata conforme os DTOs de erro, ocultando detalhes em produção.
+2. **`authMiddleware`**: Valida o token JWT e popula o objeto `req.user`.
+3. **`roleMiddleware`**: Bloqueia rotas específicas baseadas no papel (`LAWYER` / `CLIENT`).
+4. **`apiKeyMiddleware`**: Valida a chave estática para integrações de backend-to-backend.
+5. **`validationMiddleware`**: (Zod/Joi) Integração para validar o corpo e parâmetros das requisições.
+
+### 2.6 Padrão de Controllers
+
+Os controladores são implementados como classes, utilizando `RequestHandler` para garantir tipagem:
+
+- **Responsabilidade**: Extrair dados da Request, validar permissões de propriedade (**Ownership**) e invocar o Service correspondente.
+- **Injeção**: Repositórios são instanciados no construtor para permitir buscas rápidas de validação de acesso antes da chamada ao serviço.
+- **Resposta**: Sempre utilizam códigos HTTP semânticos (200, 201, 204, 401, 403, 404).
 
 ### 2.3 Diagrama de Entidades (ER)
 
@@ -160,10 +177,11 @@ flowchart LR
 
 > Documentado na task G5-5. Estrutura baseada em features com navegação centralizada.
 
-Diretório: `mobile/lib/`
-- `app/` — configuração central (tema, rotas, shell)
-- `features/` — features isoladas por domínio
-- `shared/` — componentes e utilitários reutilizáveis
+### 3.1 Estrutura de Pastas (Diretório: `mobile/lib/`)
+
+- **Configuração**: `app/` — Rotas, Temas, Global State.
+- **Domínios**: `features/` — Telas e lógica isoladas por domínio funcional.
+- **Reutilizáveis**: `shared/` — Widgets, componentes e utilitários globais.
 
 ---
 
@@ -173,5 +191,12 @@ Diretório: `mobile/lib/`
 |---|---|
 | Estratégia de cache/offline | Depende da definição de sincronização real-time |
 | Tabela `embeddings_rag` | Será definida no ticket de IA (PGVector) |
-| Autenticação JWT completa | Placeholders existem; implementação no ticket de API |
 | WebSocket para tempo real | Será avaliado junto com a latência de 2s do PRD |
+
+---
+
+## 5. Referências
+
+- [ADRs (Architectural Decision Records)](documentation/decisions/)
+- [Guia de Transição: Local para S3](documentation/specs/storage_aws_transition.md)
+- [Sistema de Segurança](documentation/specs/security_system.md)

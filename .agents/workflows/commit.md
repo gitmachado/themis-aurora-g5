@@ -67,5 +67,24 @@ Ao realizar commits na sua branch detalhada, utilize o padrão "Conventional Com
 4. Envie para o repositório remoto: `git push origin tipo/nome`.
 5. Abra um Pull Request (PR) caso aplicável para mergear na `development`.
 
+---
+
+## 🚦 Status da Task no Linear
+Para manter a sincronia entre código e gestão de tarefas, siga estas regras:
+1. **`In Progress`**: Enquanto estiver escrevendo o código.
+2. **`In Review`**: Assim que o Pull Request for criado. **A task NÃO deve ir para `Done` aqui.**
+3. **`Done`**: Somente **APÓS** o merge do PR ser aprovado e concluído na branch base.
+
+---
+
+## 🤖 Automação de Pull Request (gh cli)
+Sempre que possível, utilize o GitHub CLI para criar PRs padronizados diretamente do terminal.
+
+### Exemplo de Comando:
+```bash
+gh pr create --title "tipo(escopo): mensagem" --body "seu template aqui" --base development
+```
+Use o template definido na seção "Idioma e Estrutura de PR" deste documento para preencher o body.
+
 > [!WARNING]
-> O uso do padrão de commits garante que a geração de changelogs e a leitura pelos agentes de IA sejam eficientes. Evite commits genéricos como "ajustes finais" ou "commit".
+> O uso do padrão de commits e o status correto no Linear garante que a geração de changelogs e a leitura pelos agentes de IA sejam eficientes. Evite commits genéricos como "ajustes finais" ou "commit".
