@@ -19,14 +19,21 @@ omniconnect-aurora-g5/
 
 ```
 server/src/
-├── models/                    # Entidades do domínio (interfaces TS)
-│   └── dtos/                  # Data Transfer Objects
-├── repositories/interfaces/   # Contratos de acesso a dados
-├── services/interfaces/       # Contratos de regras de negócio
-├── controllers/               # Endpoints HTTP e orquestração
-├── config/                    # Configurações globais e variáveis de ambiente
-├── middlewares/               # Auth, RBAC, Validação e Segurança
-└── utils/                     # Helpers (Storage, Erros, etc)
+├── config/                     # Configurações globais e Swagger
+├── controllers/implementations/ # Lógica de endpoint e ownership
+├── middlewares/implementations/ # Auth, RBAC, Validação, ErrorHandler
+├── repositories/               # Camada de Acesso a Dados
+│   ├── implementations/        # Implementação em SQL Nativo
+│   └── interfaces/             # Contratos dos repositórios
+├── routes/v1/                  # Definição de rotas e JSDoc Swagger
+├── services/                   # Camada de Regras de Negócio
+│   ├── implementations/        # Orquestração e lógica de domínio
+│   └── interfaces/             # Contratos dos serviços
+├── types/                      # Tipagem centralizada (English)
+│   ├── models/                 # Modelos de domínio (Entities)
+│   ├── dtos/schemas/           # Zod Schemas p/ validação e OpenAPI
+│   └── enums/                  # Enums globais
+└── utils/                      # Helpers de Storage e Erros
 ```
 
 ### 2.2 Decisões Técnicas
@@ -188,10 +195,11 @@ flowchart LR
 
 > Documentado na task G5-5. Estrutura baseada em features com navegação centralizada.
 
-Diretório: `mobile/lib/`
-- `app/` — configuração central (tema, rotas, shell)
-- `features/` — features isoladas por domínio
-- `shared/` — componentes e utilitários reutilizáveis
+### 3.1 Estrutura de Pastas (Diretório: `mobile/lib/`)
+
+- **`app/`** — Configuração central (tema, rotas, shell, global state).
+- **`features/`** — Domínios de negócio isolados (Auth, Processos, etc.).
+- **`shared/`** — Componentes, widgets e utilitários reutilizáveis (G5-5).
 
 ---
 
