@@ -59,7 +59,7 @@ export class LeadRepository implements ILeadRepository {
       })
       .join(', ');
 
-    const values = fields.map(key => (data as any)[key]);
+    const values = fields.map(key => data[key as keyof Lead]);
 
     return (await dbGet<Lead>(
       `UPDATE leads SET ${setClause} WHERE id = $1 RETURNING ${this.selectFields}`,
