@@ -23,10 +23,10 @@ server/src/
 │   └── dtos/                  # Data Transfer Objects
 ├── repositories/interfaces/   # Contratos de acesso a dados
 ├── services/interfaces/       # Contratos de regras de negócio
-├── controllers/               # Endpoints HTTP (futuro)
-├── config/                    # Configuração do app (futuro)
-├── middlewares/               # Auth, validação, etc (futuro)
-└── utils/                     # Helpers compartilhados (futuro)
+├── controllers/               # Endpoints HTTP e orquestração
+├── config/                    # Configurações globais e variáveis de ambiente
+├── middlewares/               # Auth, RBAC, Validação e Segurança
+└── utils/                     # Helpers (Storage, Erros, etc)
 ```
 
 ### 2.2 Decisões Técnicas
@@ -37,6 +37,25 @@ server/src/
 | ORM | **Nenhum** (driver `pg` nativo) | Controle total, performance, ADR-0003 |
 | Linguagem | TypeScript (strict) | Tipagem forte sem ORM exige interfaces sólidas |
 | Arquitetura | Camadas (Controller → Service → Repository) | Separação clara de responsabilidades |
+| Proteção Bot | API Key | Garante que apenas o robô de WhatsApp acesse endpoints de ingestão |
+
+### 2.5 Middlewares Globais
+
+A aplicação utiliza um pipeline de middlewares para garantir segurança e consistência:
+
+1. **`errorHandler`**: Captura todas as exceções e as formata conforme os DTOs de erro, ocultando detalhes em produção.
+2. **`authMiddleware`**: Valida o token JWT e popula o objeto `req.user`.
+3. **`roleMiddleware`**: Bloqueia rotas específicas baseadas no papel (`LAWYER` / `CLIENT`).
+4. **`apiKeyMiddleware`**: Valida a chave estática para integrações de backend-to-backend.
+5. **`validationMiddleware`**: (Zod/Joi) Integração para validar o corpo e parâmetros das requisições.
+
+### 2.6 Padrão de Controllers
+
+Os controladores são implementados como classes, utilizando `RequestHandler` para garantir tipagem:
+
+- **Responsabilidade**: Extrair dados da Request, validar permissões de propriedade (**Ownership**) e invocar o Service correspondente.
+- **Injeção**: Repositórios são instanciados no construtor para permitir buscas rápidas de validação de acesso antes da chamada ao serviço.
+- **Resposta**: Sempre utilizam códigos HTTP semânticos (200, 201, 204, 401, 403, 404).
 
 ### 2.3 Diagrama de Entidades (ER)
 

@@ -24,8 +24,7 @@ export class NotificationService implements INotificationService {
   }
 
   async sendPush(userId: string, title: string, body: string): Promise<void> {
-    // Placeholder for FCM Integration
-    console.log(`[Push Notification] Sending to ${userId}: ${title} - ${body}`);
+    // TODO: Integrate with FCM or target service provider
     // Future: Use FCM SDK with user's fcmToken from userRepository
   }
 

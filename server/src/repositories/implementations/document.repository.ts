@@ -19,6 +19,10 @@ export class DocumentRepository implements IDocumentRepository {
     return dbGet<Document>(`SELECT ${this.selectFields} FROM documents WHERE id = $1`, [id]);
   }
 
+  async findByFileName(fileName: string): Promise<Document | null> {
+    return dbGet<Document>(`SELECT ${this.selectFields} FROM documents WHERE file_name = $1`, [fileName]);
+  }
+
   async findByLegalProcessId(legalProcessId: string): Promise<Document[]> {
     return dbAll<Document>(`SELECT ${this.selectFields} FROM documents WHERE legal_process_id = $1`, [legalProcessId]);
   }
