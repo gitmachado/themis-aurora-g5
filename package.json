@@ -4,7 +4,15 @@
   "version": "1.0.0",
   "scripts": {
     "prepare": "husky",
-    "commitlint": "commitlint --edit"
+    "commitlint": "commitlint --edit",
+    "docker:up": "docker compose up",
+    "docker:build": "docker compose up --build",
+    "docker:down": "docker compose down",
+    "docker:reset": "docker compose down -v && docker compose up --build",
+    "docker:ps": "docker compose ps",
+    "docker:logs": "docker compose logs -f",
+    "docker:logs:server": "docker compose logs -f server",
+    "docker:logs:db": "docker compose logs -f postgres"
   },
   "devDependencies": {
     "@commitlint/cli": "^19.8.0",
