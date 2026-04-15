@@ -94,8 +94,8 @@ Se preferir rodar sem Docker, o fluxo manual continua disponivel.
 | Papel | Pessoa |
 | --- | --- |
 | Tech Lead / Backend | Mauricio |
-| AI Specialist | Douglas |
-| Flutter - Mobile (Cliente e Fornecedor) | Lucas, Aline e Alan |
+| AI Specialist | Douglas e Aline |
+| Flutter - Mobile (Cliente e Fornecedor) | Lucas e Alan |
 | DevOps & QA | Thiago |
 
 ## Cronograma Recomendado (4 semanas)
