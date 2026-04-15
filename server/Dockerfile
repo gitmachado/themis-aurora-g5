@@ -6,6 +6,9 @@ COPY package.json package-lock.json ./
 
 RUN npm ci
 
+# Copia o restante do código para a imagem
+COPY . .
+
 EXPOSE 3000
 
 CMD ["npm", "run", "dev"]
