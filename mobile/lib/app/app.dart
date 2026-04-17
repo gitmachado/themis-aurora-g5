@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
-import 'router.dart';
-import 'theme.dart';
+import 'package:mobile/app/routes/app_router.dart';
+import 'package:mobile/app/theme/theme.dart';
 
 class OmniConnectApp extends StatelessWidget {
   const OmniConnectApp({super.key});

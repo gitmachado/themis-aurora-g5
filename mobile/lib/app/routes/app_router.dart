@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
-import '../features/auth/presentation/login_page.dart';
-import '../features/splash/presentation/splash_page.dart';
+import 'package:mobile/features/auth/presentation/screens/login_page.dart';
+import 'package:mobile/features/splash/presentation/screens/splash_page.dart';
 
 final class AppRouter {
   static const String splashRoute = '/';
