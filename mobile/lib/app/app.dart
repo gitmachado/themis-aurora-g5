@@ -12,7 +12,6 @@ class OmniConnectApp extends StatelessWidget {
       title: 'OmniConnect',
       debugShowCheckedModeBanner: false,
       theme: AppTheme.theme,
-      initialRoute: AppRouter.splashRoute,
       onGenerateRoute: AppRouter.generateRoute,
     );
   }
