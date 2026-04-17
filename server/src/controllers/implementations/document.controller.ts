@@ -1,26 +1,24 @@
-import { Request, Response, NextFunction, RequestHandler } from 'express';
+import { Response, NextFunction, RequestHandler } from 'express';
 import fs from 'fs';
 import path from 'path';
-import { DocumentService } from '@services';
-import { DocumentRepository, LegalProcessRepository } from '@repositories';
+import { IDocumentService, ILegalProcessService } from '@services';
 import { LocalFileStorageProvider } from '../../utils/storage/implementations/local-storage.provider';
 import { AuthRequest } from '../../middlewares/implementations/authMiddleware';
 import { ValidationError, ForbiddenError, NotFoundError } from '../../services/implementations/errors';
+import { Document } from '@models';
 
 export class DocumentController {
-  private documentService: DocumentService;
-  private documentRepository: DocumentRepository;
-  private legalProcessRepository: LegalProcessRepository;
-  private storageProvider: LocalFileStorageProvider;
+  constructor(
+    private readonly documentService: IDocumentService,
+    private readonly legalProcessService: ILegalProcessService,
+    private readonly storageProvider: LocalFileStorageProvider
+  ) {}
 
-  constructor() {
-    this.documentRepository = new DocumentRepository();
-    this.legalProcessRepository = new LegalProcessRepository();
-    this.documentService = new DocumentService(this.documentRepository);
-    this.storageProvider = new LocalFileStorageProvider();
-  }
-
-  upload: RequestHandler = async (req: AuthRequest, res: Response, next: NextFunction) => {
+  upload: RequestHandler<any, Document, { legalProcessId: string }> = async (
+    req: AuthRequest<any, Document, { legalProcessId: string }>,
+    res: Response,
+    next: NextFunction
+  ) => {
     try {
       if (!req.file) {
         throw new ValidationError('Nenhum arquivo enviado');
@@ -35,7 +33,7 @@ export class DocumentController {
 
       // Ownership check: If user is a Client, check if they own the process
       if (user.role === 'CLIENT') {
-        const process = await this.legalProcessRepository.findById(legalProcessId);
+        const process = await this.legalProcessService.getById(legalProcessId);
         if (!process || process.clientId !== user.id) {
           throw new ForbiddenError('Você não tem permissão para enviar documentos para este processo');
         }
@@ -54,7 +52,7 @@ export class DocumentController {
         fileUrl,
         mimeType: req.file.mimetype,
         sizeBytes: req.file.size,
-        sentById: req.user!.id,
+        sentById: user.id,
       });
 
       return res.status(201).json(document);
@@ -63,14 +61,18 @@ export class DocumentController {
     }
   };
 
-  listByProcess: RequestHandler = async (req: AuthRequest, res: Response, next: NextFunction) => {
+  listByProcess: RequestHandler<{ processId: string }, Document[]> = async (
+    req: AuthRequest<{ processId: string }, Document[]>,
+    res: Response,
+    next: NextFunction
+  ) => {
     try {
-      const processId = req.params.processId as string;
+      const { processId } = req.params;
       const user = req.user!;
 
       // Check process ownership if user is a Client
       if (user.role === 'CLIENT') {
-        const process = await this.legalProcessRepository.findById(processId);
+        const process = await this.legalProcessService.getById(processId);
         if (!process || process.clientId !== user.id) {
           throw new ForbiddenError('Você não tem permissão para acessar os documentos deste processo');
         }
@@ -83,27 +85,33 @@ export class DocumentController {
     }
   };
 
-  viewFile: RequestHandler = async (req: AuthRequest, res: Response, next: NextFunction) => {
+  viewFile: RequestHandler<{ filename: string }> = async (
+    req: AuthRequest<{ filename: string }>,
+    res: Response,
+    next: NextFunction
+  ) => {
     try {
       const { filename } = req.params;
       const user = req.user!;
 
       // 1. Encontrar metadados do documento pelo nome do arquivo
-      const document = await this.documentRepository.findByFileName(filename as string);
-      if (!document) {
+      // For viewFile, we temporarily use repository through service or need a service method.
+      // Refinement: Add getByFileName to DocumentService if not present.
+      const documents = await this.documentService.getByFileName(filename);
+      if (!documents) {
         throw new NotFoundError('Registro de documento não encontrado');
       }
 
       // 2. Se for cliente, validar se o processo pertence a ele
       if (user.role === 'CLIENT') {
-        const process = await this.legalProcessRepository.findById(document.legalProcessId);
+        const process = await this.legalProcessService.getById(documents.legalProcessId);
         if (!process || process.clientId !== user.id) {
           throw new ForbiddenError('Acesso negado a este documento');
         }
       }
 
       // 3. Verificar arquivo físico
-      const filePath = path.resolve(__dirname, '../../../../../uploads', filename as string);
+      const filePath = path.resolve(__dirname, '../../../../../uploads', filename);
       if (!fs.existsSync(filePath)) {
         throw new NotFoundError('Arquivo físico não encontrado no storage');
       }
@@ -114,9 +122,13 @@ export class DocumentController {
     }
   };
 
-  delete: RequestHandler = async (req: AuthRequest, res: Response, next: NextFunction) => {
+  delete: RequestHandler<{ id: string }> = async (
+    req: AuthRequest<{ id: string }>,
+    res: Response,
+    next: NextFunction
+  ) => {
     try {
-      const docId = req.params.id as string;
+      const docId = req.params.id;
       const user = req.user!;
 
       // 1. RBAC check: Only lawyers can delete documents
@@ -124,13 +136,13 @@ export class DocumentController {
         throw new ForbiddenError('Apenas advogados podem deletar documentos do sistema');
       }
 
-      // 2. Authority check: Only the lead lawyer can delete if assigned
-      const document = await this.documentRepository.findById(docId);
+      // Business logic remains here for now, but using service for data
+      const document = await this.documentService.getById(docId);
       if (!document) {
         throw new NotFoundError('Documento não encontrado');
       }
 
-      const process = await this.legalProcessRepository.findById(document.legalProcessId);
+      const process = await this.legalProcessService.getById(document.legalProcessId);
       if (process && process.lawyerId && process.lawyerId !== user.id) {
         throw new ForbiddenError('Apenas o advogado responsável por este processo pode remover documentos');
       }

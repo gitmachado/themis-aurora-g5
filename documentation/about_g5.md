@@ -3,7 +3,7 @@
 ## Grupo 5
 
 - Alan (Flutter Developer - Provider-side)
-- Aline (Flutter Developer - Client-side)
+- Aline (AI Specialist)
 - Douglas (AI Specialist)
 - Lucas (Flutter Developer - Client-side)
 - Maurício (Tech Lead / Backend)

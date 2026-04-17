@@ -10,5 +10,7 @@ export interface IDocumentService {
   upload(dto: CreateDocumentDTO): Promise<Document>;
   validateFile(sizeBytes: number, mimeType: string): boolean;
   getByLegalProcess(legalProcessId: string): Promise<Document[]>;
+  getById(id: string): Promise<Document | null>;
+  getByFileName(fileName: string): Promise<Document | null>;
   delete(id: string): Promise<void>;
 }

@@ -1,18 +1,16 @@
-import { Request, Response, NextFunction } from 'express';
-import { AuthService } from '@services';
-import { UserRepository } from '@repositories';
-import { z } from 'zod';
+import { Response, NextFunction, RequestHandler } from 'express';
+import { IAuthService } from '@services';
+import { LoginDTO, RegisterDTO, AuthResponseDTO } from '@dtos';
+import { AuthRequest } from '../../middlewares/implementations/authMiddleware';
 
 export class AuthController {
-  private authService: AuthService;
+  constructor(private readonly authService: IAuthService) {}
 
-  constructor() {
-    // In a real app, use Dependency Injection. Here we instantiate for simplicity.
-    const userRepository = new UserRepository();
-    this.authService = new AuthService(userRepository);
-  }
-
-  login = async (req: Request, res: Response, next: NextFunction) => {
+  login: RequestHandler<any, AuthResponseDTO, LoginDTO> = async (
+    req: AuthRequest<any, AuthResponseDTO, LoginDTO>,
+    res: Response,
+    next: NextFunction
+  ) => {
     try {
       const result = await this.authService.login(req.body);
       return res.status(200).json(result);
@@ -21,7 +19,11 @@ export class AuthController {
     }
   };
 
-  register = async (req: Request, res: Response, next: NextFunction) => {
+  register: RequestHandler<any, AuthResponseDTO, RegisterDTO> = async (
+    req: AuthRequest<any, AuthResponseDTO, RegisterDTO>,
+    res: Response,
+    next: NextFunction
+  ) => {
     try {
       const result = await this.authService.register(req.body);
       return res.status(201).json(result);

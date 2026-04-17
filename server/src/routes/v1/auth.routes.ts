@@ -1,10 +1,14 @@
 import { Router } from 'express';
 import { AuthController } from '../../controllers/implementations/auth.controller';
+import { AuthService } from '../../services/implementations/auth.service';
+import { UserRepository } from '../../repositories/implementations/user.repository';
 import { validate } from '../../middlewares/implementations/validationMiddleware';
 import { loginSchema, registerSchema } from '../../types/dtos/schemas';
 
 const router = Router();
-const controller = new AuthController();
+const userRepository = new UserRepository();
+const authService = new AuthService(userRepository);
+const controller = new AuthController(authService);
 
 /**
  * @openapi

@@ -1,13 +1,25 @@
 import { Router } from 'express';
 import { MessageController } from '../../controllers/implementations/message.controller';
+import { MessageService, UserService } from '@services';
+import { MessageRepository, UserRepository, LeadRepository } from '@repositories';
 import { authMiddleware } from '../../middlewares/implementations/authMiddleware';
 import { apiKeyMiddleware } from '../../middlewares/implementations/apiKeyMiddleware';
 import { validate } from '../../middlewares/implementations/validationMiddleware';
-
 import { syncMessageSchema } from '../../types/dtos/schemas';
 
 const router = Router();
-const controller = new MessageController();
+
+const messageRepository = new MessageRepository();
+const userRepository = new UserRepository();
+const userService = new UserService(userRepository);
+const leadRepository = new LeadRepository();
+const messageService = new MessageService(
+  messageRepository,
+  userRepository,
+  leadRepository
+);
+
+const controller = new MessageController(messageService, userService);
 
 /**
  * @openapi

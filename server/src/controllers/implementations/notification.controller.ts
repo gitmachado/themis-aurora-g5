@@ -1,19 +1,17 @@
 import { Response, NextFunction, RequestHandler } from 'express';
-import { NotificationService } from '@services';
-import { NotificationRepository } from '@repositories';
+import { INotificationService } from '@services';
 import { AuthRequest } from '../../middlewares/implementations/authMiddleware';
 import { ForbiddenError, NotFoundError } from '../../services/implementations/errors';
+import { Notification } from '@models';
 
 export class NotificationController {
-  private notificationService: NotificationService;
-  private notificationRepository: NotificationRepository;
+  constructor(private readonly notificationService: INotificationService) {}
 
-  constructor() {
-    this.notificationRepository = new NotificationRepository();
-    this.notificationService = new NotificationService(this.notificationRepository);
-  }
-
-  listMyNotifications = async (req: AuthRequest, res: Response, next: NextFunction) => {
+  listMyNotifications: RequestHandler<any, Notification[]> = async (
+    req: AuthRequest<any, Notification[]>,
+    res: Response,
+    next: NextFunction
+  ) => {
     try {
       const notifications = await this.notificationService.getByUser(req.user!.id);
       return res.status(200).json(notifications);
@@ -22,12 +20,16 @@ export class NotificationController {
     }
   };
 
-  markAsRead = async (req: AuthRequest, res: Response, next: NextFunction) => {
+  markAsRead: RequestHandler<{ id: string }> = async (
+    req: AuthRequest<{ id: string }>,
+    res: Response,
+    next: NextFunction
+  ) => {
     try {
-      const notificationId = req.params.id as string;
+      const notificationId = req.params.id;
       const user = req.user!;
 
-      const notification = await this.notificationRepository.findById(notificationId);
+      const notification = await this.notificationService.getById(notificationId);
       if (!notification) {
         throw new NotFoundError('Notificação não encontrada');
       }
@@ -43,7 +45,11 @@ export class NotificationController {
     }
   };
 
-  markAllAsRead: RequestHandler = async (req: AuthRequest, res: Response, next: NextFunction) => {
+  markAllAsRead: RequestHandler = async (
+    req: AuthRequest,
+    res: Response,
+    next: NextFunction
+  ) => {
     try {
       const user = req.user!;
       await this.notificationService.markAllAsRead(user.id);

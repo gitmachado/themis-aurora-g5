@@ -17,14 +17,24 @@ omniconnect-aurora-g5/
 
 ### 2.1 Estrutura de Pastas (Diretório: `server/src/`)
 
-- **Entidades**: `models/` — Definição do domínio e interfaces.
-- **DTOs**: `models/dtos/` — Objetos de transferência de dados entrada/saída.
-- **Repositórios**: `repositories/implementations/` — Acesso a dados (SQL Nativo).
-- **Serviços**: `services/implementations/` — Regras de negócio e orquestração.
-- **Controladores**: `controllers/implementations/` — Endpoints HTTP e segurança (Ownership).
-- **Middlewares**: `middlewares/implementations/` — Auth, RBAC e Validação.
-- **Rotas**: `routes/v1/` — Definição de endpoints da API Versão 1.
-- **Utilitários**: `utils/` — Helpers globais (Storage, Logger, Errors).
+```
+server/src/
+├── config/                     # Configurações globais e Swagger
+├── controllers/implementations/ # Lógica de endpoint e ownership
+├── middlewares/implementations/ # Auth, RBAC, Validação, ErrorHandler
+├── repositories/               # Camada de Acesso a Dados
+│   ├── implementations/        # Implementação em SQL Nativo
+│   └── interfaces/             # Contratos dos repositórios
+├── routes/v1/                  # Definição de rotas e JSDoc Swagger
+├── services/                   # Camada de Regras de Negócio
+│   ├── implementations/        # Orquestração e lógica de domínio
+│   └── interfaces/             # Contratos dos serviços
+├── types/                      # Tipagem centralizada (English)
+│   ├── models/                 # Modelos de domínio (Entities)
+│   ├── dtos/schemas/           # Zod Schemas p/ validação e OpenAPI
+│   └── enums/                  # Enums globais
+└── utils/                      # Helpers de Storage e Erros
+```
 
 ### 2.2 Decisões Técnicas
 
@@ -188,9 +198,9 @@ flowchart LR
 
 ### 3.1 Estrutura de Pastas (Diretório: `mobile/lib/`)
 
-- **Configuração**: `app/` — Rotas, Temas, Global State.
-- **Domínios**: `features/` — Telas e lógica isoladas por domínio funcional.
-- **Reutilizáveis**: `shared/` — Widgets, componentes e utilitários globais.
+- **`app/`** — Configuração central (tema, rotas, shell, global state).
+- **`features/`** — Domínios de negócio isolados (Auth, Processos, etc.).
+- **`shared/`** — Componentes, widgets e utilitários reutilizáveis (G5-5).
 
 ---
 
