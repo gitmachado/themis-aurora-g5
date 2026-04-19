@@ -122,3 +122,6 @@ Desktop.ini
 
 # .agents — versionar apenas conteúdo de projeto
 # (skills, knowledge, workflows, decisions e rules fazem parte do repo)
+
+# Ferramentas locais e rascunhos
+scratch/
