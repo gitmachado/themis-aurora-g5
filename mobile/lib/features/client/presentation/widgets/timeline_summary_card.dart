@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../../../shared/constants/app_colors.dart';
+import '../../../../shared/constants/app_dimensions.dart';
 import '../../../../shared/constants/app_text_styles.dart';
 
 class TimelineSummaryCard extends StatelessWidget {
@@ -20,10 +21,10 @@ class TimelineSummaryCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.all(20),
+      padding: const EdgeInsets.all(AppDimensions.screenPadding),
       decoration: BoxDecoration(
         color: AppColors.primary,
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(AppDimensions.radiusXL),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -36,15 +37,18 @@ class TimelineSummaryCard extends StatelessWidget {
                 style: AppTextStyles.caption.copyWith(color: AppColors.white.withOpacity(0.7)),
               ),
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: AppDimensions.spacingS,
+                  vertical: AppDimensions.spacingXS,
+                ),
                 decoration: BoxDecoration(
-                  color: const Color(0xFFFFF3E0), // Laranja claro
-                  borderRadius: BorderRadius.circular(16),
+                  color: AppColors.warningLight,
+                  borderRadius: BorderRadius.circular(AppDimensions.radiusXXL),
                 ),
                 child: Text(
                   status,
                   style: const TextStyle(
-                    color: Colors.orange,
+                    color: AppColors.warning,
                     fontSize: 12,
                     fontWeight: FontWeight.bold,
                   ),
@@ -64,10 +68,10 @@ class TimelineSummaryCard extends StatelessWidget {
           GestureDetector(
             onTap: onAiAnalysisTap,
             child: Container(
-              padding: const EdgeInsets.all(12),
+              padding: const EdgeInsets.all(AppDimensions.spacingM),
               decoration: BoxDecoration(
                 color: AppColors.white,
-                borderRadius: BorderRadius.circular(12),
+                borderRadius: BorderRadius.circular(AppDimensions.radiusL),
               ),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
@@ -89,7 +93,7 @@ class TimelineSummaryCard extends StatelessWidget {
           Center(
             child: TextButton.icon(
               onPressed: onChatMirrorTap,
-              icon: const Icon(Icons.history_rounded, color: Colors.white70, size: 18),
+              icon: const Icon(Icons.history_rounded, color: Colors.white70, size: AppDimensions.iconS),
               label: const Text(
                 'Acessar espelhamento do Chat',
                 style: TextStyle(color: Colors.white70, fontSize: 13),

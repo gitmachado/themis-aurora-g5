@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../../../shared/constants/app_colors.dart';
+import '../../../../shared/constants/app_dimensions.dart';
 import '../../../../shared/constants/app_text_styles.dart';
 import '../../../../shared/widgets/layout/custom_app_bar.dart';
 
@@ -83,8 +84,11 @@ class ClientNotificationsScreen extends StatelessWidget {
         final isRead = n['isRead'] as bool;
 
         return Container(
-          color: isRead ? Colors.transparent : const Color(0xFFE8EAF6),
-          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+          color: isRead ? Colors.transparent : AppColors.primaryLight,
+          padding: const EdgeInsets.symmetric(
+            horizontal: AppDimensions.screenPadding,
+            vertical: AppDimensions.contentPadding,
+          ),
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -97,7 +101,7 @@ class ClientNotificationsScreen extends StatelessWidget {
                   boxShadow: [
                     BoxShadow(
                       color: Colors.black.withOpacity(0.05),
-                      blurRadius: 4,
+                      blurRadius: AppDimensions.radiusS,
                       offset: const Offset(0, 2),
                     ),
                   ],
@@ -111,10 +115,10 @@ class ClientNotificationsScreen extends StatelessWidget {
                         top: 8,
                         right: 8,
                         child: Container(
-                          width: 8,
-                          height: 8,
+                          width: AppDimensions.radiusM,
+                          height: AppDimensions.radiusM,
                           decoration: const BoxDecoration(
-                            color: Colors.blue,
+                            color: AppColors.primary,
                             shape: BoxShape.circle,
                           ),
                         ),
@@ -122,7 +126,7 @@ class ClientNotificationsScreen extends StatelessWidget {
                   ],
                 ),
               ),
-              const SizedBox(width: 16),
+              const SizedBox(width: AppDimensions.spacingL),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -140,7 +144,7 @@ class ClientNotificationsScreen extends StatelessWidget {
                         ),
                       ],
                     ),
-                    const SizedBox(height: 4),
+                    const SizedBox(height: AppDimensions.spacingXS),
                     Text(
                       n['body'] as String,
                       style: AppTextStyles.body.copyWith(
