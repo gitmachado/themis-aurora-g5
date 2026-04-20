@@ -1,9 +1,8 @@
-import 'package:flutter/material.dart';
+import '../../../../app/routes/app_router.dart';
 import '../../../../shared/constants/app_colors.dart';
 import '../../../../shared/constants/app_text_styles.dart';
 import '../../../../shared/widgets/cards/app_card.dart';
 import '../../../../shared/widgets/cards/app_list_tile.dart';
-import '../../../../shared/widgets/layout/app_bottom_nav_bar.dart';
 import '../widgets/dashboard_header.dart';
 import '../widgets/metric_card.dart';
 import '../widgets/niche_chart.dart';
@@ -32,17 +31,19 @@ class LawyerDashboardScreen extends StatelessWidget {
                   children: [
                     _buildMetricsGrid(),
                     const SizedBox(height: 24),
-                    _buildHandoffsCard(),
+                    _buildHandoffsCard(context),
                     const SizedBox(height: 24),
                     const NicheChart(),
                     const SizedBox(height: 24),
-                    _buildSectionHeader('Últimos Leads', () {}),
+                    _buildSectionHeader('Últimos Leads', () {
+                      // Navigate to Leads tab - placeholder
+                    }),
                     const SizedBox(height: 16),
-                    _buildLeadsList(),
+                    _buildLeadsList(context),
                     const SizedBox(height: 24),
                     _buildSectionHeader('Documentos Recentes', () {}),
                     const SizedBox(height: 16),
-                    _buildDocsList(),
+                    _buildDocsList(context),
                     const SizedBox(height: 120), // Space for bottom nav
                   ],
                 ),
@@ -78,38 +79,45 @@ class LawyerDashboardScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildHandoffsCard() {
-    return AppCard(
-      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-      color: const Color(0xFFFFF4E5),
-      child: Row(
-        children: [
-          const Icon(Icons.info_outline_rounded, color: AppColors.secondaryLight, size: 24),
-          const SizedBox(width: 12),
-          const Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  '3 novos handoffs aguardando',
-                  style: TextStyle(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 14,
-                    color: AppColors.textPrimary,
+  Widget _buildHandoffsCard(BuildContext context) {
+    return InkWell(
+      onTap: () {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Abrindo fila de triagem IA...')),
+        );
+      },
+      child: AppCard(
+        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+        color: const Color(0xFFFFF4E5),
+        child: Row(
+          children: [
+            const Icon(Icons.info_outline_rounded, color: AppColors.secondaryLight, size: 24),
+            const SizedBox(width: 12),
+            const Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    '3 novos handoffs aguardando',
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 14,
+                      color: AppColors.textPrimary,
+                    ),
                   ),
-                ),
-                Text(
-                  'Clique para revisar os dados da IA',
-                  style: TextStyle(
-                    fontSize: 12,
-                    color: AppColors.textCaption,
+                  Text(
+                    'Clique para revisar os dados da IA',
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: AppColors.textCaption,
+                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
-          ),
-          const Icon(Icons.chevron_right_rounded, color: AppColors.secondaryLight, size: 20),
-        ],
+            const Icon(Icons.chevron_right_rounded, color: AppColors.secondaryLight, size: 20),
+          ],
+        ),
       ),
     );
   }
@@ -133,7 +141,7 @@ class LawyerDashboardScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildLeadsList() {
+  Widget _buildLeadsList(BuildContext context) {
     return Column(
       children: [
         AppListTile(
@@ -144,6 +152,17 @@ class LawyerDashboardScreen extends StatelessWidget {
             child: const Text('CM', style: TextStyle(color: AppColors.primary, fontSize: 12, fontWeight: FontWeight.bold)),
           ),
           trailing: _buildBadge('URGENTE', AppColors.error),
+          onTap: () {
+            Navigator.pushNamed(
+              context,
+              AppRouter.lawyerLeadDetailRoute,
+              arguments: {
+                'name': 'Carla Menezes',
+                'caseType': 'Trabalhista',
+                'urgency': 'Alta',
+              },
+            );
+          },
         ),
         const SizedBox(height: 12),
         AppListTile(
@@ -154,12 +173,23 @@ class LawyerDashboardScreen extends StatelessWidget {
             child: const Text('RS', style: TextStyle(color: AppColors.primary, fontSize: 12, fontWeight: FontWeight.bold)),
           ),
           trailing: _buildBadge('NOVO', AppColors.success),
+          onTap: () {
+            Navigator.pushNamed(
+              context,
+              AppRouter.lawyerLeadDetailRoute,
+              arguments: {
+                'name': 'Roberto Santos',
+                'caseType': 'Cível',
+                'urgency': 'Média',
+              },
+            );
+          },
         ),
       ],
     );
   }
 
-  Widget _buildDocsList() {
+  Widget _buildDocsList(BuildContext context) {
     return Column(
       children: [
         AppListTile(
@@ -173,6 +203,11 @@ class LawyerDashboardScreen extends StatelessWidget {
             ),
             child: const Icon(Icons.description_outlined, color: AppColors.primary, size: 24),
           ),
+          onTap: () {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text('Abrindo visualizador de documentos...')),
+            );
+          },
         ),
       ],
     );
