@@ -90,7 +90,7 @@ class _NicheChartState extends State<NicheChart> {
             duration: const Duration(milliseconds: 400),
             curve: Curves.easeOutBack,
             width: 44,
-            height: 120 * item['percentage'],
+            height: 120 * (item['percentage'] as double),
             decoration: BoxDecoration(
               color: isSelected ? color : color.withValues(alpha: 0.7),
               borderRadius: BorderRadius.circular(8),
