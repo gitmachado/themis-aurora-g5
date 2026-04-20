@@ -32,7 +32,7 @@ class LawyerProfileScreen extends StatelessWidget {
               _ProfileMenuItem(Icons.help_outline_rounded, 'Suporte Técnico', 'Falar com OmniConnect'),
             ]),
             const SizedBox(height: 40),
-            _buildLogoutButton(),
+            _buildLogoutButton(context),
           ],
         ),
       ),
@@ -101,7 +101,16 @@ class LawyerProfileScreen extends StatelessWidget {
                     title: Text(item.title, style: const TextStyle(fontWeight: FontWeight.bold)),
                     subtitle: Text(item.subtitle, style: AppTextStyles.caption.copyWith(fontSize: 12)),
                     trailing: const Icon(Icons.chevron_right, color: AppColors.divider),
-                    onTap: () {},
+                  ListTile(
+                    leading: Icon(item.icon, color: AppColors.textPrimary),
+                    title: Text(item.title, style: const TextStyle(fontWeight: FontWeight.bold)),
+                    subtitle: Text(item.subtitle, style: AppTextStyles.caption.copyWith(fontSize: 12)),
+                    trailing: const Icon(Icons.chevron_right, color: AppColors.divider),
+                    onTap: () {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(content: Text('Acessando ${item.title}...')),
+                      );
+                    },
                   ),
                   if (!isLast) const Divider(height: 1, indent: 56),
                 ],
@@ -113,9 +122,9 @@ class LawyerProfileScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildLogoutButton() {
+  Widget _buildLogoutButton(BuildContext context) {
     return OutlinedButton(
-      onPressed: () {},
+      onPressed: () => _showLogoutDialog(context),
       style: OutlinedButton.styleFrom(
         minimumSize: const Size(double.infinity, 56),
         side: const BorderSide(color: AppColors.error),
@@ -124,6 +133,26 @@ class LawyerProfileScreen extends StatelessWidget {
       child: const Text(
         'Sair da Conta Profissional',
         style: TextStyle(color: AppColors.error, fontWeight: FontWeight.bold, fontSize: 16),
+      ),
+    );
+  }
+
+  void _showLogoutDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Sair'),
+        content: const Text('Tem certeza que deseja sair da sua conta profissional?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Cancelar'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Sair', style: TextStyle(color: AppColors.error)),
+          ),
+        ],
       ),
     );
   }
