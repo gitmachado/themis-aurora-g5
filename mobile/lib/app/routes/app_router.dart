@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../features/design_system/presentation/screens/design_system_screen.dart';
+import '../../features/auth/presentation/screens/login_screen.dart';
 import '../../features/client/presentation/screens/client_process_timeline_screen.dart';
 
 import '../../features/client/presentation/screens/client_profile_screen.dart';
@@ -21,7 +22,9 @@ import '../../shared/widgets/layout/client_main_layout.dart';
 import '../../shared/widgets/layout/lawyer_main_layout.dart';
 
 final class AppRouter {
-  static const String initialRoute = '/';
+  static const String initialRoute = '/login';
+  static const String loginRoute = '/login';
+  static const String clientDashboardRoute = '/client-dashboard';
   static const String lawyerDashboardRoute = '/lawyer-dashboard';
   static const String lawyerClientsRoute = '/lawyer-clients';
   static const String lawyerProcessDetailRoute = '/lawyer-process-detail';
@@ -44,6 +47,16 @@ final class AppRouter {
 
   static Route<dynamic> generateRoute(RouteSettings settings) {
     switch (settings.name) {
+      case loginRoute:
+        return MaterialPageRoute<void>(
+          builder: (_) => const LoginScreen(),
+          settings: settings,
+        );
+      case clientDashboardRoute:
+        return MaterialPageRoute<void>(
+          builder: (_) => const ClientMainLayout(initialIndex: 0),
+          settings: settings,
+        );
       case initialRoute:
         return MaterialPageRoute<void>(
           builder: (_) => const LawyerMainLayout(initialIndex: 0),
