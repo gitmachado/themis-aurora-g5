@@ -9,8 +9,9 @@ import '../../features/dashboard/presentation/screens/lawyer_dashboard_screen.da
 import '../../features/lawyer/presentation/screens/lawyer_client_list_screen.dart';
 import '../../features/lawyer/presentation/screens/lawyer_process_detail_screen.dart';
 import '../../features/lawyer/presentation/screens/lawyer_profile_screen.dart';
-
+import '../../features/lawyer/presentation/screens/lawyer_lead_detail_screen.dart';
 import '../../shared/widgets/layout/client_main_layout.dart';
+import '../../shared/widgets/layout/lawyer_main_layout.dart';
 
 final class AppRouter {
   static const String initialRoute = '/';
@@ -18,6 +19,7 @@ final class AppRouter {
   static const String lawyerClientsRoute = '/lawyer-clients';
   static const String lawyerProcessDetailRoute = '/lawyer-process-detail';
   static const String lawyerProfileRoute = '/lawyer-profile';
+  static const String lawyerLeadDetailRoute = '/lawyer-lead-detail';
   static const String processListRoute = '/process-list';
   static const String processTimelineRoute = '/process-timeline';
   static const String documentsRoute = '/documents';
@@ -31,7 +33,17 @@ final class AppRouter {
     switch (settings.name) {
       case initialRoute:
         return MaterialPageRoute<void>(
-          builder: (_) => const ClientMainLayout(initialIndex: 0),
+          builder: (_) => const LawyerMainLayout(initialIndex: 0),
+          settings: settings,
+        );
+      case lawyerLeadDetailRoute:
+        final args = settings.arguments as Map<String, String>?;
+        return MaterialPageRoute<void>(
+          builder: (_) => LawyerLeadDetailScreen(
+            name: args?['name'] ?? '',
+            caseType: args?['caseType'] ?? '',
+            urgency: args?['urgency'] ?? '',
+          ),
           settings: settings,
         );
       case processListRoute:

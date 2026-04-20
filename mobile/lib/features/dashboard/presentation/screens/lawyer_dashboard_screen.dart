@@ -8,15 +8,8 @@ import '../widgets/dashboard_header.dart';
 import '../widgets/metric_card.dart';
 import '../widgets/niche_chart.dart';
 
-class LawyerDashboardScreen extends StatefulWidget {
+class LawyerDashboardScreen extends StatelessWidget {
   const LawyerDashboardScreen({super.key});
-
-  @override
-  State<LawyerDashboardScreen> createState() => _LawyerDashboardScreenState();
-}
-
-class _LawyerDashboardScreenState extends State<LawyerDashboardScreen> {
-  int _currentIndex = 0;
 
   @override
   Widget build(BuildContext context) {
@@ -50,7 +43,7 @@ class _LawyerDashboardScreenState extends State<LawyerDashboardScreen> {
                     _buildSectionHeader('Documentos Recentes', () {}),
                     const SizedBox(height: 16),
                     _buildDocsList(),
-                    const SizedBox(height: 100), // Space for bottom nav
+                    const SizedBox(height: 120), // Space for bottom nav
                   ],
                 ),
               ),
@@ -58,15 +51,6 @@ class _LawyerDashboardScreenState extends State<LawyerDashboardScreen> {
           ],
         ),
       ),
-      bottomNavigationBar: AppBottomNavigationBar(
-        currentIndex: _currentIndex,
-        onTap: (index) {
-          setState(() {
-            _currentIndex = index;
-          });
-        },
-      ),
-      extendBody: true,
     );
   }
 
