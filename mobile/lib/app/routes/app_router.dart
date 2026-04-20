@@ -7,7 +7,7 @@ import '../../features/client/presentation/screens/client_documents_screen.dart'
 import '../../features/client/presentation/screens/client_profile_screen.dart';
 import '../../features/client/presentation/screens/client_notifications_screen.dart';
 import '../../features/client/presentation/screens/client_chat_mirror_screen.dart';
-import '../../features/lawyer/presentation/screens/lawyer_dashboard_screen.dart';
+import '../../features/dashboard/presentation/screens/lawyer_dashboard_screen.dart';
 import '../../features/lawyer/presentation/screens/lawyer_client_list_screen.dart';
 import '../../features/lawyer/presentation/screens/lawyer_process_detail_screen.dart';
 import '../../features/lawyer/presentation/screens/lawyer_profile_screen.dart';
