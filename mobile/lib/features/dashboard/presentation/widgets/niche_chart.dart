@@ -102,7 +102,7 @@ class _NicheChartState extends State<NicheChart> {
                         offset: const Offset(0, 4),
                       )
                     ]
-                  : null,
+                  : [],
               gradient: LinearGradient(
                 begin: Alignment.topCenter,
                 end: Alignment.bottomCenter,
