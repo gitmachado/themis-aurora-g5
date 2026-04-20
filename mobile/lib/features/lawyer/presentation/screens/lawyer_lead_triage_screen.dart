@@ -4,6 +4,7 @@ import '../../../../shared/constants/app_colors.dart';
 import '../../../../shared/constants/app_text_styles.dart';
 import '../../../../shared/widgets/layout/custom_app_bar.dart';
 import '../widgets/lead_card.dart';
+import '../widgets/lawyer_app_bar_actions.dart';
 
 class LawyerLeadTriageScreen extends StatefulWidget {
   const LawyerLeadTriageScreen({super.key});
@@ -54,7 +55,8 @@ class _LawyerLeadTriageScreenState extends State<LawyerLeadTriageScreen> {
       backgroundColor: AppColors.background,
       appBar: const CustomAppBar(
         title: 'Triagem de Leads',
-        centerTitle: true,
+        centerTitle: false,
+        actions: [LawyerAppBarActions()],
       ),
       body: Column(
         children: [

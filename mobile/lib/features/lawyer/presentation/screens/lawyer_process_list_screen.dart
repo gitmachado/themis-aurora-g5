@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../../../../shared/constants/app_colors.dart';
 import '../../../../shared/constants/app_text_styles.dart';
 import '../../../../shared/widgets/layout/custom_app_bar.dart';
+import '../widgets/lawyer_app_bar_actions.dart';
 
 class LawyerProcessListScreen extends StatefulWidget {
   const LawyerProcessListScreen({super.key});
@@ -51,7 +52,8 @@ class _LawyerProcessListScreenState extends State<LawyerProcessListScreen> {
       backgroundColor: AppColors.background,
       appBar: const CustomAppBar(
         title: 'Gestão de Processos',
-        centerTitle: true,
+        centerTitle: false,
+        actions: [LawyerAppBarActions()],
       ),
       body: Column(
         children: [

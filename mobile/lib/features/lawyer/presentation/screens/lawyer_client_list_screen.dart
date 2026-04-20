@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../../../../shared/constants/app_colors.dart';
 import '../../../../shared/constants/app_text_styles.dart';
 import '../../../../shared/widgets/layout/custom_app_bar.dart';
+import '../widgets/lawyer_app_bar_actions.dart';
 
 class LawyerClientListScreen extends StatefulWidget {
   const LawyerClientListScreen({super.key});
@@ -24,7 +25,8 @@ class _LawyerClientListScreenState extends State<LawyerClientListScreen> {
       backgroundColor: AppColors.background,
       appBar: const CustomAppBar(
         title: 'Meus Clientes',
-        centerTitle: true,
+        centerTitle: false,
+        actions: [LawyerAppBarActions()],
       ),
       body: Column(
         children: [
