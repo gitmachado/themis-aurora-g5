@@ -5,13 +5,14 @@ import { IUserRepository } from '../../repositories/interfaces/user.repository';
 import type { LoginDTO, RegisterDTO, AuthResponseDTO } from '@dtos';
 import { UnauthorizedError, ConflictError, ValidationError } from './errors';
 import { UserRole } from '@enums';
+import { getJwtSecret } from '../../config/runtime';
 
 export class AuthService implements IAuthService {
   private readonly jwtSecret: string;
   private readonly jwtExpiresIn: string;
 
   constructor(private readonly userRepository: IUserRepository) {
-    this.jwtSecret = process.env.JWT_SECRET || 'super-secret-key-change-me';
+    this.jwtSecret = getJwtSecret();
     this.jwtExpiresIn = process.env.JWT_EXPIRE_IN || '7d';
   }
 
