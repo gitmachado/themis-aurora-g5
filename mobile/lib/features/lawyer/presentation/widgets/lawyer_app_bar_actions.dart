@@ -7,8 +7,8 @@ class LawyerAppBarActions extends StatelessWidget {
 
   const LawyerAppBarActions({
     super.key,
-    this.notificationCount = 2,
-    this.chatCount = 3,
+    this.notificationCount = 0,
+    this.chatCount = 0,
   });
 
   @override
@@ -33,7 +33,12 @@ class LawyerAppBarActions extends StatelessWidget {
     );
   }
 
-  Widget _buildActionIcon(BuildContext context, {required IconData icon, required int count, required VoidCallback onTap}) {
+  Widget _buildActionIcon(
+    BuildContext context, {
+    required IconData icon,
+    required int count,
+    required VoidCallback onTap,
+  }) {
     return Stack(
       alignment: Alignment.center,
       children: [
@@ -51,10 +56,7 @@ class LawyerAppBarActions extends StatelessWidget {
                 color: AppColors.error,
                 shape: BoxShape.circle,
               ),
-              constraints: const BoxConstraints(
-                minWidth: 14,
-                minHeight: 14,
-              ),
+              constraints: const BoxConstraints(minWidth: 14, minHeight: 14),
               child: Text(
                 count > 9 ? '+9' : count.toString(),
                 style: const TextStyle(
