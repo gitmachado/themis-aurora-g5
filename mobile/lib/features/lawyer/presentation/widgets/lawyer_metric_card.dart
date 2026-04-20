@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../../../shared/constants/app_colors.dart';
+import '../../../../shared/constants/app_dimensions.dart';
 import '../../../../shared/constants/app_text_styles.dart';
 
 class LawyerMetricCard extends StatelessWidget {
@@ -20,10 +21,10 @@ class LawyerMetricCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       width: 156,
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(AppDimensions.contentPadding),
       decoration: BoxDecoration(
         color: AppColors.white,
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(AppDimensions.radiusXL),
         border: Border.all(color: AppColors.divider),
         boxShadow: [
           BoxShadow(
@@ -37,19 +38,19 @@ class LawyerMetricCard extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Container(
-            padding: const EdgeInsets.all(8),
+            padding: const EdgeInsets.all(AppDimensions.spacingS),
             decoration: BoxDecoration(
               color: iconColor.withOpacity(0.1),
               shape: BoxShape.circle,
             ),
-            child: Icon(icon, color: iconColor, size: 20),
+            child: Icon(icon, color: iconColor, size: AppDimensions.iconS),
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: AppDimensions.spacingM),
           Text(
             value,
             style: AppTextStyles.h1.copyWith(fontSize: 24, color: AppColors.primary),
           ),
-          const SizedBox(height: 4),
+          const SizedBox(height: AppDimensions.spacingXS),
           Text(
             label,
             style: AppTextStyles.caption.copyWith(fontSize: 13),

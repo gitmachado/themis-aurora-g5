@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../../../shared/constants/app_colors.dart';
+import '../../../../shared/constants/app_dimensions.dart';
 import '../../../../shared/constants/app_text_styles.dart';
 import '../../../../shared/widgets/layout/custom_app_bar.dart';
 import '../../../../shared/widgets/buttons/app_badge.dart';
@@ -21,7 +22,7 @@ class LawyerDashboardScreen extends StatelessWidget {
               backgroundColor: AppColors.secondaryLight,
               child: Icon(Icons.person, color: AppColors.secondaryDark, size: 20),
             ),
-            const SizedBox(width: 12),
+            const SizedBox(width: AppDimensions.spacingM),
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisSize: MainAxisSize.min,
@@ -40,18 +41,18 @@ class LawyerDashboardScreen extends StatelessWidget {
         ],
       ),
       body: SingleChildScrollView(
-        padding: const EdgeInsets.all(20),
+        padding: const EdgeInsets.all(AppDimensions.screenPadding),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             _buildMetricsGrid(),
-            const SizedBox(height: 32),
+            const SizedBox(height: AppDimensions.spacing32),
             _buildSectionHeader('Novos Leads', () {}),
-            const SizedBox(height: 16),
+            const SizedBox(height: AppDimensions.spacingL),
             _buildLeadsList(),
-            const SizedBox(height: 32),
+            const SizedBox(height: AppDimensions.spacing32),
             _buildSectionHeader('Tarefas Pendentes', () {}),
-            const SizedBox(height: 16),
+            const SizedBox(height: AppDimensions.spacingL),
             _buildTaskList(),
           ],
         ),
@@ -68,21 +69,21 @@ class LawyerDashboardScreen extends StatelessWidget {
             label: 'Processos Ativos',
             value: '42',
             icon: Icons.gavel_rounded,
-            iconColor: Colors.blue,
+            iconColor: AppColors.primary,
           ),
-          SizedBox(width: 16),
+          SizedBox(width: AppDimensions.spacingL),
           LawyerMetricCard(
             label: 'Leads Hoje',
             value: '08',
             icon: Icons.person_add_rounded,
-            iconColor: Colors.green,
+            iconColor: AppColors.success,
           ),
-          SizedBox(width: 16),
+          SizedBox(width: AppDimensions.spacingL),
           LawyerMetricCard(
             label: 'Handoffs',
             value: '03',
             icon: Icons.handshake_rounded,
-            iconColor: Colors.orange,
+            iconColor: AppColors.warning,
           ),
         ],
       ),
@@ -109,9 +110,9 @@ class LawyerDashboardScreen extends StatelessWidget {
     return Column(
       children: [
         _buildLeadTile('Carla Menezes', 'Trabalhista', 'há 2 min', true),
-        const SizedBox(height: 12),
+        const SizedBox(height: AppDimensions.spacingM),
         _buildLeadTile('Roberto Santos', 'Cível', 'há 15 min', false),
-        const SizedBox(height: 12),
+        const SizedBox(height: AppDimensions.spacingM),
         _buildLeadTile('Mariana Lima', 'Família', 'há 1 hora', false),
       ],
     );
@@ -119,10 +120,10 @@ class LawyerDashboardScreen extends StatelessWidget {
 
   Widget _buildLeadTile(String name, String type, String time, bool isUrgente) {
     return Container(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(AppDimensions.contentPadding),
       decoration: BoxDecoration(
         color: AppColors.white,
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(AppDimensions.radiusL),
         border: Border.all(color: AppColors.divider),
       ),
       child: Row(
@@ -131,13 +132,13 @@ class LawyerDashboardScreen extends StatelessWidget {
             backgroundColor: AppColors.primary.withOpacity(0.1),
             child: Text(name[0], style: const TextStyle(color: AppColors.primary, fontWeight: FontWeight.bold)),
           ),
-          const SizedBox(width: 16),
+          const SizedBox(width: AppDimensions.spacingL),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(name, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
-                const SizedBox(height: 4),
+                const SizedBox(height: AppDimensions.spacingXS),
                 Text('$type • $time', style: AppTextStyles.caption),
               ],
             ),
@@ -162,7 +163,7 @@ class LawyerDashboardScreen extends StatelessWidget {
       child: Column(
         children: [
           _buildTaskItem('Protocolar petição - Processo #9821', true),
-          const Divider(height: 24),
+          const Divider(height: AppDimensions.spacingXXL),
           _buildTaskItem('Analisar documentos de Lucas Silva', false),
         ],
       ),
@@ -176,7 +177,7 @@ class LawyerDashboardScreen extends StatelessWidget {
           isUrgent ? Icons.error_outline_rounded : Icons.check_circle_outline_rounded,
           color: isUrgent ? AppColors.error : AppColors.success,
         ),
-        const SizedBox(width: 12),
+        const SizedBox(width: AppDimensions.spacingM),
         Expanded(
           child: Text(
             title,
