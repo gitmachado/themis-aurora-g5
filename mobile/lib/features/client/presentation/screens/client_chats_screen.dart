@@ -52,6 +52,7 @@ class _ClientChatsScreenState extends State<ClientChatsScreen> {
         ],
       ),
       floatingActionButton: FloatingActionButton(
+        heroTag: 'client_chat_fab',
         onPressed: () {},
         backgroundColor: AppColors.primary,
         child: const Icon(Icons.add_comment_outlined, color: AppColors.white),

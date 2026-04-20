@@ -57,6 +57,7 @@ class _LawyerClientListScreenState extends State<LawyerClientListScreen> {
         ],
       ),
       floatingActionButton: FloatingActionButton(
+        heroTag: 'lawyer_client_fab',
         onPressed: () {},
         backgroundColor: AppColors.primary,
         child: const Icon(Icons.person_add_rounded, color: Colors.white),

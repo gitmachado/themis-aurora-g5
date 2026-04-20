@@ -64,6 +64,7 @@ class _LawyerProcessListScreenState extends State<LawyerProcessListScreen> {
         ],
       ),
       floatingActionButton: FloatingActionButton(
+        heroTag: 'lawyer_process_fab',
         onPressed: () => _showNewProcessModal(context),
         backgroundColor: AppColors.primary,
         child: const Icon(Icons.add, color: Colors.white),

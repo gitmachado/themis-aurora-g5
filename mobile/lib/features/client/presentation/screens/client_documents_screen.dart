@@ -55,6 +55,7 @@ class _ClientDocumentsScreenState extends State<ClientDocumentsScreen> {
         ],
       ),
       floatingActionButton: FloatingActionButton(
+        heroTag: 'client_doc_fab',
         onPressed: () => _showUploadOptions(context),
         backgroundColor: AppColors.primary,
         child: const Icon(Icons.add_rounded, color: AppColors.white, size: 32),

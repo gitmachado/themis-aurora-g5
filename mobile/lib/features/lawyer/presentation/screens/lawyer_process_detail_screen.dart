@@ -43,6 +43,7 @@ class _LawyerProcessDetailScreenState extends State<LawyerProcessDetailScreen> {
           ],
         ),
         floatingActionButton: FloatingActionButton(
+          heroTag: 'lawyer_process_detail_fab',
           onPressed: () {},
           backgroundColor: AppColors.primary,
           child: const Icon(Icons.add_comment_rounded, color: Colors.white),
