@@ -37,6 +37,7 @@ class _ClientChatsScreenState extends State<ClientChatsScreen> {
                   subtitle: 'Olá! Sou seu assistente para o processo #1234...',
                   time: '10:30',
                   unreadCount: 2,
+                  isAi: true,
                   onTap: () {},
                 ),
                 ChatListTile(
