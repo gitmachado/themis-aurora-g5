@@ -1792,7 +1792,7 @@
       "name": "Client Process Timeline",
       "clip": true,
       "width": 390,
-      "height": 887,
+      "height": 842,
       "fill": "#F8F9FA",
       "layout": "vertical",
       "children": [
@@ -2407,61 +2407,6 @@
                       ]
                     }
                   ]
-                }
-              ]
-            }
-          ]
-        },
-        {
-          "type": "frame",
-          "id": "cllpp",
-          "name": "actionFooter",
-          "width": "fill_container",
-          "fill": "#FFFFFF",
-          "stroke": {
-            "align": "inside",
-            "thickness": {
-              "top": 1
-            },
-            "fill": "#E5E7EB"
-          },
-          "layout": "vertical",
-          "padding": [
-            16,
-            20,
-            24,
-            20
-          ],
-          "children": [
-            {
-              "type": "frame",
-              "id": "Qaad3",
-              "name": "doubtBtn",
-              "width": "fill_container",
-              "height": 56,
-              "fill": "#2E7D32",
-              "cornerRadius": 28,
-              "gap": 12,
-              "justifyContent": "center",
-              "alignItems": "center",
-              "children": [
-                {
-                  "type": "icon_font",
-                  "id": "LAAFf",
-                  "width": 20,
-                  "height": 20,
-                  "iconFontName": "message-circle",
-                  "iconFontFamily": "lucide",
-                  "fill": "#FFFFFF"
-                },
-                {
-                  "type": "text",
-                  "id": "OP3LL",
-                  "fill": "#FFFFFF",
-                  "content": "Dúvida? Falar no WhatsApp",
-                  "fontFamily": "Inter",
-                  "fontSize": 16,
-                  "fontWeight": "600"
                 }
               ]
             }
@@ -3292,48 +3237,6 @@
             24
           ],
           "children": [
-            {
-              "type": "frame",
-              "id": "AB01N",
-              "name": "searchBar",
-              "width": "fill_container",
-              "height": 44,
-              "fill": "#FFFFFF",
-              "cornerRadius": 12,
-              "stroke": {
-                "align": "inside",
-                "thickness": 1,
-                "fill": "#E5E7EB"
-              },
-              "gap": 8,
-              "padding": [
-                0,
-                16
-              ],
-              "alignItems": "center",
-              "children": [
-                {
-                  "type": "icon_font",
-                  "id": "vUeS1",
-                  "name": "searchIcon",
-                  "width": 18,
-                  "height": 18,
-                  "iconFontName": "search",
-                  "iconFontFamily": "lucide",
-                  "fill": "#666666"
-                },
-                {
-                  "type": "text",
-                  "id": "goTLT",
-                  "name": "searchText",
-                  "fill": "#999999",
-                  "content": "Buscar CPF, Nome ou Status...",
-                  "fontFamily": "Inter",
-                  "fontSize": 14,
-                  "fontWeight": "normal"
-                }
-              ]
-            },
             {
               "type": "frame",
               "id": "ocIYY",
@@ -10098,19 +10001,24 @@
                 },
                 {
                   "type": "frame",
-                  "id": "Vsuls",
+                  "id": "C1bwL",
                   "name": "cancelBtn",
                   "width": "fill_container",
                   "height": 52,
-                  "fill": "#F5F5F5",
+                  "fill": "#ffebee",
                   "cornerRadius": 26,
+                  "stroke": {
+                    "align": "inside",
+                    "thickness": 1,
+                    "fill": "#ffcdd2"
+                  },
                   "justifyContent": "center",
                   "alignItems": "center",
                   "children": [
                     {
                       "type": "text",
-                      "id": "ut9a9",
-                      "fill": "#666666",
+                      "id": "dw1xA",
+                      "fill": "#d32f2f",
                       "content": "Cancelar",
                       "fontFamily": "Inter",
                       "fontSize": 16,
@@ -11242,6 +11150,7 @@
           "type": "frame",
           "id": "Ps4NU",
           "name": "gridWrap",
+          "rotation": 0.0808425455128209,
           "width": "fill_container",
           "height": "fill_container",
           "layout": "vertical",
@@ -16349,19 +16258,24 @@
             },
             {
               "type": "frame",
-              "id": "z7Ngr",
+              "id": "PPul4",
               "name": "cancelBtn",
               "width": "fill_container",
               "height": 52,
-              "fill": "#F5F5F5",
+              "fill": "#ffebee",
               "cornerRadius": 26,
+              "stroke": {
+                "align": "inside",
+                "thickness": 1,
+                "fill": "#ffcdd2"
+              },
               "justifyContent": "center",
               "alignItems": "center",
               "children": [
                 {
                   "type": "text",
-                  "id": "BFmD1",
-                  "fill": "#666666",
+                  "id": "RaSgM",
+                  "fill": "#d32f2f",
                   "content": "Cancelar",
                   "fontFamily": "Inter",
                   "fontSize": 16,
@@ -17235,7 +17149,7 @@
                   "width": "fill_container",
                   "height": 48,
                   "fill": "#FFEBEE",
-                  "cornerRadius": 8,
+                  "cornerRadius": 129,
                   "gap": 8,
                   "justifyContent": "center",
                   "alignItems": "center",
@@ -17267,7 +17181,7 @@
                   "width": "fill_container",
                   "height": 48,
                   "fill": "#E8F5E9",
-                  "cornerRadius": 8,
+                  "cornerRadius": 129,
                   "gap": 8,
                   "justifyContent": "center",
                   "alignItems": "center",
