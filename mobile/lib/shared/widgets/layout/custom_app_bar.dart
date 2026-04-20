@@ -9,6 +9,7 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
   final Widget? titleWidget;
   final bool centerTitle;
   final bool showBackButton;
+  final PreferredSizeWidget? bottom;
 
   const CustomAppBar({
     super.key,
@@ -18,6 +19,7 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
     this.titleWidget,
     this.centerTitle = false,
     this.showBackButton = false,
+    this.bottom,
   });
 
   @override
@@ -37,7 +39,7 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
       elevation: 0,
       scrolledUnderElevation: 0,
       iconTheme: const IconThemeData(color: AppColors.primary),
-      bottom: PreferredSize(
+      bottom: bottom ?? PreferredSize(
         preferredSize: const Size.fromHeight(1),
         child: Container(
           color: AppColors.divider.withOpacity(0.5),
@@ -48,5 +50,5 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
   }
 
   @override
-  Size get preferredSize => const Size.fromHeight(kToolbarHeight);
+  Size get preferredSize => Size.fromHeight(kToolbarHeight + (bottom?.preferredSize.height ?? 0));
 }
