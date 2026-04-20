@@ -6,8 +6,8 @@ import '../../../../shared/widgets/layout/app_dashboard_header.dart';
 import '../../../../shared/widgets/buttons/app_badge.dart';
 import '../widgets/lawyer_metric_card.dart';
 
-class LawyerDashboardScreen extends StatelessWidget {
-  const LawyerDashboardScreen({super.key});
+class LawyerOverviewScreen extends StatelessWidget {
+  const LawyerOverviewScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -22,8 +22,10 @@ class LawyerDashboardScreen extends StatelessWidget {
                 name: 'Dr. Rodrigo Machado',
                 greeting: 'Bom dia,',
                 notificationCount: 5,
-                onProfileTap: () => Navigator.pushNamed(context, '/lawyer-profile'),
-                onNotificationTap: () => Navigator.pushNamed(context, '/lawyer-notifications'),
+                onProfileTap: () =>
+                    Navigator.pushNamed(context, '/lawyer-profile'),
+                onNotificationTap: () =>
+                    Navigator.pushNamed(context, '/lawyer-notifications'),
               ),
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 20),
@@ -89,7 +91,10 @@ class LawyerDashboardScreen extends StatelessWidget {
           onPressed: onSeeAll,
           child: Text(
             'Ver todos',
-            style: AppTextStyles.caption.copyWith(color: AppColors.primary, fontWeight: FontWeight.bold),
+            style: AppTextStyles.caption.copyWith(
+              color: AppColors.primary,
+              fontWeight: FontWeight.bold,
+            ),
           ),
         ),
       ],
@@ -128,8 +133,11 @@ class LawyerDashboardScreen extends StatelessWidget {
           CircleAvatar(
             backgroundColor: AppColors.primaryOverlay,
             child: Text(
-              name[0], 
-              style: const TextStyle(color: AppColors.primary, fontWeight: FontWeight.bold),
+              name[0],
+              style: const TextStyle(
+                color: AppColors.primary,
+                fontWeight: FontWeight.bold,
+              ),
             ),
           ),
           const SizedBox(width: AppDimensions.spacingL),
@@ -137,7 +145,13 @@ class LawyerDashboardScreen extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(name, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+                Text(
+                  name,
+                  style: const TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 16,
+                  ),
+                ),
                 const SizedBox(height: AppDimensions.spacingXS),
                 Text('$type • $time', style: AppTextStyles.caption),
               ],
@@ -174,7 +188,9 @@ class LawyerDashboardScreen extends StatelessWidget {
     return Row(
       children: [
         Icon(
-          isUrgent ? Icons.error_outline_rounded : Icons.check_circle_outline_rounded,
+          isUrgent
+              ? Icons.error_outline_rounded
+              : Icons.check_circle_outline_rounded,
           color: isUrgent ? AppColors.error : AppColors.success,
         ),
         const SizedBox(width: AppDimensions.spacingM),
