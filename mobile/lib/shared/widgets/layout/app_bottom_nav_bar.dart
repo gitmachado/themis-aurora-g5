@@ -44,16 +44,21 @@ class AppBottomNavigationBar extends StatelessWidget {
           ),
         ],
       ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceAround,
-        children: List.generate(navItems.length, (index) {
-          final isSelected = currentIndex == index;
-          return _NavBarItemWidget(
-            item: navItems[index],
-            isSelected: isSelected,
-            onTap: () => onTap(index),
-          );
-        }),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 8),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+          children: List.generate(navItems.length, (index) {
+            final isSelected = currentIndex == index;
+            return Expanded(
+              child: _NavBarItemWidget(
+                item: navItems[index],
+                isSelected: isSelected,
+                onTap: () => onTap(index),
+              ),
+            );
+          }),
+        ),
       ),
     );
   }
@@ -79,7 +84,9 @@ class _NavBarItemWidget extends StatelessWidget {
       behavior: HitTestBehavior.opaque,
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 300),
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        width: double.infinity,
+        margin: const EdgeInsets.symmetric(horizontal: 4),
+        padding: const EdgeInsets.symmetric(vertical: 8),
         decoration: BoxDecoration(
           color: isSelected ? AppColors.primary.withValues(alpha: 0.1) : Colors.transparent,
           borderRadius: BorderRadius.circular(20),
