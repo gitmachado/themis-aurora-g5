@@ -14,8 +14,16 @@ class LawyerClientListScreen extends StatefulWidget {
 class _LawyerClientListScreenState extends State<LawyerClientListScreen> {
   final List<Map<String, String>> _clients = [
     {'name': 'João Silva', 'cpf': '123.456.789-00', 'phone': '(11) 98888-7777'},
-    {'name': 'Maria Oliveira', 'cpf': '987.654.321-11', 'phone': '(11) 97777-6666'},
-    {'name': 'Roberto Santos', 'cpf': '456.789.123-22', 'phone': '(11) 96666-5555'},
+    {
+      'name': 'Maria Oliveira',
+      'cpf': '987.654.321-11',
+      'phone': '(11) 97777-6666',
+    },
+    {
+      'name': 'Roberto Santos',
+      'cpf': '456.789.123-22',
+      'phone': '(11) 96666-5555',
+    },
     {'name': 'Ana Costa', 'cpf': '321.654.987-33', 'phone': '(11) 95555-4444'},
   ];
 
@@ -34,7 +42,10 @@ class _LawyerClientListScreenState extends State<LawyerClientListScreen> {
             child: TextField(
               decoration: InputDecoration(
                 hintText: 'Buscar por nome ou CPF...',
-                prefixIcon: const Icon(Icons.search, color: AppColors.textCaption),
+                prefixIcon: const Icon(
+                  Icons.search,
+                  color: AppColors.textCaption,
+                ),
                 filled: true,
                 fillColor: AppColors.white,
                 border: OutlineInputBorder(
@@ -80,15 +91,24 @@ class _LawyerClientListScreenState extends State<LawyerClientListScreen> {
           backgroundColor: AppColors.primary.withValues(alpha: 0.1),
           child: Text(
             client['name']![0].toUpperCase(),
-            style: const TextStyle(fontWeight: FontWeight.bold, color: AppColors.primary),
+            style: const TextStyle(
+              fontWeight: FontWeight.bold,
+              color: AppColors.primary,
+            ),
           ),
         ),
-        title: Text(client['name']!, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15)),
+        title: Text(
+          client['name']!,
+          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
+        ),
         subtitle: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             const SizedBox(height: 4),
-            Text('CPF: ${client['cpf']}', style: AppTextStyles.caption.copyWith(fontSize: 12)),
+            Text(
+              'CPF: ${client['cpf']}',
+              style: AppTextStyles.caption.copyWith(fontSize: 12),
+            ),
           ],
         ),
         trailing: Row(
@@ -96,7 +116,11 @@ class _LawyerClientListScreenState extends State<LawyerClientListScreen> {
           children: [
             _buildActionIcon(Icons.phone_rounded, AppColors.primary, () {}),
             const SizedBox(width: 8),
-            _buildActionIcon(Icons.chat_bubble_rounded, AppColors.success, () {}),
+            _buildActionIcon(
+              Icons.chat_bubble_rounded,
+              AppColors.success,
+              () {},
+            ),
           ],
         ),
         onTap: () => Navigator.pushNamed(
@@ -111,14 +135,16 @@ class _LawyerClientListScreenState extends State<LawyerClientListScreen> {
   Widget _buildActionIcon(IconData icon, Color color, VoidCallback onTap) {
     return InkWell(
       onTap: onTap,
-      borderRadius: BorderRadius.circular(20),
-      child: Container(
-        padding: const EdgeInsets.all(8),
-        decoration: BoxDecoration(
-          color: color.withValues(alpha: 0.1),
-          shape: BoxShape.circle,
+      borderRadius: BorderRadius.circular(24),
+      child: SizedBox.square(
+        dimension: 48,
+        child: Container(
+          decoration: BoxDecoration(
+            color: color.withValues(alpha: 0.1),
+            shape: BoxShape.circle,
+          ),
+          child: Icon(icon, color: color, size: 18),
         ),
-        child: Icon(icon, color: color, size: 18),
       ),
     );
   }
