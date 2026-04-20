@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../../../../shared/constants/app_colors.dart';
 import '../../../../shared/constants/app_text_styles.dart';
 import '../../../../shared/widgets/layout/custom_app_bar.dart';
+import '../../../../shared/widgets/cards/app_card.dart';
 
 class ClientProfileScreen extends StatefulWidget {
   const ClientProfileScreen({super.key});
@@ -18,64 +19,39 @@ class _ClientProfileScreenState extends State<ClientProfileScreen> {
       appBar: const CustomAppBar(
         title: 'Meu Perfil',
         showBackButton: true,
-        centerTitle: true,
       ),
       body: SingleChildScrollView(
-        padding: const EdgeInsets.all(24.0),
+        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
         child: Column(
           children: [
-            _buildProfileCard(),
-            const SizedBox(height: 32),
-            _buildProfileSection(
+            _buildProfileHeader(),
+            const SizedBox(height: 24),
+            _buildSection(
               title: 'Dados Pessoais',
-              items: [
-                _ProfileItem(
-                  icon: Icons.person_outline,
-                  label: 'João Silva',
-                  subtitle: 'Nome Completo',
-                ),
-                _ProfileItem(
-                  icon: Icons.fingerprint_rounded,
-                  label: '123.456.789-00',
-                  subtitle: 'CPF',
-                ),
-                _ProfileItem(
-                  icon: Icons.email_outlined,
-                  label: 'joao.silva@email.com',
-                  subtitle: 'E-mail',
-                ),
-                _ProfileItem(
-                  icon: Icons.phone_android_rounded,
-                  label: '(11) 99999-9999',
-                  subtitle: 'WhatsApp',
-                ),
+              children: [
+                _buildInfoTile(Icons.person_outline_rounded, 'João Silva', 'Nome Completo'),
+                _buildInfoTile(Icons.fingerprint_rounded, '123.456.789-00', 'CPF'),
+                _buildInfoTile(Icons.email_outlined, 'joao.silva@email.com', 'E-mail'),
+                _buildInfoTile(Icons.phone_android_rounded, '(11) 99999-9999', 'WhatsApp'),
               ],
             ),
-            const SizedBox(height: 24),
-            _buildProfileSection(
+            const SizedBox(height: 20),
+            _buildSection(
               title: 'Configurações',
-              items: [
-                _ProfileItem(
-                  icon: Icons.notifications_none_rounded,
-                  label: 'Notificações',
-                  onTap: () {},
-                ),
-                _ProfileItem(
-                  icon: Icons.lock_outline_rounded,
-                  label: 'Segurança e Senha',
-                  onTap: () {},
-                ),
+              children: [
+                _buildActionTile(Icons.notifications_none_rounded, 'Notificações', () {}),
+                _buildActionTile(Icons.lock_outline_rounded, 'Segurança e Senha', () {}),
               ],
             ),
-            const SizedBox(height: 24),
-            _buildProfileSection(
+            const SizedBox(height: 20),
+            _buildSection(
               title: 'Conta',
-              items: [
-                _ProfileItem(
-                  icon: Icons.logout_rounded,
-                  label: 'Sair do Aplicativo',
+              children: [
+                _buildActionTile(
+                  Icons.logout_rounded,
+                  'Sair do Aplicativo',
+                  () => _showLogoutDialog(context),
                   isDestructive: true,
-                  onTap: () => _showLogoutDialog(context),
                 ),
               ],
             ),
@@ -86,85 +62,127 @@ class _ClientProfileScreenState extends State<ClientProfileScreen> {
     );
   }
 
-  Widget _buildProfileCard() {
-    return Container(
-      padding: const EdgeInsets.all(24),
-      decoration: BoxDecoration(
-        color: AppColors.white,
-        borderRadius: BorderRadius.circular(20),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.05),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
+  Widget _buildProfileHeader() {
+    return AppCard(
+      padding: EdgeInsets.zero,
       child: Column(
         children: [
           Stack(
-            alignment: Alignment.bottomRight,
+            alignment: Alignment.topCenter,
+            clipBehavior: Clip.none,
             children: [
-              const CircleAvatar(
-                radius: 40,
-                backgroundColor: AppColors.primary,
-                child: Text('JS', style: TextStyle(color: Colors.white, fontSize: 28, fontWeight: FontWeight.bold)),
-              ),
               Container(
-                padding: const EdgeInsets.all(6),
-                decoration: const BoxDecoration(color: AppColors.warning, shape: BoxShape.circle),
-                child: const Icon(Icons.edit, size: 14, color: AppColors.white),
+                height: 80,
+                decoration: const BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: [AppColors.primary, AppColors.secondary],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                  ),
+                  borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+                ),
+              ),
+              Positioned(
+                top: 40, // Height(80) - Radius(40) = 40 to center avatar on line
+                child: Container(
+                  padding: const EdgeInsets.all(4),
+                  decoration: const BoxDecoration(
+                    color: AppColors.white,
+                    shape: BoxShape.circle,
+                  ),
+                  child: const CircleAvatar(
+                    radius: 40,
+                    backgroundColor: AppColors.primary,
+                    child: Text('JS', style: TextStyle(color: Colors.white, fontSize: 32, fontWeight: FontWeight.bold)),
+                  ),
+                ),
               ),
             ],
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: 52), // Space for the floating part of avatar (40) + margin
           const Text('João Silva', style: AppTextStyles.h1),
           const SizedBox(height: 4),
-          Text('Cliente Premium', style: AppTextStyles.caption.copyWith(fontSize: 14)),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+            decoration: BoxDecoration(
+              color: AppColors.primary.withValues(alpha: 0.1),
+              borderRadius: BorderRadius.circular(20),
+            ),
+            child: Text(
+              'Cliente Premium',
+              style: AppTextStyles.caption.copyWith(
+                color: AppColors.primary,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ),
+          const SizedBox(height: 20),
         ],
       ),
     );
   }
 
-  Widget _buildProfileSection({required String title, required List<_ProfileItem> items}) {
+  Widget _buildSection({required String title, required List<Widget> children}) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Padding(
-          padding: const EdgeInsets.only(left: 4, bottom: 12),
-          child: Text(title, style: AppTextStyles.h2.copyWith(fontSize: 16, color: AppColors.primary)),
+          padding: const EdgeInsets.only(left: 4, bottom: 8),
+          child: Text(title, style: AppTextStyles.h2.copyWith(fontSize: 16)),
         ),
-        Container(
-          decoration: BoxDecoration(
-            color: AppColors.white,
-            borderRadius: BorderRadius.circular(16),
-            border: Border.all(color: AppColors.divider),
-          ),
+        AppCard(
+          padding: EdgeInsets.zero,
           child: Column(
-            children: items.map((item) {
-              final isLast = items.indexOf(item) == items.length - 1;
+            children: List.generate(children.length, (index) {
               return Column(
                 children: [
-                  ListTile(
-                    leading: Icon(item.icon, color: item.isDestructive ? AppColors.error : AppColors.primary, size: 22),
-                    title: Text(
-                      item.label,
-                      style: TextStyle(
-                        color: item.isDestructive ? AppColors.error : AppColors.textPrimary,
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
-                    subtitle: item.subtitle != null ? Text(item.subtitle!, style: AppTextStyles.caption.copyWith(fontSize: 11)) : null,
-                    trailing: item.onTap != null ? const Icon(Icons.chevron_right_rounded, size: 20, color: AppColors.textCaption) : null,
-                    onTap: item.onTap,
-                  ),
-                  if (!isLast) const Divider(height: 1, indent: 56),
+                  children[index],
+                  if (index < children.length - 1)
+                    const Divider(height: 1, indent: 56, endIndent: 16),
                 ],
               );
-            }).toList(),
+            }),
           ),
         ),
       ],
+    );
+  }
+
+  Widget _buildInfoTile(IconData icon, String label, String subtitle) {
+    return ListTile(
+      leading: Container(
+        padding: const EdgeInsets.all(8),
+        decoration: BoxDecoration(
+          color: AppColors.primary.withValues(alpha: 0.05),
+          borderRadius: BorderRadius.circular(10),
+        ),
+        child: Icon(icon, color: AppColors.primary, size: 20),
+      ),
+      title: Text(label, style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 14)),
+      subtitle: Text(subtitle, style: AppTextStyles.caption.copyWith(fontSize: 11)),
+    );
+  }
+
+  Widget _buildActionTile(IconData icon, String label, VoidCallback onTap, {bool isDestructive = false}) {
+    return ListTile(
+      leading: Container(
+        padding: const EdgeInsets.all(8),
+        decoration: BoxDecoration(
+          color: (isDestructive ? AppColors.error : AppColors.primary).withValues(alpha: 0.05),
+          borderRadius: BorderRadius.circular(10),
+        ),
+        child: Icon(icon, color: isDestructive ? AppColors.error : AppColors.primary, size: 20),
+      ),
+      title: Text(
+        label,
+        style: TextStyle(
+          fontWeight: FontWeight.w500,
+          fontSize: 14,
+          color: isDestructive ? AppColors.error : AppColors.textPrimary,
+        ),
+      ),
+      trailing: const Icon(Icons.chevron_right_rounded, size: 20, color: AppColors.textCaption),
+      onTap: onTap,
     );
   }
 
@@ -172,38 +190,30 @@ class _ClientProfileScreenState extends State<ClientProfileScreen> {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         title: const Text('Sair da Conta'),
         content: const Text('Tem certeza que deseja sair do aplicativo?'),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(context), child: const Text('Cancelar')),
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Cancelar', style: TextStyle(color: AppColors.textCaption)),
+          ),
           TextButton(
             onPressed: () {
+              // 1. Pop the dialog first
+              Navigator.pop(context);
+              
+              // 2. Clear stack and navigate to login
               Navigator.pushNamedAndRemoveUntil(
                 context,
                 '/login',
                 (route) => false,
               );
             },
-            child: const Text('Sair', style: TextStyle(color: AppColors.error)),
+            child: const Text('Sair', style: TextStyle(color: AppColors.error, fontWeight: FontWeight.bold)),
           ),
         ],
       ),
     );
   }
-}
-
-class _ProfileItem {
-  final IconData icon;
-  final String label;
-  final String? subtitle;
-  final VoidCallback? onTap;
-  final bool isDestructive;
-
-  _ProfileItem({
-    required this.icon,
-    required this.label,
-    this.subtitle,
-    this.onTap,
-    this.isDestructive = false,
-  });
 }
