@@ -4,6 +4,7 @@ import '../../../../shared/constants/app_colors.dart';
 import '../../../../shared/constants/app_text_styles.dart';
 import '../../../../shared/widgets/cards/app_card.dart';
 import '../../../../shared/widgets/cards/app_list_tile.dart';
+import '../../../../shared/widgets/buttons/app_badge.dart';
 import '../widgets/dashboard_header.dart';
 import '../widgets/metric_card.dart';
 import '../widgets/niche_chart.dart';
@@ -153,7 +154,7 @@ class LawyerDashboardScreen extends StatelessWidget {
             backgroundColor: AppColors.primary.withValues(alpha: 0.1),
             child: const Text('CM', style: TextStyle(color: AppColors.primary, fontSize: 12, fontWeight: FontWeight.bold)),
           ),
-          trailing: _buildBadge('URGENTE', AppColors.error),
+          trailing: const AppBadge(label: 'ALTA', type: BadgeType.error),
           onTap: () {
             Navigator.pushNamed(
               context,
@@ -174,7 +175,7 @@ class LawyerDashboardScreen extends StatelessWidget {
             backgroundColor: AppColors.primary.withValues(alpha: 0.1),
             child: const Text('RS', style: TextStyle(color: AppColors.primary, fontSize: 12, fontWeight: FontWeight.bold)),
           ),
-          trailing: _buildBadge('NOVO', AppColors.success),
+          trailing: const AppBadge(label: 'MÉDIA', type: BadgeType.warning),
           onTap: () {
             Navigator.pushNamed(
               context,
@@ -213,21 +214,5 @@ class LawyerDashboardScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildBadge(String text, Color color) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-      decoration: BoxDecoration(
-        color: color.withValues(alpha: 0.1),
-        borderRadius: BorderRadius.circular(4),
-      ),
-      child: Text(
-        text,
-        style: TextStyle(
-          color: color,
-          fontSize: 10,
-          fontWeight: FontWeight.bold,
-        ),
-      ),
-    );
   }
 }
