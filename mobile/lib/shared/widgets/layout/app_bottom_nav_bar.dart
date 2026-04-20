@@ -1,18 +1,34 @@
 import 'package:flutter/material.dart';
 import '../../constants/app_colors.dart';
 
+class NavItem {
+  final IconData icon;
+  final String label;
+
+  const NavItem({required this.icon, required this.label});
+}
+
 class AppBottomNavigationBar extends StatelessWidget {
   final int currentIndex;
   final Function(int) onTap;
+  final List<NavItem>? items;
 
   const AppBottomNavigationBar({
     super.key,
     required this.currentIndex,
     required this.onTap,
+    this.items,
   });
 
   @override
   Widget build(BuildContext context) {
+    final navItems = items ?? const [
+      NavItem(icon: Icons.dashboard_outlined, label: 'Home'),
+      NavItem(icon: Icons.folder_outlined, label: 'Processos'),
+      NavItem(icon: Icons.file_copy_outlined, label: 'Documentos'),
+      NavItem(icon: Icons.chat_bubble_outline, label: 'Chat'),
+    ];
+
     return Container(
       margin: const EdgeInsets.only(left: 20, right: 20, bottom: 24),
       padding: const EdgeInsets.all(6),
@@ -30,12 +46,10 @@ class AppBottomNavigationBar extends StatelessWidget {
       ),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceAround,
-        children: [
-          _buildItem(0, Icons.dashboard_outlined, 'Home'),
-          _buildItem(1, Icons.folder_outlined, 'Processos'),
-          _buildItem(2, Icons.file_copy_outlined, 'Documentos'),
-          _buildItem(3, Icons.chat_bubble_outline, 'Chat'),
-        ],
+        children: List.generate(navItems.length, (index) {
+          final item = navItems[index];
+          return _buildItem(index, item.icon, item.label);
+        }),
       ),
     );
   }
