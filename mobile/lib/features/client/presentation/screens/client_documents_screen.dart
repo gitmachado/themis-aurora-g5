@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../../../shared/constants/app_colors.dart';
 import '../../../../shared/constants/app_text_styles.dart';
-import '../../../../shared/widgets/layout/app_screen_header.dart';
+import '../../../../shared/widgets/layout/custom_app_bar.dart';
 import '../../../../shared/widgets/cards/document_progress_tile.dart';
 
 class ClientDocumentsScreen extends StatefulWidget {
@@ -19,12 +19,16 @@ class _ClientDocumentsScreenState extends State<ClientDocumentsScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.background,
-      body: SafeArea(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            _buildHeader(),
-            _buildSecurityBanner(),
+      appBar: const CustomAppBar(
+        title: 'Documentos',
+        showBackButton: false,
+        showNotificationButton: true,
+        notificationCount: 2,
+      ),
+      body: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          _buildSecurityBanner(),
           Padding(
             padding: const EdgeInsets.fromLTRB(20, 24, 20, 16),
             child: Column(
@@ -50,17 +54,12 @@ class _ClientDocumentsScreenState extends State<ClientDocumentsScreen> {
           ),
         ],
       ),
-    ),
       floatingActionButton: FloatingActionButton(
         onPressed: () => _showUploadOptions(context),
         backgroundColor: AppColors.primary,
         child: const Icon(Icons.add_rounded, color: AppColors.white, size: 32),
       ),
     );
-  }
-
-  Widget _buildHeader() {
-    return const AppScreenHeader(title: 'Documentos');
   }
 
   Widget _buildSecurityBanner() {
@@ -88,11 +87,11 @@ class _ClientDocumentsScreenState extends State<ClientDocumentsScreen> {
               children: [
                 const Text(
                   'Segurança garantida',
-                  style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16),
+                  style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 15),
                 ),
                 Text(
                   'Dica: Os envios são criptografados',
-                  style: TextStyle(color: Colors.white.withValues(alpha: 0.8), fontSize: 13),
+                  style: TextStyle(color: Colors.white.withValues(alpha: 0.8), fontSize: 12),
                 ),
               ],
             ),
@@ -113,8 +112,8 @@ class _ClientDocumentsScreenState extends State<ClientDocumentsScreen> {
       child: DropdownButtonHideUnderline(
         child: DropdownButton<String>(
           value: _selectedFilter,
-          icon: const Icon(Icons.keyboard_arrow_down_rounded, color: AppColors.textCaption),
-          style: AppTextStyles.body.copyWith(fontSize: 14),
+          icon: const Icon(Icons.keyboard_arrow_down_rounded, color: AppColors.textCaption, size: 20),
+          style: AppTextStyles.body.copyWith(fontSize: 13, fontWeight: FontWeight.w500),
           onChanged: (String? newValue) {
             if (newValue != null) {
               setState(() => _selectedFilter = newValue);
@@ -124,9 +123,7 @@ class _ClientDocumentsScreenState extends State<ClientDocumentsScreen> {
               .map<DropdownMenuItem<String>>((String value) {
             return DropdownMenuItem<String>(
               value: value,
-              child: Text(
-                'Visualizar: $value',
-              ),
+              child: Text('Filtro: $value'),
             );
           }).toList(),
         ),
@@ -150,18 +147,18 @@ class _ClientDocumentsScreenState extends State<ClientDocumentsScreen> {
             icon: Icon(
               Icons.grid_view_outlined,
               color: _isGridView ? AppColors.primary : AppColors.textCaption,
-              size: 20,
+              size: 18,
             ),
             onPressed: () => setState(() => _isGridView = true),
           ),
-          Container(width: 1, height: 20, color: AppColors.divider),
+          Container(width: 1, height: 16, color: AppColors.divider),
           IconButton(
             padding: const EdgeInsets.all(8),
             constraints: const BoxConstraints(),
             icon: Icon(
               Icons.format_list_bulleted_rounded,
               color: !_isGridView ? AppColors.primary : AppColors.textCaption,
-              size: 20,
+              size: 18,
             ),
             onPressed: () => setState(() => _isGridView = false),
           ),
@@ -169,8 +166,8 @@ class _ClientDocumentsScreenState extends State<ClientDocumentsScreen> {
       ),
     );
   }
+
   Widget _buildDocumentList() {
-    // Mock data filtering
     final allDocs = [
       {'title': 'RG_Frente_Verso.pdf', 'status': 'Enviado', 'type': 'pdf', 'size': '1.2 MB'},
       {'title': 'Comprovante_Residencia.jpg', 'status': 'Aprovado', 'type': 'image', 'size': '3.4 MB'},
@@ -182,114 +179,89 @@ class _ClientDocumentsScreenState extends State<ClientDocumentsScreen> {
         : allDocs.where((doc) => doc['status'] == _selectedFilter).toList();
 
     if (_isGridView) {
-      return _buildGridView(filteredDocs);
-    }
-    return _buildListView(filteredDocs);
-  }
+      return GridView.builder(
+        padding: const EdgeInsets.fromLTRB(20, 12, 20, 100),
+        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+          crossAxisCount: 2,
+          crossAxisSpacing: 16,
+          mainAxisSpacing: 16,
+          childAspectRatio: 0.85,
+        ),
+        itemCount: filteredDocs.length,
+        itemBuilder: (context, index) {
+          final doc = filteredDocs[index];
+          final isPdf = doc['type'] == 'pdf';
+          final iconColor = isPdf ? Colors.orange : AppColors.primary;
+          final bgColor = isPdf ? const Color(0xFFFFF7E6) : const Color(0xFFF0F4FF);
+          final statusColor = doc['status'] == 'Aprovado' ? AppColors.success : AppColors.primary;
 
-  Widget _buildGridView(List<Map<String, String>> docs) {
-    return GridView.builder(
-      padding: const EdgeInsets.fromLTRB(20, 12, 20, 100),
-      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: 2,
-        crossAxisSpacing: 16,
-        mainAxisSpacing: 16,
-        childAspectRatio: 0.85,
-      ),
-      itemCount: docs.length,
-      itemBuilder: (context, index) {
-        final doc = docs[index];
-        final isPdf = doc['type'] == 'pdf';
-        
-        final iconColor = isPdf ? Colors.orange : AppColors.primary;
-        final bgColor = isPdf ? const Color(0xFFFFF7E6) : const Color(0xFFF0F4FF);
-        final statusColor = doc['status'] == 'Aprovado' ? AppColors.success : AppColors.primary;
-
-        return Container(
-          decoration: BoxDecoration(
-            color: AppColors.white,
-            borderRadius: BorderRadius.circular(16),
-            border: Border.all(color: AppColors.divider.withValues(alpha: 0.5)),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withValues(alpha: 0.02),
-                blurRadius: 8,
-                offset: const Offset(0, 4),
-              ),
-            ],
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Expanded(
-                child: Container(
-                  width: double.infinity,
-                  decoration: BoxDecoration(
-                    color: bgColor,
-                    borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
-                  ),
-                  child: Center(
-                    child: Icon(
-                      isPdf ? Icons.description_outlined : Icons.image_outlined,
-                      color: iconColor,
-                      size: 32,
+          return Container(
+            decoration: BoxDecoration(
+              color: AppColors.white,
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(color: AppColors.divider.withValues(alpha: 0.5)),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Expanded(
+                  child: Container(
+                    width: double.infinity,
+                    decoration: BoxDecoration(
+                      color: bgColor,
+                      borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
                     ),
-                  ),
-                ),
-              ),
-              Padding(
-                padding: const EdgeInsets.all(12),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      doc['title']!,
-                      style: AppTextStyles.body.copyWith(fontWeight: FontWeight.bold, fontSize: 14),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                    const SizedBox(height: 4),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text(
-                          doc['size']!,
-                          style: AppTextStyles.caption.copyWith(fontSize: 11),
-                        ),
-                        Text(
-                          '08/04/26', // Mock date string to match layout
-                          style: AppTextStyles.caption.copyWith(fontSize: 11),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 8),
-                    Text(
-                      doc['status']!,
-                      style: AppTextStyles.caption.copyWith(
-                        color: statusColor,
-                        fontWeight: FontWeight.w600,
-                        fontSize: 12,
+                    child: Center(
+                      child: Icon(
+                        isPdf ? Icons.description_outlined : Icons.image_outlined,
+                        color: iconColor,
+                        size: 32,
                       ),
                     ),
-                  ],
+                  ),
                 ),
-              ),
-            ],
-          ),
-        );
-      },
-    );
-  }
+                Padding(
+                  padding: const EdgeInsets.all(12),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        doc['title']!,
+                        style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        '${doc['size']} • 08/04/26',
+                        style: AppTextStyles.caption.copyWith(fontSize: 10),
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        doc['status']!,
+                        style: TextStyle(
+                          color: statusColor,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 11,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          );
+        },
+      );
+    }
 
-  Widget _buildListView(List<Map<String, String>> docs) {
     return ListView.separated(
       padding: const EdgeInsets.fromLTRB(20, 12, 20, 100),
-      itemCount: docs.length,
+      itemCount: filteredDocs.length,
       separatorBuilder: (_, _) => const SizedBox(height: 12),
       itemBuilder: (context, index) {
-        final doc = docs[index];
+        final doc = filteredDocs[index];
         final isPdf = doc['type'] == 'pdf';
-        
         final iconColor = isPdf ? Colors.orange : AppColors.primary;
         final statusColor = doc['status'] == 'Aprovado' ? AppColors.success : AppColors.primary;
 

@@ -14,24 +14,19 @@ class ClientChatMirrorScreen extends StatelessWidget {
       appBar: CustomAppBar(
         title: '',
         showBackButton: true,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
-          onPressed: () => Navigator.pop(context),
-        ),
         actions: [
           IconButton(
             icon: const Icon(Icons.more_vert),
             onPressed: () {},
           ),
         ],
-        // Custom header to match mockup
         centerTitle: false,
         titleWidget: Row(
           children: [
             const CircleAvatar(
-              radius: 20,
+              radius: 18,
               backgroundColor: AppColors.primary,
-              child: Icon(Icons.smart_toy_outlined, color: Colors.white),
+              child: Icon(Icons.smart_toy_outlined, color: Colors.white, size: 18),
             ),
             const SizedBox(width: 12),
             Column(
@@ -40,14 +35,11 @@ class ClientChatMirrorScreen extends StatelessWidget {
               children: [
                 Text(
                   'Assistente Jurídico',
-                  style: AppTextStyles.body.copyWith(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 16,
-                  ),
+                  style: AppTextStyles.h2.copyWith(fontSize: 15),
                 ),
                 Text(
                   'Via Inteligência Artificial',
-                  style: AppTextStyles.caption.copyWith(fontSize: 12),
+                  style: AppTextStyles.caption.copyWith(fontSize: 11),
                 ),
               ],
             ),
@@ -58,7 +50,7 @@ class ClientChatMirrorScreen extends StatelessWidget {
         children: [
           Expanded(
             child: ListView(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
               children: [
                 _buildDateSeparator('Hoje'),
                 const ChatBubble(
@@ -93,7 +85,7 @@ class ClientChatMirrorScreen extends StatelessWidget {
           child: Text(
             label,
             style: AppTextStyles.caption.copyWith(
-              fontSize: 12,
+              fontSize: 11,
               color: AppColors.primary,
               fontWeight: FontWeight.bold,
             ),
@@ -121,7 +113,7 @@ class ClientChatMirrorScreen extends StatelessWidget {
               child: const TextField(
                 decoration: InputDecoration(
                   hintText: 'Pergunte algo...',
-                  hintStyle: TextStyle(color: AppColors.textCaption),
+                  hintStyle: TextStyle(color: AppColors.textCaption, fontSize: 14),
                   border: InputBorder.none,
                 ),
               ),
@@ -129,16 +121,15 @@ class ClientChatMirrorScreen extends StatelessWidget {
           ),
           const SizedBox(width: 12),
           Container(
-            padding: const EdgeInsets.all(14),
+            padding: const EdgeInsets.all(12),
             decoration: const BoxDecoration(
               color: AppColors.primary,
               shape: BoxShape.circle,
             ),
-            child: const Icon(Icons.send_rounded, color: AppColors.white, size: 20),
+            child: const Icon(Icons.send_rounded, color: AppColors.white, size: 18),
           ),
         ],
       ),
     );
   }
 }
-

@@ -1,9 +1,8 @@
 import 'package:flutter/material.dart';
 import '../../../../shared/constants/app_colors.dart';
 import '../../../../shared/widgets/buttons/app_badge.dart';
-import '../../../../shared/widgets/inputs/app_search_input.dart';
-import '../../../../shared/widgets/layout/app_screen_header.dart';
-import '../widgets/process_card.dart';
+import '../../../../shared/widgets/layout/custom_app_bar.dart';
+import '../../../../shared/widgets/cards/app_process_card.dart';
 
 class ClientProcessListScreen extends StatefulWidget {
   const ClientProcessListScreen({super.key});
@@ -13,71 +12,96 @@ class ClientProcessListScreen extends StatefulWidget {
 }
 
 class _ClientProcessListScreenState extends State<ClientProcessListScreen> {
+  String _selectedFilter = 'Todos';
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.background,
-      body: SafeArea(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            _buildHeader(),
-            Expanded(
-              child: _buildList(),
-            ),
-          ],
-        ),
+      appBar: const CustomAppBar(
+        title: 'Meus Processos',
+        showBackButton: false,
+      ),
+      body: Column(
+        children: [
+          _buildFilters(),
+          Expanded(
+            child: _buildList(),
+          ),
+        ],
       ),
     );
   }
 
-  Widget _buildHeader() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        const AppScreenHeader(title: 'Meus Processos'),
-        const SizedBox(height: 16),
-        const Padding(
-          padding: EdgeInsets.symmetric(horizontal: 20),
-          child: AppSearchInput(hintText: 'Buscar pelo nome ou número...'),
-        ),
-      ],
+  Widget _buildFilters() {
+    final filters = ['Todos', 'Ativos', 'Concluídos', 'Pendentes'];
+    return SingleChildScrollView(
+      scrollDirection: Axis.horizontal,
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+      child: Row(
+        children: filters.map((f) {
+          final isSelected = _selectedFilter == f;
+          return Padding(
+            padding: const EdgeInsets.only(right: 8),
+            child: FilterChip(
+              label: Text(f),
+              selected: isSelected,
+              onSelected: (val) => setState(() => _selectedFilter = f),
+              backgroundColor: AppColors.white,
+              selectedColor: AppColors.primary,
+              labelStyle: TextStyle(
+                color: isSelected ? AppColors.white : AppColors.textPrimary,
+                fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                fontSize: 12,
+              ),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(20),
+                side: BorderSide(
+                  color: isSelected ? AppColors.primary : AppColors.divider,
+                ),
+              ),
+              showCheckmark: false,
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+            ),
+          );
+        }).toList(),
+      ),
     );
   }
 
   Widget _buildList() {
     return ListView(
-      padding: const EdgeInsets.fromLTRB(20, 8, 20, 100),
+      padding: const EdgeInsets.fromLTRB(20, 0, 20, 100),
       children: [
-        ProcessCard(
+        AppProcessCard(
           icon: Icons.gavel_outlined,
           title: 'Ação Indenizatória',
-          processNumber: '0001234-56.2026',
+          subtitle: 'Proc: 0001234-56.2026',
           statusLabel: 'Em Análise',
           statusType: BadgeType.warning,
-          statusMessage: 'Aguardando documentação',
+          lastUpdate: 'Aguardando documentação',
           progressPercentage: 30,
           onTap: () => Navigator.pushNamed(context, '/process-timeline'),
         ),
         const SizedBox(height: 16),
-        ProcessCard(
+        AppProcessCard(
           icon: Icons.people_outline,
           title: 'Ação de Divórcio',
-          processNumber: '0005678-12.2025',
+          subtitle: 'Proc: 0005678-12.2025',
           statusLabel: 'Concluído',
           statusType: BadgeType.success,
-          statusMessage: 'Processo Arquivado',
+          lastUpdate: 'Processo Arquivado',
           progressPercentage: 100,
           onTap: () {},
         ),
         const SizedBox(height: 16),
-        ProcessCard(
+        AppProcessCard(
           icon: Icons.work_outline,
           title: 'Reclamatória Trabalhista',
-          processNumber: '0009876-90.2024',
+          subtitle: 'Proc: 0009876-90.2024',
           statusLabel: 'Andamento',
           statusType: BadgeType.primary,
-          statusMessage: 'Audiência marcada: 15/05',
+          lastUpdate: 'Audiência marcada: 15/05',
           progressPercentage: 65,
           onTap: () {},
         ),
@@ -85,3 +109,4 @@ class _ClientProcessListScreenState extends State<ClientProcessListScreen> {
     );
   }
 }
+

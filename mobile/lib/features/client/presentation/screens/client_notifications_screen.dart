@@ -2,9 +2,42 @@ import 'package:flutter/material.dart';
 import '../../../../shared/constants/app_colors.dart';
 import '../../../../shared/constants/app_text_styles.dart';
 import '../../../../shared/widgets/layout/custom_app_bar.dart';
+import '../../../../shared/widgets/cards/app_notification_tile.dart';
 
-class ClientNotificationsScreen extends StatelessWidget {
+class ClientNotificationsScreen extends StatefulWidget {
   const ClientNotificationsScreen({super.key});
+
+  @override
+  State<ClientNotificationsScreen> createState() => _ClientNotificationsScreenState();
+}
+
+class _ClientNotificationsScreenState extends State<ClientNotificationsScreen> {
+  final List<Map<String, dynamic>> _notifications = [
+    {
+      'id': '1',
+      'title': 'Nova movimentação',
+      'body': 'O juiz emitiu um despacho no processo Ação Indenizatória.',
+      'time': 'há 5 min',
+      'isRead': false,
+      'type': 'process',
+    },
+    {
+      'id': '2',
+      'title': 'Documento recebido',
+      'body': 'Sua folha de pagamento foi anexada com sucesso.',
+      'time': 'há 2 horas',
+      'isRead': true,
+      'type': 'doc',
+    },
+    {
+      'id': '3',
+      'title': 'Audiência marcada',
+      'body': 'Sua audiência cível foi agendada para 15/05 as 14:00.',
+      'time': 'Ontem',
+      'isRead': true,
+      'type': 'process',
+    },
+  ];
 
   @override
   Widget build(BuildContext context) {
@@ -17,8 +50,14 @@ class ClientNotificationsScreen extends StatelessWidget {
           showBackButton: true,
           actions: [
             TextButton(
-              onPressed: () {},
-              child: const Text('Limpar', style: TextStyle(color: AppColors.primary)),
+              onPressed: () {
+                setState(() {
+                  for (var n in _notifications) {
+                    n['isRead'] = true;
+                  }
+                });
+              },
+              child: const Text('Lidas', style: TextStyle(color: AppColors.primary)),
             ),
           ],
         ),
@@ -49,112 +88,79 @@ class ClientNotificationsScreen extends StatelessWidget {
   }
 
   Widget _buildNotificationList({required bool onlyUnread}) {
-    final notifications = [
-      {
-        'title': 'Nova movimentação',
-        'body': 'O juiz emitiu um despacho no processo Ação Indenizatória.',
-        'time': 'há 5 min',
-        'isRead': false,
-        'icon': Icons.notifications_none_outlined,
-      },
-      {
-        'title': 'Documento recebido',
-        'body': 'Sua folha de pagamento foi anexada com sucesso.',
-        'time': 'há 2 horas',
-        'isRead': true,
-        'icon': Icons.description_outlined,
-      },
-      {
-        'title': 'Audiência marcada',
-        'body': 'Sua audiência cível foi agendada para 15/05 as 14:00.',
-        'time': 'Ontem',
-        'isRead': true,
-        'icon': Icons.event_note_outlined,
-      },
-    ];
+    final list = onlyUnread 
+        ? _notifications.where((n) => !n['isRead']).toList() 
+        : _notifications;
 
-    final list = onlyUnread ? notifications.where((n) => !(n['isRead'] as bool)).toList() : notifications;
+    if (list.isEmpty) {
+      return _buildEmptyState();
+    }
 
-    return ListView.separated(
+    return ListView.builder(
+      padding: const EdgeInsets.symmetric(vertical: 8),
       itemCount: list.length,
-      separatorBuilder: (_, _) => const Divider(height: 1),
       itemBuilder: (context, index) {
         final n = list[index];
-        final isRead = n['isRead'] as bool;
-
-        return Container(
-          color: isRead ? Colors.transparent : const Color(0xFFE8EAF6),
-          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Container(
-                width: 40,
-                height: 40,
-                decoration: BoxDecoration(
-                  color: AppColors.white,
-                  shape: BoxShape.circle,
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withValues(alpha: 0.05),
-                      blurRadius: 4,
-                      offset: const Offset(0, 2),
-                    ),
-                  ],
-                ),
-                child: Stack(
-                  alignment: Alignment.center,
-                  children: [
-                    Icon(n['icon'] as IconData, color: AppColors.primary, size: 20),
-                    if (!isRead)
-                      Positioned(
-                        top: 8,
-                        right: 8,
-                        child: Container(
-                          width: 8,
-                          height: 8,
-                          decoration: const BoxDecoration(
-                            color: Colors.blue,
-                            shape: BoxShape.circle,
-                          ),
-                        ),
-                      ),
-                  ],
-                ),
-              ),
-              const SizedBox(width: 16),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text(
-                          n['title'] as String,
-                          style: AppTextStyles.body.copyWith(fontWeight: FontWeight.bold),
-                        ),
-                        Text(
-                          n['time'] as String,
-                          style: AppTextStyles.caption.copyWith(fontSize: 12),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      n['body'] as String,
-                      style: AppTextStyles.body.copyWith(
-                        fontSize: 14,
-                        color: AppColors.textCaption,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
+        return AppNotificationTile(
+          id: n['id'],
+          title: n['title'],
+          body: n['body'],
+          time: n['time'],
+          type: n['type'],
+          isRead: n['isRead'],
+          onToggleRead: _toggleReadStatus,
+          onDelete: _deleteNotification,
         );
       },
+    );
+  }
+
+  Widget _buildEmptyState() {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(Icons.notifications_none_rounded, size: 64, color: AppColors.textCaption.withValues(alpha: 0.3)),
+          const SizedBox(height: 16),
+          Text(
+            'Nenhuma notificação por aqui',
+            style: AppTextStyles.h2.copyWith(color: AppColors.textCaption),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _toggleReadStatus(String id) {
+    setState(() {
+      final index = _notifications.indexWhere((n) => n['id'] == id);
+      if (index != -1) {
+        _notifications[index]['isRead'] = !_notifications[index]['isRead'];
+      }
+    });
+  }
+
+  void _deleteNotification(String id) {
+    final index = _notifications.indexWhere((n) => n['id'] == id);
+    if (index == -1) return;
+    
+    final removed = _notifications[index];
+    setState(() {
+      _notifications.removeAt(index);
+    });
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: const Text('Notificação excluída'),
+        action: SnackBarAction(
+          label: 'Desfazer',
+          onPressed: () {
+            setState(() {
+              _notifications.insert(index, removed);
+            });
+          },
+        ),
+      ),
     );
   }
 }
