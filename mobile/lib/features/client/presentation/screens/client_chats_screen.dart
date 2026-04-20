@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../../../shared/constants/app_colors.dart';
 import '../../../../shared/constants/app_dimensions.dart';
-import '../../../../shared/constants/app_text_styles.dart';
 import '../../../../shared/widgets/layout/custom_app_bar.dart';
 import '../widgets/chat_list_tile.dart';
 
@@ -29,8 +28,8 @@ class _ClientChatsScreenState extends State<ClientChatsScreen> {
           Expanded(
             child: ListView(
               padding: const EdgeInsets.symmetric(
-                horizontal: AppDimensions.paddingMedium,
-                vertical: AppDimensions.paddingMedium,
+                horizontal: AppDimensions.spacingL,
+                vertical: AppDimensions.spacingL,
               ),
               children: [
                 ChatListTile(

@@ -215,7 +215,7 @@ class _ClientProcessTimelineScreenState extends State<ClientProcessTimelineScree
                 const SizedBox(height: 16),
                 const LabeledField(
                   label: 'VALOR DA CAUSA',
-                  value: 'R$ 50.000,00',
+                  value: 'R\$ 50.000,00',
                 ),
                 const SizedBox(height: 16),
                 const LabeledField(
