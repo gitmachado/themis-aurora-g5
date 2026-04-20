@@ -287,4 +287,3 @@ class _LawyerClientListScreenState extends State<LawyerClientListScreen> with Si
     );
   }
 }
-}

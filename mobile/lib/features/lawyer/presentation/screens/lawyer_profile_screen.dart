@@ -20,13 +20,13 @@ class LawyerProfileScreen extends StatelessWidget {
           children: [
             _buildProfessionalHeader(),
             const SizedBox(height: 32),
-            _buildProfileSection('Gestão do Escritório', [
+            _buildProfileSection(context, 'Gestão do Escritório', [
               _ProfileMenuItem(Icons.business_rounded, 'Dados do Escritório', 'Configurações e Endereço'),
               _ProfileMenuItem(Icons.group_rounded, 'Minha Equipe', 'Gerenciar advogados e estagiários'),
               _ProfileMenuItem(Icons.account_balance_wallet_outlined, 'Financeiro', 'Honorários e Faturas'),
             ]),
             const SizedBox(height: 24),
-            _buildProfileSection('Geral', [
+            _buildProfileSection(context, 'Geral', [
               _ProfileMenuItem(Icons.notifications_none_rounded, 'Notificações', 'Configurar alertas'),
               _ProfileMenuItem(Icons.lock_outline_rounded, 'Segurança', 'Alterar senha e acesso'),
               _ProfileMenuItem(Icons.help_outline_rounded, 'Suporte Técnico', 'Falar com OmniConnect'),
@@ -74,7 +74,7 @@ class LawyerProfileScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildProfileSection(String title, List<_ProfileMenuItem> items) {
+  Widget _buildProfileSection(BuildContext context, String title, List<_ProfileMenuItem> items) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -96,11 +96,6 @@ class LawyerProfileScreen extends StatelessWidget {
               final isLast = items.indexOf(item) == items.length - 1;
               return Column(
                 children: [
-                  ListTile(
-                    leading: Icon(item.icon, color: AppColors.textPrimary),
-                    title: Text(item.title, style: const TextStyle(fontWeight: FontWeight.bold)),
-                    subtitle: Text(item.subtitle, style: AppTextStyles.caption.copyWith(fontSize: 12)),
-                    trailing: const Icon(Icons.chevron_right, color: AppColors.divider),
                   ListTile(
                     leading: Icon(item.icon, color: AppColors.textPrimary),
                     title: Text(item.title, style: const TextStyle(fontWeight: FontWeight.bold)),
