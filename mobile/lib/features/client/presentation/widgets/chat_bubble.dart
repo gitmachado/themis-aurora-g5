@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../../../shared/constants/app_colors.dart';
+import '../../../../shared/constants/app_dimensions.dart';
 import '../../../../shared/constants/app_text_styles.dart';
 
 class ChatBubble extends StatelessWidget {
@@ -19,18 +20,21 @@ class ChatBubble extends StatelessWidget {
     return Align(
       alignment: isMe ? Alignment.centerRight : Alignment.centerLeft,
       child: Container(
-        margin: const EdgeInsets.symmetric(vertical: 4),
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+        margin: const EdgeInsets.symmetric(vertical: AppDimensions.spacingXS),
+        padding: const EdgeInsets.symmetric(
+          horizontal: AppDimensions.spacingM,
+          vertical: AppDimensions.spacingS,
+        ),
         constraints: BoxConstraints(
           maxWidth: MediaQuery.of(context).size.width * 0.75,
         ),
         decoration: BoxDecoration(
-          color: isMe ? const Color(0xFFDCF8C6) : AppColors.white,
+          color: isMe ? AppColors.chatBubbleMe : AppColors.white,
           borderRadius: BorderRadius.only(
-            topLeft: const Radius.circular(12),
-            topRight: const Radius.circular(12),
-            bottomLeft: isMe ? const Radius.circular(12) : Radius.zero,
-            bottomRight: isMe ? Radius.zero : const Radius.circular(12),
+            topLeft: const Radius.circular(AppDimensions.radiusL),
+            topRight: const Radius.circular(AppDimensions.radiusL),
+            bottomLeft: isMe ? const Radius.circular(AppDimensions.radiusL) : Radius.zero,
+            bottomRight: isMe ? Radius.zero : const Radius.circular(AppDimensions.radiusL),
           ),
           boxShadow: [
             BoxShadow(
@@ -59,8 +63,8 @@ class ChatBubble extends StatelessWidget {
                   style: AppTextStyles.caption.copyWith(fontSize: 11),
                 ),
                 if (isMe) ...[
-                  const SizedBox(width: 4),
-                  const Icon(Icons.done_all, size: 16, color: Colors.blue),
+                  const SizedBox(width: AppDimensions.spacingXS),
+                  const Icon(Icons.done_all, size: AppDimensions.iconXS, color: AppColors.primary),
                 ],
               ],
             ),

@@ -3,6 +3,9 @@ import '../../../../shared/constants/app_colors.dart';
 import '../../../../shared/constants/app_text_styles.dart';
 import '../../../../shared/widgets/layout/custom_app_bar.dart';
 import '../../../../shared/widgets/buttons/primary_button.dart';
+import '../../../../shared/widgets/buttons/app_badge.dart';
+import '../../../../shared/widgets/cards/labeled_field.dart';
+import '../../../../shared/widgets/cards/document_file_card.dart';
 import '../widgets/timeline_summary_card.dart';
 import '../widgets/timeline_event_tile.dart';
 
@@ -21,11 +24,41 @@ class _ClientProcessTimelineScreenState extends State<ClientProcessTimelineScree
       child: Scaffold(
         backgroundColor: AppColors.background,
         appBar: CustomAppBar(
-          title: 'Detalhes do Processo',
           showBackButton: true,
+          titleWidget: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Text(
+                '0012345-67.2023.8.26',
+                style: TextStyle(
+                  color: AppColors.textPrimary,
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              Row(
+                children: [
+                  Text(
+                    'Ação Trabalhista',
+                    style: AppTextStyles.caption.copyWith(fontSize: 12),
+                  ),
+                  const SizedBox(width: 8),
+                  Text(
+                    '• Atualizado há 15 min',
+                    style: AppTextStyles.caption.copyWith(
+                      fontSize: 11,
+                      color: AppColors.primary,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+          title: '',
           actions: [
             IconButton(
-              icon: const Icon(Icons.share_outlined),
+              icon: const Icon(Icons.more_vert, color: AppColors.textCaption),
               onPressed: () {},
             ),
           ],
@@ -33,7 +66,7 @@ class _ClientProcessTimelineScreenState extends State<ClientProcessTimelineScree
             labelColor: AppColors.primary,
             unselectedLabelColor: AppColors.textCaption,
             indicatorColor: AppColors.primary,
-            indicatorSize: TabBarIndicatorSize.label,
+            indicatorWeight: 3,
             labelStyle: TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
             tabs: [
               Tab(text: 'Timeline'),
@@ -65,41 +98,54 @@ class _ClientProcessTimelineScreenState extends State<ClientProcessTimelineScree
   Widget _buildTimelineTab() {
     return SingleChildScrollView(
       padding: const EdgeInsets.all(20),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            'Linha do Tempo',
-            style: AppTextStyles.h2.copyWith(fontSize: 18),
-          ),
-          const SizedBox(height: 24),
-          const TimelineEventTile(
-            isFirst: true,
-            date: '08/04/2026 às 14:30',
-            description: 'Processo distribuído e aguardando primeira análise do juiz.',
-            icon: Icons.gavel_outlined,
-          ),
-          const TimelineEventTile(
-            date: '07/04/2026 às 10:00',
-            description: 'Recebemos todos os documentos enviados. Vamos finalizar a petição hoje.',
-            icon: Icons.description_outlined,
-            iconBackgroundColor: Color(0xFFE8F5E9),
-          ),
-          const TimelineEventTile(
-            isLast: true,
-            date: '05/04/2026 às 09:00',
-            description: 'Contrato firmado e honorários iniciais quitados com sucesso.',
-            icon: Icons.history_edu_outlined,
-            iconBackgroundColor: Color(0xFFFFF3E0),
-          ),
-        ],
+      child: Container(
+        padding: const EdgeInsets.all(24),
+        decoration: BoxDecoration(
+          color: AppColors.white,
+          borderRadius: BorderRadius.circular(16),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.03),
+              blurRadius: 10,
+              offset: const Offset(0, 4),
+            ),
+          ],
+        ),
+        child: const Column(
+          children: [
+            TimelineEventTile(
+              isFirst: true,
+              title: 'Petição Inicial Protocolada',
+              date: '05 Abr 2026 • 14:30',
+              description: 'Processo distribuído e aguardando primeira análise do juiz.',
+              responsible: 'Dr. Marcelo Costa',
+            ),
+            TimelineEventTile(
+              title: 'Audiência Marcada',
+              date: '12 May 2026 • 10:00',
+              description: 'Aguardando a realização da audiência de conciliação.',
+              responsible: 'Dr. Rodrigo Machado',
+            ),
+            TimelineEventTile(
+              title: 'Aguardando Sentença',
+              date: '--',
+              description: 'O processo está em fase de conclusão para o juiz.',
+            ),
+            TimelineEventTile(
+              isLast: true,
+              title: 'Sentença Proferida',
+              date: 'Previsão: Junho 2026',
+              description: 'Previsão estimada baseada na média do tribunal.',
+            ),
+          ],
+        ),
       ),
     );
   }
 
   Widget _buildAiResumoTab() {
     return SingleChildScrollView(
-      padding: const EdgeInsets.all(20),
+      padding: const EdgeInsets.all(16),
       child: Column(
         children: [
           TimelineSummaryCard(
@@ -108,25 +154,150 @@ class _ClientProcessTimelineScreenState extends State<ClientProcessTimelineScree
             onAiAnalysisTap: () {},
             onChatMirrorTap: () => DefaultTabController.of(context).animateTo(3),
           ),
-          const SizedBox(height: 24),
-          _buildInfoSection('Dados do Processo', [
-            {'label': 'Número', 'value': '0001234-56.2026.8.26.0100'},
-            {'label': 'Vara', 'value': '12ª Vara Cível'},
-            {'label': 'Comarca', 'value': 'São Paulo - SP'},
-          ]),
+          const SizedBox(height: 16),
+          Container(
+            padding: const EdgeInsets.all(24),
+            decoration: BoxDecoration(
+              color: AppColors.white,
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(color: AppColors.divider.withValues(alpha: 0.5)),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.04),
+                  blurRadius: 12,
+                  offset: const Offset(0, 4),
+                ),
+              ],
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const LabeledField(
+                  label: 'DESCRIÇÃO DO CASO',
+                  value:
+                      'O cliente foi demitido sem justa causa e não recebeu as verbas rescisórias. Alega também horas extras não pagas durante os últimos 2 anos em que desempenhou suas funções.',
+                  isDescription: true,
+                ),
+                const SizedBox(height: 24),
+                const Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    LabeledField(
+                      label: 'PARTES DO PROCESSO',
+                      value: 'João Ricardo Mendes (Autor/Cliente)',
+                      icon: Icons.person_outline,
+                      iconColor: AppColors.primary,
+                    ),
+                    SizedBox(height: 12),
+                    LabeledField(
+                      label: '',
+                      value: 'Tecnologia Global S.A. (Réu)',
+                      icon: Icons.shield_outlined,
+                      iconColor: Color(0xFFEF4444),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 24),
+                LabeledField(
+                  label: 'STATUS ATUAL',
+                  value: 'Em andamento',
+                  valueWidget: const Row(
+                    children: [
+                      AppBadge(label: 'Em andamento', type: BadgeType.success),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 24),
+                const LabeledField(
+                  label: 'TRIBUNAL / VARA',
+                  value: '2ª Vara do Trabalho',
+                ),
+                const SizedBox(height: 16),
+                const LabeledField(
+                  label: 'VALOR DA CAUSA',
+                  value: 'R$ 50.000,00',
+                ),
+                const SizedBox(height: 16),
+                const LabeledField(
+                  label: 'DATA DE DISTRIBUIÇÃO',
+                  value: '12/01/2024',
+                ),
+              ],
+            ),
+          ),
         ],
       ),
     );
   }
 
   Widget _buildDocsTab() {
-    return ListView(
-      padding: const EdgeInsets.all(20),
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        _buildDocItem('Petição Inicial.pdf', '08/04/2026'),
-        _buildDocItem('Procuração.pdf', '05/04/2026'),
-        _buildDocItem('Documentos Pessoais.zip', '05/04/2026'),
+        SingleChildScrollView(
+          scrollDirection: Axis.horizontal,
+          padding: const EdgeInsets.fromLTRB(20, 16, 20, 8),
+          child: Row(
+            children: [
+              _buildFilterChip('Todos', isSelected: true),
+              const SizedBox(width: 8),
+              _buildFilterChip('Petições'),
+              const SizedBox(width: 8),
+              _buildFilterChip('Provas'),
+            ],
+          ),
+        ),
+        Expanded(
+          child: ListView(
+            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+            children: const [
+              DocumentFileCard(
+                category: 'PETIÇÃO',
+                fileName: 'Petição Inicial.pdf',
+                fileSize: '345 KB',
+                dateAdded: '05 Apr',
+              ),
+              DocumentFileCard(
+                category: 'PROCURAÇÃO',
+                fileName: 'Procuração_Assinada.pdf',
+                fileSize: '1.2 MB',
+                dateAdded: '01 Apr',
+              ),
+              DocumentFileCard(
+                category: 'PROVA',
+                fileName: 'Foto_Local_Acidente.jpg',
+                fileSize: '2.5 MB',
+                dateAdded: 'ontem',
+                icon: Icons.image_outlined,
+                iconColor: Color(0xFFEA580C),
+                iconBackgroundColor: Color(0xFFFFF7ED),
+                actionIcon: Icons.visibility_outlined,
+              ),
+            ],
+          ),
+        ),
       ],
+    );
+  }
+
+  Widget _buildFilterChip(String label, {bool isSelected = false}) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      decoration: BoxDecoration(
+        color: isSelected ? AppColors.primary : AppColors.white,
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(
+          color: isSelected ? AppColors.primary : const Color(0xFFE5E7EB),
+        ),
+      ),
+      child: Text(
+        label,
+        style: TextStyle(
+          color: isSelected ? Colors.white : const Color(0xFF666666),
+          fontSize: 12,
+          fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
+        ),
+      ),
     );
   }
 
@@ -152,66 +323,6 @@ class _ClientProcessTimelineScreenState extends State<ClientProcessTimelineScree
     );
   }
 
-  Widget _buildDocItem(String name, String date) {
-    return Container(
-      margin: const EdgeInsets.only(bottom: 12),
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: AppColors.white,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: AppColors.divider),
-      ),
-      child: Row(
-        children: [
-          const Icon(Icons.description_outlined, color: AppColors.primary),
-          const SizedBox(width: 16),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(name, style: const TextStyle(fontWeight: FontWeight.bold)),
-                Text(date, style: AppTextStyles.caption.copyWith(fontSize: 12)),
-              ],
-            ),
-          ),
-          const Icon(Icons.download_outlined, color: AppColors.textCaption),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildInfoSection(String title, List<Map<String, String>> items) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(title, style: AppTextStyles.h2.copyWith(fontSize: 16)),
-        const SizedBox(height: 12),
-        Container(
-          padding: const EdgeInsets.all(16),
-          decoration: BoxDecoration(
-            color: AppColors.white,
-            borderRadius: BorderRadius.circular(16),
-            border: Border.all(color: AppColors.divider),
-          ),
-          child: Column(
-            children: items.map((item) {
-              return Padding(
-                padding: const EdgeInsets.only(bottom: 12),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(item['label']!, style: AppTextStyles.caption),
-                    Text(item['value']!, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13)),
-                  ],
-                ),
-              );
-            }).toList(),
-          ),
-        ),
-      ],
-    );
-  }
-
   Widget _buildActionFooter(BuildContext context) {
     return Container(
       padding: const EdgeInsets.fromLTRB(20, 16, 20, 24),
@@ -223,7 +334,7 @@ class _ClientProcessTimelineScreenState extends State<ClientProcessTimelineScree
         label: 'Dúvida? Falar no WhatsApp',
         icon: Icons.chat_bubble_outline_rounded,
         backgroundColor: AppColors.success,
-        onPressed: () => Navigator.pushNamed(context, '/chat-mirror'),
+        onPressed: () {},
       ),
     );
   }

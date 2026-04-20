@@ -6,12 +6,14 @@ class AppScreenHeader extends StatelessWidget {
   final String title;
   final Widget? action;
   final EdgeInsetsGeometry padding;
+  final TextStyle? titleStyle;
 
   const AppScreenHeader({
     super.key,
     required this.title,
     this.action,
     this.padding = const EdgeInsets.fromLTRB(20, 16, 20, 0),
+    this.titleStyle,
   });
 
   @override
@@ -25,7 +27,7 @@ class AppScreenHeader extends StatelessWidget {
           Expanded(
             child: Text(
               title,
-              style: AppTextStyles.h1.copyWith(fontSize: 24),
+              style: titleStyle ?? AppTextStyles.h1.copyWith(fontSize: 24),
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
             ),

@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../../../shared/constants/app_colors.dart';
+import '../../../../shared/constants/app_dimensions.dart';
+import '../../../../shared/constants/app_text_styles.dart';
 import '../../../../shared/widgets/layout/custom_app_bar.dart';
 import '../widgets/chat_list_tile.dart';
 
@@ -11,7 +13,6 @@ class ClientChatsScreen extends StatefulWidget {
 }
 
 class _ClientChatsScreenState extends State<ClientChatsScreen> {
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -27,23 +28,22 @@ class _ClientChatsScreenState extends State<ClientChatsScreen> {
         children: [
           Expanded(
             child: ListView(
-              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+              padding: const EdgeInsets.symmetric(
+                horizontal: AppDimensions.paddingMedium,
+                vertical: AppDimensions.paddingMedium,
+              ),
               children: [
                 ChatListTile(
                   title: 'Assistente Jurídico',
-                  subtitle: 'Seu processo está na fase...',
-                  time: 'Agora',
-                  unreadCount: 1,
-                  isAi: true,
-                  onTap: () => Navigator.pushNamed(context, '/chat-mirror'),
+                  subtitle: 'Olá! Sou seu assistente para o processo #1234...',
+                  time: '10:30',
+                  unreadCount: 2,
+                  onTap: () {},
                 ),
-                const SizedBox(height: 12),
                 ChatListTile(
-                  title: 'Equipe OmniConnect',
-                  subtitle: 'Documentos recebidos...',
+                  title: 'Dr. Rodrigo Machado',
+                  subtitle: 'O novo documento foi anexado ao sistema.',
                   time: 'Ontem',
-                  unreadCount: 0,
-                  isAi: false,
                   onTap: () {},
                 ),
               ],
@@ -59,7 +59,4 @@ class _ClientChatsScreenState extends State<ClientChatsScreen> {
       ),
     );
   }
-
-
-
 }

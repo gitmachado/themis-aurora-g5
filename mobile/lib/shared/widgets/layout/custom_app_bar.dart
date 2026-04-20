@@ -12,7 +12,6 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
   final bool showNotificationButton;
   final int notificationCount;
   final VoidCallback? onNotificationTap;
-
   final PreferredSizeWidget? bottom;
 
   const CustomAppBar({
