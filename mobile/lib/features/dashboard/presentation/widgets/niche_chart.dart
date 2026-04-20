@@ -26,6 +26,7 @@ class _NicheChartState extends State<NicheChart> {
       padding: const EdgeInsets.all(20),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
         children: [
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -35,22 +36,18 @@ class _NicheChartState extends State<NicheChart> {
                 style: AppTextStyles.h2.copyWith(fontSize: 16),
               ),
               if (_selectedIndex != -1)
-                AnimatedOpacity(
-                  opacity: 1.0,
-                  duration: const Duration(milliseconds: 300),
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                    decoration: BoxDecoration(
-                      color: _data[_selectedIndex]['color'].withValues(alpha: 0.1),
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: Text(
-                      '${_data[_selectedIndex]['count']} processos',
-                      style: TextStyle(
-                        color: _data[_selectedIndex]['color'],
-                        fontWeight: FontWeight.bold,
-                        fontSize: 12,
-                      ),
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                  decoration: BoxDecoration(
+                    color: _data[_selectedIndex]['color'].withValues(alpha: 0.1),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Text(
+                    '${_data[_selectedIndex]['count']} processos',
+                    style: TextStyle(
+                      color: _data[_selectedIndex]['color'],
+                      fontWeight: FontWeight.bold,
+                      fontSize: 12,
                     ),
                   ),
                 ),
@@ -83,26 +80,25 @@ class _NicheChartState extends State<NicheChart> {
           _selectedIndex = isSelected ? -1 : index;
         });
       },
+      behavior: HitTestBehavior.opaque,
       child: Column(
+        mainAxisSize: MainAxisSize.min,
         mainAxisAlignment: MainAxisAlignment.end,
         children: [
           AnimatedContainer(
-            duration: const Duration(milliseconds: 400),
-            curve: Curves.easeOutBack,
+            duration: const Duration(milliseconds: 300),
             width: 44,
             height: 120 * (item['percentage'] as double),
             decoration: BoxDecoration(
               color: isSelected ? color : color.withValues(alpha: 0.7),
               borderRadius: BorderRadius.circular(8),
-              boxShadow: isSelected
-                  ? [
-                      BoxShadow(
-                        color: color.withValues(alpha: 0.3),
-                        blurRadius: 8,
-                        offset: const Offset(0, 4),
-                      )
-                    ]
-                  : [],
+              boxShadow: [
+                BoxShadow(
+                  color: isSelected ? color.withValues(alpha: 0.3) : Colors.transparent,
+                  blurRadius: isSelected ? 8 : 0,
+                  offset: isSelected ? const Offset(0, 4) : Offset.zero,
+                ),
+              ],
               gradient: LinearGradient(
                 begin: Alignment.topCenter,
                 end: Alignment.bottomCenter,
@@ -117,14 +113,13 @@ class _NicheChartState extends State<NicheChart> {
                 : null,
           ),
           const SizedBox(height: 12),
-          AnimatedDefaultTextStyle(
-            duration: const Duration(milliseconds: 200),
+          Text(
+            item['label'],
             style: AppTextStyles.caption.copyWith(
               fontWeight: isSelected ? FontWeight.bold : FontWeight.w600,
               color: isSelected ? color : AppColors.textCaption,
               fontSize: 12,
             ),
-            child: Text(item['label']),
           ),
         ],
       ),
