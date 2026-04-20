@@ -1,0 +1,10 @@
+{
+  "version": 1,
+  "skills": {
+    "flutter-building-layouts": {
+      "source": "flutter/skills",
+      "sourceType": "github",
+      "computedHash": "9686218c0b724c42ea30e97a3cc081cf4de69b5f3b0aa6253bd012ce9d573834"
+    }
+  }
+}
