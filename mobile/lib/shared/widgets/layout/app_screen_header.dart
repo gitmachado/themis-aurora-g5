@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../../constants/app_colors.dart';
+
 import '../../constants/app_text_styles.dart';
 
 class AppScreenHeader extends StatelessWidget {
@@ -16,6 +16,7 @@ class AppScreenHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final actionWidget = action;
     return Container(
       padding: padding,
       child: Row(
@@ -29,7 +30,7 @@ class AppScreenHeader extends StatelessWidget {
               overflow: TextOverflow.ellipsis,
             ),
           ),
-          if (action != null) action!,
+          actionWidget ?? const SizedBox.shrink(),
         ],
       ),
     );

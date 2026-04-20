@@ -23,7 +23,7 @@ class HomeHeader extends StatelessWidget {
               onTap: () => Navigator.pushNamed(context, '/profile'),
               child: CircleAvatar(
                 radius: 22,
-                backgroundColor: AppColors.primary.withOpacity(0.1),
+                backgroundColor: AppColors.primary.withValues(alpha: 0.1),
                 child: Text(
                   _getInitials(userName),
                   style: const TextStyle(

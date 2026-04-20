@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../../../shared/constants/app_colors.dart';
 import '../../../../shared/constants/app_text_styles.dart';
-import '../../../../shared/widgets/cards/app_list_tile.dart';
 import '../../../../shared/widgets/cards/document_progress_tile.dart';
 import '../widgets/home_header.dart';
 import '../widgets/hero_update_card.dart';

@@ -105,7 +105,7 @@ class _LawyerClientListScreenState extends State<LawyerClientListScreen> {
     return ListView.separated(
       padding: const EdgeInsets.fromLTRB(20, 16, 20, 100),
       itemCount: clients.length,
-      separatorBuilder: (_, __) => const SizedBox(height: 12),
+      separatorBuilder: (_, _) => const SizedBox(height: 12),
       itemBuilder: (context, index) {
         final client = clients[index];
         return _buildClientCard(client);
@@ -127,7 +127,7 @@ class _LawyerClientListScreenState extends State<LawyerClientListScreen> {
         border: Border.all(color: AppColors.divider),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.02),
+            color: Colors.black.withValues(alpha: 0.02),
             blurRadius: 10,
             offset: const Offset(0, 4),
           ),
@@ -137,7 +137,7 @@ class _LawyerClientListScreenState extends State<LawyerClientListScreen> {
         children: [
           CircleAvatar(
             radius: 24,
-            backgroundColor: AppColors.primary.withOpacity(0.1),
+            backgroundColor: AppColors.primary.withValues(alpha: 0.1),
             child: Text(
               client['name']![0],
               style: const TextStyle(color: AppColors.primary, fontWeight: FontWeight.bold, fontSize: 18),

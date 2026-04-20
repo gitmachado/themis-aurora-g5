@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import '../../../../shared/constants/app_colors.dart';
-import '../../../../shared/constants/app_text_styles.dart';
 import '../../../../shared/widgets/buttons/app_badge.dart';
 import '../../../../shared/widgets/inputs/app_search_input.dart';
 import '../../../../shared/widgets/layout/app_screen_header.dart';
@@ -40,7 +39,7 @@ class _ClientProcessListScreenState extends State<ClientProcessListScreen> {
         const SizedBox(height: 16),
         const Padding(
           padding: EdgeInsets.symmetric(horizontal: 20),
-          child: const AppSearchInput(hintText: 'Buscar pelo nome ou número...'),
+          child: AppSearchInput(hintText: 'Buscar pelo nome ou número...'),
         ),
       ],
     );

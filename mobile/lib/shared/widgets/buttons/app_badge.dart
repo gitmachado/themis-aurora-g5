@@ -20,23 +20,23 @@ class AppBadge extends StatelessWidget {
 
     switch (type) {
       case BadgeType.primary:
-        backgroundColor = AppColors.primary.withOpacity(0.1);
+        backgroundColor = AppColors.primary.withValues(alpha: 0.1);
         textColor = AppColors.primary;
         break;
       case BadgeType.success:
-        backgroundColor = AppColors.success.withOpacity(0.1);
+        backgroundColor = AppColors.success.withValues(alpha: 0.1);
         textColor = AppColors.success;
         break;
       case BadgeType.error:
-        backgroundColor = AppColors.error.withOpacity(0.1);
+        backgroundColor = AppColors.error.withValues(alpha: 0.1);
         textColor = AppColors.error;
         break;
       case BadgeType.warning:
-        backgroundColor = AppColors.secondaryDark.withOpacity(0.1);
+        backgroundColor = AppColors.secondaryDark.withValues(alpha: 0.1);
         textColor = AppColors.secondaryDark;
         break;
       case BadgeType.neutral:
-        backgroundColor = AppColors.divider.withOpacity(0.3);
+        backgroundColor = AppColors.divider.withValues(alpha: 0.3);
         textColor = AppColors.textCaption;
         break;
     }

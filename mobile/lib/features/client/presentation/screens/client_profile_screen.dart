@@ -1,10 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../../../shared/constants/app_colors.dart';
 import '../../../../shared/constants/app_text_styles.dart';
-import '../../../../shared/widgets/buttons/app_badge.dart';
 import '../../../../shared/widgets/cards/app_card.dart';
-import '../../../../shared/widgets/cards/app_list_tile.dart';
-import '../../../../shared/widgets/layout/app_bottom_nav_bar.dart';
 import '../../../../shared/widgets/layout/custom_app_bar.dart';
 
 class ClientProfileScreen extends StatefulWidget {
@@ -54,7 +51,7 @@ class _ClientProfileScreenState extends State<ClientProfileScreen> {
               children: [
                 CircleAvatar(
                   radius: 36,
-                  backgroundColor: AppColors.primary.withOpacity(0.1),
+                  backgroundColor: AppColors.primary.withValues(alpha: 0.1),
                   child: const Text(
                     'JS',
                     style: TextStyle(

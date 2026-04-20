@@ -33,7 +33,7 @@ class TimelineSummaryCard extends StatelessWidget {
             children: [
               Text(
                 'Status Atual',
-                style: AppTextStyles.caption.copyWith(color: AppColors.white.withOpacity(0.7)),
+                style: AppTextStyles.caption.copyWith(color: AppColors.white.withValues(alpha: 0.7)),
               ),
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),

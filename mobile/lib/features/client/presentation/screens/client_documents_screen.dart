@@ -1,11 +1,8 @@
 import 'package:flutter/material.dart';
 import '../../../../shared/constants/app_colors.dart';
 import '../../../../shared/constants/app_text_styles.dart';
-import '../../../../shared/widgets/buttons/app_badge.dart';
-import '../../../../shared/widgets/cards/app_list_tile.dart';
 import '../../../../shared/widgets/layout/app_screen_header.dart';
 import '../../../../shared/widgets/cards/document_progress_tile.dart';
-import '../widgets/document_filter_chips.dart';
 
 class ClientDocumentsScreen extends StatefulWidget {
   const ClientDocumentsScreen({super.key});
@@ -79,7 +76,7 @@ class _ClientDocumentsScreenState extends State<ClientDocumentsScreen> {
           Container(
             padding: const EdgeInsets.all(8),
             decoration: BoxDecoration(
-              color: AppColors.white.withOpacity(0.1),
+              color: AppColors.white.withValues(alpha: 0.1),
               shape: BoxShape.circle,
             ),
             child: const Icon(Icons.verified_user_outlined, color: Colors.white, size: 24),
@@ -95,7 +92,7 @@ class _ClientDocumentsScreenState extends State<ClientDocumentsScreen> {
                 ),
                 Text(
                   'Dica: Os envios são criptografados',
-                  style: TextStyle(color: Colors.white.withOpacity(0.8), fontSize: 13),
+                  style: TextStyle(color: Colors.white.withValues(alpha: 0.8), fontSize: 13),
                 ),
               ],
             ),
@@ -111,7 +108,7 @@ class _ClientDocumentsScreenState extends State<ClientDocumentsScreen> {
       decoration: BoxDecoration(
         color: AppColors.white,
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: AppColors.divider.withOpacity(0.5)),
+        border: Border.all(color: AppColors.divider.withValues(alpha: 0.5)),
       ),
       child: DropdownButtonHideUnderline(
         child: DropdownButton<String>(
@@ -142,7 +139,7 @@ class _ClientDocumentsScreenState extends State<ClientDocumentsScreen> {
       decoration: BoxDecoration(
         color: AppColors.white,
         borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: AppColors.divider.withOpacity(0.5)),
+        border: Border.all(color: AppColors.divider.withValues(alpha: 0.5)),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
@@ -212,10 +209,10 @@ class _ClientDocumentsScreenState extends State<ClientDocumentsScreen> {
           decoration: BoxDecoration(
             color: AppColors.white,
             borderRadius: BorderRadius.circular(16),
-            border: Border.all(color: AppColors.divider.withOpacity(0.5)),
+            border: Border.all(color: AppColors.divider.withValues(alpha: 0.5)),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withOpacity(0.02),
+                color: Colors.black.withValues(alpha: 0.02),
                 blurRadius: 8,
                 offset: const Offset(0, 4),
               ),
@@ -288,13 +285,12 @@ class _ClientDocumentsScreenState extends State<ClientDocumentsScreen> {
     return ListView.separated(
       padding: const EdgeInsets.fromLTRB(20, 12, 20, 100),
       itemCount: docs.length,
-      separatorBuilder: (_, __) => const SizedBox(height: 12),
+      separatorBuilder: (_, _) => const SizedBox(height: 12),
       itemBuilder: (context, index) {
         final doc = docs[index];
         final isPdf = doc['type'] == 'pdf';
         
         final iconColor = isPdf ? Colors.orange : AppColors.primary;
-        final bgColor = isPdf ? const Color(0xFFFFF7E6) : const Color(0xFFF0F4FF);
         final statusColor = doc['status'] == 'Aprovado' ? AppColors.success : AppColors.primary;
 
         return DocumentProgressTile(
@@ -348,7 +344,7 @@ class _ClientDocumentsScreenState extends State<ClientDocumentsScreen> {
                     padding: const EdgeInsets.symmetric(vertical: 16),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(16),
-                      side: BorderSide(color: AppColors.divider.withOpacity(0.5)),
+                      side: BorderSide(color: AppColors.divider.withValues(alpha: 0.5)),
                     ),
                   ),
                   child: Text(
@@ -371,7 +367,7 @@ class _ClientDocumentsScreenState extends State<ClientDocumentsScreen> {
       onTap: () => Navigator.pop(context),
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12),
-        side: BorderSide(color: AppColors.divider.withOpacity(0.5)),
+        side: BorderSide(color: AppColors.divider.withValues(alpha: 0.5)),
       ),
     );
   }

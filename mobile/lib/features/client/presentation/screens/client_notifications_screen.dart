@@ -77,7 +77,7 @@ class ClientNotificationsScreen extends StatelessWidget {
 
     return ListView.separated(
       itemCount: list.length,
-      separatorBuilder: (_, __) => const Divider(height: 1),
+      separatorBuilder: (_, _) => const Divider(height: 1),
       itemBuilder: (context, index) {
         final n = list[index];
         final isRead = n['isRead'] as bool;
@@ -96,7 +96,7 @@ class ClientNotificationsScreen extends StatelessWidget {
                   shape: BoxShape.circle,
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.black.withOpacity(0.05),
+                      color: Colors.black.withValues(alpha: 0.05),
                       blurRadius: 4,
                       offset: const Offset(0, 2),
                     ),

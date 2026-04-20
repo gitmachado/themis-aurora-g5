@@ -24,7 +24,7 @@ class DashboardHeader extends StatelessWidget {
             children: [
               CircleAvatar(
                 radius: 24,
-                backgroundColor: AppColors.primary.withOpacity(0.2),
+                backgroundColor: AppColors.primary.withValues(alpha: 0.2),
                 child: Text(
                   _getInitials(userName),
                   style: const TextStyle(
@@ -60,7 +60,7 @@ class DashboardHeader extends StatelessWidget {
                 decoration: BoxDecoration(
                   color: AppColors.white,
                   shape: BoxShape.circle,
-                  border: Border.all(color: AppColors.divider.withOpacity(0.5)),
+                  border: Border.all(color: AppColors.divider.withValues(alpha: 0.5)),
                 ),
                 child: IconButton(
                   icon: const Icon(Icons.notifications_none_outlined, size: 24),

@@ -35,7 +35,7 @@ class TimelineEventTile extends StatelessWidget {
                   width: 32,
                   height: 32,
                   decoration: BoxDecoration(
-                    color: iconBackgroundColor ?? (isFirst ? AppColors.secondaryLight.withOpacity(0.2) : AppColors.divider.withOpacity(0.2)),
+                    color: iconBackgroundColor ?? (isFirst ? AppColors.secondaryLight.withValues(alpha: 0.2) : AppColors.divider.withValues(alpha: 0.2)),
                     shape: BoxShape.circle,
                   ),
                   child: Icon(
@@ -77,7 +77,7 @@ class TimelineEventTile extends StatelessWidget {
                       borderRadius: BorderRadius.circular(12),
                       boxShadow: [
                         BoxShadow(
-                          color: Colors.black.withOpacity(0.05),
+                          color: Colors.black.withValues(alpha: 0.05),
                           blurRadius: 10,
                           offset: const Offset(0, 4),
                         ),

@@ -30,10 +30,10 @@ class ChatListTile extends StatelessWidget {
         decoration: BoxDecoration(
           color: AppColors.white,
           borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: AppColors.divider.withOpacity(0.5)),
+          border: Border.all(color: AppColors.divider.withValues(alpha: 0.5)),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.03),
+              color: Colors.black.withValues(alpha: 0.03),
               blurRadius: 10,
               offset: const Offset(0, 4),
             ),
@@ -45,7 +45,7 @@ class ChatListTile extends StatelessWidget {
               width: 48,
               height: 48,
               decoration: BoxDecoration(
-                color: isAi ? AppColors.primary.withOpacity(0.1) : AppColors.secondaryLight.withOpacity(0.1),
+                color: isAi ? AppColors.primary.withValues(alpha: 0.1) : AppColors.secondaryLight.withValues(alpha: 0.1),
                 shape: BoxShape.circle,
               ),
               child: Icon(

@@ -25,7 +25,7 @@ class NicheChart extends StatelessWidget {
               _buildBar('Cível', 0.85, AppColors.primary),
               _buildBar('Trab.', 0.65, AppColors.secondaryLight),
               _buildBar('Fam.', 0.45, AppColors.secondaryDark),
-              _buildBar('Cons.', 0.35, AppColors.primary.withOpacity(0.5)),
+              _buildBar('Cons.', 0.35, AppColors.primary.withValues(alpha: 0.5)),
             ],
           ),
         ],
@@ -47,7 +47,7 @@ class NicheChart extends StatelessWidget {
               end: Alignment.bottomCenter,
               colors: [
                 color,
-                color.withOpacity(0.7),
+                color.withValues(alpha: 0.7),
               ],
             ),
           ),

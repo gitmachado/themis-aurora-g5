@@ -156,7 +156,7 @@ class _LawyerDashboardScreenState extends State<LawyerDashboardScreen> {
           title: 'Carla Menezes',
           subtitle: 'Trabalhista • há 2 min',
           leading: CircleAvatar(
-            backgroundColor: AppColors.primary.withOpacity(0.1),
+            backgroundColor: AppColors.primary.withValues(alpha: 0.1),
             child: const Text('CM', style: TextStyle(color: AppColors.primary, fontSize: 12, fontWeight: FontWeight.bold)),
           ),
           trailing: _buildBadge('URGENTE', AppColors.error),
@@ -166,7 +166,7 @@ class _LawyerDashboardScreenState extends State<LawyerDashboardScreen> {
           title: 'Roberto Santos',
           subtitle: 'Cível • há 15 min',
           leading: CircleAvatar(
-            backgroundColor: AppColors.primary.withOpacity(0.1),
+            backgroundColor: AppColors.primary.withValues(alpha: 0.1),
             child: const Text('RS', style: TextStyle(color: AppColors.primary, fontSize: 12, fontWeight: FontWeight.bold)),
           ),
           trailing: _buildBadge('NOVO', AppColors.success),
@@ -184,7 +184,7 @@ class _LawyerDashboardScreenState extends State<LawyerDashboardScreen> {
           leading: Container(
             padding: const EdgeInsets.all(8),
             decoration: BoxDecoration(
-              color: AppColors.primary.withOpacity(0.1),
+              color: AppColors.primary.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(8),
             ),
             child: const Icon(Icons.description_outlined, color: AppColors.primary, size: 24),
@@ -198,7 +198,7 @@ class _LawyerDashboardScreenState extends State<LawyerDashboardScreen> {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.1),
+        color: color.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(4),
       ),
       child: Text(

@@ -24,7 +24,7 @@ class HeroUpdateCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: AppColors.primary.withOpacity(0.3),
+            color: AppColors.primary.withValues(alpha: 0.3),
             blurRadius: 15,
             offset: const Offset(0, 8),
           ),
@@ -55,7 +55,7 @@ class HeroUpdateCard extends StatelessWidget {
           Text(
             subtitle,
             style: AppTextStyles.body.copyWith(
-              color: AppColors.white.withOpacity(0.8),
+              color: AppColors.white.withValues(alpha: 0.8),
               fontSize: 14,
             ),
           ),

@@ -17,7 +17,7 @@ class QuickAiCard extends StatelessWidget {
         decoration: BoxDecoration(
           color: AppColors.surface,
           borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: AppColors.divider.withOpacity(0.5)),
+          border: Border.all(color: AppColors.divider.withValues(alpha: 0.5)),
         ),
         child: Row(
           children: [

@@ -54,7 +54,7 @@ class ProcessCard extends StatelessWidget {
                 width: 48,
                 height: 48,
                 decoration: BoxDecoration(
-                  color: AppColors.primary.withOpacity(0.1),
+                  color: AppColors.primary.withValues(alpha: 0.1),
                   shape: BoxShape.circle,
                 ),
                 child: Icon(icon, color: AppColors.primary, size: 24),
@@ -103,7 +103,7 @@ class ProcessCard extends StatelessWidget {
             borderRadius: BorderRadius.circular(2),
             child: LinearProgressIndicator(
               value: progressPercentage / 100,
-              backgroundColor: AppColors.divider.withOpacity(0.5),
+              backgroundColor: AppColors.divider.withValues(alpha: 0.5),
               valueColor: AlwaysStoppedAnimation<Color>(progressColor),
               minHeight: 4,
             ),

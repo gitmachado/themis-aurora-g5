@@ -61,7 +61,7 @@ class _ClientChatsScreenState extends State<ClientChatsScreen> {
       title: 'Mensagens',
       action: Container(
         decoration: BoxDecoration(
-          color: AppColors.background.withOpacity(0.5),
+          color: AppColors.background.withValues(alpha: 0.5),
           shape: BoxShape.circle,
         ),
         child: IconButton(

@@ -77,7 +77,7 @@ class ClientProcessTimelineScreen extends StatelessWidget {
       padding: const EdgeInsets.fromLTRB(20, 16, 20, 24),
       decoration: BoxDecoration(
         color: AppColors.white,
-        border: Border(top: BorderSide(color: AppColors.divider.withOpacity(0.5))),
+        border: Border(top: BorderSide(color: AppColors.divider.withValues(alpha: 0.5))),
       ),
       child: PrimaryButton(
         label: 'Dúvida? Falar no WhatsApp',
@@ -90,6 +90,6 @@ class ClientProcessTimelineScreen extends StatelessWidget {
   }
 
   static void _handleAiAnalysis() {
-    // TODO: implement AI analysis flow
+    // Implementação pendente
   }
 }
