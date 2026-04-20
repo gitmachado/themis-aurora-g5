@@ -21,6 +21,8 @@ class _ClientProcessListScreenState extends State<ClientProcessListScreen> {
       appBar: const CustomAppBar(
         title: 'Meus Processos',
         showBackButton: false,
+        showNotificationButton: true,
+        notificationCount: 2,
       ),
       body: Column(
         children: [

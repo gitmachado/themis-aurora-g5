@@ -60,27 +60,21 @@ class _ClientNotificationsScreenState extends State<ClientNotificationsScreen> {
               child: const Text('Lidas', style: TextStyle(color: AppColors.primary)),
             ),
           ],
+          bottom: const TabBar(
+            tabs: [
+              Tab(text: 'Não lidas'),
+              Tab(text: 'Todas'),
+            ],
+            labelColor: AppColors.primary,
+            unselectedLabelColor: AppColors.textCaption,
+            indicatorColor: AppColors.primary,
+            indicatorWeight: 3,
+          ),
         ),
-        body: Column(
+        body: TabBarView(
           children: [
-            const TabBar(
-              tabs: [
-                Tab(text: 'Não lidas'),
-                Tab(text: 'Todas'),
-              ],
-              labelColor: AppColors.primary,
-              unselectedLabelColor: AppColors.textCaption,
-              indicatorColor: AppColors.primary,
-              indicatorWeight: 3,
-            ),
-            Expanded(
-              child: TabBarView(
-                children: [
-                  _buildNotificationList(onlyUnread: true),
-                  _buildNotificationList(onlyUnread: false),
-                ],
-              ),
-            ),
+            _buildNotificationList(onlyUnread: true),
+            _buildNotificationList(onlyUnread: false),
           ],
         ),
       ),

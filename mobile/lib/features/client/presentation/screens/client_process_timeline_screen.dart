@@ -29,27 +29,22 @@ class _ClientProcessTimelineScreenState extends State<ClientProcessTimelineScree
               onPressed: () {},
             ),
           ],
-          titleWidget: null, // Ensure title is used
-          centerTitle: true,
+          bottom: const TabBar(
+            labelColor: AppColors.primary,
+            unselectedLabelColor: AppColors.textCaption,
+            indicatorColor: AppColors.primary,
+            indicatorSize: TabBarIndicatorSize.label,
+            labelStyle: TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
+            tabs: [
+              Tab(text: 'Timeline'),
+              Tab(text: 'IA Resumo'),
+              Tab(text: 'Docs'),
+              Tab(text: 'Chat'),
+            ],
+          ),
         ),
         body: Column(
           children: [
-            Container(
-              color: AppColors.background,
-              child: const TabBar(
-                labelColor: AppColors.primary,
-                unselectedLabelColor: AppColors.textCaption,
-                indicatorColor: AppColors.primary,
-                indicatorSize: TabBarIndicatorSize.label,
-                labelStyle: TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
-                tabs: [
-                  Tab(text: 'Timeline'),
-                  Tab(text: 'IA Resumo'),
-                  Tab(text: 'Docs'),
-                  Tab(text: 'Chat'),
-                ],
-              ),
-            ),
             Expanded(
               child: TabBarView(
                 children: [
