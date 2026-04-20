@@ -80,7 +80,7 @@ class AppDashboardHeader extends StatelessWidget {
                   ],
                 ),
                 child: IconButton(
-                  icon: const Icon(Icons.notifications_none_outlined, size: 28, color: AppColors.primary),
+                  icon: const Icon(Icons.notifications_none_outlined, size: 24, color: AppColors.primary),
                   onPressed: onNotificationTap,
                 ),
               ),

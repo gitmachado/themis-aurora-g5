@@ -13,6 +13,8 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
   final int notificationCount;
   final VoidCallback? onNotificationTap;
 
+  final PreferredSizeWidget? bottom;
+
   const CustomAppBar({
     super.key,
     required this.title,
@@ -24,56 +26,55 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
     this.showNotificationButton = false,
     this.notificationCount = 0,
     this.onNotificationTap,
+    this.bottom,
   });
 
   @override
   Widget build(BuildContext context) {
     return AppBar(
       automaticallyImplyLeading: false,
+      titleSpacing: showBackButton ? 0 : 20,
       title: titleWidget ?? Text(
         title,
-        style: AppTextStyles.h2.copyWith(color: AppColors.primary, fontSize: 18),
+        style: AppTextStyles.h2.copyWith(color: AppColors.primary),
       ),
       actions: [
         ...?actions,
         if (showNotificationButton)
           Stack(
+            alignment: Alignment.center,
             children: [
               IconButton(
-                icon: const Icon(Icons.notifications_none_outlined, size: 28),
+                icon: const Icon(Icons.notifications_none_rounded, size: 24),
                 onPressed: onNotificationTap ?? () => Navigator.pushNamed(context, '/notifications'),
               ),
               if (notificationCount > 0)
                 Positioned(
-                  right: 8,
-                  top: 8,
+                  right: 12,
+                  top: 12,
                   child: Container(
-                    padding: const EdgeInsets.all(4),
+                    width: 8,
+                    height: 8,
                     decoration: const BoxDecoration(
                       color: AppColors.error,
                       shape: BoxShape.circle,
-                    ),
-                    constraints: const BoxConstraints(minWidth: 16, minHeight: 16),
-                    child: Text(
-                      notificationCount > 9 ? '9+' : notificationCount.toString(),
-                      style: const TextStyle(color: Colors.white, fontSize: 8, fontWeight: FontWeight.bold),
-                      textAlign: TextAlign.center,
                     ),
                   ),
                 ),
             ],
           ),
+        const SizedBox(width: 8),
       ],
       leading: leading ?? (showBackButton ? IconButton(
-        icon: const Icon(Icons.arrow_back_ios_new_rounded, size: 20),
+        icon: const Icon(Icons.arrow_back_ios_new_rounded, size: 22),
         onPressed: () => Navigator.maybePop(context),
       ) : null),
       centerTitle: centerTitle,
       backgroundColor: AppColors.background,
       elevation: 0,
       scrolledUnderElevation: 0,
-      iconTheme: const IconThemeData(color: AppColors.primary),
-      bottom: PreferredSize(
+      iconTheme: const IconThemeData(color: AppColors.primary, size: 24),
+      bottom: bottom ?? PreferredSize(
         preferredSize: const Size.fromHeight(1),
         child: Container(
           color: AppColors.divider.withValues(alpha: 0.5),
@@ -84,5 +85,7 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
   }
 
   @override
-  Size get preferredSize => const Size.fromHeight(kToolbarHeight);
+  Size get preferredSize => Size.fromHeight(
+        kToolbarHeight + (bottom?.preferredSize.height ?? 1.0),
+      );
 }

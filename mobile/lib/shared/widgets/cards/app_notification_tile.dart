@@ -50,12 +50,12 @@ class AppNotificationTile extends StatelessWidget {
       ),
       child: Container(
         decoration: BoxDecoration(
-          color: isRead ? Colors.transparent : AppColors.primary.withValues(alpha: 0.05),
+          color: isRead ? Colors.transparent : AppColors.primaryOverlay,
           border: const Border(bottom: BorderSide(color: AppColors.divider)),
         ),
         child: ListTile(
           leading: CircleAvatar(
-            backgroundColor: _getIconColor(type).withValues(alpha: 0.1),
+            backgroundColor: _getOverlayColor(type),
             child: Icon(_getIcon(type), color: _getIconColor(type), size: 20),
           ),
           title: Text(
@@ -137,6 +137,23 @@ class AppNotificationTile extends StatelessWidget {
         return AppColors.error;
       default:
         return AppColors.textCaption;
+    }
+  }
+
+  Color _getOverlayColor(String type) {
+    switch (type) {
+      case 'lead':
+        return AppColors.primaryOverlay;
+      case 'doc':
+        return AppColors.warningOverlay;
+      case 'process':
+        return const Color(0xff673ab7).withValues(alpha: 0.1);
+      case 'chat':
+        return AppColors.successOverlay;
+      case 'alert':
+        return AppColors.errorOverlay;
+      default:
+        return AppColors.textCaption.withValues(alpha: 0.1);
     }
   }
 }

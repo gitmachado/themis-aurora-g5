@@ -3,15 +3,30 @@ import 'package:flutter/material.dart';
 class AppColors {
   AppColors._();
 
+  // Core Colors
   static const Color primary = Color(0xFF1A237E);
-  static const Color secondaryLight = Color(0xFFDEBC74);
-  static const Color secondaryDark = Color(0xFF9A7836);
-  static const Color surface = Color(0xFFF8F9FA);
-  static const Color background = Color(0xFFF8F9FA);
-  static const Color error = Color(0xFFC62828);
-  static const Color success = Color(0xFF2E7D32);
-  static const Color warning = Color(0xFFFBC02D);
+  static const Color primaryOverlay = Color(0x1A1A237E); // 10% opacity
 
+  static const Color secondary = Color(0xFFDEBC74);
+  static const Color secondaryLight = Color(0xFFDEBC74);
+  static const Color secondaryOverlay = Color(0x33DEBC74); // 20% opacity
+  static const Color secondaryDark = Color(0xFF9A7836);
+
+  // Background & Surfaces
+  static const Color background = Color(0xFFF8F9FA); // Standardized to Client Background
+  static const Color surface = Color(0xFFFFFFFF);
+  
+  // Alert & Feedback
+  static const Color error = Color(0xFFC62828);
+  static const Color errorOverlay = Color(0x1AC62828);
+  
+  static const Color success = Color(0xFF2E7D32);
+  static const Color successOverlay = Color(0x1A2E7D32);
+  
+  static const Color warning = Color(0xFFFBC02D);
+  static const Color warningOverlay = Color(0x33FBC02D);
+
+  // Typography & Borders
   static const Color textPrimary = Color(0xFF1A1A1A);
   static const Color textBody = Color(0xFF212121);
   static const Color textCaption = Color(0xFF757575);
