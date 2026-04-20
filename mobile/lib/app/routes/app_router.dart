@@ -57,11 +57,6 @@ final class AppRouter {
           builder: (_) => const ClientMainLayout(initialIndex: 0),
           settings: settings,
         );
-      case initialRoute:
-        return MaterialPageRoute<void>(
-          builder: (_) => const LawyerMainLayout(initialIndex: 0),
-          settings: settings,
-        );
       case lawyerLeadDetailRoute:
         final args = settings.arguments as Map<String, String>?;
         return MaterialPageRoute<void>(
