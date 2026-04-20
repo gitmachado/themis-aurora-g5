@@ -213,6 +213,4 @@ class LawyerDashboardScreen extends StatelessWidget {
       ],
     );
   }
-
-  }
 }
