@@ -86,7 +86,7 @@ class _LawyerLeadTriageScreenState extends State<LawyerLeadTriageScreen> {
               labelStyle: TextStyle(
                 color: isSelected ? AppColors.white : AppColors.textPrimary,
                 fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-                fontSize: 13,
+                fontSize: 12,
               ),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(20),

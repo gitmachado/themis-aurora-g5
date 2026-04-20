@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import '../../../../app/routes/app_router.dart';
 import '../../../../shared/constants/app_colors.dart';
 import '../../../../shared/constants/app_text_styles.dart';
 import '../../../../shared/widgets/buttons/app_badge.dart';

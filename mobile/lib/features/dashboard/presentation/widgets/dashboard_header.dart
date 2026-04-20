@@ -6,12 +6,14 @@ class DashboardHeader extends StatelessWidget {
   final String userName;
   final String officeName;
   final int notificationCount;
+  final int chatCount;
 
   const DashboardHeader({
     super.key,
     required this.userName,
     required this.officeName,
     this.notificationCount = 0,
+    this.chatCount = 0,
   });
 
   @override
@@ -20,82 +22,104 @@ class DashboardHeader extends StatelessWidget {
       padding: const EdgeInsets.fromLTRB(24, 24, 24, 16),
       child: Row(
         children: [
-          Row(
-            children: [
-              CircleAvatar(
-                radius: 24,
-                backgroundColor: AppColors.primary.withValues(alpha: 0.2),
-                child: Text(
-                  _getInitials(userName),
-                  style: const TextStyle(
-                    color: AppColors.primary,
-                    fontWeight: FontWeight.bold,
-                    fontSize: 18,
-                  ),
-                ),
-              ),
-              const SizedBox(width: 12),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'Olá, $userName',
-                    style: AppTextStyles.h2.copyWith(fontSize: 18),
-                  ),
-                  Text(
-                    officeName,
-                    style: AppTextStyles.caption.copyWith(
-                      fontSize: 12,
-                      color: AppColors.textCaption,
+          Expanded(
+            child: Row(
+              children: [
+                CircleAvatar(
+                  radius: 24,
+                  backgroundColor: AppColors.primary.withValues(alpha: 0.2),
+                  child: Text(
+                    _getInitials(userName),
+                    style: const TextStyle(
+                      color: AppColors.primary,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 18,
                     ),
                   ),
-                ],
-              ),
-            ],
-          ),
-          const Spacer(),
-          Stack(
-            children: [
-              Container(
-                decoration: BoxDecoration(
-                  color: AppColors.white,
-                  shape: BoxShape.circle,
-                  border: Border.all(color: AppColors.divider.withValues(alpha: 0.5)),
                 ),
-                child: IconButton(
-                  icon: const Icon(Icons.notifications_none_outlined, size: 24),
-                  onPressed: () => Navigator.pushNamed(context, '/notifications'),
-                ),
-              ),
-              if (notificationCount > 0)
-                Positioned(
-                  right: 4,
-                  top: 4,
-                  child: Container(
-                    padding: const EdgeInsets.all(4),
-                    decoration: const BoxDecoration(
-                      color: AppColors.error,
-                      shape: BoxShape.circle,
-                    ),
-                    constraints: const BoxConstraints(
-                      minWidth: 16,
-                      minHeight: 16,
-                    ),
-                    child: Text(
-                      notificationCount.toString(),
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 10,
-                        fontWeight: FontWeight.bold,
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Olá, $userName',
+                        style: AppTextStyles.h2.copyWith(fontSize: 18),
+                        overflow: TextOverflow.ellipsis,
                       ),
-                      textAlign: TextAlign.center,
-                    ),
+                      Text(
+                        officeName,
+                        style: AppTextStyles.caption.copyWith(
+                          fontSize: 12,
+                          color: AppColors.textCaption,
+                        ),
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ],
                   ),
                 ),
-            ],
+              ],
+            ),
+          ),
+          const SizedBox(width: 16),
+          _buildIconButton(
+            context,
+            icon: Icons.chat_bubble_outline_rounded,
+            count: chatCount,
+            onTap: () => Navigator.pushNamed(context, '/lawyer-chats'),
+          ),
+          const SizedBox(width: 8),
+          _buildIconButton(
+            context,
+            icon: Icons.notifications_none_outlined,
+            count: notificationCount,
+            onTap: () => Navigator.pushNamed(context, '/lawyer-notifications'),
           ),
         ],
       ),
+    );
+  }
+
+  Widget _buildIconButton(BuildContext context, {required IconData icon, required int count, required VoidCallback onTap}) {
+    return Stack(
+      children: [
+        Container(
+          decoration: BoxDecoration(
+            color: AppColors.white,
+            shape: BoxShape.circle,
+            border: Border.all(color: AppColors.divider.withValues(alpha: 0.5)),
+          ),
+          child: IconButton(
+            icon: Icon(icon, size: 22, color: AppColors.textPrimary),
+            onPressed: onTap,
+          ),
+        ),
+        if (count > 0)
+          Positioned(
+            right: 2,
+            top: 2,
+            child: Container(
+              padding: const EdgeInsets.all(4),
+              decoration: const BoxDecoration(
+                color: AppColors.error,
+                shape: BoxShape.circle,
+              ),
+              constraints: const BoxConstraints(
+                minWidth: 16,
+                minHeight: 16,
+              ),
+              child: Text(
+                count > 9 ? '+9' : count.toString(),
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 9,
+                  fontWeight: FontWeight.bold,
+                ),
+                textAlign: TextAlign.center,
+              ),
+            ),
+          ),
+      ],
     );
   }
 

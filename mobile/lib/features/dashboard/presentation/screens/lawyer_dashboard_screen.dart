@@ -7,12 +7,14 @@ import '../../../../shared/widgets/cards/app_list_tile.dart';
 import '../widgets/dashboard_header.dart';
 import '../widgets/metric_card.dart';
 import '../widgets/niche_chart.dart';
+import '../../../../shared/widgets/layout/lawyer_main_layout.dart';
 
 class LawyerDashboardScreen extends StatelessWidget {
   const LawyerDashboardScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final layoutState = context.findAncestorStateOfType<LawyerMainLayoutState>();
     return Scaffold(
       backgroundColor: const Color(0xFFF0F2F5),
       body: SafeArea(
@@ -23,6 +25,7 @@ class LawyerDashboardScreen extends StatelessWidget {
               userName: 'Dr. Rodrigo',
               officeName: 'Escritório Machado & Associados',
               notificationCount: 2,
+              chatCount: 3,
             ),
             Expanded(
               child: SingleChildScrollView(
@@ -30,19 +33,17 @@ class LawyerDashboardScreen extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    _buildMetricsGrid(),
+                    _buildMetricsGrid(context),
                     const SizedBox(height: 24),
-                    _buildHandoffsCard(context),
+                    _buildHandoffsCard(context, layoutState),
                     const SizedBox(height: 24),
                     const NicheChart(),
                     const SizedBox(height: 24),
-                    _buildSectionHeader('Últimos Leads', () {
-                      // Navigate to Leads tab - placeholder
-                    }),
+                    _buildSectionHeader('Últimos Leads', () => layoutState?.setIndex(1)),
                     const SizedBox(height: 16),
                     _buildLeadsList(context),
                     const SizedBox(height: 24),
-                    _buildSectionHeader('Documentos Recentes', () {}),
+                    _buildSectionHeader('Documentos Recentes', () => Navigator.pushNamed(context, '/lawyer-documents')),
                     const SizedBox(height: 16),
                     _buildDocsList(context),
                     const SizedBox(height: 120), // Space for bottom nav
@@ -56,8 +57,10 @@ class LawyerDashboardScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildMetricsGrid() {
-    return const Row(
+  Widget _buildMetricsGrid(BuildContext context) {
+    final layoutState = context.findAncestorStateOfType<LawyerMainLayoutState>();
+
+    return Row(
       children: [
         Expanded(
           child: MetricCard(
@@ -65,28 +68,26 @@ class LawyerDashboardScreen extends StatelessWidget {
             value: '234',
             subtitle: 'Ativos',
             icon: Icons.folder_open_rounded,
+            onTap: () => layoutState?.setIndex(2), // Processos Tab
           ),
         ),
-        SizedBox(width: 16),
+        const SizedBox(width: 16),
         Expanded(
           child: MetricCard(
             title: 'Leads Hoje',
             value: '12',
             icon: Icons.people_alt_rounded,
             iconColor: AppColors.secondaryLight,
+            onTap: () => layoutState?.setIndex(1), // Leads Tab
           ),
         ),
       ],
     );
   }
 
-  Widget _buildHandoffsCard(BuildContext context) {
+  Widget _buildHandoffsCard(BuildContext context, LawyerMainLayoutState? layoutState) {
     return InkWell(
-      onTap: () {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Abrindo fila de triagem IA...')),
-        );
-      },
+      onTap: () => Navigator.pushNamed(context, AppRouter.lawyerChatsRoute),
       child: AppCard(
         padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
         color: const Color(0xFFFFF4E5),
@@ -205,9 +206,7 @@ class LawyerDashboardScreen extends StatelessWidget {
             child: const Icon(Icons.description_outlined, color: AppColors.primary, size: 24),
           ),
           onTap: () {
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text('Abrindo visualizador de documentos...')),
-            );
+            Navigator.pushNamed(context, '/lawyer-documents');
           },
         ),
       ],

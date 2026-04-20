@@ -30,58 +30,81 @@ class AppBottomNavigationBar extends StatelessWidget {
     ];
 
     return Container(
-      margin: const EdgeInsets.only(left: 20, right: 20, bottom: 24),
-      padding: const EdgeInsets.all(6),
+      margin: const EdgeInsets.fromLTRB(16, 0, 16, 24),
+      padding: const EdgeInsets.symmetric(vertical: 8),
       decoration: BoxDecoration(
         color: AppColors.white,
-        borderRadius: BorderRadius.circular(36),
-        border: Border.all(color: AppColors.divider.withValues(alpha: 0.5)),
+        borderRadius: BorderRadius.circular(32),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.08),
-            blurRadius: 15,
-            offset: const Offset(0, 5),
+            color: Colors.black.withValues(alpha: 0.1),
+            blurRadius: 20,
+            offset: const Offset(0, 8),
           ),
         ],
       ),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceAround,
         children: List.generate(navItems.length, (index) {
-          final item = navItems[index];
-          return _buildItem(index, item.icon, item.label);
+          final isSelected = currentIndex == index;
+          return _NavBarItemWidget(
+            item: navItems[index],
+            isSelected: isSelected,
+            onTap: () => onTap(index),
+          );
         }),
       ),
     );
   }
+}
 
-  Widget _buildItem(int index, IconData icon, String label) {
-    final isSelected = currentIndex == index;
+class _NavBarItemWidget extends StatelessWidget {
+  final NavItem item;
+  final bool isSelected;
+  final VoidCallback onTap;
+
+  const _NavBarItemWidget({
+    required this.item,
+    required this.isSelected,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final color = isSelected ? AppColors.primary : AppColors.textCaption;
+
     return GestureDetector(
-      onTap: () => onTap(index),
-      child: Container(
+      onTap: onTap,
+      behavior: HitTestBehavior.opaque,
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 300),
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
         decoration: BoxDecoration(
-          color: isSelected ? AppColors.primary : Colors.transparent,
-          borderRadius: BorderRadius.circular(26),
+          color: isSelected ? AppColors.primary.withValues(alpha: 0.1) : Colors.transparent,
+          borderRadius: BorderRadius.circular(20),
         ),
-        child: Row(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(
-              icon,
-              color: isSelected ? AppColors.white : AppColors.textCaption,
-              size: 24,
+            TweenAnimationBuilder<double>(
+              duration: const Duration(milliseconds: 200),
+              tween: Tween(begin: 1.0, end: isSelected ? 1.2 : 1.0),
+              builder: (context, scale, child) {
+                return Transform.scale(
+                  scale: scale,
+                  child: Icon(item.icon, color: color, size: 24),
+                );
+              },
             ),
-            if (isSelected) ...[
-              const SizedBox(width: 8),
-              Text(
-                label,
-                style: const TextStyle(
-                  color: AppColors.white,
-                  fontWeight: FontWeight.bold,
-                  fontSize: 13,
-                ),
+            const SizedBox(height: 4),
+            Text(
+              item.label,
+              style: TextStyle(
+                color: color,
+                fontSize: 10,
+                fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
               ),
-            ],
+            ),
           ],
         ),
       ),

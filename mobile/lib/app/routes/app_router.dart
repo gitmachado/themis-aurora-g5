@@ -10,6 +10,13 @@ import '../../features/lawyer/presentation/screens/lawyer_client_list_screen.dar
 import '../../features/lawyer/presentation/screens/lawyer_process_detail_screen.dart';
 import '../../features/lawyer/presentation/screens/lawyer_profile_screen.dart';
 import '../../features/lawyer/presentation/screens/lawyer_lead_detail_screen.dart';
+import '../../features/lawyer/presentation/screens/lawyer_notification_screen.dart';
+import '../../features/lawyer/presentation/screens/lawyer_document_review_screen.dart';
+import '../../features/lawyer/presentation/screens/lawyer_document_list_screen.dart';
+import '../../features/lawyer/presentation/screens/lawyer_chat_list_screen.dart';
+import '../../features/lawyer/presentation/screens/lawyer_ai_manager_screen.dart';
+import '../../features/lawyer/presentation/screens/lawyer_chat_handoff_screen.dart';
+import '../../features/lawyer/presentation/screens/lawyer_client_detail_screen.dart';
 import '../../shared/widgets/layout/client_main_layout.dart';
 import '../../shared/widgets/layout/lawyer_main_layout.dart';
 
@@ -20,6 +27,12 @@ final class AppRouter {
   static const String lawyerProcessDetailRoute = '/lawyer-process-detail';
   static const String lawyerProfileRoute = '/lawyer-profile';
   static const String lawyerLeadDetailRoute = '/lawyer-lead-detail';
+  static const String lawyerNotificationsRoute = '/lawyer-notifications';
+  static const String lawyerDocumentsRoute = '/lawyer-documents';
+  static const String lawyerDocumentReviewRoute = '/lawyer-document-review';
+  static const String lawyerChatsRoute = '/lawyer-chats';
+  static const String lawyerAIManagerRoute = '/lawyer-ai-manager';
+  static const String lawyerChatHandoffRoute = '/lawyer-chat-handoff';
   static const String processListRoute = '/process-list';
   static const String processTimelineRoute = '/process-timeline';
   static const String documentsRoute = '/documents';
@@ -91,6 +104,15 @@ final class AppRouter {
           builder: (_) => const LawyerClientListScreen(),
           settings: settings,
         );
+      case '/lawyer-client-detail':
+        final args = settings.arguments as Map<String, dynamic>?;
+        return MaterialPageRoute<void>(
+          builder: (_) => LawyerClientDetailScreen(
+            name: args?['name'] ?? '',
+            cpf: args?['cpf'] ?? '',
+          ),
+          settings: settings,
+        );
       case lawyerProcessDetailRoute:
         return MaterialPageRoute<void>(
           builder: (_) => const LawyerProcessDetailScreen(),
@@ -99,6 +121,37 @@ final class AppRouter {
       case lawyerProfileRoute:
         return MaterialPageRoute<void>(
           builder: (_) => const LawyerProfileScreen(),
+          settings: settings,
+        );
+      case lawyerNotificationsRoute:
+        return MaterialPageRoute<void>(
+          builder: (_) => const LawyerNotificationScreen(),
+          settings: settings,
+        );
+      case lawyerDocumentsRoute:
+        return MaterialPageRoute<void>(
+          builder: (_) => const LawyerDocumentListScreen(),
+          settings: settings,
+        );
+      case lawyerDocumentReviewRoute:
+        return MaterialPageRoute<void>(
+          builder: (_) => const LawyerDocumentReviewScreen(),
+          settings: settings,
+        );
+      case lawyerChatsRoute:
+        return MaterialPageRoute<void>(
+          builder: (_) => const LawyerChatListScreen(),
+          settings: settings,
+        );
+      case lawyerAIManagerRoute:
+        return MaterialPageRoute<void>(
+          builder: (_) => const LawyerAIManagerScreen(),
+          settings: settings,
+        );
+      case lawyerChatHandoffRoute:
+        final args = settings.arguments as Map<String, dynamic>?;
+        return MaterialPageRoute<void>(
+          builder: (_) => LawyerChatHandoffScreen(clientName: args?['clientName'] ?? 'Cliente'),
           settings: settings,
         );
       case designSystemRoute:
