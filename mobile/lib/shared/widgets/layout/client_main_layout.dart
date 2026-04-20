@@ -3,6 +3,7 @@ import '../../../../features/client/presentation/screens/client_home_screen.dart
 import '../../../../features/client/presentation/screens/client_process_list_screen.dart';
 import '../../../../features/client/presentation/screens/client_documents_screen.dart';
 import '../../../../features/client/presentation/screens/client_chats_screen.dart';
+import '../../../../features/client/presentation/screens/client_profile_screen.dart';
 import 'app_bottom_nav_bar.dart';
 
 class ClientMainLayout extends StatefulWidget {
@@ -22,6 +23,7 @@ class _ClientMainLayoutState extends State<ClientMainLayout> {
     ClientProcessListScreen(),
     ClientDocumentsScreen(),
     ClientChatsScreen(),
+    ClientProfileScreen(),
   ];
 
   @override
