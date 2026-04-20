@@ -223,8 +223,11 @@ class _LawyerProfileScreenState extends State<LawyerProfileScreen> {
           TextButton(onPressed: () => Navigator.pop(context), child: const Text('Cancelar')),
           TextButton(
             onPressed: () {
-              Navigator.pop(context);
-              ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Saindo...')));
+              Navigator.pushNamedAndRemoveUntil(
+                context,
+                '/login',
+                (route) => false,
+              );
             },
             child: const Text('Sair', style: TextStyle(color: AppColors.error)),
           ),

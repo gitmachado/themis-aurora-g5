@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../../../shared/constants/app_colors.dart';
 import '../../../../shared/constants/app_text_styles.dart';
+import '../../../../shared/widgets/cards/app_notification_tile.dart';
 
 class LawyerNotificationScreen extends StatefulWidget {
   const LawyerNotificationScreen({super.key});
@@ -90,11 +91,20 @@ class _LawyerNotificationScreenState extends State<LawyerNotificationScreen> {
     }
 
     return ListView.builder(
-      padding: const EdgeInsets.symmetric(vertical: 16),
+      padding: const EdgeInsets.symmetric(vertical: 8),
       itemCount: list.length,
       itemBuilder: (context, index) {
-        final notification = list[index];
-        return _buildDismissibleItem(notification, index, onlyUnread);
+        final n = list[index];
+        return AppNotificationTile(
+          id: n['id'],
+          title: n['title'],
+          body: n['body'],
+          time: n['time'],
+          type: n['type'],
+          isRead: n['isRead'],
+          onToggleRead: _toggleReadStatus,
+          onDelete: _deleteNotification,
+        );
       },
     );
   }
@@ -113,97 +123,6 @@ class _LawyerNotificationScreenState extends State<LawyerNotificationScreen> {
         ],
       ),
     );
-  }
-
-  Widget _buildDismissibleItem(Map<String, dynamic> notification, int index, bool onlyUnread) {
-    final bool isRead = notification['isRead'];
-
-    return Dismissible(
-      key: Key('notif_${notification['id']}_$onlyUnread'),
-      direction: DismissDirection.horizontal,
-      onDismissed: (direction) {
-        if (direction == DismissDirection.endToStart) {
-          _deleteNotification(notification['id']);
-        } else {
-          _toggleReadStatus(notification['id']);
-        }
-      },
-      background: _buildSwipeBackground(
-        color: isRead ? AppColors.textCaption : AppColors.primary,
-        icon: isRead ? Icons.mark_email_unread_rounded : Icons.mark_email_read_rounded,
-        alignment: Alignment.centerLeft,
-      ),
-      secondaryBackground: _buildSwipeBackground(
-        color: AppColors.error,
-        icon: Icons.delete_outline_rounded,
-        alignment: Alignment.centerRight,
-      ),
-      child: _buildNotificationTile(notification),
-    );
-  }
-
-  Widget _buildSwipeBackground({required Color color, required IconData icon, required Alignment alignment}) {
-    return Container(
-      color: color,
-      alignment: alignment,
-      padding: const EdgeInsets.symmetric(horizontal: 20),
-      child: Icon(icon, color: Colors.white),
-    );
-  }
-
-  Widget _buildNotificationTile(Map<String, dynamic> n) {
-    final bool isRead = n['isRead'];
-
-    return Container(
-      decoration: BoxDecoration(
-        color: isRead ? Colors.transparent : AppColors.primary.withValues(alpha: 0.05),
-        border: const Border(bottom: BorderSide(color: AppColors.divider)),
-      ),
-      child: ListTile(
-        leading: CircleAvatar(
-          backgroundColor: _getIconColor(n['type']).withValues(alpha: 0.1),
-          child: Icon(_getIcon(n['type']), color: _getIconColor(n['type']), size: 20),
-        ),
-        title: Text(
-          n['title'],
-          style: TextStyle(
-            fontWeight: isRead ? FontWeight.normal : FontWeight.bold,
-            color: AppColors.textPrimary,
-          ),
-        ),
-        subtitle: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const SizedBox(height: 4),
-            Text(n['body'], style: AppTextStyles.caption.copyWith(fontSize: 13)),
-            const SizedBox(height: 4),
-            Text(n['time'], style: AppTextStyles.caption.copyWith(fontSize: 11, color: AppColors.textCaption)),
-          ],
-        ),
-        isThreeLine: true,
-        onTap: () => _toggleReadStatus(n['id']),
-      ),
-    );
-  }
-
-  IconData _getIcon(String type) {
-    switch (type) {
-      case 'lead': return Icons.person_add_rounded;
-      case 'doc': return Icons.file_present_rounded;
-      case 'process': return Icons.gavel_rounded;
-      case 'chat': return Icons.chat_bubble_rounded;
-      default: return Icons.notifications_rounded;
-    }
-  }
-
-  Color _getIconColor(String type) {
-    switch (type) {
-      case 'lead': return AppColors.primary;
-      case 'doc': return AppColors.warning;
-      case 'process': return const Color(0xFF673AB7);
-      case 'chat': return AppColors.success;
-      default: return AppColors.textCaption;
-    }
   }
 
   void _toggleReadStatus(String id) {
@@ -226,7 +145,7 @@ class _LawyerNotificationScreenState extends State<LawyerNotificationScreen> {
 
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: Text('Notificação excluída'),
+        content: const Text('Notificação excluída'),
         action: SnackBarAction(
           label: 'Desfazer',
           onPressed: () {
@@ -239,3 +158,4 @@ class _LawyerNotificationScreenState extends State<LawyerNotificationScreen> {
     );
   }
 }
+

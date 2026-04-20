@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../../../shared/constants/app_colors.dart';
 import '../../../../shared/constants/app_text_styles.dart';
-import '../../../../shared/widgets/layout/custom_app_bar.dart';
+import '../../../../shared/widgets/layout/app_dashboard_header.dart';
 import '../../../../shared/widgets/buttons/app_badge.dart';
 import '../widgets/lawyer_metric_card.dart';
 
@@ -12,48 +12,38 @@ class LawyerDashboardScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.background,
-      appBar: CustomAppBar(
-        title: '',
-        titleWidget: Row(
-          children: [
-            const CircleAvatar(
-              radius: 18,
-              backgroundColor: AppColors.secondaryLight,
-              child: Icon(Icons.person, color: AppColors.secondaryDark, size: 20),
-            ),
-            const SizedBox(width: 12),
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                const Text('Olá, Dr. Rodrigo', style: AppTextStyles.h2),
-                Text('Escritório Machado & Associados', style: AppTextStyles.caption.copyWith(fontSize: 12)),
-              ],
-            ),
-          ],
-        ),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.notifications_outlined, color: AppColors.primary),
-            onPressed: () {},
+      body: SafeArea(
+        child: SingleChildScrollView(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              AppDashboardHeader(
+                name: 'Dr. Rodrigo Machado',
+                greeting: 'Bom dia,',
+                notificationCount: 5,
+                onProfileTap: () => Navigator.pushNamed(context, '/lawyer-profile'),
+                onNotificationTap: () => Navigator.pushNamed(context, '/lawyer-notifications'),
+              ),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 20),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    _buildMetricsGrid(),
+                    const SizedBox(height: 32),
+                    _buildSectionHeader('Novos Leads', () {}),
+                    const SizedBox(height: 16),
+                    _buildLeadsList(),
+                    const SizedBox(height: 32),
+                    _buildSectionHeader('Tarefas Pendentes', () {}),
+                    const SizedBox(height: 16),
+                    _buildTaskList(),
+                    const SizedBox(height: 100),
+                  ],
+                ),
+              ),
+            ],
           ),
-        ],
-      ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(20),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            _buildMetricsGrid(),
-            const SizedBox(height: 32),
-            _buildSectionHeader('Novos Leads', () {}),
-            const SizedBox(height: 16),
-            _buildLeadsList(),
-            const SizedBox(height: 32),
-            _buildSectionHeader('Tarefas Pendentes', () {}),
-            const SizedBox(height: 16),
-            _buildTaskList(),
-          ],
         ),
       ),
     );

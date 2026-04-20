@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import '../../../../shared/constants/app_colors.dart';
 import '../../../../shared/constants/app_text_styles.dart';
 import '../../../../shared/widgets/layout/custom_app_bar.dart';
+import '../../../../shared/widgets/buttons/app_badge.dart';
 import '../widgets/lawyer_app_bar_actions.dart';
+import '../../../../shared/widgets/cards/app_process_card.dart';
 
 class LawyerProcessListScreen extends StatefulWidget {
   const LawyerProcessListScreen({super.key});
@@ -143,84 +145,30 @@ class _LawyerProcessListScreenState extends State<LawyerProcessListScreen> {
       itemCount: filtered.length,
       itemBuilder: (context, index) {
         final p = filtered[index];
-        return _buildProcessCard(p);
+        return Padding(
+          padding: const EdgeInsets.only(bottom: 16),
+          child: AppProcessCard(
+            title: p['client'],
+            subtitle: 'Proc: ${p['number']}',
+            statusLabel: p['status'],
+            statusType: _getStatusType(p['status']),
+            lastUpdate: p['lastUpdate'],
+            onTap: () {
+              Navigator.pushNamed(context, '/lawyer-process-detail');
+            },
+          ),
+        );
       },
     );
   }
 
-  Widget _buildProcessCard(Map<String, dynamic> p) {
-    return Container(
-      margin: const EdgeInsets.only(bottom: 16),
-      decoration: BoxDecoration(
-        color: AppColors.white,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: AppColors.divider),
-      ),
-      child: InkWell(
-        onTap: () {
-          Navigator.pushNamed(context, '/lawyer-process-detail');
-        },
-        borderRadius: BorderRadius.circular(16),
-        child: Padding(
-          padding: const EdgeInsets.all(16),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Expanded(
-                    child: Text(
-                      p['client'],
-                      style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
-                    ),
-                  ),
-                  _buildStatusPill(p['status']),
-                ],
-              ),
-              const SizedBox(height: 8),
-              Text(
-                'Proc: ${p['number']}',
-                style: AppTextStyles.caption.copyWith(fontSize: 12),
-              ),
-              const SizedBox(height: 12),
-              Row(
-                children: [
-                  const Icon(Icons.update_rounded, size: 14, color: AppColors.primary),
-                  const SizedBox(width: 4),
-                  Expanded(
-                    child: Text(
-                      p['lastUpdate'],
-                      style: AppTextStyles.caption.copyWith(color: AppColors.textPrimary, fontSize: 12),
-                    ),
-                  ),
-                ],
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
+  BadgeType _getStatusType(String status) {
+    if (status.contains('Aguardando')) return BadgeType.warning;
+    if (status.contains('Sentença')) return BadgeType.success;
+    if (status.contains('Audiência')) return BadgeType.primary;
+    return BadgeType.primary;
   }
 
-  Widget _buildStatusPill(String status) {
-    Color color = AppColors.primary;
-    if (status.contains('Aguardando')) color = AppColors.warning;
-    if (status.contains('Sentença')) color = AppColors.success;
-    if (status.contains('Audiência')) color = const Color(0xFF673AB7);
-
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-      decoration: BoxDecoration(
-        color: color.withValues(alpha: 0.1),
-        borderRadius: BorderRadius.circular(8),
-      ),
-      child: Text(
-        status.toUpperCase(),
-        style: TextStyle(color: color, fontSize: 10, fontWeight: FontWeight.bold),
-      ),
-    );
-  }
 
   void _showNewProcessModal(BuildContext context) {
     showModalBottomSheet(
