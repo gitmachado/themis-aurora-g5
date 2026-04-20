@@ -53,11 +53,11 @@ class LawyerMainLayoutState extends State<LawyerMainLayout> {
         currentIndex: currentIndex,
         onTap: _onTabTapped,
         items: const [
-          NavItem(icon: Icons.dashboard_outlined, label: 'Início'),
-          NavItem(icon: Icons.people_outline_rounded, label: 'Leads'),
-          NavItem(icon: Icons.folder_shared_outlined, label: 'Processos'),
-          NavItem(icon: Icons.contact_page_outlined, label: 'Clientes'),
-          NavItem(icon: Icons.person_outline_rounded, label: 'Perfil'),
+          NavItem(icon: Icons.grid_view_rounded, label: 'Início'),
+          NavItem(icon: Icons.people_alt_rounded, label: 'Leads'),
+          NavItem(icon: Icons.business_center_rounded, label: 'Processos'),
+          NavItem(icon: Icons.person_search_rounded, label: 'Clientes'),
+          NavItem(icon: Icons.person_rounded, label: 'Perfil'),
         ],
       ),
     );

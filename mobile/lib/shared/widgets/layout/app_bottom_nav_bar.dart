@@ -23,10 +23,11 @@ class AppBottomNavigationBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final navItems = items ?? const [
-      NavItem(icon: Icons.dashboard_outlined, label: 'Home'),
-      NavItem(icon: Icons.folder_outlined, label: 'Processos'),
-      NavItem(icon: Icons.file_copy_outlined, label: 'Documentos'),
-      NavItem(icon: Icons.chat_bubble_outline, label: 'Chat'),
+      NavItem(icon: Icons.grid_view_rounded, label: 'Início'),
+      NavItem(icon: Icons.business_center_rounded, label: 'Processos'),
+      NavItem(icon: Icons.description_rounded, label: 'Documentos'),
+      NavItem(icon: Icons.chat_bubble_rounded, label: 'Chat'),
+      NavItem(icon: Icons.person_rounded, label: 'Perfil'),
     ];
 
     return Container(
