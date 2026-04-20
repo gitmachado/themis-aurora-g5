@@ -1,128 +1,137 @@
-import 'package:flutter/material.dart';
+import 'dart:math' as math;
 import '../../../../shared/constants/app_colors.dart';
 import '../../../../shared/constants/app_text_styles.dart';
 import '../../../../shared/widgets/cards/app_card.dart';
 
-class NicheChart extends StatefulWidget {
+class NicheChart extends StatelessWidget {
   const NicheChart({super.key});
 
   @override
-  State<NicheChart> createState() => _NicheChartState();
-}
-
-class _NicheChartState extends State<NicheChart> {
-  int _selectedIndex = -1;
-
-  final List<Map<String, dynamic>> _data = [
-    {'label': 'Cível', 'percentage': 0.85, 'count': 42, 'color': AppColors.primary},
-    {'label': 'Trab.', 'percentage': 0.65, 'count': 28, 'color': AppColors.secondaryLight},
-    {'label': 'Fam.', 'percentage': 0.45, 'count': 15, 'color': AppColors.secondaryDark},
-    {'label': 'Cons.', 'percentage': 0.35, 'count': 12, 'color': const Color(0xFF9E9E9E)},
-  ];
-
-  @override
   Widget build(BuildContext context) {
+    final List<Map<String, dynamic>> data = [
+      {'label': 'Trabalhista', 'percentage': 60, 'color': AppColors.primary},
+      {'label': 'Cível', 'percentage': 25, 'color': AppColors.success},
+      {'label': 'Família', 'percentage': 15, 'color': AppColors.secondary},
+    ];
+
     return AppCard(
-      padding: const EdgeInsets.all(20),
+      padding: const EdgeInsets.all(24),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisSize: MainAxisSize.min,
         children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                'Casos por Nicho',
-                style: AppTextStyles.h2.copyWith(fontSize: 16),
-              ),
-              if (_selectedIndex != -1)
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                  decoration: BoxDecoration(
-                    color: _data[_selectedIndex]['color'].withValues(alpha: 0.1),
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: Text(
-                    '${_data[_selectedIndex]['count']} processos',
-                    style: TextStyle(
-                      color: _data[_selectedIndex]['color'],
-                      fontWeight: FontWeight.bold,
-                      fontSize: 12,
-                    ),
-                  ),
-                ),
-            ],
+          Text(
+            'Casos por Nicho',
+            style: AppTextStyles.h2.copyWith(fontSize: 16),
           ),
           const SizedBox(height: 24),
-          SizedBox(
-            height: 150,
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              crossAxisAlignment: CrossAxisAlignment.end,
-              children: List.generate(_data.length, (index) {
-                return _buildBar(index);
-              }),
-            ),
+          Row(
+            children: [
+              // Donut Chart
+              SizedBox(
+                height: 140,
+                width: 140,
+                child: Stack(
+                  children: [
+                    CustomPaint(
+                      size: const Size(140, 140),
+                      painter: _DonutChartPainter(data: data),
+                    ),
+                    Center(
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text(
+                            '234',
+                            style: AppTextStyles.h1.copyWith(fontSize: 20),
+                          ),
+                          Text(
+                            'Total',
+                            style: AppTextStyles.caption.copyWith(fontSize: 10),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(width: 32),
+              // Legend
+              Expanded(
+                child: Column(
+                  children: data.map((item) => _buildLegendItem(item)).toList(),
+                ),
+              ),
+            ],
           ),
         ],
       ),
     );
   }
 
-  Widget _buildBar(int index) {
-    final item = _data[index];
-    final isSelected = _selectedIndex == index;
-    final color = item['color'] as Color;
-
-    return GestureDetector(
-      onTap: () {
-        setState(() {
-          _selectedIndex = isSelected ? -1 : index;
-        });
-      },
-      behavior: HitTestBehavior.opaque,
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        mainAxisAlignment: MainAxisAlignment.end,
+  Widget _buildLegendItem(Map<String, dynamic> item) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 12),
+      child: Row(
         children: [
-          AnimatedContainer(
-            duration: const Duration(milliseconds: 300),
-            width: 44,
-            height: 120 * (item['percentage'] as double),
+          Container(
+            width: 12,
+            height: 12,
             decoration: BoxDecoration(
-              color: isSelected ? color : color.withValues(alpha: 0.7),
-              borderRadius: BorderRadius.circular(8),
-              boxShadow: [
-                BoxShadow(
-                  color: isSelected ? color.withValues(alpha: 0.3) : Colors.transparent,
-                  blurRadius: isSelected ? 8 : 0,
-                  offset: isSelected ? const Offset(0, 4) : Offset.zero,
-                ),
-              ],
-              gradient: LinearGradient(
-                begin: Alignment.topCenter,
-                end: Alignment.bottomCenter,
-                colors: [
-                  isSelected ? color : color.withValues(alpha: 0.9),
-                  color.withValues(alpha: 0.6),
-                ],
+              color: item['color'] as Color,
+              shape: BoxShape.circle,
+            ),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Text(
+              item['label'] as String,
+              style: AppTextStyles.caption.copyWith(
+                fontWeight: FontWeight.w600,
+                color: AppColors.textBody,
               ),
             ),
-            child: isSelected
-                ? const Icon(Icons.check, color: Colors.white, size: 16)
-                : null,
           ),
-          const SizedBox(height: 12),
           Text(
-            item['label'],
+            '${item['percentage']}%',
             style: AppTextStyles.caption.copyWith(
-              fontWeight: isSelected ? FontWeight.bold : FontWeight.w600,
-              color: isSelected ? color : AppColors.textCaption,
-              fontSize: 12,
+              fontWeight: FontWeight.bold,
+              color: AppColors.textPrimary,
             ),
           ),
         ],
       ),
     );
   }
+}
+
+class _DonutChartPainter extends CustomPainter {
+  final List<Map<String, dynamic>> data;
+
+  _DonutChartPainter({required this.data});
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final center = Offset(size.width / 2, size.height / 2);
+    final radius = size.width / 2;
+    final strokeWidth = radius * 0.35;
+    final rect = Rect.fromCircle(center: center, radius: radius - strokeWidth / 2);
+
+    double startAngle = -math.pi / 2;
+
+    for (var item in data) {
+      final sweepAngle = (item['percentage'] / 100) * 2 * math.pi;
+      final paint = Paint()
+        ..color = item['color'] as Color
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = strokeWidth
+        ..strokeCap = StrokeCap.round;
+
+      // Special case for single segment or to add small gaps
+      canvas.drawArc(rect, startAngle + 0.05, sweepAngle - 0.1, false, paint);
+      startAngle += sweepAngle;
+    }
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => true;
 }
