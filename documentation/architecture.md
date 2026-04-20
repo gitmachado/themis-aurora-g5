@@ -46,6 +46,7 @@ server/src/
 | Arquitetura | Camadas (Controller → Service → Repository) | Separação clara de responsabilidades |
 | Proteção Bot | API Key | Garante que apenas o robô de WhatsApp acesse endpoints de ingestão |
 | Segurança | Ownership/Tutor | Proteção contra IDOR e acesso não autorizado ([ADR-0004](decisions/0004-fine-grained-security-and-tutor-ownership.md)) |
+| Hospedagem MVP | VM unica com Docker e proxy HTTPS | Menor distancia entre o ambiente atual e o primeiro deploy publico (`../.agents/decisions/0006-hospedagem-mvp-publico.md`) |
 
 ### 2.5 Middlewares Globais
 
@@ -73,6 +74,24 @@ A API é 100% documentada utilizando o padrão **OpenAPI 3.0** via `swagger-jsdo
 - **Integração com Zod**: Os esquemas de validação Zod (`src/types/dtos/schemas/`) são utilizados para gerar automaticamente as definições de `requestBody`.
 - **Modelos de Resposta**: As interfaces de domínio (`src/types/models/`) são mapeadas como componentes Swagger, garantindo agilidade no desenvolvimento do frontend Flutter.
 - **Segurança**: A documentação inclui suporte nativo para testes com `bearerAuth` (JWT) e `apiKeyAuth` (Bot Integration).
+
+### 2.8 Deploy Público do MVP
+
+Para o primeiro deploy publico, a arquitetura aprovada usa uma unica VM/VPS Linux com proxy HTTPS na borda. Essa decisao privilegia simplicidade operacional e compatibilidade com o estado atual do backend, que ainda depende de volume local para documentos.
+
+- O trafego publico entra apenas por `443` no proxy reverso.
+- O `server` responde internamente na mesma VM e nao deve ser exposto diretamente na internet.
+- O PostgreSQL permanece na mesma VM, acessivel apenas pela rede interna.
+- O endpoint `/health` e um liveness check simples para operacao e smoke tests.
+- O Swagger fica desabilitado quando `NODE_ENV=production`.
+
+```mermaid
+flowchart LR
+    CLIENTE[App Flutter / Integracao externa] -->|HTTPS 443| PROXY[Proxy reverso]
+    PROXY -->|Rede interna| API[Container server]
+    API -->|Rede interna| DB[(PostgreSQL)]
+    API -->|Volume local| FILES[(uploads)]
+```
 
 ### 2.3 Diagrama de Entidades (ER)
 
