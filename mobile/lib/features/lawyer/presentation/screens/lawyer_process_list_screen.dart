@@ -54,7 +54,6 @@ class _LawyerProcessListScreenState extends State<LawyerProcessListScreen> {
       backgroundColor: AppColors.background,
       appBar: const CustomAppBar(
         title: 'Gestão de Processos',
-        centerTitle: false,
         actions: [LawyerAppBarActions()],
       ),
       body: Column(

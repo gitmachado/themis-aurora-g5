@@ -12,7 +12,6 @@ class LawyerDocumentReviewScreen extends StatelessWidget {
       backgroundColor: Colors.black, // Lightroom style
       appBar: const CustomAppBar(
         title: 'Revisão de Documento',
-        centerTitle: true,
         showBackButton: true,
       ),
       body: Column(

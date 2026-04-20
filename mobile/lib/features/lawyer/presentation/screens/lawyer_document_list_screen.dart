@@ -44,7 +44,7 @@ class _LawyerDocumentListScreenState extends State<LawyerDocumentListScreen> {
       backgroundColor: AppColors.background,
       appBar: const CustomAppBar(
         title: 'Revisão de Documentos',
-        centerTitle: true,
+        showBackButton: true,
       ),
       body: Column(
         children: [

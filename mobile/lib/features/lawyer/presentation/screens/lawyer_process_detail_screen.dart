@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../../../shared/constants/app_colors.dart';
 import '../../../../shared/constants/app_text_styles.dart';
+import '../../../../shared/widgets/layout/custom_app_bar.dart';
 
 class LawyerProcessDetailScreen extends StatefulWidget {
   const LawyerProcessDetailScreen({super.key});
@@ -16,18 +17,9 @@ class _LawyerProcessDetailScreenState extends State<LawyerProcessDetailScreen> {
       length: 4,
       child: Scaffold(
         backgroundColor: AppColors.background,
-        appBar: AppBar(
-          backgroundColor: AppColors.background,
-          elevation: 0,
-          leading: IconButton(
-            icon: const Icon(Icons.arrow_back_ios_new_rounded, color: AppColors.primary, size: 20),
-            onPressed: () => Navigator.pop(context),
-          ),
-          title: Text(
-            'Processo 1023456-88',
-            style: AppTextStyles.h2.copyWith(color: AppColors.primary),
-          ),
-          centerTitle: true,
+        appBar: CustomAppBar(
+          title: 'Processo 1023456-88',
+          showBackButton: true,
           bottom: TabBar(
             labelColor: AppColors.primary,
             unselectedLabelColor: AppColors.textCaption,

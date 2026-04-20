@@ -134,7 +134,7 @@ class _LawyerLeadDetailScreenState extends State<LawyerLeadDetailScreen> with Si
       backgroundColor: AppColors.primary,
       elevation: 0,
       leading: IconButton(
-        icon: const Icon(Icons.arrow_back_ios_new_rounded, color: Colors.white),
+        icon: const Icon(Icons.arrow_back_ios_new_rounded, color: Colors.white, size: 22),
         onPressed: () => Navigator.pop(context),
       ),
       flexibleSpace: FlexibleSpaceBar(

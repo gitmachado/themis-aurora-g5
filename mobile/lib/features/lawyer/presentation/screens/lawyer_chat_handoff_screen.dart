@@ -26,7 +26,7 @@ class _LawyerChatHandoffScreenState extends State<LawyerChatHandoffScreen> {
       backgroundColor: AppColors.background,
       appBar: CustomAppBar(
         title: widget.clientName,
-        centerTitle: true,
+        showBackButton: true,
         actions: [
           IconButton(
             icon: const Icon(Icons.info_outline_rounded),
@@ -47,21 +47,29 @@ class _LawyerChatHandoffScreenState extends State<LawyerChatHandoffScreen> {
   Widget _buildHandoffBanner() {
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
-      color: AppColors.warning.withValues(alpha: 0.1),
+      padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+      color: AppColors.warningOverlay,
       child: Row(
         children: [
-          const Icon(Icons.pause_circle_outline_rounded, color: AppColors.warning, size: 20),
-          const SizedBox(width: 8),
+          const Icon(Icons.pause_circle_outline_rounded, color: AppColors.warning, size: 22),
+          const SizedBox(width: 12),
           const Expanded(
             child: Text(
               'Você assumiu esta conversa. O Bot está em pausa.',
-              style: TextStyle(color: AppColors.warning, fontSize: 12, fontWeight: FontWeight.bold),
+              style: TextStyle(color: AppColors.warning, fontSize: 13, fontWeight: FontWeight.bold),
             ),
           ),
           TextButton(
             onPressed: () {},
-            child: const Text('Reativar Bot', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
+            style: TextButton.styleFrom(
+              backgroundColor: AppColors.warning.withValues(alpha: 0.1),
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+            ),
+            child: const Text(
+              'Reativar Bot', 
+              style: TextStyle(color: AppColors.warning, fontSize: 12, fontWeight: FontWeight.bold),
+            ),
           ),
         ],
       ),
@@ -70,7 +78,7 @@ class _LawyerChatHandoffScreenState extends State<LawyerChatHandoffScreen> {
 
   Widget _buildChatList() {
     return ListView.builder(
-      padding: const EdgeInsets.all(20),
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
       itemCount: _messages.length,
       itemBuilder: (context, index) {
         final m = _messages[index];
@@ -91,13 +99,22 @@ class _LawyerChatHandoffScreenState extends State<LawyerChatHandoffScreen> {
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
         constraints: BoxConstraints(maxWidth: MediaQuery.of(context).size.width * 0.75),
         decoration: BoxDecoration(
-          color: isClient ? AppColors.white : (isBot ? AppColors.primary.withValues(alpha: 0.1) : AppColors.primary),
+          color: isClient 
+              ? AppColors.surface 
+              : (isBot ? AppColors.primaryOverlay : AppColors.primary),
           borderRadius: BorderRadius.only(
             topLeft: const Radius.circular(16),
             topRight: const Radius.circular(16),
             bottomLeft: Radius.circular(isClient ? 0 : 16),
             bottomRight: Radius.circular(isClient ? 16 : 0),
           ),
+          boxShadow: isClient ? [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.03),
+              blurRadius: 4,
+              offset: const Offset(0, 2),
+            )
+          ] : null,
           border: isClient ? Border.all(color: AppColors.divider) : null,
         ),
         child: Column(
@@ -106,16 +123,25 @@ class _LawyerChatHandoffScreenState extends State<LawyerChatHandoffScreen> {
             if (isBot)
               const Padding(
                 padding: EdgeInsets.only(bottom: 4),
-                child: Text('ASSISTENTE IA', style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: AppColors.primary)),
+                child: Text(
+                  'ASSISTENTE IA', 
+                  style: TextStyle(
+                    fontSize: 10, 
+                    fontWeight: FontWeight.w800, 
+                    color: AppColors.primary,
+                    letterSpacing: 0.5,
+                  ),
+                ),
               ),
             Text(
               m['text'],
               style: TextStyle(
-                color: isLawyer ? Colors.white : AppColors.textPrimary,
-                fontSize: 14,
+                color: (isLawyer) ? Colors.white : AppColors.textPrimary,
+                fontSize: 15,
+                height: 1.4,
               ),
             ),
-            const SizedBox(height: 4),
+            const SizedBox(height: 6),
             Align(
               alignment: Alignment.bottomRight,
               child: Text(

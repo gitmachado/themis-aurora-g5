@@ -49,7 +49,7 @@ class _LawyerChatListScreenState extends State<LawyerChatListScreen> {
       backgroundColor: AppColors.background,
       appBar: const CustomAppBar(
         title: 'Mensagens e Handoffs',
-        centerTitle: true,
+        showBackButton: true,
       ),
       body: Column(
         children: [
@@ -105,11 +105,21 @@ class _LawyerChatListScreenState extends State<LawyerChatListScreen> {
         final bool isHandoff = chat['status'] == 'HANDOFF_PENDING';
 
         return Container(
-          margin: const EdgeInsets.only(bottom: 12),
+          margin: const EdgeInsets.only(bottom: 16),
           decoration: BoxDecoration(
-            color: AppColors.white,
-            borderRadius: BorderRadius.circular(16),
-            border: Border.all(color: isHandoff ? AppColors.warning.withValues(alpha: 0.3) : AppColors.divider),
+            color: AppColors.surface,
+            borderRadius: BorderRadius.circular(20),
+            border: Border.all(
+              color: isHandoff ? AppColors.warningOverlay : AppColors.divider,
+              width: isHandoff ? 2 : 1,
+            ),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withValues(alpha: 0.04),
+                blurRadius: 10,
+                offset: const Offset(0, 4),
+              ),
+            ],
           ),
           child: ListTile(
             contentPadding: const EdgeInsets.all(16),
@@ -117,8 +127,11 @@ class _LawyerChatListScreenState extends State<LawyerChatListScreen> {
               children: [
                 CircleAvatar(
                   radius: 24,
-                  backgroundColor: AppColors.primary.withValues(alpha: 0.1),
-                  child: Text(chat['initials'], style: const TextStyle(color: AppColors.primary, fontWeight: FontWeight.bold)),
+                  backgroundColor: AppColors.primaryOverlay,
+                  child: Text(
+                    chat['initials'], 
+                    style: const TextStyle(color: AppColors.primary, fontWeight: FontWeight.bold),
+                  ),
                 ),
                 if (isHandoff)
                   Positioned(
@@ -139,31 +152,36 @@ class _LawyerChatListScreenState extends State<LawyerChatListScreen> {
             title: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text(chat['clientName'], style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15)),
-                Text(chat['time'], style: AppTextStyles.caption.copyWith(fontSize: 11)),
+                Text(chat['clientName'], style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+                Text(chat['time'], style: AppTextStyles.caption.copyWith(fontSize: 12)),
               ],
             ),
             subtitle: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const SizedBox(height: 4),
+                const SizedBox(height: 6),
                 Text(
                   chat['lastMessage'],
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
-                  style: AppTextStyles.caption.copyWith(fontSize: 13),
+                  style: AppTextStyles.caption.copyWith(fontSize: 14),
                 ),
                 if (isHandoff) ...[
-                  const SizedBox(height: 8),
+                  const SizedBox(height: 10),
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
                     decoration: BoxDecoration(
-                      color: AppColors.warning.withValues(alpha: 0.1),
-                      borderRadius: BorderRadius.circular(6),
+                      color: AppColors.warningOverlay,
+                      borderRadius: BorderRadius.circular(8),
                     ),
                     child: const Text(
                       'IA SOLICITOU INTERVENÇÃO',
-                      style: TextStyle(color: AppColors.warning, fontSize: 10, fontWeight: FontWeight.bold),
+                      style: TextStyle(
+                        color: AppColors.warning, 
+                        fontSize: 10, 
+                        fontWeight: FontWeight.bold,
+                        letterSpacing: 0.5,
+                      ),
                     ),
                   ),
                 ],

@@ -1,13 +1,15 @@
 import 'package:flutter/material.dart';
 import '../../../../shared/constants/app_colors.dart';
 import '../../../../shared/constants/app_text_styles.dart';
+import '../../../../shared/widgets/layout/custom_app_bar.dart';
 import '../../../../shared/widgets/cards/app_notification_tile.dart';
 
 class LawyerNotificationScreen extends StatefulWidget {
   const LawyerNotificationScreen({super.key});
 
   @override
-  State<LawyerNotificationScreen> createState() => _LawyerNotificationScreenState();
+  State<LawyerNotificationScreen> createState() =>
+      _LawyerNotificationScreenState();
 }
 
 class _LawyerNotificationScreenState extends State<LawyerNotificationScreen> {
@@ -52,14 +54,8 @@ class _LawyerNotificationScreenState extends State<LawyerNotificationScreen> {
       length: 2,
       child: Scaffold(
         backgroundColor: AppColors.background,
-        appBar: AppBar(
-          backgroundColor: AppColors.background,
-          elevation: 0,
-          title: Text(
-            'Notificações',
-            style: AppTextStyles.h2.copyWith(color: AppColors.primary),
-          ),
-          centerTitle: true,
+        appBar: CustomAppBar(
+          title: 'Notificações',
           bottom: TabBar(
             labelColor: AppColors.primary,
             unselectedLabelColor: AppColors.textCaption,
@@ -82,8 +78,8 @@ class _LawyerNotificationScreenState extends State<LawyerNotificationScreen> {
   }
 
   Widget _buildNotificationList({required bool onlyUnread}) {
-    final list = onlyUnread 
-        ? _notifications.where((n) => !n['isRead']).toList() 
+    final list = onlyUnread
+        ? _notifications.where((n) => !n['isRead']).toList()
         : _notifications;
 
     if (list.isEmpty) {
@@ -114,7 +110,11 @@ class _LawyerNotificationScreenState extends State<LawyerNotificationScreen> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(Icons.notifications_none_rounded, size: 64, color: AppColors.textCaption.withValues(alpha: 0.3)),
+          Icon(
+            Icons.notifications_none_rounded,
+            size: 64,
+            color: AppColors.textCaption.withValues(alpha: 0.3),
+          ),
           const SizedBox(height: 16),
           Text(
             'Nenhuma notificação por aqui',
@@ -137,7 +137,7 @@ class _LawyerNotificationScreenState extends State<LawyerNotificationScreen> {
   void _deleteNotification(String id) {
     final index = _notifications.indexWhere((n) => n['id'] == id);
     if (index == -1) return;
-    
+
     final removed = _notifications[index];
     setState(() {
       _notifications.removeAt(index);
@@ -158,4 +158,3 @@ class _LawyerNotificationScreenState extends State<LawyerNotificationScreen> {
     );
   }
 }
-

@@ -111,15 +111,25 @@ class LawyerDashboardScreen extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: AppColors.white,
-        borderRadius: BorderRadius.circular(12),
+        color: AppColors.surface,
+        borderRadius: BorderRadius.circular(16),
         border: Border.all(color: AppColors.divider),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.03),
+            blurRadius: 8,
+            offset: const Offset(0, 4),
+          ),
+        ],
       ),
       child: Row(
         children: [
           CircleAvatar(
-            backgroundColor: AppColors.primary.withValues(alpha: 0.1),
-            child: Text(name[0], style: const TextStyle(color: AppColors.primary, fontWeight: FontWeight.bold)),
+            backgroundColor: AppColors.primaryOverlay,
+            child: Text(
+              name[0], 
+              style: const TextStyle(color: AppColors.primary, fontWeight: FontWeight.bold),
+            ),
           ),
           const SizedBox(width: 16),
           Expanded(

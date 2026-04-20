@@ -25,7 +25,6 @@ class _LawyerClientListScreenState extends State<LawyerClientListScreen> {
       backgroundColor: AppColors.background,
       appBar: const CustomAppBar(
         title: 'Meus Clientes',
-        centerTitle: false,
         actions: [LawyerAppBarActions()],
       ),
       body: Column(

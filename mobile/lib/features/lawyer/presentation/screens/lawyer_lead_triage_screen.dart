@@ -55,7 +55,6 @@ class _LawyerLeadTriageScreenState extends State<LawyerLeadTriageScreen> {
       backgroundColor: AppColors.background,
       appBar: const CustomAppBar(
         title: 'Triagem de Leads',
-        centerTitle: false,
         actions: [LawyerAppBarActions()],
       ),
       body: Column(

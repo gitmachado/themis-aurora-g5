@@ -21,7 +21,7 @@ class _LawyerAIManagerScreenState extends State<LawyerAIManagerScreen> {
       backgroundColor: AppColors.background,
       appBar: const CustomAppBar(
         title: 'Gestão de IA (RAG)',
-        centerTitle: true,
+        showBackButton: true,
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(24),
