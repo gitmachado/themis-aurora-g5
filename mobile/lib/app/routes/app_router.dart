@@ -104,12 +104,12 @@ final class AppRouter {
         );
       case lawyerDashboardRoute:
         return MaterialPageRoute<void>(
-          builder: (_) => const LawyerDashboardScreen(),
+          builder: (_) => const LawyerMainLayout(initialIndex: 0),
           settings: settings,
         );
       case lawyerClientsRoute:
         return MaterialPageRoute<void>(
-          builder: (_) => const LawyerClientListScreen(),
+          builder: (_) => const LawyerMainLayout(initialIndex: 3),
           settings: settings,
         );
       case '/lawyer-client-detail':
