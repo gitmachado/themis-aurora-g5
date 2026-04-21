@@ -3,12 +3,10 @@ import '../../features/design_system/presentation/screens/design_system_screen.d
 import '../../features/auth/presentation/screens/login_screen.dart';
 // Client
 import '../../features/client/procedures/presentation/screens/client_procedure_timeline_screen.dart';
-import '../../features/client/files/presentation/screens/client_files_screen.dart';
 import '../../features/client/profile/presentation/screens/client_profile_screen.dart';
 import '../../features/client/notifications/presentation/screens/client_notifications_screen.dart';
 import '../../features/client/chat/presentation/screens/client_chat_mirror_screen.dart';
 // Lawyer
-import '../../features/lawyer/procedures/presentation/screens/lawyer_procedure_list_screen.dart';
 import '../../features/lawyer/procedures/presentation/screens/lawyer_procedure_detail_screen.dart';
 import '../../features/lawyer/profile/presentation/screens/lawyer_profile_screen.dart';
 import '../../features/lawyer/leads/presentation/screens/lawyer_lead_detail_screen.dart';

@@ -69,7 +69,7 @@ class _ClientProcedureListScreenState extends State<ClientProcedureListScreen> {
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(20),
                 side: BorderSide(
-                  color: isSelected ? AppColors.primary : AppColors.divider,
+                  color: isSelected ? AppColors.primary : AppColors.border,
                 ),
               ),
               showCheckmark: false,

@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import '../../../../../../shared/constants/app_colors.dart';
 import '../../../../../../shared/constants/app_text_styles.dart';
 import '../../../../../../shared/widgets/buttons/app_badge.dart';
@@ -26,8 +26,6 @@ class LeadCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final urgencyType = _getUrgencyType();
-    final isUrgent = urgency.toUpperCase() == 'ALTA' || urgency.toUpperCase() == 'URGENTE';
-
     return GestureDetector(
       onTap: onTap,
       child: Container(
@@ -36,8 +34,8 @@ class LeadCard extends StatelessWidget {
           color: AppColors.white,
           borderRadius: BorderRadius.circular(16),
           border: Border.all(
-            color: isUrgent ? AppColors.error.withValues(alpha: 0.3) : AppColors.divider,
-            width: isUrgent ? 1.5 : 1,
+            color: AppColors.border,
+            width: 1,
           ),
           boxShadow: [
             BoxShadow(
@@ -93,24 +91,25 @@ class LeadCard extends StatelessWidget {
               ],
             ),
             const SizedBox(height: 16),
-            const Divider(height: 1),
-            const SizedBox(height: 12),
             Row(
-              mainAxisAlignment: MainAxisAlignment.end,
               children: [
-                _buildActionButton(
-                  icon: Icons.close_rounded,
-                  color: AppColors.textCaption,
-                  onPressed: onArchive,
-                  label: 'Arquivar',
+                Expanded(
+                  child: _buildActionButton(
+                    icon: Icons.close_rounded,
+                    color: AppColors.textCaption,
+                    onPressed: onArchive,
+                    label: 'Arquivar',
+                  ),
                 ),
                 const SizedBox(width: 12),
-                _buildActionButton(
-                  icon: Icons.check_circle_rounded,
-                  color: AppColors.success,
-                  onPressed: onAccept,
-                  label: 'Aceitar',
-                  isPrimary: true,
+                Expanded(
+                  child: _buildActionButton(
+                    icon: Icons.check_circle_rounded,
+                    color: AppColors.success,
+                    onPressed: onAccept,
+                    label: 'Aceitar',
+                    isPrimary: true,
+                  ),
                 ),
               ],
             ),
@@ -149,11 +148,11 @@ class LeadCard extends StatelessWidget {
           color: isPrimary ? color.withValues(alpha: 0.1) : Colors.transparent,
           borderRadius: BorderRadius.circular(8),
           border: Border.all(
-            color: isPrimary ? color.withValues(alpha: 0.2) : AppColors.divider,
+            color: isPrimary ? color.withValues(alpha: 0.2) : AppColors.border,
           ),
         ),
         child: Row(
-          mainAxisSize: MainAxisSize.min,
+          mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Icon(icon, color: color, size: 18),
             const SizedBox(width: 8),

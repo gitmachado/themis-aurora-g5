@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../constants/app_colors.dart';
 import '../../constants/app_text_styles.dart';
-import '../buttons/app_badge.dart';
 
 class AppFileCard extends StatelessWidget {
   final String fileName;
@@ -34,7 +33,7 @@ class AppFileCard extends StatelessWidget {
       decoration: BoxDecoration(
         color: AppColors.white,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: const Color(0xFFE5E7EB)),
+        border: Border.all(color: AppColors.border),
       ),
       child: InkWell(
         onTap: onTap,

@@ -15,7 +15,7 @@ class AppColors {
   static const Color secondaryOverlay = Color(0x33DEBC74); // 20% opacity
 
   // Background & Surfaces
-  static const Color background = Color(0xFFF8F9FA); 
+  static const Color background = Color(0xFFF4F6F9); 
   static const Color surface = Color(0xFFFFFFFF);
   
   // Alert & Feedback
@@ -34,6 +34,7 @@ class AppColors {
   static const Color textBody = Color(0xFF212121);
   static const Color textCaption = Color(0xFF757575);
   static const Color white = Colors.white;
+  static const Color border = Color(0xFFE2E8F0);
   static const Color chatBubbleMe = Color(0xFFDCF8C6);
-  static const Color divider = Color(0xFFCCCCCC);
+  static const Color divider = Color(0xFFE2E8F0);
 }

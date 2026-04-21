@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import '../../../../../../shared/constants/app_colors.dart';
 import '../../../../../../shared/widgets/layout/custom_app_bar.dart';
 
@@ -38,9 +38,9 @@ class _LawyerChatHandoffScreenState extends State<LawyerChatHandoffScreen> {
         children: [
           _buildHandoffBanner(),
           Expanded(child: _buildChatList()),
-          _buildInputArea(),
         ],
       ),
+      bottomNavigationBar: _buildInputArea(),
     );
   }
 
@@ -160,48 +160,52 @@ class _LawyerChatHandoffScreenState extends State<LawyerChatHandoffScreen> {
 
   Widget _buildInputArea() {
     return Container(
-      padding: const EdgeInsets.fromLTRB(20, 12, 20, 32),
       decoration: BoxDecoration(
         color: AppColors.white,
         boxShadow: [
           BoxShadow(color: Colors.black.withValues(alpha: 0.05), blurRadius: 10, offset: const Offset(0, -2)),
         ],
       ),
-      child: Row(
-        children: [
-          IconButton(onPressed: () {}, icon: const Icon(Icons.add_circle_outline_rounded, color: AppColors.primary)),
-          Expanded(
-            child: TextField(
-              controller: _messageController,
-              decoration: InputDecoration(
-                hintText: 'Escreva uma mensagem...',
-                border: OutlineInputBorder(borderRadius: BorderRadius.circular(24), borderSide: BorderSide.none),
-                filled: true,
-                fillColor: AppColors.background,
-                contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      child: SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(20, 12, 20, 12),
+          child: Row(
+            children: [
+              IconButton(onPressed: () {}, icon: const Icon(Icons.add_circle_outline_rounded, color: AppColors.primary)),
+              Expanded(
+                child: TextField(
+                  controller: _messageController,
+                  decoration: InputDecoration(
+                    hintText: 'Escreva uma mensagem...',
+                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(24), borderSide: BorderSide.none),
+                    filled: true,
+                    fillColor: AppColors.background,
+                    contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  ),
+                ),
               ),
-            ),
+              const SizedBox(width: 8),
+              CircleAvatar(
+                backgroundColor: AppColors.primary,
+                child: IconButton(
+                  icon: const Icon(Icons.send_rounded, color: Colors.white, size: 20),
+                  onPressed: () {
+                    if (_messageController.text.isNotEmpty) {
+                      setState(() {
+                        _messages.add({
+                          'sender': 'LAWYER',
+                          'text': _messageController.text,
+                          'time': 'Agora',
+                        });
+                        _messageController.clear();
+                      });
+                    }
+                  },
+                ),
+              ),
+            ],
           ),
-          const SizedBox(width: 8),
-          CircleAvatar(
-            backgroundColor: AppColors.primary,
-            child: IconButton(
-              icon: const Icon(Icons.send_rounded, color: Colors.white, size: 20),
-              onPressed: () {
-                if (_messageController.text.isNotEmpty) {
-                  setState(() {
-                    _messages.add({
-                      'sender': 'LAWYER',
-                      'text': _messageController.text,
-                      'time': 'Agora',
-                    });
-                    _messageController.clear();
-                  });
-                }
-              },
-            ),
-          ),
-        ],
+        ),
       ),
     );
   }

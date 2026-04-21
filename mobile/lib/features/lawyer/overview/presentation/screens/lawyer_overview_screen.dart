@@ -5,7 +5,7 @@ import '../../../../../../shared/constants/app_text_styles.dart';
 import '../../../../../../shared/widgets/cards/app_card.dart';
 import '../../../../../../shared/widgets/cards/app_list_tile.dart';
 import '../../../../../../shared/widgets/buttons/app_badge.dart';
-import '../widgets/dashboard_header.dart';
+import '../../../../../../shared/widgets/layout/app_dashboard_header.dart';
 import '../widgets/metric_card.dart';
 import '../widgets/niche_chart.dart';
 import '../../../../../../shared/widgets/layout/lawyer_main_layout.dart';
@@ -22,11 +22,13 @@ class LawyerOverviewScreen extends StatelessWidget {
       backgroundColor: AppColors.background,
       body: Column(
         children: [
-            const DashboardHeader(
-              userName: 'Dr. Rodrigo',
-              officeName: 'Escritório Machado & Associados',
+            const AppDashboardHeader(
+              name: 'Dr. Rodrigo',
+              subtitle: 'Escritório Machado & Associados',
+              avatarUrl: 'https://images.unsplash.com/photo-1560250097-0b93528c311a?q=80&w=256&h=256&auto=format&fit=crop',
               notificationCount: 2,
               chatCount: 3,
+              showChat: true,
             ),
             Expanded(
               child: SingleChildScrollView(
@@ -94,6 +96,7 @@ class LawyerOverviewScreen extends StatelessWidget {
       child: AppCard(
         padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
         color: const Color(0xFFFFF4E5),
+        hasBorder: false,
         child: Row(
           children: [
             const Icon(Icons.info_outline_rounded, color: AppColors.secondaryLight, size: 24),

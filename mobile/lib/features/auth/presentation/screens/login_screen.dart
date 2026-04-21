@@ -165,7 +165,7 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
             ),
             enabledBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
-              borderSide: const BorderSide(color: AppColors.divider),
+              borderSide: const BorderSide(color: AppColors.border),
             ),
           ),
         ),
@@ -184,7 +184,7 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
             ),
             enabledBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
-              borderSide: const BorderSide(color: AppColors.divider),
+              borderSide: const BorderSide(color: AppColors.border),
             ),
           ),
         ),

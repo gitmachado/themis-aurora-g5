@@ -18,15 +18,11 @@ class ClientHomeScreen extends StatelessWidget {
         children: [
           AppDashboardHeader(
             name: 'Lucas Silva',
-            greeting: 'Bom dia,',
+            subtitle: 'Cliente',
             avatarUrl: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?q=80&w=256&h=256&auto=format&fit=crop',
             notificationCount: 2,
             onProfileTap: () => Navigator.pushNamed(context, '/profile'),
             onNotificationTap: () => Navigator.pushNamed(context, '/notifications'),
-          ),
-          Container(
-            height: 1,
-              color: AppColors.divider.withValues(alpha: 0.7),
           ),
           Expanded(
             child: SingleChildScrollView(

@@ -76,21 +76,15 @@ class _ClientProcedureTimelineScreenState extends State<ClientProcedureTimelineS
             ],
           ),
         ),
-        body: Column(
+        body: TabBarView(
           children: [
-            Expanded(
-              child: TabBarView(
-                children: [
-                  _buildTimelineTab(),
-                  _buildAiResumoTab(),
-                  _buildFilesTab(),
-                  _buildChatTab(),
-                ],
-              ),
-            ),
-            _buildActionFooter(context),
+            _buildTimelineTab(),
+            _buildAiResumoTab(),
+            _buildFilesTab(),
+            _buildChatTab(),
           ],
         ),
+        bottomNavigationBar: _buildActionFooter(context),
       ),
     );
   }
@@ -325,16 +319,21 @@ class _ClientProcedureTimelineScreenState extends State<ClientProcedureTimelineS
 
   Widget _buildActionFooter(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.fromLTRB(20, 16, 20, 24),
       decoration: BoxDecoration(
         color: AppColors.white,
         border: Border(top: BorderSide(color: AppColors.divider.withValues(alpha: 0.5))),
       ),
-      child: PrimaryButton(
-        label: 'Dúvida? Falar no WhatsApp',
-        icon: Icons.chat_bubble_outline_rounded,
-        backgroundColor: AppColors.success,
-        onPressed: () {},
+      child: SafeArea(
+        top: false,
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(20, 16, 20, 16),
+          child: PrimaryButton(
+            label: 'Dúvida? Falar no WhatsApp',
+            icon: Icons.chat_bubble_outline_rounded,
+            backgroundColor: AppColors.success,
+            onPressed: () {},
+          ),
+        ),
       ),
     );
   }

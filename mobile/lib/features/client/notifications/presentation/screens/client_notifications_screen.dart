@@ -73,6 +73,7 @@ class _ClientNotificationsScreenState extends State<ClientNotificationsScreen> {
           ),
         ),
         body: SafeArea(
+          top: false,
           child: TabBarView(
             children: [
               _buildNotificationList(onlyUnread: true),
@@ -94,7 +95,7 @@ class _ClientNotificationsScreenState extends State<ClientNotificationsScreen> {
     }
 
     return ListView.builder(
-      padding: const EdgeInsets.symmetric(vertical: 8),
+      padding: const EdgeInsets.only(bottom: 24),
       itemCount: list.length,
       itemBuilder: (context, index) {
         final n = list[index];

@@ -66,6 +66,11 @@ Ao realizar commits na sua branch detalhada, utilize o padrão "Conventional Com
 3. Faça o commit padronizado: `git commit -m "feat: sua mensagem"`.
 4. Envie para o repositório remoto: `git push origin tipo/nome`.
 5. Abra um Pull Request (PR) caso aplicável para mergear na `development`.
+---
+
+## 🛡️ Segurança e Permissões (Regra para IA)
+> [!IMPORTANT]
+> O Agente/IA **NUNCA** deve realizar comandos de `git push`, `git push --force` ou criar Pull Requests sem a autorização **explícita e única** do usuário para aquela operação específica. Mesmo que uma permissão tenha sido dada anteriormente, novas alterações que exijam envio para o GitHub devem ser validadas novamente.
 
 ---
 

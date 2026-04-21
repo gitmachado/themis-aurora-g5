@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../constants/app_colors.dart';
 import '../../constants/app_text_styles.dart';
+import 'app_notification_button.dart';
 
 class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
   final String title;
@@ -9,6 +10,9 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
   final Widget? titleWidget;
   final bool centerTitle;
   final bool showBackButton;
+  final bool showNotificationButton;
+  final int notificationCount;
+  final VoidCallback? onNotificationTap;
   final PreferredSizeWidget? bottom;
   final bool showDivider;
 
@@ -20,27 +24,41 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
     this.titleWidget,
     this.centerTitle = false,
     this.showBackButton = false,
+    this.showNotificationButton = false,
+    this.notificationCount = 0,
+    this.onNotificationTap,
     this.bottom,
     this.showDivider = true,
   });
 
   @override
   Widget build(BuildContext context) {
+    final hasTrailingActions =
+        (actions?.isNotEmpty ?? false) || showNotificationButton;
+
     return AppBar(
       automaticallyImplyLeading: false,
       titleSpacing: showBackButton ? 0 : 20,
-      title: titleWidget ??
+      title:
+          titleWidget ??
           Text(
             title,
             style: AppTextStyles.h2.copyWith(color: AppColors.primary),
           ),
-      actions: actions != null
+      actions: hasTrailingActions
           ? [
-              ...actions!,
+              ...?actions,
+              if (showNotificationButton)
+                AppNotificationButton(
+                  notificationCount: notificationCount,
+                  onTap: onNotificationTap ??
+                      () => Navigator.pushNamed(context, '/notifications'),
+                ),
               const SizedBox(width: 8),
             ]
           : null,
-      leading: leading ??
+      leading:
+          leading ??
           (showBackButton
               ? IconButton(
                   icon: const Icon(Icons.arrow_back_ios_new_rounded, size: 22),

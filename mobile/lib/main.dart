@@ -6,16 +6,19 @@ import 'app/app.dart';
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
 
-  // Configura a barra de navegação e status nativa para evitar transparência
+  // Configura a barra de navegação e status nativa para modo edge-to-edge
   SystemChrome.setSystemUIOverlayStyle(
     const SystemUiOverlayStyle(
       statusBarColor: Colors.transparent,
       statusBarIconBrightness: Brightness.dark,
-      systemNavigationBarColor: Color(0xFFF8F9FA),
+      systemNavigationBarColor: Colors.transparent,
       systemNavigationBarIconBrightness: Brightness.dark,
       systemNavigationBarDividerColor: Colors.transparent,
     ),
   );
+
+  // Garante o modo edge-to-edge no Android
+  SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
 
   runApp(const OmniConnectApp());
 }

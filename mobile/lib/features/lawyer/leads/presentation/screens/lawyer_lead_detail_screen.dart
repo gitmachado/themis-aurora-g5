@@ -125,7 +125,7 @@ class _LawyerLeadDetailScreenState extends State<LawyerLeadDetailScreen> with Si
           ],
         ),
       ),
-      bottomSheet: SafeArea(child: _buildStickyFooter()),
+      bottomNavigationBar: _buildStickyFooter(),
     );
   }
 
@@ -223,7 +223,6 @@ class _LawyerLeadDetailScreenState extends State<LawyerLeadDetailScreen> with Si
 
   Widget _buildStickyFooter() {
     return Container(
-      padding: const EdgeInsets.fromLTRB(24, 16, 24, 32),
       decoration: BoxDecoration(
         color: AppColors.white,
         boxShadow: [
@@ -233,18 +232,27 @@ class _LawyerLeadDetailScreenState extends State<LawyerLeadDetailScreen> with Si
             offset: const Offset(0, -5),
           ),
         ],
-      ),
-      child: ElevatedButton(
-        onPressed: _showConversionDialog,
-        style: ElevatedButton.styleFrom(
-          backgroundColor: AppColors.primary,
-          minimumSize: const Size(double.infinity, 56),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-          elevation: 0,
+        border: Border(
+          top: BorderSide(color: AppColors.divider.withValues(alpha: 0.5)),
         ),
-        child: const Text(
-          'Converter em Cliente',
-          style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16),
+      ),
+      child: SafeArea(
+        top: false,
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(24, 16, 24, 16),
+          child: ElevatedButton(
+            onPressed: _showConversionDialog,
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppColors.primary,
+              minimumSize: const Size(double.infinity, 56),
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+              elevation: 0,
+            ),
+            child: const Text(
+              'Converter em Cliente',
+              style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16),
+            ),
+          ),
         ),
       ),
     );
@@ -260,49 +268,54 @@ class _LawyerLeadDetailScreenState extends State<LawyerLeadDetailScreen> with Si
           color: AppColors.white,
           borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
         ),
-        padding: const EdgeInsets.all(32),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Container(
-              width: 40,
-              height: 4,
-              decoration: BoxDecoration(
-                color: AppColors.divider,
-                borderRadius: BorderRadius.circular(2),
-              ),
+        child: SafeArea(
+          top: false,
+          child: Padding(
+            padding: const EdgeInsets.all(32),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Container(
+                  width: 40,
+                  height: 4,
+                  decoration: BoxDecoration(
+                    color: AppColors.divider,
+                    borderRadius: BorderRadius.circular(2),
+                  ),
+                ),
+                const SizedBox(height: 24),
+                const Icon(Icons.verified_user_outlined, color: AppColors.success, size: 64),
+                const SizedBox(height: 24),
+                const Text(
+                  'Confirmar Conversão',
+                  style: AppTextStyles.h1,
+                ),
+                const SizedBox(height: 16),
+                Text(
+                  'Ao converter ${widget.name}, um novo usuário será criado e um processo será iniciado automaticamente. O cliente receberá os dados de acesso via WhatsApp.',
+                  textAlign: TextAlign.center,
+                  style: AppTextStyles.body.copyWith(color: AppColors.textCaption),
+                ),
+                const SizedBox(height: 32),
+                ElevatedButton(
+                  onPressed: () {
+                    Navigator.pop(context); // Close sheet
+                    _showSuccessAnimation();
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColors.success,
+                    minimumSize: const Size(double.infinity, 56),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                  ),
+                  child: const Text('Sim, Converter Agora', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+                ),
+                TextButton(
+                  onPressed: () => Navigator.pop(context),
+                  child: const Text('Cancelar', style: TextStyle(color: AppColors.textCaption)),
+                ),
+              ],
             ),
-            const SizedBox(height: 24),
-            const Icon(Icons.verified_user_outlined, color: AppColors.success, size: 64),
-            const SizedBox(height: 24),
-            const Text(
-              'Confirmar Conversão',
-              style: AppTextStyles.h1,
-            ),
-            const SizedBox(height: 16),
-            Text(
-              'Ao converter ${widget.name}, um novo usuário será criado e um processo será iniciado automaticamente. O cliente receberá os dados de acesso via WhatsApp.',
-              textAlign: TextAlign.center,
-              style: AppTextStyles.body.copyWith(color: AppColors.textCaption),
-            ),
-            const SizedBox(height: 32),
-            ElevatedButton(
-              onPressed: () {
-                Navigator.pop(context); // Close sheet
-                _showSuccessAnimation();
-              },
-              style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.success,
-                minimumSize: const Size(double.infinity, 56),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-              ),
-              child: const Text('Sim, Converter Agora', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
-            ),
-            TextButton(
-              onPressed: () => Navigator.pop(context),
-              child: const Text('Cancelar', style: TextStyle(color: AppColors.textCaption)),
-            ),
-          ],
+          ),
         ),
       ),
     );

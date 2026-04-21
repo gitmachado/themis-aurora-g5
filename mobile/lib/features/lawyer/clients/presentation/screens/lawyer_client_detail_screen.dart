@@ -46,6 +46,10 @@ class _LawyerClientDetailScreenState extends State<LawyerClientDetailScreen> {
           ],
         ),
       ),
+      bottomNavigationBar: Container(
+        height: MediaQuery.of(context).padding.bottom,
+        color: AppColors.white,
+      ),
     );
   }
 

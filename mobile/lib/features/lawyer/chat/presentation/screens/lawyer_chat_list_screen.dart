@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import '../../../../../../app/routes/app_router.dart';
 import '../../../../../../shared/constants/app_colors.dart';
 import '../../../../../../shared/constants/app_text_styles.dart';
@@ -56,6 +56,10 @@ class _LawyerChatListScreenState extends State<LawyerChatListScreen> {
           _buildFilters(),
           Expanded(child: _buildChatList()),
         ],
+      ),
+      bottomNavigationBar: Container(
+        height: MediaQuery.of(context).padding.bottom,
+        color: AppColors.white,
       ),
     );
   }

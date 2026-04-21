@@ -28,7 +28,7 @@ class AppListTile extends StatelessWidget {
         decoration: BoxDecoration(
           color: AppColors.white,
           borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: AppColors.divider.withValues(alpha: 0.3)),
+          border: Border.all(color: AppColors.border),
         ),
         child: Row(
           children: [
