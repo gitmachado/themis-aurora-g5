@@ -1,16 +1,16 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import '../../../../../../shared/constants/app_colors.dart';
 import '../../../../../../shared/constants/app_text_styles.dart';
 import '../../../../../../shared/widgets/layout/custom_app_bar.dart';
 
-class LawyerProcessDetailScreen extends StatefulWidget {
-  const LawyerProcessDetailScreen({super.key});
+class LawyerProcedureDetailScreen extends StatefulWidget {
+  const LawyerProcedureDetailScreen({super.key});
 
   @override
-  State<LawyerProcessDetailScreen> createState() => _LawyerProcessDetailScreenState();
+  State<LawyerProcedureDetailScreen> createState() => _LawyerProcedureDetailScreenState();
 }
 
-class _LawyerProcessDetailScreenState extends State<LawyerProcessDetailScreen> {
+class _LawyerProcedureDetailScreenState extends State<LawyerProcedureDetailScreen> {
   @override
   Widget build(BuildContext context) {
     return DefaultTabController(
@@ -18,7 +18,7 @@ class _LawyerProcessDetailScreenState extends State<LawyerProcessDetailScreen> {
       child: Scaffold(
         backgroundColor: AppColors.background,
         appBar: CustomAppBar(
-          title: 'Processo 1023456-88',
+          title: 'Trâmite 1023456-88',
           showBackButton: true,
           bottom: TabBar(
             labelColor: AppColors.primary,
@@ -29,21 +29,23 @@ class _LawyerProcessDetailScreenState extends State<LawyerProcessDetailScreen> {
             tabs: const [
               Tab(text: 'Timeline'),
               Tab(text: 'Resumo'),
-              Tab(text: 'Docs'),
+              Tab(text: 'Arquivos'),
               Tab(text: 'Chat'),
             ],
           ),
         ),
-        body: TabBarView(
-          children: [
-            _buildTimelineTab(),
-            _buildResumoTab(),
-            _buildDocumentsTab(),
-            _buildChatMirrorTab(),
-          ],
+        body: SafeArea(
+          child: TabBarView(
+            children: [
+              _buildTimelineTab(),
+              _buildResumoTab(),
+              _buildFilesTab(),
+              _buildChatMirrorTab(),
+            ],
+          ),
         ),
         floatingActionButton: FloatingActionButton(
-          heroTag: 'lawyer_process_detail_fab',
+          heroTag: 'lawyer_procedure_detail_fab',
           onPressed: () {},
           backgroundColor: AppColors.primary,
           child: const Icon(Icons.add_comment_rounded, color: Colors.white),
@@ -61,7 +63,7 @@ class _LawyerProcessDetailScreenState extends State<LawyerProcessDetailScreen> {
           _buildTimelineItem(
             title: 'Petição Inicial Protocolada',
             date: '15 Mai 2024 • 14:30',
-            description: 'O processo foi iniciado com sucesso.',
+            description: 'O trâmite foi iniciado com sucesso.',
             isLast: false,
           ),
           _buildTimelineItem(
@@ -109,14 +111,14 @@ class _LawyerProcessDetailScreenState extends State<LawyerProcessDetailScreen> {
     );
   }
 
-  Widget _buildDocumentsTab() {
+  Widget _buildFilesTab() {
     return ListView(
       padding: const EdgeInsets.all(24),
       children: [
-        _buildDocTile('Petição_Inicial_Final.pdf', '15/05/2024', Icons.picture_as_pdf_rounded),
-        _buildDocTile('Comprovante_Residencia_Joao.jpg', '12/05/2024', Icons.image_rounded),
-        _buildDocTile('Contrato_Prestacao_Servicos.pdf', '10/05/2024', Icons.picture_as_pdf_rounded),
-        _buildDocTile('Procuracao_Assinada.pdf', '10/05/2024', Icons.picture_as_pdf_rounded),
+        _buildFileTile('Petição_Inicial_Final.pdf', '15/05/2024', Icons.picture_as_pdf_rounded),
+        _buildFileTile('Comprovante_Residencia_Joao.jpg', '12/05/2024', Icons.image_rounded),
+        _buildFileTile('Contrato_Prestacao_Servicos.pdf', '10/05/2024', Icons.picture_as_pdf_rounded),
+        _buildFileTile('Procuracao_Assinada.pdf', '10/05/2024', Icons.picture_as_pdf_rounded),
       ],
     );
   }
@@ -145,10 +147,10 @@ class _LawyerProcessDetailScreenState extends State<LawyerProcessDetailScreen> {
           child: ListView(
             padding: const EdgeInsets.all(20),
             children: [
-              _buildChatMirrorBubble('Olá, gostaria de saber o status do meu processo.', '10:00', true),
+              _buildChatMirrorBubble('Olá, gostaria de saber o status do meu trâmite.', '10:00', true),
               _buildChatMirrorBubble('Olá! Sou o assistente jurídico. Vou verificar para você. Qual o seu CPF?', '10:00', false),
               _buildChatMirrorBubble('123.456.789-00', '10:01', true),
-              _buildChatMirrorBubble('Obrigado. Seu processo está em fase de citação. Deseja falar com um advogado?', '10:01', false),
+              _buildChatMirrorBubble('Obrigado. Seu trâmite está em fase de citação. Deseja falar com um advogado?', '10:01', false),
               _buildChatMirrorBubble('Sim, por favor. Tenho uma dúvida sobre a última petição.', '10:02', true),
               _buildChatMirrorBubble('Entendido. Vou encaminhar sua solicitação para o Dr. Rodrigo.', '10:03', false),
             ],
@@ -225,7 +227,7 @@ class _LawyerProcessDetailScreenState extends State<LawyerProcessDetailScreen> {
     );
   }
 
-  Widget _buildDocTile(String name, String date, IconData icon) {
+  Widget _buildFileTile(String name, String date, IconData icon) {
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
       decoration: BoxDecoration(
@@ -238,7 +240,7 @@ class _LawyerProcessDetailScreenState extends State<LawyerProcessDetailScreen> {
         title: Text(name, style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w500)),
         subtitle: Text(date, style: AppTextStyles.caption.copyWith(fontSize: 11)),
         trailing: const Icon(Icons.more_vert_rounded, color: AppColors.textCaption, size: 20),
-        onTap: () => Navigator.pushNamed(context, '/lawyer-document-review'),
+        onTap: () => Navigator.pushNamed(context, '/lawyer-file-review'),
       ),
     );
   }
@@ -291,3 +293,4 @@ class _LawyerProcessDetailScreenState extends State<LawyerProcessDetailScreen> {
     );
   }
 }
+

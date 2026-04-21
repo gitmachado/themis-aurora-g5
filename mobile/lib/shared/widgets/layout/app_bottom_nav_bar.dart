@@ -4,8 +4,15 @@ import '../../constants/app_colors.dart';
 class NavItem {
   final IconData icon;
   final String label;
+  final double? size;
+  final double? offsetY;
 
-  const NavItem({required this.icon, required this.label});
+  const NavItem({
+    required this.icon,
+    required this.label,
+    this.size,
+    this.offsetY,
+  });
 }
 
 class AppBottomNavigationBar extends StatelessWidget {
@@ -23,16 +30,16 @@ class AppBottomNavigationBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final navItems = items ?? const [
-      NavItem(icon: Icons.grid_view_rounded, label: 'Início'),
-      NavItem(icon: Icons.business_center_rounded, label: 'Processos'),
-      NavItem(icon: Icons.description_rounded, label: 'Documentos'),
-      NavItem(icon: Icons.chat_bubble_rounded, label: 'Chat'),
-      NavItem(icon: Icons.person_rounded, label: 'Perfil'),
+      NavItem(icon: Icons.grid_view_rounded, label: 'Início', size: 25),
+      NavItem(icon: Icons.business_center_rounded, label: 'Trâmites', size: 27, offsetY: -1.0),
+      NavItem(icon: Icons.description_rounded, label: 'Arquivos', size: 24),
+      NavItem(icon: Icons.chat_rounded, label: 'Chat', size: 24, offsetY: 1.0),
+      NavItem(icon: Icons.person_rounded, label: 'Perfil', size: 25),
     ];
 
     return Container(
-      margin: const EdgeInsets.fromLTRB(16, 0, 16, 24),
-      padding: const EdgeInsets.symmetric(vertical: 8),
+      margin: const EdgeInsets.fromLTRB(16, 0, 16, 13), // Reduzido de 18 para 13 (-5px para descer)
+      padding: const EdgeInsets.symmetric(vertical: 10),
       decoration: BoxDecoration(
         color: AppColors.white,
         borderRadius: BorderRadius.circular(32),
@@ -85,13 +92,16 @@ class _NavBarItemWidget extends StatelessWidget {
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 300),
         width: double.infinity,
+        height: 64, 
         margin: const EdgeInsets.symmetric(horizontal: 4),
-        padding: const EdgeInsets.symmetric(vertical: 8),
+        padding: const EdgeInsets.symmetric(vertical: 2, horizontal: 4), // Pequeno respiro na bolha ativa
+
         decoration: BoxDecoration(
           color: isSelected ? AppColors.primary.withValues(alpha: 0.1) : Colors.transparent,
           borderRadius: BorderRadius.circular(20),
         ),
         child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
           mainAxisSize: MainAxisSize.min,
           children: [
             TweenAnimationBuilder<double>(
@@ -100,18 +110,45 @@ class _NavBarItemWidget extends StatelessWidget {
               builder: (context, scale, child) {
                 return Transform.scale(
                   scale: scale,
-                  child: Icon(item.icon, color: color, size: 24),
+                  child: Transform.translate(
+                    offset: Offset(0, item.offsetY ?? 0),
+                    child: Icon(item.icon, color: color, size: item.size ?? 24),
+                  ),
                 );
               },
             ),
-            const SizedBox(height: 4),
-            Text(
-              item.label,
-              style: TextStyle(
-                color: color,
-                fontSize: 10,
-                fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-              ),
+            AnimatedSize(
+              duration: const Duration(milliseconds: 300),
+              curve: Curves.easeOutCubic,
+              alignment: Alignment.topCenter,
+              child: isSelected
+                  ? Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        const SizedBox(height: 4),
+                        SizedBox(
+                          height: 14,
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 6.0),
+                            child: FittedBox(
+                              fit: BoxFit.scaleDown,
+                              alignment: Alignment.center,
+                              child: Text(
+                                item.label,
+                                softWrap: false,
+                                maxLines: 1,
+                                style: TextStyle(
+                                  color: color,
+                                  fontSize: 10,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
+                    )
+                  : const SizedBox.shrink(),
             ),
           ],
         ),

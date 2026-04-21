@@ -1,8 +1,9 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import '../../../../../../shared/constants/app_colors.dart';
 import '../../../../../../shared/constants/app_text_styles.dart';
 import '../../../../../../shared/widgets/layout/custom_app_bar.dart';
 import '../../../../../../shared/widgets/cards/app_card.dart';
+import '../../../../../../shared/constants/app_dimensions.dart';
 
 class ClientProfileScreen extends StatefulWidget {
   const ClientProfileScreen({super.key});
@@ -17,8 +18,10 @@ class _ClientProfileScreenState extends State<ClientProfileScreen> {
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: const CustomAppBar(
-        title: 'Meu Perfil',
-        showBackButton: true,
+        title: 'Perfil',
+        showBackButton: false,
+        showNotificationButton: true,
+        notificationCount: 2,
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
@@ -55,7 +58,8 @@ class _ClientProfileScreenState extends State<ClientProfileScreen> {
                 ),
               ],
             ),
-            const SizedBox(height: 40),
+            SizedBox(height: AppDimensions.bottomPadding(context)),
+
           ],
         ),
       ),
@@ -93,7 +97,7 @@ class _ClientProfileScreenState extends State<ClientProfileScreen> {
                   child: const CircleAvatar(
                     radius: 40,
                     backgroundColor: AppColors.primary,
-                    child: Text('JS', style: TextStyle(color: Colors.white, fontSize: 32, fontWeight: FontWeight.bold)),
+                    backgroundImage: NetworkImage('https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?q=80&w=256&h=256&auto=format&fit=crop'),
                   ),
                 ),
               ),

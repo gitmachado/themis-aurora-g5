@@ -1,4 +1,5 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
+import '../../../../../../app/routes/app_router.dart';
 import '../../../../../../shared/constants/app_colors.dart';
 import '../../../../../../shared/constants/app_text_styles.dart';
 import '../../../../../../shared/widgets/cards/app_card.dart';
@@ -41,7 +42,7 @@ class _LawyerClientDetailScreenState extends State<LawyerClientDetailScreen> {
             const SizedBox(height: 24),
             _buildInfoCard(),
             const SizedBox(height: 24),
-            _buildProcessHistory(),
+            _buildProcedureHistory(),
           ],
         ),
       ),
@@ -124,19 +125,19 @@ class _LawyerClientDetailScreenState extends State<LawyerClientDetailScreen> {
     );
   }
 
-  Widget _buildProcessHistory() {
+  Widget _buildProcedureHistory() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text('Processos Vinculados', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+        const Text('Trâmites Vinculados', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
         const SizedBox(height: 12),
-        _buildProcessTile('1023456-88.2024.8.26.0100', 'Indenização por Dano Moral', 'Em andamento'),
-        _buildProcessTile('0055443-12.2023.8.26.0100', 'Ação Revisional', 'Concluído'),
+        _buildProcedureTile('1023456-88.2024.8.26.0100', 'Indenização por Dano Moral', 'Em andamento'),
+        _buildProcedureTile('0055443-12.2023.8.26.0100', 'Ação Revisional', 'Concluído'),
       ],
     );
   }
 
-  Widget _buildProcessTile(String number, String type, String status) {
+  Widget _buildProcedureTile(String number, String type, String status) {
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
       decoration: BoxDecoration(
@@ -162,7 +163,7 @@ class _LawyerClientDetailScreenState extends State<LawyerClientDetailScreen> {
             ),
           ),
         ),
-        onTap: () => Navigator.pushNamed(context, '/lawyer-process-detail'),
+        onTap: () => Navigator.pushNamed(context, AppRouter.lawyerProcedureDetailRoute),
       ),
     );
   }

@@ -1,17 +1,18 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import '../../../../../../shared/constants/app_colors.dart';
 import '../../../../../../shared/constants/app_text_styles.dart';
+import '../../../../../../shared/constants/app_dimensions.dart';
 import '../../../../../../shared/widgets/layout/custom_app_bar.dart';
-import '../../../../../../shared/widgets/cards/document_progress_tile.dart';
+import '../../../../../../shared/widgets/cards/file_progress_tile.dart';
 
-class ClientDocumentsScreen extends StatefulWidget {
-  const ClientDocumentsScreen({super.key});
+class ClientFilesScreen extends StatefulWidget {
+  const ClientFilesScreen({super.key});
 
   @override
-  State<ClientDocumentsScreen> createState() => _ClientDocumentsScreenState();
+  State<ClientFilesScreen> createState() => _ClientFilesScreenState();
 }
 
-class _ClientDocumentsScreenState extends State<ClientDocumentsScreen> {
+class _ClientFilesScreenState extends State<ClientFilesScreen> {
   String _selectedFilter = 'Todos';
   bool _isGridView = true;
 
@@ -20,42 +21,55 @@ class _ClientDocumentsScreenState extends State<ClientDocumentsScreen> {
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: const CustomAppBar(
-        title: 'Documentos',
+        title: 'Arquivos',
         showBackButton: false,
         showNotificationButton: true,
         notificationCount: 2,
+        showDivider: false,
       ),
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          _buildSecurityBanner(),
-          Padding(
-            padding: const EdgeInsets.fromLTRB(20, 24, 20, 16),
+          Container(
+            color: AppColors.white,
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  'Seus envios',
-                  style: AppTextStyles.h2.copyWith(fontSize: 18),
+                _buildSecurityBanner(),
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(20, 16, 20, 16),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Seus arquivos',
+                        style: AppTextStyles.h2.copyWith(fontSize: 18),
+                      ),
+                      const SizedBox(height: 16),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          _buildFilterDropdown(),
+                          _buildViewToggleOptions(),
+                        ],
+                      ),
+                    ],
+                  ),
                 ),
-                const SizedBox(height: 16),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    _buildFilterDropdown(),
-                    _buildViewToggleOptions(),
-                  ],
+                Container(
+                  height: 1,
+                  color: AppColors.divider.withValues(alpha: 0.7),
                 ),
               ],
             ),
           ),
           Expanded(
-            child: _buildDocumentList(),
+            child: _buildFileList(),
           ),
         ],
       ),
       floatingActionButton: FloatingActionButton(
-        heroTag: 'client_doc_fab',
+        heroTag: 'client_file_fab',
         onPressed: () => _showUploadOptions(context),
         backgroundColor: AppColors.primary,
         child: const Icon(Icons.add_rounded, color: AppColors.white, size: 32),
@@ -65,7 +79,7 @@ class _ClientDocumentsScreenState extends State<ClientDocumentsScreen> {
 
   Widget _buildSecurityBanner() {
     return Container(
-      margin: const EdgeInsets.fromLTRB(20, 20, 20, 0),
+      margin: const EdgeInsets.fromLTRB(20, 12, 20, 0),
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: AppColors.primary,
@@ -108,7 +122,7 @@ class _ClientDocumentsScreenState extends State<ClientDocumentsScreen> {
       decoration: BoxDecoration(
         color: AppColors.white,
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: AppColors.divider.withValues(alpha: 0.5)),
+        border: Border.all(color: AppColors.divider.withValues(alpha: 0.7)),
       ),
       child: DropdownButtonHideUnderline(
         child: DropdownButton<String>(
@@ -137,7 +151,7 @@ class _ClientDocumentsScreenState extends State<ClientDocumentsScreen> {
       decoration: BoxDecoration(
         color: AppColors.white,
         borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: AppColors.divider.withValues(alpha: 0.5)),
+        border: Border.all(color: AppColors.divider.withValues(alpha: 0.7)),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
@@ -168,39 +182,39 @@ class _ClientDocumentsScreenState extends State<ClientDocumentsScreen> {
     );
   }
 
-  Widget _buildDocumentList() {
-    final allDocs = [
+  Widget _buildFileList() {
+    final allFiles = [
       {'title': 'RG_Frente_Verso.pdf', 'status': 'Enviado', 'type': 'pdf', 'size': '1.2 MB'},
       {'title': 'Comprovante_Residencia.jpg', 'status': 'Aprovado', 'type': 'image', 'size': '3.4 MB'},
       {'title': 'Certidao_Nascimento.pdf', 'status': 'Solicitado', 'type': 'pdf', 'size': '2.1 MB'},
     ];
 
-    final filteredDocs = _selectedFilter == 'Todos'
-        ? allDocs
-        : allDocs.where((doc) => doc['status'] == _selectedFilter).toList();
+    final filteredFiles = _selectedFilter == 'Todos'
+        ? allFiles
+        : allFiles.where((doc) => doc['status'] == _selectedFilter).toList();
 
     if (_isGridView) {
       return GridView.builder(
-        padding: const EdgeInsets.fromLTRB(20, 12, 20, 100),
+        padding: EdgeInsets.fromLTRB(20, 18, 20, AppDimensions.bottomPadding(context)),
         gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
           crossAxisCount: 2,
           crossAxisSpacing: 16,
           mainAxisSpacing: 16,
           childAspectRatio: 0.85,
         ),
-        itemCount: filteredDocs.length,
+        itemCount: filteredFiles.length,
         itemBuilder: (context, index) {
-          final doc = filteredDocs[index];
-          final isPdf = doc['type'] == 'pdf';
+          final file = filteredFiles[index];
+          final isPdf = file['type'] == 'pdf';
           final iconColor = isPdf ? Colors.orange : AppColors.primary;
           final bgColor = isPdf ? const Color(0xFFFFF7E6) : const Color(0xFFF0F4FF);
-          final statusColor = doc['status'] == 'Aprovado' ? AppColors.success : AppColors.primary;
+          final statusColor = file['status'] == 'Aprovado' ? AppColors.success : AppColors.primary;
 
           return Container(
             decoration: BoxDecoration(
               color: AppColors.white,
               borderRadius: BorderRadius.circular(16),
-              border: Border.all(color: AppColors.divider.withValues(alpha: 0.5)),
+              border: Border.all(color: AppColors.divider.withValues(alpha: 0.7)),
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -227,19 +241,19 @@ class _ClientDocumentsScreenState extends State<ClientDocumentsScreen> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        doc['title']!,
+                        file['title']!,
                         style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                       ),
                       const SizedBox(height: 4),
                       Text(
-                        '${doc['size']} • 08/04/26',
+                        '${file['size']} • 08/04/26',
                         style: AppTextStyles.caption.copyWith(fontSize: 10),
                       ),
                       const SizedBox(height: 8),
                       Text(
-                        doc['status']!,
+                        file['status']!,
                         style: TextStyle(
                           color: statusColor,
                           fontWeight: FontWeight.bold,
@@ -257,18 +271,18 @@ class _ClientDocumentsScreenState extends State<ClientDocumentsScreen> {
     }
 
     return ListView.separated(
-      padding: const EdgeInsets.fromLTRB(20, 12, 20, 100),
-      itemCount: filteredDocs.length,
+      padding: EdgeInsets.fromLTRB(20, 18, 20, AppDimensions.bottomPadding(context)),
+      itemCount: filteredFiles.length,
       separatorBuilder: (_, _) => const SizedBox(height: 12),
       itemBuilder: (context, index) {
-        final doc = filteredDocs[index];
-        final isPdf = doc['type'] == 'pdf';
+        final file = filteredFiles[index];
+        final isPdf = file['type'] == 'pdf';
         final iconColor = isPdf ? Colors.orange : AppColors.primary;
-        final statusColor = doc['status'] == 'Aprovado' ? AppColors.success : AppColors.primary;
+        final statusColor = file['status'] == 'Aprovado' ? AppColors.success : AppColors.primary;
 
-        return DocumentProgressTile(
-          title: doc['title']!,
-          status: '${doc['status']!} • ${doc['size']} • 08/04/2026',
+        return FileProgressTile(
+          title: file['title']!,
+          status: '${file['status']!} • ${file['size']} • 08/04/2026',
           statusColor: statusColor,
           iconColor: iconColor,
           icon: isPdf ? Icons.description_outlined : Icons.image_outlined,
@@ -301,7 +315,7 @@ class _ClientDocumentsScreenState extends State<ClientDocumentsScreen> {
                 ),
               ),
               const SizedBox(height: 24),
-              Text('Enviar documento', style: AppTextStyles.h2.copyWith(fontSize: 18)),
+              Text('Enviar arquivo', style: AppTextStyles.h2.copyWith(fontSize: 18)),
               const SizedBox(height: 24),
               _buildUploadOption(Icons.camera_alt_outlined, 'Tirar Foto'),
               const SizedBox(height: 12),
@@ -345,3 +359,4 @@ class _ClientDocumentsScreenState extends State<ClientDocumentsScreen> {
     );
   }
 }
+

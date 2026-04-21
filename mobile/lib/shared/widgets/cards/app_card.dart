@@ -35,7 +35,7 @@ class AppCard extends StatelessWidget {
             ),
           ],
           border: Border.all(
-            color: AppColors.divider.withValues(alpha: 0.5),
+            color: AppColors.divider.withValues(alpha: 0.7),
             width: 1,
           ),
         ),

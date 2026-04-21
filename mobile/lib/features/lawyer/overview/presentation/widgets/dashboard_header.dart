@@ -1,6 +1,7 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import '../../../../../../shared/constants/app_colors.dart';
 import '../../../../../../shared/constants/app_text_styles.dart';
+import '../../../../../../shared/widgets/layout/app_notification_button.dart';
 
 class DashboardHeader extends StatelessWidget {
   final String userName;
@@ -28,14 +29,7 @@ class DashboardHeader extends StatelessWidget {
                 CircleAvatar(
                   radius: 24,
                   backgroundColor: AppColors.primary.withValues(alpha: 0.2),
-                  child: Text(
-                    _getInitials(userName),
-                    style: const TextStyle(
-                      color: AppColors.primary,
-                      fontWeight: FontWeight.bold,
-                      fontSize: 18,
-                    ),
-                  ),
+                  backgroundImage: const NetworkImage('https://images.unsplash.com/photo-1560250097-0b93528c311a?q=80&w=256&h=256&auto=format&fit=crop'),
                 ),
                 const SizedBox(width: 12),
                 Expanded(
@@ -69,11 +63,10 @@ class DashboardHeader extends StatelessWidget {
             onTap: () => Navigator.pushNamed(context, '/lawyer-chats'),
           ),
           const SizedBox(width: 8),
-          _buildIconButton(
-            context,
-            icon: Icons.notifications_none_outlined,
-            count: notificationCount,
+          AppNotificationButton(
+            notificationCount: notificationCount,
             onTap: () => Navigator.pushNamed(context, '/lawyer-notifications'),
+            size: 22,
           ),
         ],
       ),

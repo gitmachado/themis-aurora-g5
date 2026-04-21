@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import '../../../../../../shared/constants/app_colors.dart';
 import '../../../../../../shared/constants/app_dimensions.dart';
 import '../../../../../../shared/widgets/layout/custom_app_bar.dart';
@@ -27,14 +27,19 @@ class _ClientChatsScreenState extends State<ClientChatsScreen> {
         children: [
           Expanded(
             child: ListView(
-              padding: const EdgeInsets.symmetric(
-                horizontal: AppDimensions.spacingL,
-                vertical: AppDimensions.spacingL,
+              padding: EdgeInsets.fromLTRB(
+                AppDimensions.spacingL,
+                AppDimensions.spacingL,
+                AppDimensions.spacingL,
+                AppDimensions.bottomPadding(context),
               ),
+
+
               children: [
                 ChatListTile(
                   title: 'Assistente Jurídico',
-                  subtitle: 'Olá! Sou seu assistente para o processo #1234...',
+                  subtitle: 'Olá! Sou seu assistente para o trâmite #1234...',
+
                   time: '10:30',
                   unreadCount: 2,
                   isAi: true,

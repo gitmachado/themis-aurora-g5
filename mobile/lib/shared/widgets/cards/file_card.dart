@@ -3,7 +3,7 @@ import '../../constants/app_colors.dart';
 import '../../constants/app_text_styles.dart';
 import '../buttons/app_badge.dart';
 
-class DocumentFileCard extends StatelessWidget {
+class AppFileCard extends StatelessWidget {
   final String fileName;
   final String fileSize;
   final String dateAdded;
@@ -14,7 +14,7 @@ class DocumentFileCard extends StatelessWidget {
   final Color iconColor;
   final Color iconBackgroundColor;
 
-  const DocumentFileCard({
+  const AppFileCard({
     super.key,
     required this.fileName,
     required this.fileSize,
@@ -104,3 +104,4 @@ class DocumentFileCard extends StatelessWidget {
     );
   }
 }
+

@@ -1,11 +1,11 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import '../../../../../../shared/constants/app_colors.dart';
 
-class DocumentFilterChips extends StatelessWidget {
+class FileFilterChips extends StatelessWidget {
   final String selectedFilter;
   final Function(String) onFilterChanged;
 
-  const DocumentFilterChips({
+  const FileFilterChips({
     super.key,
     required this.selectedFilter,
     required this.onFilterChanged,
@@ -50,3 +50,4 @@ class DocumentFilterChips extends StatelessWidget {
     );
   }
 }
+

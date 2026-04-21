@@ -9,6 +9,7 @@ import '../widgets/dashboard_header.dart';
 import '../widgets/metric_card.dart';
 import '../widgets/niche_chart.dart';
 import '../../../../../../shared/widgets/layout/lawyer_main_layout.dart';
+import '../../../../../../shared/constants/app_dimensions.dart';
 
 
 class LawyerOverviewScreen extends StatelessWidget {
@@ -41,14 +42,15 @@ class LawyerOverviewScreen extends StatelessWidget {
                     const SizedBox(height: 24),
                     const NicheChart(),
                     const SizedBox(height: 24),
-                    _buildSectionHeader('Últimos Leads', () => layoutState?.setIndex(1)),
+                      _buildSectionHeader('Últimos Leads', () => layoutState?.setIndex(1)),
                     const SizedBox(height: 16),
                     _buildLeadsList(context),
                     const SizedBox(height: 24),
-                    _buildSectionHeader('Documentos Recentes', () => Navigator.pushNamed(context, '/lawyer-documents')),
+                    _buildSectionHeader('Arquivos Recentes', () => Navigator.pushNamed(context, AppRouter.lawyerFilesRoute)),
                     const SizedBox(height: 16),
                     _buildDocsList(context),
-                    const SizedBox(height: 120), // Space for bottom nav
+                    SizedBox(height: AppDimensions.bottomPadding(context)), // Dynamic space
+
                   ],
                 ),
               ),
@@ -66,11 +68,11 @@ class LawyerOverviewScreen extends StatelessWidget {
       children: [
         Expanded(
           child: MetricCard(
-            title: 'Processos',
+            title: 'Trâmites',
             value: '234',
             subtitle: 'Ativos',
             icon: Icons.folder_open_rounded,
-            onTap: () => layoutState?.setIndex(2), // Processos Tab
+            onTap: () => layoutState?.setIndex(2), // Trâmites Tab
           ),
         ),
         const SizedBox(width: 16),
@@ -86,6 +88,7 @@ class LawyerOverviewScreen extends StatelessWidget {
       ],
     );
   }
+
 
   Widget _buildHandoffsCard(BuildContext context, LawyerMainLayoutState? layoutState) {
     return InkWell(
@@ -208,10 +211,11 @@ class LawyerOverviewScreen extends StatelessWidget {
             child: const Icon(Icons.description_outlined, color: AppColors.primary, size: 24),
           ),
           onTap: () {
-            Navigator.pushNamed(context, '/lawyer-documents');
+            Navigator.pushNamed(context, AppRouter.lawyerFilesRoute);
           },
         ),
       ],
     );
   }
 }
+

@@ -110,9 +110,9 @@ class AppNotificationTile extends StatelessWidget {
     switch (type) {
       case 'lead':
         return Icons.person_add_rounded;
-      case 'doc':
+      case 'file':
         return Icons.file_present_rounded;
-      case 'process':
+      case 'procedure':
         return Icons.gavel_rounded;
       case 'chat':
         return Icons.chat_bubble_rounded;
@@ -127,9 +127,9 @@ class AppNotificationTile extends StatelessWidget {
     switch (type) {
       case 'lead':
         return AppColors.primary;
-      case 'doc':
+      case 'file':
         return AppColors.warning;
-      case 'process':
+      case 'procedure':
         return const Color(0xFF673AB7);
       case 'chat':
         return AppColors.success;
@@ -144,9 +144,9 @@ class AppNotificationTile extends StatelessWidget {
     switch (type) {
       case 'lead':
         return AppColors.primaryOverlay;
-      case 'doc':
+      case 'file':
         return AppColors.warningOverlay;
-      case 'process':
+      case 'procedure':
         return const Color(0xff673ab7).withValues(alpha: 0.1);
       case 'chat':
         return AppColors.successOverlay;
@@ -157,3 +157,4 @@ class AppNotificationTile extends StatelessWidget {
     }
   }
 }
+

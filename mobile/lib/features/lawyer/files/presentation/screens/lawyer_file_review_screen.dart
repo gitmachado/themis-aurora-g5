@@ -1,28 +1,32 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import '../../../../../../shared/constants/app_colors.dart';
 import '../../../../../../shared/constants/app_text_styles.dart';
 import '../../../../../../shared/widgets/layout/custom_app_bar.dart';
 
-class LawyerDocumentReviewScreen extends StatelessWidget {
-  const LawyerDocumentReviewScreen({super.key});
+class LawyerFileReviewScreen extends StatelessWidget {
+  const LawyerFileReviewScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.black, // Lightroom style
       appBar: const CustomAppBar(
-        title: 'Revisão de Documento',
+        title: 'Revisão de Arquivo',
         showBackButton: true,
       ),
-      body: Column(
-        children: [
-          Expanded(
-            child: _buildFilePreview(),
-          ),
-          _buildMetadataSection(context),
-        ],
+      body: SafeArea(
+        child: Column(
+          children: [
+            Expanded(
+              child: _buildFilePreview(),
+            ),
+            _buildMetadataSection(context),
+          ],
+        ),
       ),
-      bottomNavigationBar: _buildActionToolbar(context),
+      bottomNavigationBar: SafeArea(
+        child: _buildActionToolbar(context),
+      ),
     );
   }
 
@@ -53,7 +57,7 @@ class LawyerDocumentReviewScreen extends StatelessWidget {
           const SizedBox(height: 16),
           _buildMetadataRow('Enviado por', 'João Silva'),
           _buildMetadataRow('Data de Envio', '15/05/2024 às 10:30'),
-          _buildMetadataRow('Processo', '1023456-88.2024'),
+          _buildMetadataRow('Trâmite', '1023456-88.2024'),
           const Divider(height: 32),
           const Text('Descrição do Cliente', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
           const SizedBox(height: 8),
@@ -67,7 +71,7 @@ class LawyerDocumentReviewScreen extends StatelessWidget {
           TextField(
             maxLines: 3,
             decoration: InputDecoration(
-              hintText: 'Explique por que o documento foi recusado...',
+              hintText: 'Explique por que o arquivo foi recusado...',
               hintStyle: AppTextStyles.caption,
               filled: true,
               fillColor: AppColors.white,
@@ -141,3 +145,4 @@ class LawyerDocumentReviewScreen extends StatelessWidget {
     );
   }
 }
+

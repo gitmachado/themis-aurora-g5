@@ -36,4 +36,9 @@ class AppDimensions {
   static const double appBarHeight = 56.0;
   static const double buttonHeight = 48.0;
   static const double inputHeight = 56.0;
+  
+  static double bottomPadding(BuildContext context) {
+    // 50.0 (Barra + Margens) + Área dinâmica do sistema
+    return 50.0 + MediaQuery.of(context).padding.bottom;
+  }
 }

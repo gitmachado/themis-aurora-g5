@@ -1,22 +1,22 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import '../../../../../../shared/constants/app_colors.dart';
 import '../../../../../../shared/constants/app_text_styles.dart';
 import '../../../../../../shared/widgets/layout/custom_app_bar.dart';
 import '../../../../../../shared/widgets/buttons/primary_button.dart';
 import '../../../../../../shared/widgets/buttons/app_badge.dart';
 import '../../../../../../shared/widgets/cards/labeled_field.dart';
-import '../../../../../../shared/widgets/cards/document_file_card.dart';
+import '../../../../../../shared/widgets/cards/file_card.dart';
 import '../widgets/timeline_summary_card.dart';
 import '../widgets/timeline_event_tile.dart';
 
-class ClientProcessTimelineScreen extends StatefulWidget {
-  const ClientProcessTimelineScreen({super.key});
+class ClientProcedureTimelineScreen extends StatefulWidget {
+  const ClientProcedureTimelineScreen({super.key});
 
   @override
-  State<ClientProcessTimelineScreen> createState() => _ClientProcessTimelineScreenState();
+  State<ClientProcedureTimelineScreen> createState() => _ClientProcedureTimelineScreenState();
 }
 
-class _ClientProcessTimelineScreenState extends State<ClientProcessTimelineScreen> {
+class _ClientProcedureTimelineScreenState extends State<ClientProcedureTimelineScreen> {
   @override
   Widget build(BuildContext context) {
     return DefaultTabController(
@@ -71,7 +71,7 @@ class _ClientProcessTimelineScreenState extends State<ClientProcessTimelineScree
             tabs: [
               Tab(text: 'Timeline'),
               Tab(text: 'IA Resumo'),
-              Tab(text: 'Docs'),
+              Tab(text: 'Arquivos'),
               Tab(text: 'Chat'),
             ],
           ),
@@ -83,7 +83,7 @@ class _ClientProcessTimelineScreenState extends State<ClientProcessTimelineScree
                 children: [
                   _buildTimelineTab(),
                   _buildAiResumoTab(),
-                  _buildDocsTab(),
+                  _buildFilesTab(),
                   _buildChatTab(),
                 ],
               ),
@@ -117,7 +117,7 @@ class _ClientProcessTimelineScreenState extends State<ClientProcessTimelineScree
               isFirst: true,
               title: 'Petição Inicial Protocolada',
               date: '05 Abr 2026 • 14:30',
-              description: 'Processo distribuído e aguardando primeira análise do juiz.',
+              description: 'Trâmite distribuído e aguardando primeira análise do juiz.',
               responsible: 'Dr. Marcelo Costa',
             ),
             TimelineEventTile(
@@ -129,7 +129,7 @@ class _ClientProcessTimelineScreenState extends State<ClientProcessTimelineScree
             TimelineEventTile(
               title: 'Aguardando Sentença',
               date: '--',
-              description: 'O processo está em fase de conclusão para o juiz.',
+              description: 'O trâmite está em fase de conclusão para o juiz.',
             ),
             TimelineEventTile(
               isLast: true,
@@ -183,7 +183,7 @@ class _ClientProcessTimelineScreenState extends State<ClientProcessTimelineScree
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     LabeledField(
-                      label: 'PARTES DO PROCESSO',
+                      label: 'PARTES DO TRÂMITE',
                       value: 'João Ricardo Mendes (Autor/Cliente)',
                       icon: Icons.person_outline,
                       iconColor: AppColors.primary,
@@ -230,7 +230,7 @@ class _ClientProcessTimelineScreenState extends State<ClientProcessTimelineScree
     );
   }
 
-  Widget _buildDocsTab() {
+  Widget _buildFilesTab() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -251,19 +251,19 @@ class _ClientProcessTimelineScreenState extends State<ClientProcessTimelineScree
           child: ListView(
             padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
             children: const [
-              DocumentFileCard(
+              AppFileCard(
                 category: 'PETIÇÃO',
                 fileName: 'Petição Inicial.pdf',
                 fileSize: '345 KB',
-                dateAdded: '05 Apr',
+                dateAdded: '05 Abr',
               ),
-              DocumentFileCard(
+              AppFileCard(
                 category: 'PROCURAÇÃO',
                 fileName: 'Procuração_Assinada.pdf',
                 fileSize: '1.2 MB',
                 dateAdded: '01 Apr',
               ),
-              DocumentFileCard(
+              AppFileCard(
                 category: 'PROVA',
                 fileName: 'Foto_Local_Acidente.jpg',
                 fileSize: '2.5 MB',
@@ -339,3 +339,4 @@ class _ClientProcessTimelineScreenState extends State<ClientProcessTimelineScree
     );
   }
 }
+

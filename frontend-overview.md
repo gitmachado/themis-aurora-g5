@@ -102,46 +102,51 @@ lawyer/
   presentation/ {screens, widgets, providers}
 ```
 
-### 3.3 Refatoração Sub-Feature por Funcionalidade 🔄 (em progresso)
-**Problema identificado:** `client` e `lawyer` acumulam *todas* as telas em uma única
-pasta `presentation/screens/`. Com 8 telas no cliente e 14 no advogado, a navegação
-pelo código fica custosa. Ao buscar um bug no chat, o desenvolvedor passa por telas
-de processos, documentos e perfil antes de encontrar o arquivo certo.
+### 3.3 Refatoração Sub-Feature por Funcionalidade ✅ (Concluído em 21/04/2026)
+**Problema identificado:** `client` e `lawyer` acumulavam *todas* as telas e widgets em pastas planas de `presentation/`. Com o crescimento do app (~23 arquivos de UI), a busca por arquivos específicos tornou-se ineficiente e o acoplamento cresceu.
 
-**Decisão de arquitetura:** Transformar `client` e `lawyer` em **módulos de role**, com **sub-features funcionais auto-contidas (Vertical Slicing)**. Cada funcionalidade possui suas próprias camadas de `data/`, `domain/` e `presentation/`.
+**Solução: Vertical Slicing + Full Clean Architecture.**
+Cada funcionalidade foi isolada em uma sub-feature auto-contida. Se uma feature for removida, 100% do seu código (UI, lógica e dados) é removido sem deixar órfãos.
 
-**Nova estrutura target:**
+#### Estrutura Detalhada Implementada
+Cada uma das **15 sub-features** abaixo recebeu a estrutura completa de 9 sub-pastas:
+
+- **Client (6 features):** `home`, `chat`, `documents`, `processes`, `notifications`, `profile`
+- **Lawyer (9 features):** `overview`, `leads`, `chat`, `ai_manager`, `processes`, `clients`, `documents`, `notifications`, `profile`
+
+**Template de Pastas (Aplicado a cada sub-feature):**
 ```
-client/
-  chat/
-    data/
-    domain/
-    presentation/{screens, widgets, providers}
-  home/
-    data/
-    domain/
-    presentation/
-  ...etc
-
-lawyer/
-  leads/
-    data/
-    domain/
-    presentation/
-  ...etc
+feature_name/
+├── data/
+│   ├── data_sources/    ← Chamadas Remote (API) / Local (Cache)
+│   ├── models/          ← DTOs (Data Transfer Objects)
+│   └── repositories/    ← Implementações dos repositórios
+├── domain/
+│   ├── entities/        ← Modelos de negócio puros
+│   ├── repositories/    ← Interfaces/Contratos (abstract classes)
+│   └── usecases/        ← Regras de execução (ex: GetProcessTimeline)
+└── presentation/
+    ├── providers/       ← Riverpod providers/notifiers
+    ├── screens/         ← Páginas inteiras (Scaffolds)
+    └── widgets/         ← Componentes exclusivos da feature
 ```
 
-**Rationale:** Isolamento total de responsabilidades. Um bug no chat é resolvido exclusivamente dentro da sub-pasta de chat, abrangendo desde a interface até o modelo de dados e repositório. Previne conflitos de merge e garante que a arquitetura evolua de forma previsível.
+#### Mudanças Significativas
+- **Promoção de Componentes:** O widget `LawyerAppBarActions` foi movido para `shared/widgets/` por ser compartilhado entre 4 sub-features distintas do advogado.
+- **Roteamento:** O `AppRouter` foi totalmente atualizado para refletir os novos caminhos físicos dos arquivos.
+- **Limpeza:** Pastas temporárias de `data/` e `domain/` que estavam no nível do módulo (role) foram eliminadas em favor da estrutura distribuída por funcionalidade.
+
 
 ---
 
 ## 4. Próximos Passos Técnicos (Mobile)
 
-- [ ] Executar refatoração sub-feature (Seção 3.3)
-- [ ] Atualizar `app_router.dart` com novos import paths
+- [x] Executar refatoração sub-feature (Vertical Slicing)
+- [x] Atualizar `app_router.dart` com novos import paths
 - [ ] Sincronizar ADR de arquitetura mobile (`.agents/decisions/` e `documentation/decisions/`)
 - [ ] Integrar com API REST (autenticação via `whatsappNumber + password`)
 - [ ] Adicionar Riverpod providers reais por feature
+
 
 ---
 

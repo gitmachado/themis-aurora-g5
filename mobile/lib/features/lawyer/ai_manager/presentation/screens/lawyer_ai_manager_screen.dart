@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import '../../../../../../shared/constants/app_colors.dart';
 import '../../../../../../shared/constants/app_text_styles.dart';
 import '../../../../../../shared/widgets/layout/custom_app_bar.dart';
@@ -135,15 +135,15 @@ class _LawyerAIManagerScreenState extends State<LawyerAIManagerScreen> {
           ],
         ),
         const SizedBox(height: 8),
-        _buildDocTile('Jurisprudência_Trabalhista_V1.pdf', 'Ativo'),
-        _buildDocTile('Regras_Escritorio_Honorarios.pdf', 'Ativo'),
-        _buildDocTile('Modelo_Contrato_Civel.pdf', 'Processando...'),
+        _buildFileTile('Jurisprudência_Trabalhista_V1.pdf', 'Ativo'),
+        _buildFileTile('Regras_Escritorio_Honorarios.pdf', 'Ativo'),
+        _buildFileTile('Modelo_Contrato_Civel.pdf', 'Analisando...'),
       ],
     );
   }
 
-  Widget _buildDocTile(String name, String status) {
-    bool isProcessing = status == 'Processando...';
+  Widget _buildFileTile(String name, String status) {
+    bool isAnalyzing = status == 'Analisando...';
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
       decoration: BoxDecoration(
@@ -152,9 +152,9 @@ class _LawyerAIManagerScreenState extends State<LawyerAIManagerScreen> {
         border: Border.all(color: AppColors.divider),
       ),
       child: ListTile(
-        leading: Icon(Icons.picture_as_pdf_outlined, color: isProcessing ? AppColors.textCaption : AppColors.error),
+        leading: Icon(Icons.picture_as_pdf_outlined, color: isAnalyzing ? AppColors.textCaption : AppColors.error),
         title: Text(name, style: const TextStyle(fontSize: 14)),
-        subtitle: Text(status, style: TextStyle(fontSize: 12, color: isProcessing ? AppColors.warning : AppColors.success)),
+        subtitle: Text(status, style: TextStyle(fontSize: 12, color: isAnalyzing ? AppColors.warning : AppColors.success)),
         trailing: IconButton(
           icon: const Icon(Icons.delete_outline_rounded, color: AppColors.textCaption, size: 20),
           onPressed: () {},
@@ -162,4 +162,5 @@ class _LawyerAIManagerScreenState extends State<LawyerAIManagerScreen> {
       ),
     );
   }
+
 }

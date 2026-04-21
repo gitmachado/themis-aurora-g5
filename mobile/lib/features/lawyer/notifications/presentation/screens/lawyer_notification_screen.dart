@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import '../../../../../../shared/constants/app_colors.dart';
 import '../../../../../../shared/constants/app_text_styles.dart';
 import '../../../../../../shared/widgets/layout/custom_app_bar.dart';
@@ -24,20 +24,21 @@ class _LawyerNotificationScreenState extends State<LawyerNotificationScreen> {
     },
     {
       'id': '2',
-      'title': 'Documento Recebido',
+      'title': 'Arquivo Recebido',
       'body': 'Maria Oliveira enviou o comprovante de residência.',
       'time': 'há 1 hora',
       'isRead': false,
-      'type': 'doc',
+      'type': 'file',
     },
     {
       'id': '3',
       'title': 'Audiência Amanhã',
-      'body': 'Lembrete: Audiência do processo 1023456-88 às 14:00.',
+      'body': 'Lembrete: Audiência do trâmite 1023456-88 às 14:00.',
       'time': 'há 3 horas',
       'isRead': true,
-      'type': 'process',
+      'type': 'procedure',
     },
+
     {
       'id': '4',
       'title': 'Handoff de Chat',
@@ -67,11 +68,13 @@ class _LawyerNotificationScreenState extends State<LawyerNotificationScreen> {
             ],
           ),
         ),
-        body: TabBarView(
-          children: [
-            _buildNotificationList(onlyUnread: true),
-            _buildNotificationList(onlyUnread: false),
-          ],
+        body: SafeArea(
+          child: TabBarView(
+            children: [
+              _buildNotificationList(onlyUnread: true),
+              _buildNotificationList(onlyUnread: false),
+            ],
+          ),
         ),
       ),
     );

@@ -1,8 +1,9 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import '../../../../../../shared/constants/app_colors.dart';
 import '../../../../../../shared/constants/app_text_styles.dart';
 import '../../../../../../shared/widgets/layout/custom_app_bar.dart';
 import '../../../../../../shared/widgets/cards/app_card.dart';
+import '../../../../../../shared/constants/app_dimensions.dart';
 import 'lawyer_sub_settings_screen.dart';
 
 class LawyerProfileScreen extends StatefulWidget {
@@ -18,8 +19,10 @@ class _LawyerProfileScreenState extends State<LawyerProfileScreen> {
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: const CustomAppBar(
-        title: 'Meu Perfil',
-        showBackButton: true,
+        title: 'Perfil',
+        showBackButton: false,
+        showNotificationButton: true,
+        notificationCount: 2,
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
@@ -102,7 +105,8 @@ class _LawyerProfileScreenState extends State<LawyerProfileScreen> {
                 ),
               ],
             ),
-            const SizedBox(height: 40),
+            SizedBox(height: AppDimensions.bottomPadding(context)),
+
           ],
         ),
       ),
@@ -149,7 +153,7 @@ class _LawyerProfileScreenState extends State<LawyerProfileScreen> {
                   child: const CircleAvatar(
                     radius: 40,
                     backgroundColor: AppColors.primary,
-                    child: Text('RM', style: TextStyle(color: Colors.white, fontSize: 32, fontWeight: FontWeight.bold)),
+                    backgroundImage: NetworkImage('https://images.unsplash.com/photo-1560250097-0b93528c311a?q=80&w=256&h=256&auto=format&fit=crop'),
                   ),
                 ),
               ),

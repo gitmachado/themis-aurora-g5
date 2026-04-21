@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import '../../../../../../shared/constants/app_colors.dart';
 import '../../../../../../shared/constants/app_text_styles.dart';
 import '../../../../../../shared/widgets/layout/custom_app_bar.dart';
@@ -46,28 +46,31 @@ class ClientChatMirrorScreen extends StatelessWidget {
           ],
         ),
       ),
-      body: Column(
-        children: [
-          Expanded(
-            child: ListView(
-              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-              children: [
-                _buildDateSeparator('Hoje'),
-                const ChatBubble(
-                  message: 'Quais documentos preciso enviar para dar entrada no processo?',
-                  time: '14:20',
-                  isMe: true,
-                ),
-                const ChatBubble(
-                  message: 'Você vai precisar de: RG, CPF, Comprovante de Residência e Extrato bancário de 3 meses. Quer anexar na aba Documentos agora?',
-                  time: '14:21',
-                  isMe: false,
-                ),
-              ],
+      body: SafeArea(
+        child: Column(
+          children: [
+            Expanded(
+              child: ListView(
+                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+                children: [
+                  _buildDateSeparator('Hoje'),
+                  const ChatBubble(
+                    message: 'Quais documentos preciso enviar para dar entrada no trâmite?',
+                    time: '14:20',
+                    isMe: true,
+                  ),
+                  const ChatBubble(
+                    message: 'Você vai precisar de: RG, CPF, Comprovante de Residência e Extrato bancário de 3 meses. Quer anexar na aba Arquivos agora?',
+                    time: '14:21',
+                    isMe: false,
+                  ),
+
+                ],
+              ),
             ),
-          ),
-          _buildMessageInput(context),
-        ],
+            _buildMessageInput(context),
+          ],
+        ),
       ),
     );
   }

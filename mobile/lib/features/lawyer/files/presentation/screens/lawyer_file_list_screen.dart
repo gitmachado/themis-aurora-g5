@@ -1,23 +1,23 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import '../../../../../../shared/constants/app_colors.dart';
 import '../../../../../../shared/constants/app_text_styles.dart';
 import '../../../../../../shared/widgets/layout/custom_app_bar.dart';
 
-class LawyerDocumentListScreen extends StatefulWidget {
-  const LawyerDocumentListScreen({super.key});
+class LawyerFileListScreen extends StatefulWidget {
+  const LawyerFileListScreen({super.key});
 
   @override
-  State<LawyerDocumentListScreen> createState() => _LawyerDocumentListScreenState();
+  State<LawyerFileListScreen> createState() => _LawyerFileListScreenState();
 }
 
-class _LawyerDocumentListScreenState extends State<LawyerDocumentListScreen> {
-  final List<Map<String, dynamic>> _documents = [
+class _LawyerFileListScreenState extends State<LawyerFileListScreen> {
+  final List<Map<String, dynamic>> _files = [
     {
       'id': '1',
       'name': 'Comprovante_Residencia.jpg',
       'client': 'Maria Oliveira',
       'date': '12/05/2024',
-      'status': 'Aguardando Revisão',
+      'status': 'Aguardando Révisao',
       'type': 'image',
     },
     {
@@ -25,7 +25,7 @@ class _LawyerDocumentListScreenState extends State<LawyerDocumentListScreen> {
       'name': 'Contrato_Assinado_V2.pdf',
       'client': 'João Silva',
       'date': '10/05/2024',
-      'status': 'Aguardando Revisão',
+      'status': 'Aguardando Révisao',
       'type': 'pdf',
     },
     {
@@ -33,7 +33,7 @@ class _LawyerDocumentListScreenState extends State<LawyerDocumentListScreen> {
       'name': 'RG_Frente_Verso.pdf',
       'client': 'Roberto Santos',
       'date': '08/05/2024',
-      'status': 'Aguardando Revisão',
+      'status': 'Aguardando Révisao',
       'type': 'pdf',
     },
   ];
@@ -43,14 +43,14 @@ class _LawyerDocumentListScreenState extends State<LawyerDocumentListScreen> {
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: const CustomAppBar(
-        title: 'Revisão de Documentos',
+        title: 'Revisão de Arquivos',
         showBackButton: true,
       ),
       body: Column(
         children: [
           _buildFilters(),
           Expanded(
-            child: _buildDocList(),
+            child: _buildFileList(),
           ),
         ],
       ),
@@ -93,12 +93,12 @@ class _LawyerDocumentListScreenState extends State<LawyerDocumentListScreen> {
     );
   }
 
-  Widget _buildDocList() {
+  Widget _buildFileList() {
     return ListView.builder(
       padding: const EdgeInsets.symmetric(horizontal: 20),
-      itemCount: _documents.length,
+      itemCount: _files.length,
       itemBuilder: (context, index) {
-        final doc = _documents[index];
+        final file = _files[index];
         return Container(
           margin: const EdgeInsets.only(bottom: 12),
           decoration: BoxDecoration(
@@ -115,25 +115,26 @@ class _LawyerDocumentListScreenState extends State<LawyerDocumentListScreen> {
                 borderRadius: BorderRadius.circular(12),
               ),
               child: Icon(
-                doc['type'] == 'pdf' ? Icons.picture_as_pdf_rounded : Icons.image_rounded,
+                file['type'] == 'pdf' ? Icons.picture_as_pdf_rounded : Icons.image_rounded,
                 color: AppColors.primary,
               ),
             ),
-            title: Text(doc['name'], style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
+            title: Text(file['name'], style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
             subtitle: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 const SizedBox(height: 4),
-                Text('Cliente: ${doc['client']}', style: AppTextStyles.caption.copyWith(fontSize: 12)),
+                Text('Cliente: ${file['client']}', style: AppTextStyles.caption.copyWith(fontSize: 12)),
                 const SizedBox(height: 2),
-                Text('Recebido em: ${doc['date']}', style: AppTextStyles.caption.copyWith(fontSize: 11)),
+                Text('Recebido em: ${file['date']}', style: AppTextStyles.caption.copyWith(fontSize: 11)),
               ],
             ),
             trailing: const Icon(Icons.chevron_right_rounded, color: AppColors.textCaption),
-            onTap: () => Navigator.pushNamed(context, '/lawyer-document-review'),
+            onTap: () => Navigator.pushNamed(context, '/lawyer-file-review'),
           ),
         );
       },
     );
   }
 }
+

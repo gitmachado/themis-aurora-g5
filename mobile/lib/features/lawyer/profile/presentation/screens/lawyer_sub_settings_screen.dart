@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import '../../../../../../shared/constants/app_colors.dart';
 import '../../../../../../shared/constants/app_text_styles.dart';
 import '../../../../../../shared/widgets/layout/custom_app_bar.dart';
@@ -21,8 +21,9 @@ class LawyerSubSettingsScreen extends StatelessWidget {
         title: title,
         centerTitle: true,
       ),
-      body: ListView.builder(
-        padding: const EdgeInsets.all(24),
+      body: SafeArea(
+        child: ListView.builder(
+          padding: const EdgeInsets.all(24),
         itemCount: items.length,
         itemBuilder: (context, index) {
           final item = items[index];
@@ -80,6 +81,7 @@ class LawyerSubSettingsScreen extends StatelessWidget {
             ),
           );
         },
+      ),
       ),
     );
   }

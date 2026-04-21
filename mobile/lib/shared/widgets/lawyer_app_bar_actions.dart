@@ -1,5 +1,6 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import '../constants/app_colors.dart';
+import 'layout/app_notification_button.dart';
 
 class LawyerAppBarActions extends StatelessWidget {
   final int notificationCount;
@@ -22,11 +23,10 @@ class LawyerAppBarActions extends StatelessWidget {
           count: chatCount,
           onTap: () => Navigator.pushNamed(context, '/lawyer-chats'),
         ),
-        _buildActionIcon(
-          context,
-          icon: Icons.notifications_none_outlined,
-          count: notificationCount,
+        AppNotificationButton(
+          notificationCount: notificationCount,
           onTap: () => Navigator.pushNamed(context, '/lawyer-notifications'),
+          size: 22,
         ),
         const SizedBox(width: 12),
       ],

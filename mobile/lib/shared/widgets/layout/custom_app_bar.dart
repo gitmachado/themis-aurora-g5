@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../constants/app_colors.dart';
 import '../../constants/app_text_styles.dart';
+import 'app_notification_button.dart';
 
 class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
   final String title;
@@ -13,6 +14,7 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
   final int notificationCount;
   final VoidCallback? onNotificationTap;
   final PreferredSizeWidget? bottom;
+  final bool showDivider;
 
   const CustomAppBar({
     super.key,
@@ -26,6 +28,7 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
     this.notificationCount = 0,
     this.onNotificationTap,
     this.bottom,
+    this.showDivider = true,
   });
 
   @override
@@ -46,32 +49,10 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
           ? [
               ...?actions,
               if (showNotificationButton)
-                Stack(
-                  alignment: Alignment.center,
-                  children: [
-                    IconButton(
-                      icon: const Icon(
-                        Icons.notifications_none_rounded,
-                        size: 24,
-                      ),
-                      onPressed:
-                          onNotificationTap ??
-                          () => Navigator.pushNamed(context, '/notifications'),
-                    ),
-                    if (notificationCount > 0)
-                      Positioned(
-                        right: 12,
-                        top: 12,
-                        child: Container(
-                          width: 8,
-                          height: 8,
-                          decoration: const BoxDecoration(
-                            color: AppColors.error,
-                            shape: BoxShape.circle,
-                          ),
-                        ),
-                      ),
-                  ],
+                AppNotificationButton(
+                  notificationCount: notificationCount,
+                  onTap: onNotificationTap ??
+                      () => Navigator.pushNamed(context, '/notifications'),
                 ),
               const SizedBox(width: 8),
             ]
@@ -85,23 +66,24 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
                 )
               : null),
       centerTitle: centerTitle,
-      backgroundColor: AppColors.background,
+      backgroundColor: AppColors.white,
       elevation: 0,
       scrolledUnderElevation: 0,
       iconTheme: const IconThemeData(color: AppColors.primary, size: 24),
-      bottom:
-          bottom ??
-          PreferredSize(
-            preferredSize: const Size.fromHeight(1),
-            child: Container(
-              color: AppColors.divider.withValues(alpha: 0.5),
-              height: 1,
-            ),
-          ),
+      bottom: bottom ??
+          (showDivider
+              ? PreferredSize(
+                  preferredSize: const Size.fromHeight(1),
+                  child: Container(
+                    color: AppColors.divider.withValues(alpha: 0.7),
+                    height: 1,
+                  ),
+                )
+              : null),
     );
   }
 
   @override
-  Size get preferredSize =>
-      Size.fromHeight(kToolbarHeight + (bottom?.preferredSize.height ?? 1.0));
+  Size get preferredSize => Size.fromHeight(
+      kToolbarHeight + (bottom?.preferredSize.height ?? (showDivider ? 1.0 : 0.0)));
 }

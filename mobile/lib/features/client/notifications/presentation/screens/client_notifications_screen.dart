@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import '../../../../../../shared/constants/app_colors.dart';
 import '../../../../../../shared/constants/app_text_styles.dart';
 import '../../../../../../shared/widgets/layout/custom_app_bar.dart';
@@ -16,18 +16,18 @@ class _ClientNotificationsScreenState extends State<ClientNotificationsScreen> {
     {
       'id': '1',
       'title': 'Nova movimentação',
-      'body': 'O juiz emitiu um despacho no processo Ação Indenizatória.',
+      'body': 'O juiz emitiu um despacho no trâmite Ação Indenizatória.',
       'time': 'há 5 min',
       'isRead': false,
-      'type': 'process',
+      'type': 'procedure',
     },
     {
       'id': '2',
-      'title': 'Documento recebido',
+      'title': 'Arquivo recebido',
       'body': 'Sua folha de pagamento foi anexada com sucesso.',
       'time': 'há 2 horas',
       'isRead': true,
-      'type': 'doc',
+      'type': 'file',
     },
     {
       'id': '3',
@@ -35,8 +35,9 @@ class _ClientNotificationsScreenState extends State<ClientNotificationsScreen> {
       'body': 'Sua audiência cível foi agendada para 15/05 as 14:00.',
       'time': 'Ontem',
       'isRead': true,
-      'type': 'process',
+      'type': 'procedure',
     },
+
   ];
 
   @override
@@ -71,11 +72,13 @@ class _ClientNotificationsScreenState extends State<ClientNotificationsScreen> {
             indicatorWeight: 3,
           ),
         ),
-        body: TabBarView(
-          children: [
-            _buildNotificationList(onlyUnread: true),
-            _buildNotificationList(onlyUnread: false),
-          ],
+        body: SafeArea(
+          child: TabBarView(
+            children: [
+              _buildNotificationList(onlyUnread: true),
+              _buildNotificationList(onlyUnread: false),
+            ],
+          ),
         ),
       ),
     );

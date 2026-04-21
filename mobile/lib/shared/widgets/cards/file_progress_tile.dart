@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import '../../constants/app_colors.dart';
 import '../../constants/app_text_styles.dart';
 
-class DocumentProgressTile extends StatelessWidget {
+class FileProgressTile extends StatelessWidget {
   final String title;
   final String status;
   final Color iconColor;
@@ -11,7 +11,7 @@ class DocumentProgressTile extends StatelessWidget {
   final double? progress;
   final VoidCallback? onTap;
 
-  const DocumentProgressTile({
+  const FileProgressTile({
     super.key,
     required this.title,
     required this.status,
@@ -32,7 +32,7 @@ class DocumentProgressTile extends StatelessWidget {
         decoration: BoxDecoration(
           color: AppColors.white,
           borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: AppColors.divider.withValues(alpha: 0.5)),
+          border: Border.all(color: AppColors.divider.withValues(alpha: 0.7)),
           boxShadow: [
             BoxShadow(
               color: Colors.black.withValues(alpha: 0.03),
@@ -91,3 +91,4 @@ class DocumentProgressTile extends StatelessWidget {
     );
   }
 }
+

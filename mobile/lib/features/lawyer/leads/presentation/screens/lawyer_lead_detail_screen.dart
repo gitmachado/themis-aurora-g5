@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import '../../../../../../shared/constants/app_colors.dart';
 import '../../../../../../shared/constants/app_text_styles.dart';
 import '../../../../../../shared/widgets/buttons/app_badge.dart';
@@ -58,71 +58,74 @@ class _LawyerLeadDetailScreenState extends State<LawyerLeadDetailScreen> with Si
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.background,
-      body: CustomScrollView(
-        slivers: [
-          _buildSliverAppBar(),
-          SliverToBoxAdapter(
-            child: FadeTransition(
-              opacity: _fadeAnimation,
-              child: SlideTransition(
-                position: _slideAnimation,
-                child: Padding(
-                  padding: const EdgeInsets.all(24.0),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      _buildInfoSection(
-                        title: 'Capturado pelo Bot',
-                        icon: Icons.smart_toy_outlined,
-                        children: [
-                          _buildDetailItem('Nome Completo', widget.name),
-                          _buildDetailItem('WhatsApp', '+55 (11) 99999-9999'),
-                          _buildDetailItem('CPF', '123.456.789-00'),
-                          _buildDetailItem('Tipo de Caso', widget.caseType),
-                          _buildDetailItem('Urgência', widget.urgency, isBadge: true),
-                          _buildDetailItem('Disponibilidade', 'Manhã / Tarde'),
-                        ],
-                      ),
-                      const SizedBox(height: 24),
-                      _buildInfoSection(
-                        title: 'Relato do Caso (IA)',
-                        icon: Icons.description_outlined,
-                        children: [
-                          Text(
-                            'O lead entrou em contato relatando problemas com rescisão contratual. Trabalhou na empresa por 5 anos e alega que não recebeu as verbas rescisórias corretamente. Possui documentos comprobatórios e deseja uma consultoria urgente.',
-                            style: AppTextStyles.body.copyWith(height: 1.5),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 24),
-                      _buildInfoSection(
-                        title: 'Notas do Advogado',
-                        icon: Icons.note_alt_outlined,
-                        children: [
-                          TextField(
-                            maxLines: 3,
-                            decoration: InputDecoration(
-                              hintText: 'Adicione observações internas...',
-                              filled: true,
-                              fillColor: AppColors.white,
-                              border: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(12),
-                                borderSide: const BorderSide(color: AppColors.divider),
+      body: SafeArea(
+        top: false, // SliverAppBar handles top safe area
+        child: CustomScrollView(
+          slivers: [
+            _buildSliverAppBar(),
+            SliverToBoxAdapter(
+              child: FadeTransition(
+                opacity: _fadeAnimation,
+                child: SlideTransition(
+                  position: _slideAnimation,
+                  child: Padding(
+                    padding: const EdgeInsets.all(24.0),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        _buildInfoSection(
+                          title: 'Capturado pelo Bot',
+                          icon: Icons.smart_toy_outlined,
+                          children: [
+                            _buildDetailItem('Nome Completo', widget.name),
+                            _buildDetailItem('WhatsApp', '+55 (11) 99999-9999'),
+                            _buildDetailItem('CPF', '123.456.789-00'),
+                            _buildDetailItem('Tipo de Caso', widget.caseType),
+                            _buildDetailItem('Urgência', widget.urgency, isBadge: true),
+                            _buildDetailItem('Disponibilidade', 'Manhã / Tarde'),
+                          ],
+                        ),
+                        const SizedBox(height: 24),
+                        _buildInfoSection(
+                          title: 'Relato do Caso (IA)',
+                          icon: Icons.description_outlined,
+                          children: [
+                            Text(
+                              'O lead entrou em contato relatando problemas com rescisão contratual. Trabalhou na empresa por 5 anos e alega que não recebeu as verbas rescisórias corretamente. Possui documentos comprobatórios e deseja uma consultoria urgente.',
+                              style: AppTextStyles.body.copyWith(height: 1.5),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 24),
+                        _buildInfoSection(
+                          title: 'Notas do Advogado',
+                          icon: Icons.note_alt_outlined,
+                          children: [
+                            TextField(
+                              maxLines: 3,
+                              decoration: InputDecoration(
+                                hintText: 'Adicione observações internas...',
+                                filled: true,
+                                fillColor: AppColors.white,
+                                border: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                  borderSide: const BorderSide(color: AppColors.divider),
+                                ),
                               ),
                             ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 120), // Bottom padding for sticky button
-                    ],
+                          ],
+                        ),
+                        const SizedBox(height: 120), // Bottom padding for sticky button
+                      ],
+                    ),
                   ),
                 ),
               ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
-      bottomSheet: _buildStickyFooter(),
+      bottomSheet: SafeArea(child: _buildStickyFooter()),
     );
   }
 

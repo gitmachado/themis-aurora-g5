@@ -1,23 +1,24 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import '../../../../../../shared/constants/app_colors.dart';
 import '../../../../../../shared/constants/app_text_styles.dart';
+import '../../../../../../shared/constants/app_dimensions.dart';
 import '../../../../../../shared/widgets/layout/custom_app_bar.dart';
 import '../../../../../../shared/widgets/buttons/app_badge.dart';
 import '../../../../../../shared/widgets/lawyer_app_bar_actions.dart';
-import '../../../../../../shared/widgets/cards/app_process_card.dart';
+import '../../../../../../shared/widgets/cards/app_procedure_card.dart';
 
-class LawyerProcessListScreen extends StatefulWidget {
-  const LawyerProcessListScreen({super.key});
+class LawyerProcedureListScreen extends StatefulWidget {
+  const LawyerProcedureListScreen({super.key});
 
   @override
-  State<LawyerProcessListScreen> createState() => _LawyerProcessListScreenState();
+  State<LawyerProcedureListScreen> createState() => _LawyerProcedureListScreenState();
 }
 
-class _LawyerProcessListScreenState extends State<LawyerProcessListScreen> {
+class _LawyerProcedureListScreenState extends State<LawyerProcedureListScreen> {
   String _searchQuery = '';
   String _selectedFilter = 'Todos';
 
-  final List<Map<String, dynamic>> _processes = [
+  final List<Map<String, dynamic>> _procedures = [
     {
       'number': '1023456-88.2023.8.26.0100',
       'client': 'João Silva',
@@ -53,19 +54,19 @@ class _LawyerProcessListScreenState extends State<LawyerProcessListScreen> {
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: const CustomAppBar(
-        title: 'Gestão de Processos',
+        title: 'Gestão de Trâmites',
         actions: [LawyerAppBarActions()],
       ),
       body: Column(
         children: [
           _buildSearchBar(),
           _buildFilters(),
-          Expanded(child: _buildProcessList()),
+          Expanded(child: _buildProcedureList()),
         ],
       ),
       floatingActionButton: FloatingActionButton(
-        heroTag: 'lawyer_process_fab',
-        onPressed: () => _showNewProcessModal(context),
+        heroTag: 'lawyer_procedure_fab',
+        onPressed: () => _showNewProcedureModal(context),
         backgroundColor: AppColors.primary,
         child: const Icon(Icons.add, color: Colors.white),
       ),
@@ -78,7 +79,7 @@ class _LawyerProcessListScreenState extends State<LawyerProcessListScreen> {
       child: TextField(
         onChanged: (val) => setState(() => _searchQuery = val),
         decoration: InputDecoration(
-          hintText: 'Buscar por processo ou cliente...',
+          hintText: 'Buscar por trâmite ou cliente...',
           prefixIcon: const Icon(Icons.search_rounded, color: AppColors.textCaption),
           filled: true,
           fillColor: AppColors.white,
@@ -128,8 +129,8 @@ class _LawyerProcessListScreenState extends State<LawyerProcessListScreen> {
     );
   }
 
-  Widget _buildProcessList() {
-    final filtered = _processes.where((p) {
+  Widget _buildProcedureList() {
+    final filtered = _procedures.where((p) {
       final matchesSearch = p['client'].toLowerCase().contains(_searchQuery.toLowerCase()) ||
           p['number'].contains(_searchQuery);
       if (!matchesSearch) return false;
@@ -141,20 +142,23 @@ class _LawyerProcessListScreenState extends State<LawyerProcessListScreen> {
     }).toList();
 
     return ListView.builder(
-      padding: const EdgeInsets.all(20),
+      padding: EdgeInsets.fromLTRB(20, 20, 20, AppDimensions.bottomPadding(context)),
+
+
+
       itemCount: filtered.length,
       itemBuilder: (context, index) {
         final p = filtered[index];
         return Padding(
           padding: const EdgeInsets.only(bottom: 16),
-          child: AppProcessCard(
+          child: AppProcedureCard(
             title: p['client'],
             subtitle: 'Proc: ${p['number']}',
             statusLabel: p['status'],
             statusType: _getStatusType(p['status']),
             lastUpdate: p['lastUpdate'],
             onTap: () {
-              Navigator.pushNamed(context, '/lawyer-process-detail');
+              Navigator.pushNamed(context, '/lawyer-procedure-detail');
             },
           ),
         );
@@ -170,7 +174,7 @@ class _LawyerProcessListScreenState extends State<LawyerProcessListScreen> {
   }
 
 
-  void _showNewProcessModal(BuildContext context) {
+  void _showNewProcedureModal(BuildContext context) {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -184,11 +188,11 @@ class _LawyerProcessListScreenState extends State<LawyerProcessListScreen> {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Text('Novo Processo', style: AppTextStyles.h1),
+            const Text('Novo Trâmite', style: AppTextStyles.h1),
             const SizedBox(height: 16),
             const TextField(decoration: InputDecoration(labelText: 'Cliente')),
             const SizedBox(height: 12),
-            const TextField(decoration: InputDecoration(labelText: 'Número do Processo')),
+            const TextField(decoration: InputDecoration(labelText: 'Número do Trâmite')),
             const SizedBox(height: 12),
             const TextField(decoration: InputDecoration(labelText: 'Tipo/Nicho')),
             const SizedBox(height: 24),
@@ -198,7 +202,7 @@ class _LawyerProcessListScreenState extends State<LawyerProcessListScreen> {
                 backgroundColor: AppColors.primary,
                 minimumSize: const Size(double.infinity, 50),
               ),
-              child: const Text('Cadastrar Processo', style: TextStyle(color: Colors.white)),
+              child: const Text('Cadastrar Trâmite', style: TextStyle(color: Colors.white)),
             ),
           ],
         ),
@@ -206,3 +210,4 @@ class _LawyerProcessListScreenState extends State<LawyerProcessListScreen> {
     );
   }
 }
+

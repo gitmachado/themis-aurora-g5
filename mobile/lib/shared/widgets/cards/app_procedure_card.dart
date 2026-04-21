@@ -4,7 +4,7 @@ import '../../constants/app_text_styles.dart';
 import '../../widgets/buttons/app_badge.dart';
 import '../../widgets/cards/app_card.dart';
 
-class AppProcessCard extends StatelessWidget {
+class AppProcedureCard extends StatelessWidget {
   final String title;
   final String subtitle;
   final String? statusLabel;
@@ -14,7 +14,7 @@ class AppProcessCard extends StatelessWidget {
   final IconData? icon;
   final VoidCallback onTap;
 
-  const AppProcessCard({
+  const AppProcedureCard({
     super.key,
     required this.title,
     required this.subtitle,
@@ -117,3 +117,4 @@ class AppProcessCard extends StatelessWidget {
     );
   }
 }
+

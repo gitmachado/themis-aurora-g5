@@ -1,7 +1,8 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import '../../../../../../shared/constants/app_colors.dart';
 import '../../../../../../shared/constants/app_text_styles.dart';
 import '../../../../../../shared/widgets/layout/custom_app_bar.dart';
+import '../../../../../../shared/constants/app_dimensions.dart';
 import '../../../../../../shared/widgets/lawyer_app_bar_actions.dart';
 
 class LawyerClientListScreen extends StatefulWidget {
@@ -57,7 +58,9 @@ class _LawyerClientListScreenState extends State<LawyerClientListScreen> {
           ),
           Expanded(
             child: ListView.builder(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
+              padding: EdgeInsets.fromLTRB(16, 0, 16, AppDimensions.bottomPadding(context)),
+
+
               itemCount: _clients.length,
               itemBuilder: (context, index) {
                 final client = _clients[index];
@@ -65,6 +68,7 @@ class _LawyerClientListScreenState extends State<LawyerClientListScreen> {
               },
             ),
           ),
+
         ],
       ),
       floatingActionButton: FloatingActionButton(

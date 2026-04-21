@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../constants/app_colors.dart';
 import '../../constants/app_text_styles.dart';
+import 'app_notification_button.dart';
 
 class AppDashboardHeader extends StatelessWidget {
   final String name;
@@ -23,9 +24,9 @@ class AppDashboardHeader extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.fromLTRB(20, 20, 20, 24),
+      padding: const EdgeInsets.fromLTRB(20, 12, 20, 16),
       decoration: const BoxDecoration(
-        color: AppColors.background,
+        color: AppColors.white,
       ),
       child: Row(
         children: [
@@ -65,45 +66,9 @@ class AppDashboardHeader extends StatelessWidget {
               ],
             ),
           ),
-          Stack(
-            children: [
-              Container(
-                decoration: BoxDecoration(
-                  color: AppColors.white,
-                  shape: BoxShape.circle,
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withValues(alpha: 0.05),
-                      blurRadius: 10,
-                      offset: const Offset(0, 4),
-                    ),
-                  ],
-                ),
-                child: IconButton(
-                  icon: const Icon(Icons.notifications_none_outlined, size: 24, color: AppColors.primary),
-                  onPressed: onNotificationTap,
-                ),
-              ),
-              if (notificationCount > 0)
-                Positioned(
-                  right: 4,
-                  top: 4,
-                  child: Container(
-                    padding: const EdgeInsets.all(4),
-                    decoration: BoxDecoration(
-                      color: AppColors.error,
-                      shape: BoxShape.circle,
-                      border: Border.all(color: AppColors.white, width: 2),
-                    ),
-                    constraints: const BoxConstraints(minWidth: 20, minHeight: 20),
-                    child: Text(
-                      notificationCount > 9 ? '9+' : notificationCount.toString(),
-                      style: const TextStyle(color: Colors.white, fontSize: 9, fontWeight: FontWeight.bold),
-                      textAlign: TextAlign.center,
-                    ),
-                  ),
-                ),
-            ],
+          AppNotificationButton(
+            notificationCount: notificationCount,
+            onTap: onNotificationTap ?? () {},
           ),
         ],
       ),

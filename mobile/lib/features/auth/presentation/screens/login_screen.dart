@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import '../../../../app/routes/app_router.dart';
 import '../../../../shared/constants/app_colors.dart';
 import '../../../../shared/constants/app_text_styles.dart';
+
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -27,92 +30,122 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: AppColors.white,
-      body: SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.symmetric(horizontal: 24.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              const SizedBox(height: 60),
-              // Logo Placeholder
-              Center(
-                child: Container(
-                  width: 80,
-                  height: 80,
-                  decoration: BoxDecoration(
-                    color: AppColors.primary,
-                    borderRadius: BorderRadius.circular(20),
+    return AnnotatedRegion<SystemUiOverlayStyle>(
+      value: const SystemUiOverlayStyle(
+        systemNavigationBarColor: Colors.white,
+
+        systemNavigationBarIconBrightness: Brightness.dark,
+        systemNavigationBarDividerColor: Colors.transparent,
+      ),
+      child: Scaffold(
+        backgroundColor: AppColors.white,
+        body: SafeArea(
+          child: LayoutBuilder(
+            builder: (context, constraints) {
+              return SingleChildScrollView(
+                physics: const AlwaysScrollableScrollPhysics(),
+                child: ConstrainedBox(
+                  constraints: BoxConstraints(
+                    minHeight: constraints.maxHeight,
                   ),
-                  child: const Icon(
-                    Icons.gavel_rounded,
-                    color: Colors.white,
-                    size: 40,
+                  child: IntrinsicHeight(
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 24.0),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          const SizedBox(height: 48),
+                          // Logo Placeholder
+                          Center(
+                            child: Container(
+                              width: 80,
+                              height: 80,
+                              decoration: BoxDecoration(
+                                color: AppColors.primary,
+                                borderRadius: BorderRadius.circular(20),
+                              ),
+                              child: const Icon(
+                                Icons.gavel_rounded,
+                                color: Colors.white,
+                                size: 40,
+                              ),
+                            ),
+                          ),
+                          const SizedBox(height: 32),
+                          const Text(
+                            'Bem-vindo ao\nOmniConnect',
+                            textAlign: TextAlign.center,
+                            style: AppTextStyles.h1,
+                          ),
+                          const SizedBox(height: 12),
+                          Text(
+                            'Acesse sua conta para continuar',
+                            textAlign: TextAlign.center,
+                            style: AppTextStyles.caption.copyWith(fontSize: 14),
+                          ),
+                          const SizedBox(height: 40),
+                          
+                          // Custom Tab Bar
+                          Container(
+                            height: 50,
+                            decoration: BoxDecoration(
+                              color: AppColors.background,
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            child: TabBar(
+                              controller: _tabController,
+                              indicator: BoxDecoration(
+                                color: AppColors.primary,
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                              labelColor: Colors.white,
+                              unselectedLabelColor: AppColors.textCaption,
+                              labelStyle: const TextStyle(fontWeight: FontWeight.bold),
+                              indicatorSize: TabBarIndicatorSize.tab,
+                              dividerColor: Colors.transparent,
+                              tabs: const [
+                                Tab(text: 'Sou Cliente'),
+                                Tab(text: 'Sou Advogado'),
+                              ],
+                            ),
+                          ),
+                          const SizedBox(height: 32),
+                          
+                          // Tab View
+                          SizedBox(
+                            height: 280,
+                            child: TabBarView(
+                              controller: _tabController,
+                              children: [
+                                _buildLoginForm(isLawyer: false),
+                                _buildLoginForm(isLawyer: true),
+                              ],
+                            ),
+                          ),
+                          
+                          // Spacer empurra o rodapé para baixo se houver espaço
+                          const Spacer(),
+                          
+                          Padding(
+                            padding: const EdgeInsets.symmetric(vertical: 16),
+                            child: TextButton(
+                              onPressed: () {},
+                              child: const Text(
+                                'Ainda não tem uma conta? Cadastre-se',
+                                style: TextStyle(
+                                  color: AppColors.primary,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
                   ),
                 ),
-              ),
-              const SizedBox(height: 32),
-              const Text(
-                'Bem-vindo ao\nOmniConnect',
-                textAlign: TextAlign.center,
-                style: AppTextStyles.h1,
-              ),
-              const SizedBox(height: 12),
-              Text(
-                'Acesse sua conta para continuar',
-                textAlign: TextAlign.center,
-                style: AppTextStyles.caption.copyWith(fontSize: 14),
-              ),
-              const SizedBox(height: 48),
-              
-              // Custom Tab Bar
-              Container(
-                height: 50,
-                decoration: BoxDecoration(
-                  color: AppColors.background,
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: TabBar(
-                  controller: _tabController,
-                  indicator: BoxDecoration(
-                    color: AppColors.primary,
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                  labelColor: Colors.white,
-                  unselectedLabelColor: AppColors.textCaption,
-                  labelStyle: const TextStyle(fontWeight: FontWeight.bold),
-                  indicatorSize: TabBarIndicatorSize.tab,
-                  dividerColor: Colors.transparent,
-                  tabs: const [
-                    Tab(text: 'Sou Cliente'),
-                    Tab(text: 'Sou Advogado'),
-                  ],
-                ),
-              ),
-              const SizedBox(height: 32),
-              
-              // Tab View
-              SizedBox(
-                height: 300,
-                child: TabBarView(
-                  controller: _tabController,
-                  children: [
-                    _buildLoginForm(isLawyer: false),
-                    _buildLoginForm(isLawyer: true),
-                  ],
-                ),
-              ),
-              
-              const SizedBox(height: 24),
-              TextButton(
-                onPressed: () {},
-                child: const Text(
-                  'Ainda não tem uma conta? Cadastre-se',
-                  style: TextStyle(color: AppColors.primary, fontWeight: FontWeight.w600),
-                ),
-              ),
-            ],
+              );
+            },
           ),
         ),
       ),
@@ -163,13 +196,13 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
             child: const Text('Esqueci minha senha'),
           ),
         ),
-        const SizedBox(height: 24),
+        const SizedBox(height: 10),
         ElevatedButton(
           onPressed: () {
             if (isLawyer) {
-              Navigator.pushReplacementNamed(context, '/lawyer-dashboard');
+              Navigator.pushReplacementNamed(context, AppRouter.lawyerDashboardRoute);
             } else {
-              Navigator.pushReplacementNamed(context, '/client-dashboard');
+              Navigator.pushReplacementNamed(context, AppRouter.clientDashboardRoute);
             }
           },
           style: ElevatedButton.styleFrom(

@@ -35,5 +35,5 @@ class AppColors {
   static const Color textCaption = Color(0xFF757575);
   static const Color white = Colors.white;
   static const Color chatBubbleMe = Color(0xFFDCF8C6);
-  static const Color divider = Color(0xFFE0E0E0);
+  static const Color divider = Color(0xFFCCCCCC);
 }
