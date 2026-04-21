@@ -3,7 +3,7 @@ import '../../../../../../shared/constants/app_colors.dart';
 import '../../../../../../shared/constants/app_text_styles.dart';
 import '../../../../../../shared/widgets/layout/custom_app_bar.dart';
 import '../../../../../../shared/constants/app_dimensions.dart';
-import '../../../../../../shared/widgets/lawyer_app_bar_actions.dart';
+import '../../../../../../shared/widgets/app_app_bar_actions.dart';
 
 class LawyerClientListScreen extends StatefulWidget {
   const LawyerClientListScreen({super.key});
@@ -32,14 +32,16 @@ class _LawyerClientListScreenState extends State<LawyerClientListScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.background,
-      appBar: const CustomAppBar(
-        title: 'Meus Clientes',
-        actions: [LawyerAppBarActions()],
+      appBar: CustomAppBar(
+        title: 'Clientes',
+        actions: [AppAppBarActions(chatCount: 3, notificationCount: 2)],
+        showDivider: false,
       ),
       body: Column(
         children: [
-          Padding(
-            padding: const EdgeInsets.all(16.0),
+          Container(
+            color: AppColors.white,
+            padding: const EdgeInsets.fromLTRB(20, 0, 20, 8),
             child: TextField(
               decoration: InputDecoration(
                 hintText: 'Buscar por nome ou CPF...',
@@ -48,19 +50,31 @@ class _LawyerClientListScreenState extends State<LawyerClientListScreen> {
                   color: AppColors.textCaption,
                 ),
                 filled: true,
-                fillColor: AppColors.white,
+                fillColor: AppColors.background,
+                contentPadding: const EdgeInsets.symmetric(vertical: 0),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
-                  borderSide: BorderSide.none,
+                  borderSide: BorderSide(color: AppColors.divider.withValues(alpha: 0.5)),
+                ),
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: BorderSide(color: AppColors.divider.withValues(alpha: 0.5)),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: const BorderSide(color: AppColors.primary, width: 1.5),
                 ),
               ),
             ),
           ),
+          Container(
+            height: 1,
+            color: AppColors.divider.withValues(alpha: 0.7),
+          ),
+          const SizedBox(height: 16),
           Expanded(
             child: ListView.builder(
               padding: EdgeInsets.fromLTRB(16, 0, 16, AppDimensions.bottomPadding(context)),
-
-
               itemCount: _clients.length,
               itemBuilder: (context, index) {
                 final client = _clients[index];
@@ -68,7 +82,6 @@ class _LawyerClientListScreenState extends State<LawyerClientListScreen> {
               },
             ),
           ),
-
         ],
       ),
       floatingActionButton: FloatingActionButton(

@@ -4,6 +4,7 @@ import '../../../../../../shared/constants/app_text_styles.dart';
 import '../../../../../../shared/constants/app_dimensions.dart';
 import '../../../../../../shared/widgets/layout/custom_app_bar.dart';
 import '../../../../../../shared/widgets/cards/file_progress_tile.dart';
+import '../../../../../../shared/widgets/app_app_bar_actions.dart';
 
 class ClientFilesScreen extends StatefulWidget {
   const ClientFilesScreen({super.key});
@@ -20,11 +21,10 @@ class _ClientFilesScreenState extends State<ClientFilesScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.background,
-      appBar: const CustomAppBar(
+      appBar: CustomAppBar(
         title: 'Arquivos',
         showBackButton: false,
-        showNotificationButton: true,
-        notificationCount: 2,
+        actions: [AppAppBarActions(showChat: false, notificationCount: 2)],
         showDivider: false,
       ),
       body: Column(

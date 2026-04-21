@@ -24,14 +24,23 @@ class AppNotificationButton extends StatelessWidget {
         ),
         if (notificationCount > 0)
           Positioned(
-            right: 12,
-            top: 12,
+            right: 8,
+            top: 8,
             child: Container(
-              width: 8,
-              height: 8,
+              padding: const EdgeInsets.all(2),
               decoration: const BoxDecoration(
                 color: AppColors.error,
                 shape: BoxShape.circle,
+              ),
+              constraints: const BoxConstraints(minWidth: 14, minHeight: 14),
+              child: Text(
+                notificationCount > 9 ? '+9' : notificationCount.toString(),
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 8,
+                  fontWeight: FontWeight.bold,
+                ),
+                textAlign: TextAlign.center,
               ),
             ),
           ),

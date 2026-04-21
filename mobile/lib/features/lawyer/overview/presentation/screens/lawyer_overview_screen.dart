@@ -20,10 +20,8 @@ class LawyerOverviewScreen extends StatelessWidget {
     final layoutState = context.findAncestorStateOfType<LawyerMainLayoutState>();
     return Scaffold(
       backgroundColor: AppColors.background,
-      body: SafeArea(
-        bottom: false,
-        child: Column(
-          children: [
+      body: Column(
+        children: [
             const DashboardHeader(
               userName: 'Dr. Rodrigo',
               officeName: 'Escritório Machado & Associados',
@@ -57,7 +55,6 @@ class LawyerOverviewScreen extends StatelessWidget {
             ),
           ],
         ),
-      ),
     );
   }
 

@@ -4,7 +4,7 @@ import '../../../../../../shared/constants/app_text_styles.dart';
 import '../../../../../../shared/constants/app_dimensions.dart';
 import '../../../../../../shared/widgets/layout/custom_app_bar.dart';
 import '../../../../../../shared/widgets/buttons/app_badge.dart';
-import '../../../../../../shared/widgets/lawyer_app_bar_actions.dart';
+import '../../../../../../shared/widgets/app_app_bar_actions.dart';
 import '../../../../../../shared/widgets/cards/app_procedure_card.dart';
 
 class LawyerProcedureListScreen extends StatefulWidget {
@@ -53,14 +53,28 @@ class _LawyerProcedureListScreenState extends State<LawyerProcedureListScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.background,
-      appBar: const CustomAppBar(
-        title: 'Gestão de Trâmites',
-        actions: [LawyerAppBarActions()],
+      appBar: CustomAppBar(
+        title: 'Trâmites',
+        actions: [AppAppBarActions(chatCount: 3, notificationCount: 2)],
+        showDivider: false,
       ),
       body: Column(
         children: [
-          _buildSearchBar(),
-          _buildFilters(),
+          Container(
+            color: AppColors.white,
+            child: Column(
+              children: [
+                _buildSearchBar(),
+                _buildFilters(),
+                const SizedBox(height: 8),
+              ],
+            ),
+          ),
+          Container(
+            height: 1,
+            color: AppColors.divider.withValues(alpha: 0.7),
+          ),
+          const SizedBox(height: 16),
           Expanded(child: _buildProcedureList()),
         ],
       ),
@@ -75,17 +89,25 @@ class _LawyerProcedureListScreenState extends State<LawyerProcedureListScreen> {
 
   Widget _buildSearchBar() {
     return Padding(
-      padding: const EdgeInsets.fromLTRB(20, 16, 20, 8),
+      padding: const EdgeInsets.fromLTRB(20, 0, 20, 8),
       child: TextField(
         onChanged: (val) => setState(() => _searchQuery = val),
         decoration: InputDecoration(
           hintText: 'Buscar por trâmite ou cliente...',
           prefixIcon: const Icon(Icons.search_rounded, color: AppColors.textCaption),
           filled: true,
-          fillColor: AppColors.white,
+          fillColor: AppColors.background,
           border: OutlineInputBorder(
             borderRadius: BorderRadius.circular(12),
-            borderSide: BorderSide.none,
+            borderSide: BorderSide(color: AppColors.divider.withValues(alpha: 0.5)),
+          ),
+          enabledBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+            borderSide: BorderSide(color: AppColors.divider.withValues(alpha: 0.5)),
+          ),
+          focusedBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+            borderSide: const BorderSide(color: AppColors.primary, width: 1.5),
           ),
           contentPadding: const EdgeInsets.symmetric(vertical: 0),
         ),

@@ -3,6 +3,7 @@ import '../../../../../../shared/constants/app_colors.dart';
 import '../../../../../../shared/constants/app_text_styles.dart';
 import '../../../../../../shared/widgets/layout/custom_app_bar.dart';
 import '../../../../../../shared/widgets/cards/app_card.dart';
+import '../../../../../../shared/widgets/app_app_bar_actions.dart';
 import '../../../../../../shared/constants/app_dimensions.dart';
 
 class ClientProfileScreen extends StatefulWidget {
@@ -17,11 +18,10 @@ class _ClientProfileScreenState extends State<ClientProfileScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.background,
-      appBar: const CustomAppBar(
+      appBar: CustomAppBar(
         title: 'Perfil',
         showBackButton: false,
-        showNotificationButton: true,
-        notificationCount: 2,
+        actions: [AppAppBarActions(showChat: false, notificationCount: 2)],
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),

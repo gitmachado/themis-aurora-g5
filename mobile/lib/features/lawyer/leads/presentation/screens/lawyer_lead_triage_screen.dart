@@ -5,7 +5,7 @@ import '../../../../../../shared/constants/app_text_styles.dart';
 import '../../../../../../shared/constants/app_dimensions.dart';
 import '../../../../../../shared/widgets/layout/custom_app_bar.dart';
 import '../widgets/lead_card.dart';
-import '../../../../../../shared/widgets/lawyer_app_bar_actions.dart';
+import '../../../../../../shared/widgets/app_app_bar_actions.dart';
 
 class LawyerLeadTriageScreen extends StatefulWidget {
   const LawyerLeadTriageScreen({super.key});
@@ -54,13 +54,22 @@ class _LawyerLeadTriageScreenState extends State<LawyerLeadTriageScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.background,
-      appBar: const CustomAppBar(
-        title: 'Triagem de Leads',
-        actions: [LawyerAppBarActions()],
+      appBar: CustomAppBar(
+        title: 'Leads',
+        actions: [AppAppBarActions(chatCount: 3, notificationCount: 2)],
+        showDivider: false,
       ),
       body: Column(
         children: [
-          _buildFilters(),
+          Container(
+            color: AppColors.white,
+            child: _buildFilters(),
+          ),
+          Container(
+            height: 1,
+            color: AppColors.divider.withValues(alpha: 0.7),
+          ),
+          const SizedBox(height: 16),
           Expanded(
             child: _buildLeadsList(),
           ),
@@ -73,7 +82,7 @@ class _LawyerLeadTriageScreenState extends State<LawyerLeadTriageScreen> {
     final filters = ['Todos', 'Urgentes', 'Novos', 'Trabalhista', 'Cível'];
     return SingleChildScrollView(
       scrollDirection: Axis.horizontal,
-      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+      padding: const EdgeInsets.fromLTRB(20, 0, 20, 16),
       child: Row(
         children: filters.map((filter) {
           final isSelected = _selectedFilter == filter;

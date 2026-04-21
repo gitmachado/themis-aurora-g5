@@ -56,10 +56,8 @@ class LawyerMainLayoutState extends State<LawyerMainLayout> {
       },
       child: Scaffold(
         extendBody: true,
-        body: SafeArea(
-          bottom: false,
-          child: LayoutBuilder(
-            builder: (context, constraints) {
+        body: LayoutBuilder(
+          builder: (context, constraints) {
               final double height = constraints.maxHeight;
               final double stopStart = (height - 180) / height;
               final double stopEnd = (height - 60) / height;
@@ -81,7 +79,6 @@ class LawyerMainLayoutState extends State<LawyerMainLayout> {
               );
             },
           ),
-        ),
         bottomNavigationBar: Container(
           padding: const EdgeInsets.only(top: 16),
           decoration: BoxDecoration(

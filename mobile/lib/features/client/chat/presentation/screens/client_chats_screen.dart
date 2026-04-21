@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../../../../../../shared/constants/app_colors.dart';
 import '../../../../../../shared/constants/app_dimensions.dart';
 import '../../../../../../shared/widgets/layout/custom_app_bar.dart';
+import '../../../../../../shared/widgets/app_app_bar_actions.dart';
 import '../widgets/chat_list_tile.dart';
 
 class ClientChatsScreen extends StatefulWidget {
@@ -16,11 +17,10 @@ class _ClientChatsScreenState extends State<ClientChatsScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.background,
-      appBar: const CustomAppBar(
+      appBar: CustomAppBar(
         title: 'Mensagens',
         showBackButton: false,
-        showNotificationButton: true,
-        notificationCount: 2,
+        actions: [AppAppBarActions(showChat: false, notificationCount: 2)],
       ),
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.start,

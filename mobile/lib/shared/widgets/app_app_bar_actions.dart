@@ -2,14 +2,20 @@ import 'package:flutter/material.dart';
 import '../constants/app_colors.dart';
 import 'layout/app_notification_button.dart';
 
-class LawyerAppBarActions extends StatelessWidget {
+class AppAppBarActions extends StatelessWidget {
   final int notificationCount;
   final int chatCount;
+  final bool showChat;
+  final VoidCallback? onNotificationTap;
+  final VoidCallback? onChatTap;
 
-  const LawyerAppBarActions({
+  const AppAppBarActions({
     super.key,
     this.notificationCount = 0,
     this.chatCount = 0,
+    this.showChat = true,
+    this.onNotificationTap,
+    this.onChatTap,
   });
 
   @override
@@ -17,15 +23,19 @@ class LawyerAppBarActions extends StatelessWidget {
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
-        _buildActionIcon(
-          context,
-          icon: Icons.chat_bubble_outline_rounded,
-          count: chatCount,
-          onTap: () => Navigator.pushNamed(context, '/lawyer-chats'),
-        ),
+        if (showChat)
+          _buildActionIcon(
+            context,
+            icon: Icons.chat_bubble_outline_rounded,
+            count: chatCount,
+            onTap: onChatTap ?? () => Navigator.pushNamed(context, '/lawyer-chats'),
+          ),
         AppNotificationButton(
           notificationCount: notificationCount,
-          onTap: () => Navigator.pushNamed(context, '/lawyer-notifications'),
+          onTap: onNotificationTap ?? () {
+            final route = showChat ? '/lawyer-notifications' : '/notifications';
+            Navigator.pushNamed(context, route);
+          },
           size: 22,
         ),
         const SizedBox(width: 12),
