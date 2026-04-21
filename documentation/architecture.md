@@ -211,15 +211,45 @@ flowchart LR
 
 ---
 
-## 3. Frontend Flutter — Arquitetura por Features
+## 3. Frontend Flutter — Arquitetura Vertical Slicing
 
-> Documentado na task G5-5. Estrutura baseada em features com navegação centralizada.
+> O projeto superou a etapa puramente visual. Implementou-se o **Full Vertical Slicing com Clean Architecture** e o gerenciamento de estado via **Riverpod** em aproximação das chamadas API (Ref: [ADR-0005](decisions/0005-arquitetura-frontend-flutter.md)).
 
-### 3.1 Estrutura de Pastas (Diretório: `mobile/lib/`)
+### 3.1 Estrutura de Pastas de Alto Nível (Diretório: `mobile/lib/`)
+- **`app/`** — Configuração central (tema global, routes, configuração base do system chrome).
+- **`features/`** — Hospeda a ramificação principal `client` (App do Cliente) e `lawyer` (App do Advogado), contendo dentro de si o real Vertical Slicing por sub-feature.
+- **`shared/`** — Componentes visuais (`widgets/`), utilitários estritos e provedores globais que circulam nos 2 aplicativos simultaneamente sem estarem atrelados a um domínio.
 
-- **`app/`** — Configuração central (tema, rotas, shell, global state).
-- **`features/`** — Domínios de negócio isolados (Auth, Processos, etc.).
-- **`shared/`** — Componentes, widgets e utilitários reutilizáveis (G5-5).
+### 3.2 O Padrão Vertical Slicing
+Diferente da formatação plana inicial, onde existia uma única pasta `presentation` com dezenas de telas, cada rota e funcionalidade virou uma "sub-feature" isolada (ex: `features/client/home`, `features/lawyer/leads`).
+
+Cada sub-feature abriga os pilares da Clean Architecture:
+```
+<sub-feature_name>/
+├── data/
+│   ├── data_sources/    ← Mapeamento HTTP/Supabase (Remote)
+│   ├── models/          ← DTOs para parse JSON
+│   └── repositories/    ← Ponte conectando API à regra local
+├── domain/
+│   ├── entities/        ← Regras e modelos 100% livres de dependência nativa
+│   ├── repositories/    ← Interfaces obrigatórias do backend
+│   └── usecases/        ← Execution flow puro
+└── presentation/
+    ├── providers/       ← Riverpod Notifiers (Estado reativo da UI conectada aos UseCases)
+    ├── screens/         ← UI Scaffolds (Páginas Base)
+    └── widgets/         ← Pedaços de UI específicos dessa sub-feature
+```
+
+### 3.3 Padronização Visual e Regras de UI
+A interface está lapidada sobre as seguintes regras fixas consolidadas:
+- **Clean Aesthetic e Espaçamento Restrito:** Reduziu-se o uso de `Dividers` supérfluos, apostando em margens e hierarquia de sombra para divisórias limpas.
+- **Headers Brancos Unificados:** As "AppBars" usam `backgroundColor` branco com setas restritas e barra de pesquisa padrão. Não inventamos cores extras.
+- **Edge-to-Edge Fluid (No Bleeding):** A `AppBottomNavigationBar` trabalha unida ao `SafeArea` sem provocar retenções na barra de navegação virtual do S.O. O `SystemUiOverlayStyle` também tem comportamentos base para ser 100% transparente.
+
+### 3.4 Gestão de Estado e Backend
+Com o **Deploy do MVP Endurecido (ADR-0006)** o ambiente de Nuvem tem zero tolerância a chamadas vulneráveis.
+- É regra obrigatória usar as injeções reativas do `Riverpod` em vez de passar variáveis complexas via construtores Stateless.
+- A comunicação com o Backend nas datasources exige envio robusto de JWT/Bearer, pois o *Swagger* e CORS estão restritos para Production.
 
 ---
 

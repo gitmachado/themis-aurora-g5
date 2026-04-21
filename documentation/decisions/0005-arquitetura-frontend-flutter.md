@@ -35,7 +35,7 @@ Estrutura anatômica exata contida na pasta de cada sub-feature:
 ### 5. Consequências
 - **Positivas:** Altíssima desacoplabilidade. Se amanhã a documentação do cliente não for mais necessária, deletar a pasta `features/client/documents` aniquila 100% de seus dados, domínio e estado sem gerar dependências órfãs.
 - **Negativas:** Exige criação massiva de sub-diretórios para coisas que parecem pequenas a princípio.
-- **Desenvolvimento Agêntico:** Os agentes de IA DEVEM sempre mapear seus componentes, modelos e estado estritamente dentro da sua sub-feature respectiva, sem subir os dados para o nível do `role` (ex. injetar dados do Lead direto na aba Advogado em vez da sub-feature lead resultaria em erro grave de arquitetura).
+- **Desenvolvimento Agêntico:** Os desenvolvedores devem mapear seus componentes, modelos e estado estritamente dentro da sua sub-feature respectiva.
 
 ---
 > [!NOTE]
