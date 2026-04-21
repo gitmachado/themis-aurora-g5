@@ -2,6 +2,7 @@ import { Request, Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
 import { UnauthorizedError } from '../../services/implementations/errors';
 import { UserRole } from '@enums';
+import { getJwtSecret } from '../../config/runtime';
 
 export interface JWTPayload {
   sub: string;
@@ -40,7 +41,7 @@ export const authMiddleware = (
   }
 
   const token = parts[1];
-  const secret = process.env.JWT_SECRET || 'super-secret-key-change-me';
+  const secret = getJwtSecret();
 
   try {
     const decoded = jwt.verify(token, secret) as JWTPayload;
