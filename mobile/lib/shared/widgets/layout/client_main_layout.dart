@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
-import '../../../../features/client/presentation/screens/client_home_screen.dart';
-import '../../../../features/client/presentation/screens/client_process_list_screen.dart';
-import '../../../../features/client/presentation/screens/client_documents_screen.dart';
-import '../../../../features/client/presentation/screens/client_chats_screen.dart';
-import '../../../../features/client/presentation/screens/client_profile_screen.dart';
+import '../../../../features/client/home/presentation/screens/client_home_screen.dart';
+import '../../../../features/client/processes/presentation/screens/client_process_list_screen.dart';
+import '../../../../features/client/documents/presentation/screens/client_documents_screen.dart';
+import '../../../../features/client/chat/presentation/screens/client_chats_screen.dart';
+import '../../../../features/client/profile/presentation/screens/client_profile_screen.dart';
 import 'app_bottom_nav_bar.dart';
+
 
 class ClientMainLayout extends StatefulWidget {
   final int initialIndex;

@@ -1,23 +1,25 @@
 import 'package:flutter/material.dart';
 import '../../features/design_system/presentation/screens/design_system_screen.dart';
 import '../../features/auth/presentation/screens/login_screen.dart';
-import '../../features/client/presentation/screens/client_process_timeline_screen.dart';
-
-import '../../features/client/presentation/screens/client_profile_screen.dart';
-import '../../features/client/presentation/screens/client_notifications_screen.dart';
-import '../../features/client/presentation/screens/client_chat_mirror_screen.dart';
-import '../../features/lawyer/presentation/screens/lawyer_process_detail_screen.dart';
-import '../../features/lawyer/presentation/screens/lawyer_profile_screen.dart';
-import '../../features/lawyer/presentation/screens/lawyer_lead_detail_screen.dart';
-import '../../features/lawyer/presentation/screens/lawyer_notification_screen.dart';
-import '../../features/lawyer/presentation/screens/lawyer_document_review_screen.dart';
-import '../../features/lawyer/presentation/screens/lawyer_document_list_screen.dart';
-import '../../features/lawyer/presentation/screens/lawyer_chat_list_screen.dart';
-import '../../features/lawyer/presentation/screens/lawyer_ai_manager_screen.dart';
-import '../../features/lawyer/presentation/screens/lawyer_chat_handoff_screen.dart';
-import '../../features/lawyer/presentation/screens/lawyer_client_detail_screen.dart';
+// Client
+import '../../features/client/processes/presentation/screens/client_process_timeline_screen.dart';
+import '../../features/client/profile/presentation/screens/client_profile_screen.dart';
+import '../../features/client/notifications/presentation/screens/client_notifications_screen.dart';
+import '../../features/client/chat/presentation/screens/client_chat_mirror_screen.dart';
+// Lawyer
+import '../../features/lawyer/processes/presentation/screens/lawyer_process_detail_screen.dart';
+import '../../features/lawyer/profile/presentation/screens/lawyer_profile_screen.dart';
+import '../../features/lawyer/leads/presentation/screens/lawyer_lead_detail_screen.dart';
+import '../../features/lawyer/notifications/presentation/screens/lawyer_notification_screen.dart';
+import '../../features/lawyer/documents/presentation/screens/lawyer_document_review_screen.dart';
+import '../../features/lawyer/documents/presentation/screens/lawyer_document_list_screen.dart';
+import '../../features/lawyer/chat/presentation/screens/lawyer_chat_list_screen.dart';
+import '../../features/lawyer/ai_manager/presentation/screens/lawyer_ai_manager_screen.dart';
+import '../../features/lawyer/chat/presentation/screens/lawyer_chat_handoff_screen.dart';
+import '../../features/lawyer/clients/presentation/screens/lawyer_client_detail_screen.dart';
 import '../../shared/widgets/layout/client_main_layout.dart';
 import '../../shared/widgets/layout/lawyer_main_layout.dart';
+
 
 final class AppRouter {
   static const String initialRoute = '/login';

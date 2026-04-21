@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
-import '../../../../features/dashboard/presentation/screens/lawyer_dashboard_screen.dart';
-import '../../../../features/lawyer/presentation/screens/lawyer_lead_triage_screen.dart';
-import '../../../../features/lawyer/presentation/screens/lawyer_process_list_screen.dart';
-import '../../../../features/lawyer/presentation/screens/lawyer_client_list_screen.dart';
-import '../../../../features/lawyer/presentation/screens/lawyer_profile_screen.dart';
+import '../../../../features/lawyer/overview/presentation/screens/lawyer_overview_screen.dart';
+import '../../../../features/lawyer/leads/presentation/screens/lawyer_lead_triage_screen.dart';
+import '../../../../features/lawyer/processes/presentation/screens/lawyer_process_list_screen.dart';
+import '../../../../features/lawyer/clients/presentation/screens/lawyer_client_list_screen.dart';
+import '../../../../features/lawyer/profile/presentation/screens/lawyer_profile_screen.dart';
 import 'app_bottom_nav_bar.dart';
+
 
 class LawyerMainLayout extends StatefulWidget {
   final int initialIndex;
@@ -19,7 +20,7 @@ class LawyerMainLayoutState extends State<LawyerMainLayout> {
   late int currentIndex;
 
   final List<Widget> _screens = const [
-    LawyerDashboardScreen(),
+    LawyerOverviewScreen(),
     LawyerLeadTriageScreen(),
     LawyerProcessListScreen(),
     LawyerClientListScreen(),
