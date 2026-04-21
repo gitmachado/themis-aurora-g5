@@ -10,35 +10,37 @@ This skill defines the technical and architectural standards for Flutter develop
 ## Core Workflow
 
 1.  **Contextual Research**: Before implementation, examine existing patterns in `lib/shared/widgets/` and previously implemented screens in `lib/features/`.
-2.  **Prototype Reference**: Use the `.pen` file in `documentation/prototype.pen` as a structural and aesthetic reference only.
-    - **Note**: Prototypes may contain inconsistencies, misalignments, or AI-generated artifacts. Do not follow the prototype if it violates UI/UX best practices or established project standards.
-3.  **Layout Construction**: Use the `flutter-building-layouts` skill to construct interfaces using the Flutter constraint system.
-4.  **UX Refinement**: Proactively improve layouts that appear inconsistent or unintuitive. Apply harmonious spacing, correct typography, and implement feedback states (loading, error, empty).
+2.  **Focus Shift to Logic (Post-UI Baseline)**: The static UI baseline is already consolidated. Your primary responsibility now is to connect screens using **Riverpod Providers** and implement Clean Architecture's Data/Domain layers to consume the hardened Backend.
+3.  **Layout Refinements**: If constructing UI, use the `flutter-building-layouts` skill. Enforce the Omni UI standard:
+    - **No Bleeding**: Always respect `SafeArea`. The `AppBottomNavigationBar` and `SystemUiOverlayStyle` must create a clean edge-to-edge experience without dark native bars intersecting the app.
+    - **Clean Aesthetics**: Use white backgrounds for headers (AppBars), semantic consistency, and avoid excessive `Dividers`. Use margins and spacing hierarchically.
 
 ## Identity and Styling
 
 Refer to `documentation/design-guide.md` for the following specifications:
 - **Colors**: Use defined tokens (Primary: `#1A237E`, Gold: `#DEBC74`, etc.).
 - **Typography**: Utilize the `Inter` font family. Standards: H1 (24px, Bold), H2 (18px, Semi-Bold), Body (16px).
-- **Spacing**: Maintain consistency using 4px or 8px increments.
+- **Spacing**: Maintain consistency using 4px or 8px increments. Prefer whitespace parsing over linear dividers.
 
 ## Architecture and Organization
 
-- **Layering**: Follow the Clean Architecture pattern:
-    - `data/`: Repositories and DataSources.
-    - `domain/`: Entities and UseCases.
-    - `presentation/`: Screens and Widgets.
+- **Vertical Slicing & Layering**: We strictly follow "Full Vertical Slicing" with Clean Architecture. Every functionality is an isolated sub-feature.
+- Each sub-feature has its own layers:
+    - `<sub-feature>/data/`: repositories, models, data_sources.
+    - `<sub-feature>/domain/`: repositories, entities, usecases.
+    - `<sub-feature>/presentation/`: screens, widgets, providers.
 - **Widget Placement**:
-    - Global/Reusable Widgets: `lib/shared/widgets/`.
-    - Feature-specific Widgets: `lib/features/<feature>/presentation/widgets/`.
+    - Global/Brand-Identity Widgets (NavBars, Base AppBars, Tokens): `lib/shared/widgets/`.
+    - Feature-specific Widgets: `lib/features/<role>/<sub-feature>/presentation/widgets/`.
+- **State Management**: Mandatory use of `Riverpod` for state logic. Do not pass business state purely via widget constructors.
 - **Naming Conventions**: Use `snake_case` for filenames and `PascalCase` for classes.
 
 ## Reference Documentation
 
 Consult the following documents for absolute requirements:
 - `documentation/design-guide.md`: Visual identity and navigation logic.
+- `documentation/architecture.md`: Section 3 acts as the ultimate truth for the Frontend structure, Data models, and API boundaries.
 - `documentation/documents/*`: Technical specifications and roadmaps.
-- `documentation/architecture.md`: Data models and mobile structure diagrams.
 
 ## Quality Standards
 

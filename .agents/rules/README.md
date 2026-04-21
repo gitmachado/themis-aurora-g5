@@ -7,9 +7,10 @@ Este diretório contém os comportamentos esperados e as diretrizes de código p
 
 ## 🛠️ Diretrizes Técnicas
 - **Simplicidade**: Siga o princípio YAGNI (You Ain't Gonna Need It). Não implemente complexidade desnecessária.
-- **Documentação**: Toda decisão arquitetural deve ser registrada via workflow `/decision`.
+- **Contextualização**: Para entender como está o status atual do app (Flutter Mobile), navegue diretamente para `documentation/architecture.md` (o antigo `frontend-overview` foi depreciado e transferido para lá).
+- **Documentação**: Toda decisão arquitetural nova deve ser registrada via workflow `/decision`.
 - **Commits**: Use sempre o workflow `/commit` (Conventional Commits).
-- **Consistência**: Mantenha os padrões definidos pelo Grupo 5 em termos de UI/UX e arquitetura.
+- **Consistência**: Mantenha os padrões definidos pelo Grupo 5 (Edge-to-edge UI, Clean Architecture com Vertical Slicing e gerenciamento via Riverpod).
 
 ---
 > [!IMPORTANT]
