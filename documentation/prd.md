@@ -61,7 +61,7 @@ O OmniConnect e um ecossistema de gestao juridica que une a agilidade da IA no W
 
 **Regras de Negocio:**
 
-- **Aba "Linha do Tempo":** Exibe cronologicamente as notas deixadas pelo advogado (Peticao protocolada, Audiencia marcada etc.).
+- **Abas do Processo:** "Timeline" (exibe cronologicamente as notas), "Resumo" (dados gerais do caso) e "Documentos" (arquivos anexados).
 - **Aba "Chat":** Espelhamento (somente leitura) da conversa tida com o bot no WhatsApp para referencia do cliente.
 - **Botao Duvida Rapida:** Redireciona para o WhatsApp do escritorio com o texto: `Ola, tenho uma duvida sobre meu processo [ID-CASO]`.
 
