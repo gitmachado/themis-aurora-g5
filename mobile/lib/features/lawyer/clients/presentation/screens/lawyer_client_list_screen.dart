@@ -41,7 +41,7 @@ class _LawyerClientListScreenState extends State<LawyerClientListScreen> {
         children: [
           Container(
             color: AppColors.white,
-            padding: const EdgeInsets.fromLTRB(20, 0, 20, 8),
+            padding: const EdgeInsets.fromLTRB(20, 0, 20, 16),
             child: TextField(
               decoration: InputDecoration(
                 hintText: 'Buscar por nome ou CPF...',

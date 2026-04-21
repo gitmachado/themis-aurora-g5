@@ -34,6 +34,7 @@ class LawyerOverviewScreen extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
+                    const SizedBox(height: 18),
                     _buildMetricsGrid(context),
                     const SizedBox(height: 24),
                     _buildHandoffsCard(context, layoutState),

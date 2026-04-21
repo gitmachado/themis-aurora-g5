@@ -28,49 +28,52 @@ class AppDashboardHeader extends StatelessWidget {
       decoration: const BoxDecoration(
         color: AppColors.white,
       ),
-      child: Row(
-        children: [
-          GestureDetector(
-            onTap: onProfileTap,
-            child: CircleAvatar(
-              radius: 30,
-              backgroundColor: AppColors.secondaryLight,
-              backgroundImage: avatarUrl != null ? NetworkImage(avatarUrl!) : null,
-              child: avatarUrl == null
-                  ? Text(
-                      _getInitials(name),
-                      style: const TextStyle(
-                        color: AppColors.secondaryDark,
-                        fontWeight: FontWeight.bold,
-                        fontSize: 20,
-                      ),
-                    )
-                  : null,
+      child: SafeArea(
+        bottom: false,
+        child: Row(
+          children: [
+            GestureDetector(
+              onTap: onProfileTap,
+              child: CircleAvatar(
+                radius: 30,
+                backgroundColor: AppColors.secondaryLight,
+                backgroundImage: avatarUrl != null ? NetworkImage(avatarUrl!) : null,
+                child: avatarUrl == null
+                    ? Text(
+                        _getInitials(name),
+                        style: const TextStyle(
+                          color: AppColors.secondaryDark,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 20,
+                        ),
+                      )
+                    : null,
+              ),
             ),
-          ),
-          const SizedBox(width: 16),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  greeting,
-                  style: AppTextStyles.caption.copyWith(fontSize: 14, color: AppColors.textCaption),
-                ),
-                Text(
-                  name,
-                  style: AppTextStyles.h1.copyWith(fontSize: 22, color: AppColors.primary),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                ),
-              ],
+            const SizedBox(width: 16),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    greeting,
+                    style: AppTextStyles.caption.copyWith(fontSize: 14, color: AppColors.textCaption),
+                  ),
+                  Text(
+                    name,
+                    style: AppTextStyles.h1.copyWith(fontSize: 22, color: AppColors.primary),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ],
+              ),
             ),
-          ),
-          AppNotificationButton(
-            notificationCount: notificationCount,
-            onTap: onNotificationTap ?? () {},
-          ),
-        ],
+            AppNotificationButton(
+              notificationCount: notificationCount,
+              onTap: onNotificationTap ?? () {},
+            ),
+          ],
+        ),
       ),
     );
   }

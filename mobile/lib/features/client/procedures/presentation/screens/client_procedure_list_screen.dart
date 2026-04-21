@@ -30,16 +30,13 @@ class _ClientProcedureListScreenState extends State<ClientProcedureListScreen> {
         children: [
           Container(
             color: AppColors.white,
-            child: Column(
-              children: [
-                _buildFilters(),
-                Container(
-                  height: 1,
-                  color: AppColors.divider.withValues(alpha: 0.7),
-                ),
-              ],
-            ),
+            child: _buildFilters(),
           ),
+          Container(
+            height: 1,
+            color: AppColors.divider.withValues(alpha: 0.7),
+          ),
+          const SizedBox(height: 16),
           Expanded(
             child: _buildList(),
           ),
@@ -139,7 +136,7 @@ class _ClientProcedureListScreenState extends State<ClientProcedureListScreen> {
     }).toList();
 
     return ListView.builder(
-      padding: EdgeInsets.fromLTRB(20, 18, 20, AppDimensions.bottomPadding(context)),
+      padding: EdgeInsets.fromLTRB(20, 0, 20, AppDimensions.bottomPadding(context)),
       itemCount: filteredProcedures.length,
       itemBuilder: (context, index) {
         final proc = filteredProcedures[index];

@@ -52,32 +52,29 @@ class _ClientMainLayoutState extends State<ClientMainLayout> {
       },
       child: Scaffold(
         extendBody: true,
-        body: SafeArea(
-          bottom: false,
-          child: LayoutBuilder(
-            builder: (context, constraints) {
-              final double height = constraints.maxHeight;
-              // Meio termo: começa aos 180px e termina aos 60px
-              final double stopStart = (height - 180) / height;
-              final double stopEnd = (height - 60) / height;
-  
-              return ShaderMask(
-                shaderCallback: (Rect bounds) {
-                  return LinearGradient(
-                    begin: Alignment.topCenter,
-                    end: Alignment.bottomCenter,
-                    colors: const [Colors.black, Colors.transparent],
-                    stops: [stopStart, stopEnd],
-                  ).createShader(bounds);
-                },
-                blendMode: BlendMode.dstIn,
-                child: IndexedStack(
-                  index: _currentIndex,
-                  children: _screens,
-                ),
-              );
-            },
-          ),
+        body: LayoutBuilder(
+          builder: (context, constraints) {
+            final double height = constraints.maxHeight;
+            // Meio termo: começa aos 180px e termina aos 60px
+            final double stopStart = (height - 180) / height;
+            final double stopEnd = (height - 60) / height;
+
+            return ShaderMask(
+              shaderCallback: (Rect bounds) {
+                return LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                  colors: const [Colors.black, Colors.transparent],
+                  stops: [stopStart, stopEnd],
+                ).createShader(bounds);
+              },
+              blendMode: BlendMode.dstIn,
+              child: IndexedStack(
+                index: _currentIndex,
+                children: _screens,
+              ),
+            );
+          },
         ),
         bottomNavigationBar: Container(
           padding: const EdgeInsets.only(top: 16),
