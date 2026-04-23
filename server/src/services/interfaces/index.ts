@@ -1,4 +1,5 @@
 export * from './auth.service';
+export * from './configuration.service';
 export * from './document.service';
 export * from './lead.service';
 export * from './legal-process.service';
