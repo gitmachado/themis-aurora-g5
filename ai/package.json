@@ -7,7 +7,9 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "build": "tsc",
     "start": "node dist/index.js",
-    "dev": "ts-node src/index.ts"
+    "dev": "ts-node src/index.ts",
+    "test:graph": "ts-node src/test-graph.ts",
+    "index:pdf": "ts-node src/rag/indexer.ts"
   },
   "keywords": [],
   "author": "",
