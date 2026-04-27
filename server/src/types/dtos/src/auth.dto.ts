@@ -1,7 +1,9 @@
 import { UserRole } from '@enums';
 
 export interface LoginDTO {
-  whatsappNumber: string;
+  identifier?: string;
+  whatsappNumber?: string;
+  cpf?: string;
   password: string;
 }
 
