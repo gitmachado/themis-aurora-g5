@@ -69,6 +69,8 @@ const upload = multer({
  */
 router.post('/upload', authMiddleware, upload.single('file'), controller.upload);
 
+router.get('/my', authMiddleware, controller.listMyDocuments);
+
 /**
  * @openapi
  * /documents/view/{filename}:
@@ -120,6 +122,8 @@ router.get('/view/:filename', authMiddleware, controller.viewFile);
  *                 $ref: '#/components/schemas/Document'
  */
 router.get('/process/:processId', authMiddleware, controller.listByProcess);
+
+router.get('/:id', authMiddleware, controller.getById);
 
 /**
  * @openapi
