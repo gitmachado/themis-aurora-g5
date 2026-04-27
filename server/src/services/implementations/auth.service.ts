@@ -17,25 +17,34 @@ export class AuthService implements IAuthService {
   }
 
   async login(dto: LoginDTO): Promise<AuthResponseDTO> {
-    const user = await this.userRepository.findByWhatsapp(dto.whatsappNumber);
+    const rawIdentifier = dto.identifier || dto.whatsappNumber || dto.cpf || '';
+    const identifier = this.onlyDigits(rawIdentifier);
+    const candidates = identifier
+      ? await this.userRepository.findByCpfOrWhatsapp(identifier)
+      : [];
 
-    if (!user || !user.passwordHash) {
+    if (!candidates.length) {
       throw new UnauthorizedError('Credenciais inválidas');
     }
 
-    const isPasswordValid = await bcrypt.compare(dto.password, user.passwordHash);
+    for (const user of candidates) {
+      if (!user.passwordHash) {
+        continue;
+      }
 
-    if (!isPasswordValid) {
-      throw new UnauthorizedError('Credenciais inválidas');
+      const isPasswordValid = await bcrypt.compare(dto.password, user.passwordHash);
+      if (isPasswordValid) {
+        const token = this.generateToken(user.id, user.role);
+
+        return {
+          token,
+          userId: user.id,
+          role: user.role,
+        };
+      }
     }
 
-    const token = this.generateToken(user.id, user.role);
-
-    return {
-      token,
-      userId: user.id,
-      role: user.role,
-    };
+    throw new UnauthorizedError('Credenciais inválidas');
   }
 
   async register(dto: RegisterDTO): Promise<AuthResponseDTO> {
@@ -95,5 +104,9 @@ export class AuthService implements IAuthService {
       subject: userId,
       expiresIn: this.jwtExpiresIn as any,
     });
+  }
+
+  private onlyDigits(value: string): string {
+    return value.replace(/\D/g, '');
   }
 }
