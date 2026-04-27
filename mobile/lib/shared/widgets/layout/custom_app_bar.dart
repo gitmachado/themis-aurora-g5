@@ -51,7 +51,8 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
               if (showNotificationButton)
                 AppNotificationButton(
                   notificationCount: notificationCount,
-                  onTap: onNotificationTap ??
+                  onTap:
+                      onNotificationTap ??
                       () => Navigator.pushNamed(context, '/notifications'),
                 ),
               const SizedBox(width: 8),
@@ -70,7 +71,8 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
       elevation: 0,
       scrolledUnderElevation: 0,
       iconTheme: const IconThemeData(color: AppColors.primary, size: 24),
-      bottom: bottom ??
+      bottom:
+          bottom ??
           (showDivider
               ? PreferredSize(
                   preferredSize: const Size.fromHeight(1),
@@ -85,5 +87,7 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
 
   @override
   Size get preferredSize => Size.fromHeight(
-      kToolbarHeight + (bottom?.preferredSize.height ?? (showDivider ? 1.0 : 0.0)));
+    kToolbarHeight +
+        (bottom?.preferredSize.height ?? (showDivider ? 1.0 : 0.0)),
+  );
 }
