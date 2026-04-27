@@ -3,6 +3,7 @@ import { ILeadRepository } from '../../repositories/interfaces/lead.repository';
 import { IUserRepository } from '../../repositories/interfaces/user.repository';
 import { IAuthService } from '../interfaces/auth.service';
 import { INotificationService } from '../interfaces/notification.service';
+import { ILegalProcessService } from '../interfaces/legal-process.service';
 import type { Lead, User } from '@models';
 import type { CreateLeadDTO, ConvertLeadDTO } from '@dtos';
 import { NotFoundError, ConflictError } from './errors';
@@ -14,7 +15,8 @@ export class LeadService implements ILeadService {
     private readonly leadRepository: ILeadRepository,
     private readonly userRepository: IUserRepository,
     private readonly authService: IAuthService,
-    private readonly notificationService: INotificationService
+    private readonly notificationService: INotificationService,
+    private readonly legalProcessService: ILegalProcessService
   ) {}
 
   async createFromWhatsapp(dto: CreateLeadDTO): Promise<Lead> {
@@ -80,7 +82,18 @@ export class LeadService implements ILeadService {
     });
 
     // Update lead status
-    await this.leadRepository.update(lead.id, { status: 'CONVERTED' });
+    await this.leadRepository.update(lead.id, {
+      status: 'CONVERTED',
+      convertedUserId: user.id,
+    });
+
+    await this.legalProcessService.create({
+      clientId: user.id,
+      lawyerId: dto.lawyerId,
+      title: `${lead.caseType || 'Civil'} - ${lead.name || 'Cliente'}`,
+      description: lead.caseDescription || '',
+      caseType: lead.caseType || 'Civil',
+    });
 
     // Notify user with temp password (simulating WhatsApp/Email)
     await this.notificationService.sendPush(
@@ -90,6 +103,18 @@ export class LeadService implements ILeadService {
     );
 
     return user;
+  }
+
+  async discard(id: string, reason?: string): Promise<Lead> {
+    const lead = await this.leadRepository.findById(id);
+    if (!lead) {
+      throw new NotFoundError('Lead não encontrado');
+    }
+
+    return this.leadRepository.update(id, {
+      status: 'DISCARDED',
+      discardReason: reason || null,
+    });
   }
 
   async getPending(): Promise<Lead[]> {
