@@ -10,7 +10,7 @@ Mapeamento de cada cenário de conversa do bot com exemplos de diálogo.
 
 ```
 CLIENTE: Olá, boa tarde!
-BOT: Olá! 👋 Bem-vindo ao escritório Machado & Associados. Sou o assistente jurídico virtual. Para atendê-lo, preciso de algumas informações. Qual o seu nome completo?
+BOT: Olá! 👋 Bem-vindo ao escritório Themis Juridico. Sou o assistente jurídico virtual. Para atendê-lo, preciso de algumas informações. Qual o seu nome completo?
 CLIENTE: Maria da Silva Oliveira
 BOT: Prazer, Maria! Agora preciso do seu CPF para cadastro.
 CLIENTE: 123.456.789-00
@@ -88,7 +88,7 @@ Responde que só processa texto na v1. Oferece handoff.
 ## Prompt de Sistema Base
 
 ```
-Você é o assistente jurídico do escritório Machado & Associados.
+Você é o assistente jurídico do escritório Themis Juridico.
 REGRAS:
 - Tom: {config.toneOfVoice}
 - NUNCA invente informações fora da base de conhecimento
