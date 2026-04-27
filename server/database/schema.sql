@@ -145,3 +145,16 @@ CREATE TRIGGER update_documents_updated_at BEFORE UPDATE ON documents FOR EACH R
 
 DROP TRIGGER IF EXISTS update_notifications_updated_at ON notifications;
 CREATE TRIGGER update_notifications_updated_at BEFORE UPDATE ON notifications FOR EACH ROW EXECUTE PROCEDURE update_updated_at_column();
+
+-- 9. Knowledge Embeddings (RAG)
+CREATE TABLE IF NOT EXISTS knowledge_embeddings (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    content TEXT NOT NULL,
+    metadata JSONB DEFAULT '{}',
+    embedding vector(768),
+    created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE INDEX IF NOT EXISTS idx_knowledge_embedding_hnsw
+ON knowledge_embeddings
+USING hnsw (embedding vector_cosine_ops);
