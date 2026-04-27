@@ -1,30 +1,42 @@
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
-import '../../../../../../shared/constants/app_colors.dart';
-import '../../../../../../shared/constants/app_text_styles.dart';
-import '../../../../../../shared/constants/app_dimensions.dart';
-import '../../../../../../shared/widgets/layout/custom_app_bar.dart';
-import '../../../../../../shared/widgets/cards/file_progress_tile.dart';
-import '../../../../../../shared/widgets/app_app_bar_actions.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:url_launcher/url_launcher.dart';
 
-class ClientFilesScreen extends StatefulWidget {
+import '../../../../../../features/procedures/domain/entities/legal_process.dart';
+import '../../../../../../features/procedures/domain/entities/process_document.dart';
+import '../../../../../../features/procedures/presentation/providers/procedure_providers.dart';
+import '../../../../../../shared/constants/app_colors.dart';
+import '../../../../../../shared/constants/app_dimensions.dart';
+import '../../../../../../shared/constants/app_text_styles.dart';
+import '../../../../../../shared/network/api_client.dart';
+import '../../../../../../shared/utils/api_formatters.dart';
+import '../../../../../../shared/widgets/app_app_bar_actions.dart';
+import '../../../../../../shared/widgets/layout/custom_app_bar.dart';
+import '../../../../../../shared/widgets/layout/loading_skeleton.dart';
+
+class ClientFilesScreen extends ConsumerStatefulWidget {
   const ClientFilesScreen({super.key});
 
   @override
-  State<ClientFilesScreen> createState() => _ClientFilesScreenState();
+  ConsumerState<ClientFilesScreen> createState() => _ClientFilesScreenState();
 }
 
-class _ClientFilesScreenState extends State<ClientFilesScreen> {
+class _ClientFilesScreenState extends ConsumerState<ClientFilesScreen> {
   String _selectedFilter = 'Todos';
-  bool _isGridView = true;
+  bool _isUploading = false;
 
   @override
   Widget build(BuildContext context) {
+    final documents = ref.watch(myDocumentsProvider);
+    final procedures = ref.watch(myProceduresProvider).valueOrNull ?? const [];
+
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: CustomAppBar(
         title: 'Arquivos',
         showBackButton: false,
-        actions: [AppAppBarActions(showChat: false, notificationCount: 2)],
+        actions: [AppAppBarActions(showChat: false)],
         showDivider: false,
       ),
       body: Column(
@@ -38,21 +50,14 @@ class _ClientFilesScreenState extends State<ClientFilesScreen> {
                 _buildSecurityBanner(),
                 Padding(
                   padding: const EdgeInsets.fromLTRB(20, 16, 20, 16),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Text(
                         'Seus arquivos',
                         style: AppTextStyles.h2.copyWith(fontSize: 18),
                       ),
-                      const SizedBox(height: 16),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          _buildFilterDropdown(),
-                          _buildViewToggleOptions(),
-                        ],
-                      ),
+                      _buildFilterDropdown(),
                     ],
                   ),
                 ),
@@ -64,15 +69,34 @@ class _ClientFilesScreenState extends State<ClientFilesScreen> {
             ),
           ),
           Expanded(
-            child: _buildFileList(),
+            child: documents.when(
+              data: (items) => _buildFileList(items),
+              loading: _buildLoadingList,
+              error: (error, _) => _buildErrorState(error),
+            ),
           ),
         ],
       ),
       floatingActionButton: FloatingActionButton(
         heroTag: 'client_file_fab',
-        onPressed: () => _showUploadOptions(context),
-        backgroundColor: AppColors.primary,
-        child: const Icon(Icons.add_rounded, color: AppColors.white, size: 32),
+        onPressed: _isUploading ? null : () => _pickAndUpload(procedures),
+        backgroundColor: _isUploading
+            ? AppColors.textCaption
+            : AppColors.primary,
+        child: _isUploading
+            ? const SizedBox(
+                width: 20,
+                height: 20,
+                child: CircularProgressIndicator(
+                  strokeWidth: 2,
+                  color: AppColors.white,
+                ),
+              )
+            : const Icon(
+                Icons.upload_file_rounded,
+                color: AppColors.white,
+                size: 28,
+              ),
       ),
     );
   }
@@ -93,7 +117,11 @@ class _ClientFilesScreenState extends State<ClientFilesScreen> {
               color: AppColors.white.withValues(alpha: 0.1),
               shape: BoxShape.circle,
             ),
-            child: const Icon(Icons.verified_user_outlined, color: Colors.white, size: 24),
+            child: const Icon(
+              Icons.verified_user_outlined,
+              color: Colors.white,
+              size: 24,
+            ),
           ),
           const SizedBox(width: 16),
           Expanded(
@@ -102,11 +130,18 @@ class _ClientFilesScreenState extends State<ClientFilesScreen> {
               children: [
                 const Text(
                   'Segurança garantida',
-                  style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 15),
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 15,
+                  ),
                 ),
                 Text(
-                  'Dica: Os envios são criptografados',
-                  style: TextStyle(color: Colors.white.withValues(alpha: 0.8), fontSize: 12),
+                  'Envios e visualizações passam pelo backend autenticado.',
+                  style: TextStyle(
+                    color: Colors.white.withValues(alpha: 0.8),
+                    fontSize: 12,
+                  ),
                 ),
               ],
             ),
@@ -127,226 +162,221 @@ class _ClientFilesScreenState extends State<ClientFilesScreen> {
       child: DropdownButtonHideUnderline(
         child: DropdownButton<String>(
           value: _selectedFilter,
-          icon: const Icon(Icons.keyboard_arrow_down_rounded, color: AppColors.textCaption, size: 20),
-          style: AppTextStyles.body.copyWith(fontSize: 13, fontWeight: FontWeight.w500),
-          onChanged: (String? newValue) {
-            if (newValue != null) {
-              setState(() => _selectedFilter = newValue);
-            }
+          icon: const Icon(
+            Icons.keyboard_arrow_down_rounded,
+            color: AppColors.textCaption,
+            size: 20,
+          ),
+          style: AppTextStyles.body.copyWith(
+            fontSize: 13,
+            fontWeight: FontWeight.w500,
+          ),
+          onChanged: (value) {
+            if (value != null) setState(() => _selectedFilter = value);
           },
-          items: <String>['Todos', 'Enviado', 'Aprovado', 'Em análise']
-              .map<DropdownMenuItem<String>>((String value) {
-            return DropdownMenuItem<String>(
-              value: value,
-              child: Text('Filtro: $value'),
-            );
-          }).toList(),
+          items: const ['Todos', 'PDF', 'Imagem', 'Outros']
+              .map(
+                (value) =>
+                    DropdownMenuItem<String>(value: value, child: Text(value)),
+              )
+              .toList(),
         ),
       ),
     );
   }
 
-  Widget _buildViewToggleOptions() {
-    return Container(
-      decoration: BoxDecoration(
-        color: AppColors.white,
-        borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: AppColors.divider.withValues(alpha: 0.7)),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          IconButton(
-            padding: const EdgeInsets.all(8),
-            constraints: const BoxConstraints(),
-            icon: Icon(
-              Icons.grid_view_outlined,
-              color: _isGridView ? AppColors.primary : AppColors.textCaption,
-              size: 18,
-            ),
-            onPressed: () => setState(() => _isGridView = true),
+  Widget _buildFileList(List<ProcessDocument> documents) {
+    final filtered = documents.where(_matchesFilter).toList();
+
+    if (filtered.isEmpty) {
+      return RefreshIndicator(
+        onRefresh: () => ref.refresh(myDocumentsProvider.future),
+        child: ListView(
+          physics: const AlwaysScrollableScrollPhysics(),
+          padding: EdgeInsets.fromLTRB(
+            24,
+            64,
+            24,
+            AppDimensions.bottomPadding(context),
           ),
-          Container(width: 1, height: 16, color: AppColors.divider),
-          IconButton(
-            padding: const EdgeInsets.all(8),
-            constraints: const BoxConstraints(),
-            icon: Icon(
-              Icons.format_list_bulleted_rounded,
-              color: !_isGridView ? AppColors.primary : AppColors.textCaption,
-              size: 18,
+          children: [
+            Icon(
+              Icons.folder_open_rounded,
+              size: 64,
+              color: AppColors.textCaption.withValues(alpha: 0.4),
             ),
-            onPressed: () => setState(() => _isGridView = false),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildFileList() {
-    final allFiles = [
-      {'title': 'RG_Frente_Verso.pdf', 'status': 'Enviado', 'type': 'pdf', 'size': '1.2 MB'},
-      {'title': 'Comprovante_Residencia.jpg', 'status': 'Aprovado', 'type': 'image', 'size': '3.4 MB'},
-      {'title': 'Certidao_Nascimento.pdf', 'status': 'Solicitado', 'type': 'pdf', 'size': '2.1 MB'},
-    ];
-
-    final filteredFiles = _selectedFilter == 'Todos'
-        ? allFiles
-        : allFiles.where((doc) => doc['status'] == _selectedFilter).toList();
-
-    if (_isGridView) {
-      return GridView.builder(
-        padding: EdgeInsets.fromLTRB(20, 18, 20, AppDimensions.bottomPadding(context)),
-        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-          crossAxisCount: 2,
-          crossAxisSpacing: 16,
-          mainAxisSpacing: 16,
-          childAspectRatio: 0.85,
+            const SizedBox(height: 16),
+            Text(
+              'Nenhum arquivo encontrado',
+              textAlign: TextAlign.center,
+              style: AppTextStyles.h2.copyWith(color: AppColors.textCaption),
+            ),
+          ],
         ),
-        itemCount: filteredFiles.length,
-        itemBuilder: (context, index) {
-          final file = filteredFiles[index];
-          final isPdf = file['type'] == 'pdf';
-          final iconColor = isPdf ? Colors.orange : AppColors.primary;
-          final bgColor = isPdf ? const Color(0xFFFFF7E6) : const Color(0xFFF0F4FF);
-          final statusColor = file['status'] == 'Aprovado' ? AppColors.success : AppColors.primary;
-
-          return Container(
-            decoration: BoxDecoration(
-              color: AppColors.white,
-              borderRadius: BorderRadius.circular(16),
-              border: Border.all(color: AppColors.divider.withValues(alpha: 0.7)),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withValues(alpha: 0.05),
-                  blurRadius: 10,
-                  offset: const Offset(0, 4),
-                ),
-              ],
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Expanded(
-                  child: Container(
-                    width: double.infinity,
-                    decoration: BoxDecoration(
-                      color: bgColor,
-                      borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
-                    ),
-                    child: Center(
-                      child: Icon(
-                        isPdf ? Icons.description_outlined : Icons.image_outlined,
-                        color: iconColor,
-                        size: 32,
-                      ),
-                    ),
-                  ),
-                ),
-                Padding(
-                  padding: const EdgeInsets.all(12),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        file['title']!,
-                        style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        '${file['size']} • 08/04/26',
-                        style: AppTextStyles.caption.copyWith(fontSize: 10),
-                      ),
-                      const SizedBox(height: 8),
-                      Text(
-                        file['status']!,
-                        style: TextStyle(
-                          color: statusColor,
-                          fontWeight: FontWeight.bold,
-                          fontSize: 11,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-          );
-        },
       );
     }
 
-    return ListView.separated(
-      padding: EdgeInsets.fromLTRB(20, 18, 20, AppDimensions.bottomPadding(context)),
-      itemCount: filteredFiles.length,
-      separatorBuilder: (_, _) => const SizedBox(height: 12),
-      itemBuilder: (context, index) {
-        final file = filteredFiles[index];
-        final isPdf = file['type'] == 'pdf';
-        final iconColor = isPdf ? Colors.orange : AppColors.primary;
-        final statusColor = file['status'] == 'Aprovado' ? AppColors.success : AppColors.primary;
-
-        return FileProgressTile(
-          title: file['title']!,
-          status: '${file['status']!} • ${file['size']} • 08/04/2026',
-          statusColor: statusColor,
-          iconColor: iconColor,
-          icon: isPdf ? Icons.description_outlined : Icons.image_outlined,
-        );
-      },
+    return RefreshIndicator(
+      onRefresh: () => ref.refresh(myDocumentsProvider.future),
+      child: ListView.separated(
+        padding: EdgeInsets.fromLTRB(
+          20,
+          18,
+          20,
+          AppDimensions.bottomPadding(context),
+        ),
+        itemCount: filtered.length,
+        separatorBuilder: (_, _) => const SizedBox(height: 12),
+        itemBuilder: (context, index) => _buildDocumentTile(filtered[index]),
+      ),
     );
   }
 
-  void _showUploadOptions(BuildContext context) {
-    showModalBottomSheet<void>(
-      context: context,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+  Widget _buildDocumentTile(ProcessDocument document) {
+    final isPdf = _documentType(document) == 'PDF';
+    final iconColor = isPdf ? AppColors.error : AppColors.primary;
+
+    return Container(
+      decoration: BoxDecoration(
+        color: AppColors.white,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: AppColors.divider.withValues(alpha: 0.7)),
       ),
+      child: ListTile(
+        contentPadding: const EdgeInsets.all(16),
+        leading: Container(
+          padding: const EdgeInsets.all(10),
+          decoration: BoxDecoration(
+            color: iconColor.withValues(alpha: 0.1),
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: Icon(
+            isPdf ? Icons.picture_as_pdf_rounded : Icons.description_outlined,
+            color: iconColor,
+          ),
+        ),
+        title: Text(
+          document.fileName,
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+        ),
+        subtitle: Text(
+          '${formatFileSize(document.sizeBytes)} • ${formatDateLabel(document.createdAt)}',
+          style: AppTextStyles.caption.copyWith(fontSize: 12),
+        ),
+        trailing: const Icon(
+          Icons.open_in_new_rounded,
+          color: AppColors.textCaption,
+        ),
+        onTap: () => _openDocument(document),
+      ),
+    );
+  }
+
+  Widget _buildLoadingList() {
+    return ListView.separated(
+      padding: const EdgeInsets.all(20),
+      itemCount: 5,
+      separatorBuilder: (_, _) => const SizedBox(height: 12),
+      itemBuilder: (_, _) =>
+          const LoadingSkeleton(height: 78, borderRadius: 16),
+    );
+  }
+
+  Widget _buildErrorState(Object error) {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(24),
+        child: Text(
+          error.toString(),
+          textAlign: TextAlign.center,
+          style: AppTextStyles.body.copyWith(color: AppColors.error),
+        ),
+      ),
+    );
+  }
+
+  bool _matchesFilter(ProcessDocument document) {
+    if (_selectedFilter == 'Todos') return true;
+    return _documentType(document) == _selectedFilter;
+  }
+
+  String _documentType(ProcessDocument document) {
+    final source = '${document.mimeType ?? ''} ${document.fileName}'
+        .toLowerCase();
+    if (source.contains('pdf')) return 'PDF';
+    if (source.contains('image') ||
+        source.endsWith('.png') ||
+        source.endsWith('.jpg') ||
+        source.endsWith('.jpeg')) {
+      return 'Imagem';
+    }
+    return 'Outros';
+  }
+
+  Future<void> _pickAndUpload(List<LegalProcess> procedures) async {
+    if (procedures.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text(
+            'Voce precisa ter um trâmite ativo para enviar arquivo.',
+          ),
+        ),
+      );
+      return;
+    }
+
+    final process = procedures.length == 1
+        ? procedures.first
+        : await _selectProcess(procedures);
+    if (process == null) return;
+
+    final result = await FilePicker.pickFiles(withData: false);
+    final file = result?.files.single;
+    if (file == null || file.path == null) return;
+
+    setState(() => _isUploading = true);
+    try {
+      await ref
+          .read(procedureActionsProvider)
+          .uploadDocument(
+            processId: process.id,
+            filePath: file.path!,
+            fileName: file.name,
+          );
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Arquivo enviado com sucesso.')),
+      );
+    } catch (error) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(error.toString())));
+    } finally {
+      if (mounted) setState(() => _isUploading = false);
+    }
+  }
+
+  Future<LegalProcess?> _selectProcess(List<LegalProcess> procedures) {
+    return showModalBottomSheet<LegalProcess>(
+      context: context,
+      showDragHandle: true,
       builder: (context) {
-        return Padding(
-          padding: const EdgeInsets.all(24),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
+        return SafeArea(
+          child: ListView(
+            shrinkWrap: true,
+            padding: const EdgeInsets.fromLTRB(20, 0, 20, 24),
             children: [
-              Center(
-                child: Container(
-                  width: 40,
-                  height: 4,
-                  decoration: BoxDecoration(
-                    color: AppColors.divider,
-                    borderRadius: BorderRadius.circular(2),
-                  ),
-                ),
-              ),
-              const SizedBox(height: 24),
-              Text('Enviar arquivo', style: AppTextStyles.h2.copyWith(fontSize: 18)),
-              const SizedBox(height: 24),
-              _buildUploadOption(Icons.camera_alt_outlined, 'Tirar Foto'),
+              Text('Escolha o trâmite', style: AppTextStyles.h2),
               const SizedBox(height: 12),
-              _buildUploadOption(Icons.image_outlined, 'Galeria de Fotos'),
-              const SizedBox(height: 12),
-              _buildUploadOption(Icons.description_outlined, 'Arquivos do Dispositivo'),
-              const SizedBox(height: 24),
-              SizedBox(
-                width: double.infinity,
-                child: TextButton(
-                  onPressed: () => Navigator.pop(context),
-                  style: TextButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(vertical: 16),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(16),
-                      side: BorderSide(color: AppColors.divider.withValues(alpha: 0.5)),
-                    ),
-                  ),
-                  child: Text(
-                    'Cancelar',
-                    style: AppTextStyles.body.copyWith(fontWeight: FontWeight.w600),
-                  ),
+              for (final process in procedures)
+                ListTile(
+                  title: Text(process.title),
+                  subtitle: Text(process.processNumber ?? process.id),
+                  onTap: () => Navigator.pop(context, process),
                 ),
-              ),
             ],
           ),
         );
@@ -354,16 +384,20 @@ class _ClientFilesScreenState extends State<ClientFilesScreen> {
     );
   }
 
-  Widget _buildUploadOption(IconData icon, String label) {
-    return ListTile(
-      leading: Icon(icon, color: AppColors.primary),
-      title: Text(label, style: AppTextStyles.body.copyWith(fontWeight: FontWeight.w600)),
-      onTap: () => Navigator.pop(context),
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
-        side: BorderSide(color: AppColors.divider.withValues(alpha: 0.5)),
-      ),
+  Future<void> _openDocument(ProcessDocument document) async {
+    final source = document.fileUrl.isNotEmpty
+        ? document.fileUrl
+        : document.fileName;
+    final url = ref.read(apiClientProvider).buildDocumentUrl(source);
+    final uri = Uri.parse(url);
+    if (await canLaunchUrl(uri)) {
+      await launchUrl(uri, mode: LaunchMode.externalApplication);
+      return;
+    }
+
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Nao foi possivel abrir o arquivo.')),
     );
   }
 }
-
