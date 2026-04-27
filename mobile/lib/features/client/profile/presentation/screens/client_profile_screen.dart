@@ -1,72 +1,111 @@
 import 'package:flutter/material.dart';
-import '../../../../../../shared/constants/app_colors.dart';
-import '../../../../../../shared/constants/app_text_styles.dart';
-import '../../../../../../shared/widgets/layout/custom_app_bar.dart';
-import '../../../../../../shared/widgets/cards/app_card.dart';
-import '../../../../../../shared/widgets/app_app_bar_actions.dart';
-import '../../../../../../shared/constants/app_dimensions.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-class ClientProfileScreen extends StatefulWidget {
+import '../../../../../../features/auth/domain/entities/account.dart';
+import '../../../../../../features/auth/presentation/providers/auth_providers.dart';
+import '../../../../../../shared/constants/app_colors.dart';
+import '../../../../../../shared/constants/app_dimensions.dart';
+import '../../../../../../shared/constants/app_text_styles.dart';
+import '../../../../../../shared/widgets/app_app_bar_actions.dart';
+import '../../../../../../shared/widgets/cards/app_card.dart';
+import '../../../../../../shared/widgets/layout/custom_app_bar.dart';
+import '../../../../../../shared/widgets/layout/loading_skeleton.dart';
+
+class ClientProfileScreen extends ConsumerWidget {
   const ClientProfileScreen({super.key});
 
   @override
-  State<ClientProfileScreen> createState() => _ClientProfileScreenState();
-}
+  Widget build(BuildContext context, WidgetRef ref) {
+    final account = ref.watch(currentAccountProvider);
 
-class _ClientProfileScreenState extends State<ClientProfileScreen> {
-  @override
-  Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: CustomAppBar(
         title: 'Perfil',
         showBackButton: false,
-        actions: [AppAppBarActions(showChat: false, notificationCount: 2)],
+        actions: [AppAppBarActions(showChat: false)],
       ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
-        child: Column(
-          children: [
-            _buildProfileHeader(),
-            const SizedBox(height: 24),
-            _buildSection(
-              title: 'Dados Pessoais',
-              children: [
-                _buildInfoTile(Icons.person_outline_rounded, 'João Silva', 'Nome Completo'),
-                _buildInfoTile(Icons.fingerprint_rounded, '123.456.789-00', 'CPF'),
-                _buildInfoTile(Icons.email_outlined, 'joao.silva@email.com', 'E-mail'),
-                _buildInfoTile(Icons.phone_android_rounded, '(11) 99999-9999', 'WhatsApp'),
-              ],
+      body: account.when(
+        data: (account) => _buildContent(context, ref, account),
+        loading: () => const Padding(
+          padding: EdgeInsets.all(24),
+          child: LoadingSkeleton(height: 260, borderRadius: 16),
+        ),
+        error: (error, _) => Center(
+          child: Padding(
+            padding: const EdgeInsets.all(24),
+            child: Text(
+              error.toString(),
+              textAlign: TextAlign.center,
+              style: AppTextStyles.body.copyWith(color: AppColors.error),
             ),
-            const SizedBox(height: 20),
-            _buildSection(
-              title: 'Configurações',
-              children: [
-                _buildActionTile(Icons.notifications_none_rounded, 'Notificações', () {}),
-                _buildActionTile(Icons.lock_outline_rounded, 'Segurança e Senha', () {}),
-              ],
-            ),
-            const SizedBox(height: 20),
-            _buildSection(
-              title: 'Conta',
-              children: [
-                _buildActionTile(
-                  Icons.logout_rounded,
-                  'Sair do Aplicativo',
-                  () => _showLogoutDialog(context),
-                  isDestructive: true,
-                ),
-              ],
-            ),
-            SizedBox(height: AppDimensions.bottomPadding(context)),
-
-          ],
+          ),
         ),
       ),
     );
   }
 
-  Widget _buildProfileHeader() {
+  Widget _buildContent(BuildContext context, WidgetRef ref, Account account) {
+    return SingleChildScrollView(
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
+      child: Column(
+        children: [
+          _buildProfileHeader(account),
+          const SizedBox(height: 24),
+          _buildSection(
+            title: 'Dados Pessoais',
+            children: [
+              _buildInfoTile(
+                Icons.person_outline_rounded,
+                account.name,
+                'Nome Completo',
+              ),
+              _buildInfoTile(
+                Icons.fingerprint_rounded,
+                account.cpf?.isNotEmpty == true
+                    ? account.cpf!
+                    : 'Nao informado',
+                'CPF',
+              ),
+              _buildInfoTile(
+                Icons.email_outlined,
+                account.email?.isNotEmpty == true
+                    ? account.email!
+                    : 'Nao informado',
+                'E-mail',
+              ),
+              _buildInfoTile(
+                Icons.phone_android_rounded,
+                account.whatsappNumber.isNotEmpty
+                    ? account.whatsappNumber
+                    : 'Nao informado',
+                'WhatsApp',
+              ),
+            ],
+          ),
+          const SizedBox(height: 20),
+          _buildPreferenceSection(context, ref, account),
+          const SizedBox(height: 20),
+          _buildSection(
+            title: 'Conta',
+            children: [
+              _buildActionTile(
+                Icons.logout_rounded,
+                'Sair do Aplicativo',
+                () => _showLogoutDialog(context, ref),
+                isDestructive: true,
+              ),
+            ],
+          ),
+          SizedBox(height: AppDimensions.bottomPadding(context)),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildProfileHeader(Account account) {
+    final initial = account.name.isEmpty ? '?' : account.name[0].toUpperCase();
+
     return AppCard(
       padding: EdgeInsets.zero,
       child: Column(
@@ -87,24 +126,31 @@ class _ClientProfileScreenState extends State<ClientProfileScreen> {
                 ),
               ),
               Positioned(
-                top: 40, // Height(80) - Radius(40) = 40 to center avatar on line
+                top: 40,
                 child: Container(
                   padding: const EdgeInsets.all(4),
                   decoration: const BoxDecoration(
                     color: AppColors.white,
                     shape: BoxShape.circle,
                   ),
-                  child: const CircleAvatar(
+                  child: CircleAvatar(
                     radius: 40,
                     backgroundColor: AppColors.primary,
-                    backgroundImage: NetworkImage('https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?q=80&w=256&h=256&auto=format&fit=crop'),
+                    child: Text(
+                      initial,
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 28,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
                   ),
                 ),
               ),
             ],
           ),
-          const SizedBox(height: 52), // Space for the floating part of avatar (40) + margin
-          const Text('João Silva', style: AppTextStyles.h1),
+          const SizedBox(height: 52),
+          Text(account.name, style: AppTextStyles.h1),
           const SizedBox(height: 4),
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
@@ -113,7 +159,7 @@ class _ClientProfileScreenState extends State<ClientProfileScreen> {
               borderRadius: BorderRadius.circular(20),
             ),
             child: Text(
-              'Cliente Premium',
+              'Conta de cliente',
               style: AppTextStyles.caption.copyWith(
                 color: AppColors.primary,
                 fontWeight: FontWeight.bold,
@@ -126,7 +172,42 @@ class _ClientProfileScreenState extends State<ClientProfileScreen> {
     );
   }
 
-  Widget _buildSection({required String title, required List<Widget> children}) {
+  Widget _buildPreferenceSection(
+    BuildContext context,
+    WidgetRef ref,
+    Account account,
+  ) {
+    final preferences = account.notificationPreferences;
+
+    return _buildSection(
+      title: 'Notificações',
+      children: [
+        _buildPreferenceTile(
+          title: 'Atualizações de trâmite',
+          value: preferences['processUpdates'] ?? true,
+          onChanged: (value) =>
+              _updatePreference(context, ref, account, 'processUpdates', value),
+        ),
+        _buildPreferenceTile(
+          title: 'Arquivos e documentos',
+          value: preferences['documents'] ?? true,
+          onChanged: (value) =>
+              _updatePreference(context, ref, account, 'documents', value),
+        ),
+        _buildPreferenceTile(
+          title: 'Mensagens espelhadas',
+          value: preferences['messages'] ?? true,
+          onChanged: (value) =>
+              _updatePreference(context, ref, account, 'messages', value),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildSection({
+    required String title,
+    required List<Widget> children,
+  }) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -162,20 +243,52 @@ class _ClientProfileScreenState extends State<ClientProfileScreen> {
         ),
         child: Icon(icon, color: AppColors.primary, size: 20),
       ),
-      title: Text(label, style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 14)),
-      subtitle: Text(subtitle, style: AppTextStyles.caption.copyWith(fontSize: 11)),
+      title: Text(
+        label,
+        style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 14),
+      ),
+      subtitle: Text(
+        subtitle,
+        style: AppTextStyles.caption.copyWith(fontSize: 11),
+      ),
     );
   }
 
-  Widget _buildActionTile(IconData icon, String label, VoidCallback onTap, {bool isDestructive = false}) {
+  Widget _buildPreferenceTile({
+    required String title,
+    required bool value,
+    required ValueChanged<bool> onChanged,
+  }) {
+    return SwitchListTile(
+      value: value,
+      onChanged: onChanged,
+      title: Text(
+        title,
+        style: const TextStyle(fontWeight: FontWeight.w500, fontSize: 14),
+      ),
+      activeThumbColor: AppColors.primary,
+    );
+  }
+
+  Widget _buildActionTile(
+    IconData icon,
+    String label,
+    VoidCallback onTap, {
+    bool isDestructive = false,
+  }) {
     return ListTile(
       leading: Container(
         padding: const EdgeInsets.all(8),
         decoration: BoxDecoration(
-          color: (isDestructive ? AppColors.error : AppColors.primary).withValues(alpha: 0.05),
+          color: (isDestructive ? AppColors.error : AppColors.primary)
+              .withValues(alpha: 0.05),
           borderRadius: BorderRadius.circular(10),
         ),
-        child: Icon(icon, color: isDestructive ? AppColors.error : AppColors.primary, size: 20),
+        child: Icon(
+          icon,
+          color: isDestructive ? AppColors.error : AppColors.primary,
+          size: 20,
+        ),
       ),
       title: Text(
         label,
@@ -185,36 +298,70 @@ class _ClientProfileScreenState extends State<ClientProfileScreen> {
           color: isDestructive ? AppColors.error : AppColors.textPrimary,
         ),
       ),
-      trailing: const Icon(Icons.chevron_right_rounded, size: 20, color: AppColors.textCaption),
+      trailing: const Icon(
+        Icons.chevron_right_rounded,
+        size: 20,
+        color: AppColors.textCaption,
+      ),
       onTap: onTap,
     );
   }
 
-  void _showLogoutDialog(BuildContext context) {
-    showDialog(
+  Future<void> _updatePreference(
+    BuildContext context,
+    WidgetRef ref,
+    Account account,
+    String key,
+    bool value,
+  ) async {
+    final updated = Map<String, bool>.from(account.notificationPreferences)
+      ..[key] = value;
+
+    try {
+      await ref
+          .read(accountActionsProvider)
+          .updateNotificationPreferences(updated);
+    } catch (error) {
+      if (!context.mounted) return;
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(error.toString())));
+    }
+  }
+
+  void _showLogoutDialog(BuildContext context, WidgetRef ref) {
+    showDialog<void>(
       context: context,
-      builder: (context) => AlertDialog(
+      builder: (dialogContext) => AlertDialog(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         title: const Text('Sair da Conta'),
         content: const Text('Tem certeza que deseja sair do aplicativo?'),
         actions: [
           TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Cancelar', style: TextStyle(color: AppColors.textCaption)),
+            onPressed: () => Navigator.pop(dialogContext),
+            child: const Text(
+              'Cancelar',
+              style: TextStyle(color: AppColors.textCaption),
+            ),
           ),
           TextButton(
-            onPressed: () {
-              // 1. Pop the dialog first
-              Navigator.pop(context);
-              
-              // 2. Clear stack and navigate to login
+            onPressed: () async {
+              Navigator.pop(dialogContext);
+              await ref.read(authControllerProvider.notifier).logout();
+              if (!context.mounted) return;
               Navigator.pushNamedAndRemoveUntil(
                 context,
                 '/login',
                 (route) => false,
               );
             },
-            child: const Text('Sair', style: TextStyle(color: AppColors.error, fontWeight: FontWeight.bold)),
+            child: const Text(
+              'Sair',
+              style: TextStyle(
+                color: AppColors.error,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
           ),
         ],
       ),
