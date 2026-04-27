@@ -1,6 +1,6 @@
 import { IUserRepository } from '../interfaces/user.repository';
 import type { User } from '@models';
-import { dbGet, dbRun } from '../../config/database';
+import { dbAll, dbGet, dbRun } from '../../config/database';
 
 export class UserRepository implements IUserRepository {
   private readonly userSelect = `
@@ -28,6 +28,62 @@ export class UserRepository implements IUserRepository {
     return dbGet<User>(
       `SELECT ${this.userSelect} FROM users WHERE cpf = $1`,
       [cpf]
+    );
+  }
+
+  async findByCpfOrWhatsapp(identifier: string): Promise<User[]> {
+    return dbAll<User>(
+      `SELECT ${this.userSelect}
+       FROM users
+       WHERE regexp_replace(COALESCE(cpf, ''), '\\D', '', 'g') = $1
+          OR regexp_replace(whatsapp_number, '\\D', '', 'g') = $1`,
+      [identifier]
+    );
+  }
+
+  async findClientsByLawyerId(lawyerId: string): Promise<User[]> {
+    return dbAll<User>(
+      `SELECT DISTINCT
+        users.id,
+        users.name,
+        users.whatsapp_number as "whatsappNumber",
+        users.cpf,
+        users.email,
+        users.role,
+        users.password_hash as "passwordHash",
+        users.fcm_token as "fcmToken",
+        users.notification_preferences as "notificationPreferences",
+        users.created_at as "createdAt",
+        users.updated_at as "updatedAt"
+       FROM users
+       INNER JOIN legal_processes ON legal_processes.client_id = users.id
+       WHERE legal_processes.lawyer_id = $1
+         AND users.role = 'CLIENT'
+       ORDER BY users.name ASC`,
+      [lawyerId]
+    );
+  }
+
+  async findClientByLawyerId(lawyerId: string, clientId: string): Promise<User | null> {
+    return dbGet<User>(
+      `SELECT DISTINCT
+        users.id,
+        users.name,
+        users.whatsapp_number as "whatsappNumber",
+        users.cpf,
+        users.email,
+        users.role,
+        users.password_hash as "passwordHash",
+        users.fcm_token as "fcmToken",
+        users.notification_preferences as "notificationPreferences",
+        users.created_at as "createdAt",
+        users.updated_at as "updatedAt"
+       FROM users
+       INNER JOIN legal_processes ON legal_processes.client_id = users.id
+       WHERE legal_processes.lawyer_id = $1
+         AND users.id = $2
+         AND users.role = 'CLIENT'`,
+      [lawyerId, clientId]
     );
   }
 
