@@ -5,7 +5,9 @@ import { IDocumentService, ILegalProcessService } from '@services';
 import { LocalFileStorageProvider } from '../../utils/storage/implementations/local-storage.provider';
 import { AuthRequest } from '../../middlewares/implementations/authMiddleware';
 import { ValidationError, ForbiddenError, NotFoundError } from '../../services/implementations/errors';
-import { Document } from '@models';
+import { Document, User } from '@models';
+
+type RequestUser = Pick<User, 'id' | 'role'>;
 
 export class DocumentController {
   constructor(
@@ -20,42 +22,64 @@ export class DocumentController {
     next: NextFunction
   ) => {
     try {
-      if (!req.file) {
+      const file = (req as any).file;
+      if (!file) {
         throw new ValidationError('Nenhum arquivo enviado');
       }
 
-      const { legalProcessId } = req.body;
+      const legalProcessId = req.body.legalProcessId || (req.body as any).processId;
       if (!legalProcessId) {
         throw new ValidationError('ID do processo é obrigatório');
       }
 
       const user = req.user!;
-
-      // Ownership check: If user is a Client, check if they own the process
-      if (user.role === 'CLIENT') {
-        const process = await this.legalProcessService.getById(legalProcessId);
-        if (!process || process.clientId !== user.id) {
-          throw new ForbiddenError('Você não tem permissão para enviar documentos para este processo');
-        }
-      }
+      await this.ensureProcessAccess(legalProcessId, user);
 
       // Validação básica do serviço (tamanho e tipo)
-      this.documentService.validateFile(req.file.size, req.file.mimetype);
+      this.documentService.validateFile(file.size, file.mimetype);
 
       // Salva no storage (pasta local por enquanto)
-      const fileUrl = await this.storageProvider.saveFile(req.file);
+      const fileUrl = await this.storageProvider.saveFile(file);
 
       // Salva metadados no banco
       const document = await this.documentService.upload({
         legalProcessId,
-        fileName: req.file.originalname,
+        fileName: file.originalname,
         fileUrl,
-        mimeType: req.file.mimetype,
-        sizeBytes: req.file.size,
+        mimeType: file.mimetype,
+        sizeBytes: file.size,
         sentById: user.id,
       });
 
       return res.status(201).json(document);
+    } catch (error) {
+      next(error);
+    }
+  };
+
+  listMyDocuments: RequestHandler<any, Document[]> = async (
+    req: AuthRequest<any, Document[]>,
+    res: Response,
+    next: NextFunction
+  ) => {
+    try {
+      const user = req.user!;
+      const processes = user.role === 'CLIENT'
+        ? await this.legalProcessService.getByClientId(user.id)
+        : await this.legalProcessService.getByLawyerId(user.id);
+      const documents = (
+        await Promise.all(
+          processes.map((process) => this.documentService.getByLegalProcess(process.id))
+        )
+      ).flat();
+
+      documents.sort((a, b) => {
+        const aTime = new Date(a.createdAt).getTime();
+        const bTime = new Date(b.createdAt).getTime();
+        return bTime - aTime;
+      });
+
+      return res.status(200).json(documents);
     } catch (error) {
       next(error);
     }
@@ -70,16 +94,28 @@ export class DocumentController {
       const { processId } = req.params;
       const user = req.user!;
 
-      // Check process ownership if user is a Client
-      if (user.role === 'CLIENT') {
-        const process = await this.legalProcessService.getById(processId);
-        if (!process || process.clientId !== user.id) {
-          throw new ForbiddenError('Você não tem permissão para acessar os documentos deste processo');
-        }
-      }
+      await this.ensureProcessAccess(processId, user);
 
       const documents = await this.documentService.getByLegalProcess(processId);
       return res.status(200).json(documents);
+    } catch (error) {
+      next(error);
+    }
+  };
+
+  getById: RequestHandler<{ id: string }, Document> = async (
+    req: AuthRequest<{ id: string }, Document>,
+    res: Response,
+    next: NextFunction
+  ) => {
+    try {
+      const document = await this.documentService.getById(req.params.id);
+      if (!document) {
+        throw new NotFoundError('Documento não encontrado');
+      }
+
+      await this.ensureDocumentAccess(document, req.user!);
+      return res.status(200).json(document);
     } catch (error) {
       next(error);
     }
@@ -102,13 +138,7 @@ export class DocumentController {
         throw new NotFoundError('Registro de documento não encontrado');
       }
 
-      // 2. Se for cliente, validar se o processo pertence a ele
-      if (user.role === 'CLIENT') {
-        const process = await this.legalProcessService.getById(documents.legalProcessId);
-        if (!process || process.clientId !== user.id) {
-          throw new ForbiddenError('Acesso negado a este documento');
-        }
-      }
+      await this.ensureDocumentAccess(documents, user);
 
       // 3. Verificar arquivo físico
       const filePath = path.resolve(__dirname, '../../../../../uploads', filename);
@@ -153,4 +183,23 @@ export class DocumentController {
       next(error);
     }
   };
+
+  private async ensureDocumentAccess(document: Document, user: RequestUser): Promise<void> {
+    await this.ensureProcessAccess(document.legalProcessId, user);
+  }
+
+  private async ensureProcessAccess(processId: string, user: RequestUser): Promise<void> {
+    const process = await this.legalProcessService.getById(processId);
+    if (!process) {
+      throw new NotFoundError('Trâmite não encontrado');
+    }
+
+    if (user.role === 'CLIENT' && process.clientId !== user.id) {
+      throw new ForbiddenError('Você não tem permissão para acessar documentos deste trâmite');
+    }
+
+    if (user.role === 'LAWYER' && process.lawyerId !== user.id) {
+      throw new ForbiddenError('Você não tem permissão para acessar documentos deste trâmite');
+    }
+  }
 }
