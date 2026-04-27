@@ -7,7 +7,7 @@ ON CONFLICT (id) DO NOTHING;
 
 -- Insert Lawyer (User)
 INSERT INTO users (id, name, whatsapp_number, cpf, email, role, password_hash)
-VALUES ('a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11', 'Dr. Maurício Advogado', '5511999999999', '12345678901', 'mauricio@adv.com.br', 'LAWYER', '$2b$12$EjP.Xm6.mK.Xm6.mK.Xm6.mK.Xm6.mK.Xm6.mK.Xm6.mK.Xm6')
+VALUES ('a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11', 'Dr. Thigs Advogado', '5511999999999', '12345678901', 'mauricio@adv.com.br', 'LAWYER', '$2b$12$EjP.Xm6.mK.Xm6.mK.Xm6.mK.Xm6.mK.Xm6.mK.Xm6.mK.Xm6')
 ON CONFLICT (id) DO NOTHING;
 
 -- Insert Client (User)
