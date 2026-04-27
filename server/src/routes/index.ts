@@ -1,5 +1,7 @@
 import { Router } from 'express';
 import authRoutes from './v1/auth.routes';
+import accountRoutes from './v1/account.routes';
+import clientRoutes from './v1/client.routes';
 import leadRoutes from './v1/lead.routes';
 import processRoutes from './v1/process.routes';
 import documentRoutes from './v1/document.routes';
@@ -11,6 +13,8 @@ import botRoutes from './v1/bot.routes';
 const router = Router();
 
 router.use('/auth', authRoutes);
+router.use('/account', accountRoutes);
+router.use('/clients', clientRoutes);
 router.use('/leads', leadRoutes);
 router.use('/processes', processRoutes);
 router.use('/documents', documentRoutes);
