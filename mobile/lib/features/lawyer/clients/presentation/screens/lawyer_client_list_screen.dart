@@ -1,40 +1,37 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:url_launcher/url_launcher.dart';
+import '../../../../../../app/routes/app_router.dart';
+import '../../../../../../features/lawyer/clients/domain/entities/lawyer_client.dart';
+import '../../../../../../features/lawyer/clients/presentation/providers/lawyer_client_providers.dart';
 import '../../../../../../shared/constants/app_colors.dart';
 import '../../../../../../shared/constants/app_text_styles.dart';
 import '../../../../../../shared/widgets/layout/custom_app_bar.dart';
 import '../../../../../../shared/constants/app_dimensions.dart';
 import '../../../../../../shared/widgets/app_app_bar_actions.dart';
+import '../../../../../../shared/widgets/layout/loading_skeleton.dart';
 
-class LawyerClientListScreen extends StatefulWidget {
+class LawyerClientListScreen extends ConsumerStatefulWidget {
   const LawyerClientListScreen({super.key});
 
   @override
-  State<LawyerClientListScreen> createState() => _LawyerClientListScreenState();
+  ConsumerState<LawyerClientListScreen> createState() =>
+      _LawyerClientListScreenState();
 }
 
-class _LawyerClientListScreenState extends State<LawyerClientListScreen> {
-  final List<Map<String, String>> _clients = [
-    {'name': 'João Silva', 'cpf': '123.456.789-00', 'phone': '(11) 98888-7777'},
-    {
-      'name': 'Maria Oliveira',
-      'cpf': '987.654.321-11',
-      'phone': '(11) 97777-6666',
-    },
-    {
-      'name': 'Roberto Santos',
-      'cpf': '456.789.123-22',
-      'phone': '(11) 96666-5555',
-    },
-    {'name': 'Ana Costa', 'cpf': '321.654.987-33', 'phone': '(11) 95555-4444'},
-  ];
+class _LawyerClientListScreenState
+    extends ConsumerState<LawyerClientListScreen> {
+  String _searchQuery = '';
 
   @override
   Widget build(BuildContext context) {
+    final clients = ref.watch(myLawyerClientsProvider);
+
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: CustomAppBar(
         title: 'Clientes',
-        actions: [AppAppBarActions(chatCount: 3, notificationCount: 2)],
+        actions: [AppAppBarActions()],
         showDivider: false,
       ),
       body: Column(
@@ -43,6 +40,7 @@ class _LawyerClientListScreenState extends State<LawyerClientListScreen> {
             color: AppColors.white,
             padding: const EdgeInsets.fromLTRB(20, 0, 20, 16),
             child: TextField(
+              onChanged: (value) => setState(() => _searchQuery = value),
               decoration: InputDecoration(
                 hintText: 'Buscar por nome ou CPF...',
                 prefixIcon: const Icon(
@@ -62,38 +60,61 @@ class _LawyerClientListScreenState extends State<LawyerClientListScreen> {
                 ),
                 focusedBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
-                  borderSide: const BorderSide(color: AppColors.primary, width: 1.5),
+                  borderSide: const BorderSide(
+                    color: AppColors.primary,
+                    width: 1.5,
+                  ),
                 ),
               ),
             ),
           ),
-          Container(
-            height: 1,
-            color: AppColors.divider.withValues(alpha: 0.7),
-          ),
+          Container(height: 1, color: AppColors.divider.withValues(alpha: 0.7)),
           const SizedBox(height: 16),
           Expanded(
-            child: ListView.builder(
-              padding: EdgeInsets.fromLTRB(16, 0, 16, AppDimensions.bottomPadding(context)),
-              itemCount: _clients.length,
-              itemBuilder: (context, index) {
-                final client = _clients[index];
-                return _buildClientCard(client);
-              },
+            child: clients.when(
+              data: _buildClientList,
+              loading: _buildLoadingList,
+              error: (error, _) => _buildErrorState(error),
             ),
           ),
         ],
       ),
-      floatingActionButton: FloatingActionButton(
-        heroTag: 'lawyer_client_fab',
-        onPressed: () {},
-        backgroundColor: AppColors.primary,
-        child: const Icon(Icons.person_add_rounded, color: Colors.white),
+    );
+  }
+
+  Widget _buildClientList(List<LawyerClient> clients) {
+    final query = _searchQuery.toLowerCase();
+    final filtered = clients.where((client) {
+      return client.name.toLowerCase().contains(query) ||
+          (client.cpf ?? '').contains(_searchQuery) ||
+          client.whatsappNumber.contains(_searchQuery);
+    }).toList();
+
+    if (filtered.isEmpty) {
+      return Center(
+        child: Text(
+          'Nenhum cliente encontrado',
+          style: AppTextStyles.h2.copyWith(color: AppColors.textCaption),
+        ),
+      );
+    }
+
+    return RefreshIndicator(
+      onRefresh: () => ref.refresh(myLawyerClientsProvider.future),
+      child: ListView.builder(
+        padding: EdgeInsets.fromLTRB(
+          16,
+          0,
+          16,
+          AppDimensions.bottomPadding(context),
+        ),
+        itemCount: filtered.length,
+        itemBuilder: (context, index) => _buildClientCard(filtered[index]),
       ),
     );
   }
 
-  Widget _buildClientCard(Map<String, String> client) {
+  Widget _buildClientCard(LawyerClient client) {
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
       decoration: BoxDecoration(
@@ -107,7 +128,7 @@ class _LawyerClientListScreenState extends State<LawyerClientListScreen> {
           radius: 24,
           backgroundColor: AppColors.primary.withValues(alpha: 0.1),
           child: Text(
-            client['name']![0].toUpperCase(),
+            client.name[0].toUpperCase(),
             style: const TextStyle(
               fontWeight: FontWeight.bold,
               color: AppColors.primary,
@@ -115,7 +136,7 @@ class _LawyerClientListScreenState extends State<LawyerClientListScreen> {
           ),
         ),
         title: Text(
-          client['name']!,
+          client.name,
           style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
         ),
         subtitle: Column(
@@ -123,7 +144,9 @@ class _LawyerClientListScreenState extends State<LawyerClientListScreen> {
           children: [
             const SizedBox(height: 4),
             Text(
-              'CPF: ${client['cpf']}',
+              client.cpf == null || client.cpf!.isEmpty
+                  ? 'WhatsApp: ${client.whatsappNumber}'
+                  : 'CPF: ${client.cpf}',
               style: AppTextStyles.caption.copyWith(fontSize: 12),
             ),
           ],
@@ -131,25 +154,72 @@ class _LawyerClientListScreenState extends State<LawyerClientListScreen> {
         trailing: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            _buildActionIcon(Icons.phone_rounded, AppColors.primary, () {}),
+            _buildActionIcon(
+              Icons.phone_rounded,
+              AppColors.primary,
+              client.whatsappNumber.isEmpty
+                  ? null
+                  : () => _callClient(client.whatsappNumber),
+            ),
             const SizedBox(width: 8),
             _buildActionIcon(
               Icons.chat_bubble_rounded,
               AppColors.success,
-              () {},
+              () => Navigator.pushNamed(
+                context,
+                AppRouter.lawyerChatHandoffRoute,
+                arguments: {
+                  'clientName': client.name,
+                  'whatsappNumber': client.whatsappNumber,
+                },
+              ),
             ),
           ],
         ),
         onTap: () => Navigator.pushNamed(
           context,
           '/lawyer-client-detail',
-          arguments: {'name': client['name'], 'cpf': client['cpf']},
+          arguments: {
+            'id': client.id,
+            'name': client.name,
+            'cpf': client.cpf ?? '',
+            'phone': client.whatsappNumber,
+            'email': client.email,
+          },
         ),
       ),
     );
   }
 
-  Widget _buildActionIcon(IconData icon, Color color, VoidCallback onTap) {
+  Widget _buildLoadingList() {
+    return ListView.separated(
+      padding: EdgeInsets.fromLTRB(
+        16,
+        0,
+        16,
+        AppDimensions.bottomPadding(context),
+      ),
+      itemCount: 4,
+      separatorBuilder: (_, _) => const SizedBox(height: 12),
+      itemBuilder: (_, _) =>
+          const LoadingSkeleton(height: 82, borderRadius: 16),
+    );
+  }
+
+  Widget _buildErrorState(Object error) {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(24),
+        child: Text(
+          error.toString(),
+          textAlign: TextAlign.center,
+          style: AppTextStyles.body.copyWith(color: AppColors.error),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildActionIcon(IconData icon, Color color, VoidCallback? onTap) {
     return InkWell(
       onTap: onTap,
       borderRadius: BorderRadius.circular(24),
@@ -164,5 +234,12 @@ class _LawyerClientListScreenState extends State<LawyerClientListScreen> {
         ),
       ),
     );
+  }
+
+  Future<void> _callClient(String whatsappNumber) async {
+    final uri = Uri.parse('tel:$whatsappNumber');
+    if (await canLaunchUrl(uri)) {
+      await launchUrl(uri);
+    }
   }
 }
