@@ -33,7 +33,10 @@ class AppSearchInput extends StatelessWidget {
         onChanged: onChanged,
         decoration: InputDecoration(
           hintText: hintText,
-          hintStyle: const TextStyle(color: AppColors.textCaption, fontSize: 14),
+          hintStyle: const TextStyle(
+            color: AppColors.textCaption,
+            fontSize: 14,
+          ),
           prefixIcon: const Icon(Icons.search, color: AppColors.textCaption),
           suffixIcon: onFilterTap != null
               ? IconButton(
