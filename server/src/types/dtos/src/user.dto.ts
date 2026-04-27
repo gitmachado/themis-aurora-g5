@@ -26,6 +26,19 @@ export interface UserResponseDTO {
   id: string;
   name: string;
   whatsappNumber: string;
+  cpf: string | null;
   role: UserRole;
   email: string | null;
+}
+
+export interface AccountResponseDTO {
+  id: string;
+  name: string;
+  whatsappNumber: string;
+  cpf: string | null;
+  email: string | null;
+  role: UserRole;
+  notificationPreferences: Record<string, boolean> | null;
+  createdAt: Date;
+  updatedAt: Date;
 }
