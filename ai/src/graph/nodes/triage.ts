@@ -1,4 +1,4 @@
-import { ChatOpenAI } from "@langchain/openai";
+import { ChatGoogleGenerativeAI } from "@langchain/google-genai";
 import { AIMessage } from "@langchain/core/messages";
 import axios from "axios";
 import { OmniStateType, TriageData, TriageStep } from "../state.js";
@@ -154,8 +154,9 @@ export async function triageNode(
   }
 
   // Gera a pergunta do próximo step via LLM
-  const model = new ChatOpenAI({
-    modelName: process.env.OPENAI_MODEL || "gpt-4o-mini",
+  const model = new ChatGoogleGenerativeAI({
+    modelName: process.env.GOOGLE_MODEL || "gemini-1.5-flash",
+    apiKey: process.env.GOOGLE_API_KEY,
     temperature: 0.3,
   });
 
