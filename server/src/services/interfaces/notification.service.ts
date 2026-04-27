@@ -9,4 +9,5 @@ export interface INotificationService {
   getUnread(userId: string): Promise<Notification[]>;
   markAsRead(id: string): Promise<void>;
   markAllAsRead(userId: string): Promise<void>;
+  delete(id: string): Promise<void>;
 }
