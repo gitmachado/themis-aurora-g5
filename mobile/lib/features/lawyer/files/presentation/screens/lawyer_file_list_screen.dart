@@ -1,140 +1,157 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:url_launcher/url_launcher.dart';
+
+import '../../../../../../features/procedures/domain/entities/process_document.dart';
+import '../../../../../../features/procedures/presentation/providers/procedure_providers.dart';
 import '../../../../../../shared/constants/app_colors.dart';
 import '../../../../../../shared/constants/app_text_styles.dart';
+import '../../../../../../shared/network/api_client.dart';
+import '../../../../../../shared/utils/api_formatters.dart';
 import '../../../../../../shared/widgets/layout/custom_app_bar.dart';
+import '../../../../../../shared/widgets/layout/loading_skeleton.dart';
 
-class LawyerFileListScreen extends StatefulWidget {
+class LawyerFileListScreen extends ConsumerWidget {
   const LawyerFileListScreen({super.key});
 
   @override
-  State<LawyerFileListScreen> createState() => _LawyerFileListScreenState();
-}
+  Widget build(BuildContext context, WidgetRef ref) {
+    final documents = ref.watch(myDocumentsProvider);
 
-class _LawyerFileListScreenState extends State<LawyerFileListScreen> {
-  final List<Map<String, dynamic>> _files = [
-    {
-      'id': '1',
-      'name': 'Comprovante_Residencia.jpg',
-      'client': 'Maria Oliveira',
-      'date': '12/05/2024',
-      'status': 'Aguardando Révisao',
-      'type': 'image',
-    },
-    {
-      'id': '2',
-      'name': 'Contrato_Assinado_V2.pdf',
-      'client': 'João Silva',
-      'date': '10/05/2024',
-      'status': 'Aguardando Révisao',
-      'type': 'pdf',
-    },
-    {
-      'id': '3',
-      'name': 'RG_Frente_Verso.pdf',
-      'client': 'Roberto Santos',
-      'date': '08/05/2024',
-      'status': 'Aguardando Révisao',
-      'type': 'pdf',
-    },
-  ];
-
-  @override
-  Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.background,
-      appBar: const CustomAppBar(
-        title: 'Revisão de Arquivos',
-        showBackButton: true,
-      ),
-      body: Column(
-        children: [
-          _buildFilters(),
-          Expanded(
-            child: _buildFileList(),
-          ),
-        ],
+      appBar: const CustomAppBar(title: 'Arquivos', showBackButton: true),
+      body: documents.when(
+        data: (items) => _buildFileList(context, ref, items),
+        loading: _buildLoadingList,
+        error: (error, _) => _buildErrorState(error),
       ),
     );
   }
 
-  Widget _buildFilters() {
-    return SingleChildScrollView(
-      scrollDirection: Axis.horizontal,
-      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-      child: Row(
-        children: [
-          _buildFilterChip('Aguardando Revisão', true),
-          const SizedBox(width: 8),
-          _buildFilterChip('Aprovados', false),
-          const SizedBox(width: 8),
-          _buildFilterChip('Recusados', false),
-        ],
+  Widget _buildFileList(
+    BuildContext context,
+    WidgetRef ref,
+    List<ProcessDocument> files,
+  ) {
+    if (files.isEmpty) {
+      return Center(
+        child: Text('Nenhum arquivo encontrado.', style: AppTextStyles.body),
+      );
+    }
+
+    return RefreshIndicator(
+      onRefresh: () => ref.refresh(myDocumentsProvider.future),
+      child: ListView.builder(
+        padding: const EdgeInsets.all(20),
+        itemCount: files.length,
+        itemBuilder: (context, index) {
+          final file = files[index];
+          return _buildFileTile(context, ref, file);
+        },
       ),
     );
   }
 
-  Widget _buildFilterChip(String label, bool isSelected) {
-    return FilterChip(
-      label: Text(label),
-      selected: isSelected,
-      onSelected: (val) {},
-      backgroundColor: AppColors.white,
-      selectedColor: AppColors.primary,
-      labelStyle: TextStyle(
-        color: isSelected ? Colors.white : AppColors.textPrimary,
-        fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-        fontSize: 12,
-      ),
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(20),
-        side: BorderSide(color: isSelected ? AppColors.primary : AppColors.divider),
-      ),
-      showCheckmark: false,
+  Widget _buildFileTile(
+    BuildContext context,
+    WidgetRef ref,
+    ProcessDocument file,
+  ) {
+    final isPdf = (file.mimeType ?? file.fileName).toLowerCase().contains(
+      'pdf',
     );
-  }
 
-  Widget _buildFileList() {
-    return ListView.builder(
-      padding: const EdgeInsets.symmetric(horizontal: 20),
-      itemCount: _files.length,
-      itemBuilder: (context, index) {
-        final file = _files[index];
-        return Container(
-          margin: const EdgeInsets.only(bottom: 12),
+    return Container(
+      margin: const EdgeInsets.only(bottom: 12),
+      decoration: BoxDecoration(
+        color: AppColors.white,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: AppColors.divider),
+      ),
+      child: ListTile(
+        contentPadding: const EdgeInsets.all(16),
+        leading: Container(
+          padding: const EdgeInsets.all(10),
           decoration: BoxDecoration(
-            color: AppColors.white,
-            borderRadius: BorderRadius.circular(16),
-            border: Border.all(color: AppColors.divider),
+            color: AppColors.primary.withValues(alpha: 0.1),
+            borderRadius: BorderRadius.circular(12),
           ),
-          child: ListTile(
-            contentPadding: const EdgeInsets.all(16),
-            leading: Container(
-              padding: const EdgeInsets.all(10),
-              decoration: BoxDecoration(
-                color: AppColors.primary.withValues(alpha: 0.1),
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: Icon(
-                file['type'] == 'pdf' ? Icons.picture_as_pdf_rounded : Icons.image_rounded,
-                color: AppColors.primary,
-              ),
-            ),
-            title: Text(file['name'], style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
-            subtitle: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const SizedBox(height: 4),
-                Text('Cliente: ${file['client']}', style: AppTextStyles.caption.copyWith(fontSize: 12)),
-                const SizedBox(height: 2),
-                Text('Recebido em: ${file['date']}', style: AppTextStyles.caption.copyWith(fontSize: 11)),
-              ],
-            ),
-            trailing: const Icon(Icons.chevron_right_rounded, color: AppColors.textCaption),
-            onTap: () => Navigator.pushNamed(context, '/lawyer-file-review'),
+          child: Icon(
+            isPdf ? Icons.picture_as_pdf_rounded : Icons.image_rounded,
+            color: isPdf ? AppColors.error : AppColors.primary,
           ),
-        );
-      },
+        ),
+        title: Text(
+          file.fileName,
+          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+        ),
+        subtitle: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const SizedBox(height: 4),
+            Text(
+              'Trâmite: ${file.legalProcessId}',
+              style: AppTextStyles.caption.copyWith(fontSize: 12),
+            ),
+            const SizedBox(height: 2),
+            Text(
+              '${formatFileSize(file.sizeBytes)} • ${formatDateLabel(file.createdAt)}',
+              style: AppTextStyles.caption.copyWith(fontSize: 11),
+            ),
+          ],
+        ),
+        trailing: const Icon(
+          Icons.chevron_right_rounded,
+          color: AppColors.textCaption,
+        ),
+        onTap: () => _openDocument(context, ref, file),
+      ),
+    );
+  }
+
+  Widget _buildLoadingList() {
+    return ListView.separated(
+      padding: const EdgeInsets.all(20),
+      itemCount: 5,
+      separatorBuilder: (_, _) => const SizedBox(height: 12),
+      itemBuilder: (_, _) =>
+          const LoadingSkeleton(height: 82, borderRadius: 16),
+    );
+  }
+
+  Widget _buildErrorState(Object error) {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(24),
+        child: Text(
+          error.toString(),
+          textAlign: TextAlign.center,
+          style: AppTextStyles.body.copyWith(color: AppColors.error),
+        ),
+      ),
+    );
+  }
+
+  Future<void> _openDocument(
+    BuildContext context,
+    WidgetRef ref,
+    ProcessDocument document,
+  ) async {
+    final source = document.fileUrl.isNotEmpty
+        ? document.fileUrl
+        : document.fileName;
+    final url = ref.read(apiClientProvider).buildDocumentUrl(source);
+    final uri = Uri.parse(url);
+
+    if (await canLaunchUrl(uri)) {
+      await launchUrl(uri, mode: LaunchMode.externalApplication);
+      return;
+    }
+
+    if (!context.mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Nao foi possivel abrir o arquivo.')),
     );
   }
 }
-
