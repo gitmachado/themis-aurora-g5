@@ -6,10 +6,17 @@ import { z } from 'zod';
  *   schemas:
  *     LoginRequest:
  *       type: object
- *       required: [whatsappNumber, password]
+ *       required: [identifier, password]
  *       properties:
+ *         identifier:
+ *           type: string
+ *           description: CPF ou numero de WhatsApp
  *         whatsappNumber:
  *           type: string
+ *           deprecated: true
+ *         cpf:
+ *           type: string
+ *           deprecated: true
  *         password:
  *           type: string
  *     RegisterRequest:
@@ -28,9 +35,17 @@ import { z } from 'zod';
 
 export const loginSchema = z.object({
   body: z.object({
-    whatsappNumber: z.string().min(10),
+    identifier: z.string().min(10).optional(),
+    whatsappNumber: z.string().min(10).optional(),
+    cpf: z.string().min(10).optional(),
     password: z.string().min(6),
-  }),
+  }).refine(
+    data => data.identifier || data.whatsappNumber || data.cpf,
+    {
+      message: 'CPF ou numero de WhatsApp e obrigatorio',
+      path: ['identifier'],
+    }
+  ),
 });
 
 export const registerSchema = z.object({
