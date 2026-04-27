@@ -43,6 +43,14 @@ export class UserService implements IUserService {
     return this.userRepository.findByWhatsapp(whatsapp);
   }
 
+  async getClientsByLawyerId(lawyerId: string): Promise<User[]> {
+    return this.userRepository.findClientsByLawyerId(lawyerId);
+  }
+
+  async getClientByLawyerId(lawyerId: string, clientId: string): Promise<User | null> {
+    return this.userRepository.findClientByLawyerId(lawyerId, clientId);
+  }
+
   async update(id: string, dto: UpdateUserDTO): Promise<User> {
     const user = await this.userRepository.findById(id);
     if (!user) {
