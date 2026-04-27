@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import '../../../../../../shared/constants/app_colors.dart';
 import '../../../../../../shared/constants/app_dimensions.dart';
 import '../../../../../../shared/constants/app_text_styles.dart';
@@ -34,7 +34,9 @@ class TimelineSummaryCard extends StatelessWidget {
             children: [
               Text(
                 'Status Atual',
-                style: AppTextStyles.caption.copyWith(color: AppColors.white.withValues(alpha: 0.7)),
+                style: AppTextStyles.caption.copyWith(
+                  color: AppColors.white.withValues(alpha: 0.7),
+                ),
               ),
               Container(
                 padding: const EdgeInsets.symmetric(
@@ -76,7 +78,11 @@ class TimelineSummaryCard extends StatelessWidget {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  const Icon(Icons.auto_awesome, color: AppColors.primary, size: 20),
+                  const Icon(
+                    Icons.auto_awesome,
+                    color: AppColors.primary,
+                    size: 20,
+                  ),
                   const SizedBox(width: 12),
                   const Text(
                     'Entender status com IA',
@@ -93,7 +99,11 @@ class TimelineSummaryCard extends StatelessWidget {
           Center(
             child: TextButton.icon(
               onPressed: onChatMirrorTap,
-              icon: const Icon(Icons.history_rounded, color: Colors.white70, size: AppDimensions.iconS),
+              icon: const Icon(
+                Icons.history_rounded,
+                color: Colors.white70,
+                size: AppDimensions.iconS,
+              ),
               label: const Text(
                 'Acessar espelhamento do Chat',
                 style: TextStyle(color: Colors.white70, fontSize: 13),
