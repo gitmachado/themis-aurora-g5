@@ -22,7 +22,7 @@ class LawyerProfileScreen extends ConsumerWidget {
       backgroundColor: AppColors.background,
       appBar: CustomAppBar(
         title: 'Perfil',
-        showBackButton: false,
+        showBackButton: true,
         actions: [AppAppBarActions()],
       ),
       body: account.when(

@@ -29,6 +29,7 @@ class _LawyerNotificationScreenState
         backgroundColor: AppColors.background,
         appBar: CustomAppBar(
           title: 'Notificações',
+          showBackButton: true,
           bottom: TabBar(
             labelColor: AppColors.primary,
             unselectedLabelColor: AppColors.textCaption,
