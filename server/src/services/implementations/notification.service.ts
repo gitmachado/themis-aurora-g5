@@ -51,4 +51,13 @@ export class NotificationService implements INotificationService {
   async markAllAsRead(userId: string): Promise<void> {
     await this.notificationRepository.markAllAsRead(userId);
   }
+
+  async delete(id: string): Promise<void> {
+    const notification = await this.notificationRepository.findById(id);
+    if (!notification) {
+      throw new NotFoundError('Notificação não encontrada');
+    }
+
+    await this.notificationRepository.delete(id);
+  }
 }
