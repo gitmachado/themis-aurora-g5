@@ -39,9 +39,10 @@ class TimelineEventTile extends StatelessWidget {
                   width: 32,
                   height: 32,
                   decoration: BoxDecoration(
-                    color: iconBackgroundColor ?? 
-                        (isFirst 
-                            ? AppColors.primaryOverlay 
+                    color:
+                        iconBackgroundColor ??
+                        (isFirst
+                            ? AppColors.primaryOverlay
                             : AppColors.background),
                     shape: BoxShape.circle,
                     border: !isFirst && iconBackgroundColor == null
@@ -79,7 +80,9 @@ class TimelineEventTile extends StatelessWidget {
                       style: AppTextStyles.body.copyWith(
                         fontWeight: FontWeight.bold,
                         fontSize: 15,
-                        color: isFirst ? AppColors.textPrimary : AppColors.textCaption,
+                        color: isFirst
+                            ? AppColors.textPrimary
+                            : AppColors.textCaption,
                       ),
                     ),
                   const SizedBox(height: 2),
@@ -122,7 +125,9 @@ class TimelineEventTile extends StatelessWidget {
                         description,
                         style: AppTextStyles.body.copyWith(
                           fontSize: 13,
-                          color: isFirst ? AppColors.textBody : AppColors.textCaption,
+                          color: isFirst
+                              ? AppColors.textBody
+                              : AppColors.textCaption,
                         ),
                       ),
                     ),
