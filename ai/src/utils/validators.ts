@@ -20,8 +20,8 @@ export function isValidCPF(cpf: string): boolean {
     const sum = slice
       .split("")
       .reduce((acc, digit, i) => acc + parseInt(digit) * (factor - i), 0);
-    const remainder = (sum * 10) % 11;
-    return remainder >= 10 ? 0 : remainder;
+    const remainder = sum % 11;
+    return remainder < 2 ? 0 : 11 - remainder;
   };
 
   const first = calcDigit(cleaned.slice(0, 9), 10);
