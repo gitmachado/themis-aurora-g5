@@ -74,12 +74,19 @@ class AppProcedureCard extends StatelessWidget {
             const SizedBox(height: 12),
             Row(
               children: [
-                const Icon(Icons.update_rounded, size: 14, color: AppColors.primary),
+                const Icon(
+                  Icons.update_rounded,
+                  size: 14,
+                  color: AppColors.primary,
+                ),
                 const SizedBox(width: 4),
                 Expanded(
                   child: Text(
                     lastUpdate!,
-                    style: AppTextStyles.caption.copyWith(color: AppColors.textPrimary, fontSize: 12),
+                    style: AppTextStyles.caption.copyWith(
+                      color: AppColors.textPrimary,
+                      fontSize: 12,
+                    ),
                   ),
                 ),
               ],
@@ -90,7 +97,10 @@ class AppProcedureCard extends StatelessWidget {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                const Text('Progresso', style: TextStyle(fontSize: 11, color: AppColors.textCaption)),
+                const Text(
+                  'Progresso',
+                  style: TextStyle(fontSize: 11, color: AppColors.textCaption),
+                ),
                 Text(
                   '$progressPercentage%',
                   style: AppTextStyles.caption.copyWith(
@@ -107,7 +117,9 @@ class AppProcedureCard extends StatelessWidget {
               child: LinearProgressIndicator(
                 value: progressPercentage! / 100,
                 backgroundColor: AppColors.divider.withValues(alpha: 0.5),
-                valueColor: const AlwaysStoppedAnimation<Color>(AppColors.primary),
+                valueColor: const AlwaysStoppedAnimation<Color>(
+                  AppColors.primary,
+                ),
                 minHeight: 4,
               ),
             ),
@@ -117,4 +129,3 @@ class AppProcedureCard extends StatelessWidget {
     );
   }
 }
-
