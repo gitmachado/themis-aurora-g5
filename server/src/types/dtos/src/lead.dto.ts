@@ -32,5 +32,6 @@ export interface UpdateLeadDTO {
 /** DTO for converting a Lead into a Client (User) */
 export interface ConvertLeadDTO {
   leadId: string;
+  lawyerId: string;
   temporaryPassword?: string;
 }
