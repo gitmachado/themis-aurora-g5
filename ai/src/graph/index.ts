@@ -16,7 +16,8 @@ async function syncNode(state: OmniStateType): Promise<Partial<OmniStateType>> {
     await syncMessage({
       whatsappNumber: state.whatsappNumber,
       content: String(lastMsg.content),
-      sender: lastMsg instanceof AIMessage ? "BOT" : "CLIENT",
+      senderRole: lastMsg instanceof AIMessage ? "BOT" : "CLIENT",
+      messageType: "TEXT",
       whatsappMessageId: null,
     });
   }

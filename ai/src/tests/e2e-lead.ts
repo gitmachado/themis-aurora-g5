@@ -25,6 +25,7 @@ async function sendMessage(threadId: string, content: string) {
     },
     { configurable: { thread_id: threadId } }
   );
+  await new Promise(r => setTimeout(r, 3000)); // Delay para evitar 429 (Quota)
   const last = result.messages.at(-1);
   console.log(`  [USER] ${content || "(vazia)"}`);
   console.log(`  [BOT]  ${String(last?.content ?? "(sem resposta)").slice(0, 200)}`);

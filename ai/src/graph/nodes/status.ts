@@ -98,7 +98,7 @@ export async function statusNode(
 
   // Múltiplos processos — lista numerada, aguarda escolha
   return {
-    currentNode: "status_node",
+    currentNode: "sync_node",
     messages: [new AIMessage(formatList(processes))],
   };
 }

@@ -7,7 +7,8 @@ import axios from "axios";
 export async function syncMessage(data: {
   whatsappNumber: string;
   content: string;
-  sender: "CLIENT" | "BOT";
+  senderRole: "CLIENT" | "BOT";
+  messageType: "TEXT" | "IMAGE" | "DOCUMENT";
   whatsappMessageId: string | null;
 }) {
   try {

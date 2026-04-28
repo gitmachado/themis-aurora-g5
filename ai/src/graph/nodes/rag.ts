@@ -1,4 +1,4 @@
-import { ChatGoogleGenerativeAI, GoogleGenerativeAIEmbeddings } from "@langchain/google-genai";
+import { ChatOpenAI, OpenAIEmbeddings } from "@langchain/openai";
 import { AIMessage } from "@langchain/core/messages";
 import { PGVectorStore } from "@langchain/community/vectorstores/pgvector";
 import { OmniStateType } from "../state.js";
@@ -29,9 +29,9 @@ export async function ragNode(
   const query = String(messages.at(-1)?.content ?? "").trim();
 
   // 1. Inicializa embeddings e vector store
-  const embeddings = new GoogleGenerativeAIEmbeddings({
-    modelName: process.env.GOOGLE_EMBEDDING_MODEL || "text-embedding-004",
-    apiKey: process.env.GOOGLE_API_KEY,
+  const embeddings = new OpenAIEmbeddings({
+    model: process.env.OPENAI_EMBEDDING_MODEL || "text-embedding-3-small",
+    apiKey: process.env.OPENAI_API_KEY,
   });
 
   let vectorStore: PGVectorStore;
@@ -77,9 +77,9 @@ export async function ragNode(
       : "Nenhum documento relevante encontrado.";
 
   // 4. Gera resposta com prompt defensivo
-  const model = new ChatGoogleGenerativeAI({
-    modelName: process.env.GOOGLE_MODEL || "gemini-1.5-flash",
-    apiKey: process.env.GOOGLE_API_KEY,
+  const model = new ChatOpenAI({
+    model: process.env.OPENAI_MODEL || "gpt-4o-mini",
+    apiKey: process.env.OPENAI_API_KEY,
     temperature: 0,
   });
 

@@ -66,7 +66,7 @@ whatsappRouter.post("/webhook", async (req, res) => {
       leadId: null,
       messages: [new HumanMessage(textBody)],
       triage: INITIAL_TRIAGE,
-      currentNode: "router",
+      currentNode: "router_node",
       needsHandoff: false,
       handoffReason: null,
       config,
