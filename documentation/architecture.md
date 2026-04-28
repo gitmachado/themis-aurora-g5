@@ -46,6 +46,7 @@ server/src/
 | Arquitetura | Camadas (Controller → Service → Repository) | Separação clara de responsabilidades |
 | Proteção Bot | API Key | Garante que apenas o robô de WhatsApp acesse endpoints de ingestão |
 | Segurança | Ownership/Tutor | Proteção contra IDOR e acesso não autorizado ([ADR-0004](decisions/0004-fine-grained-security-and-tutor-ownership.md)) |
+| Auth complementar | Supabase Auth | Email/senha, confirmacao de email e convites sem transformar lead bruto em conta autenticada (`../.agents/decisions/0007-supabase-auth-complementar.md`) |
 | Hospedagem MVP | VM unica com Docker e proxy HTTPS | Menor distancia entre o ambiente atual e o primeiro deploy publico (`../.agents/decisions/0006-hospedagem-mvp-publico.md`) |
 
 ### 2.5 Middlewares Globais
@@ -53,7 +54,7 @@ server/src/
 A aplicação utiliza um pipeline de middlewares para garantir segurança e consistência:
 
 1. **`errorHandler`**: Captura todas as exceções e as formata conforme os DTOs de erro, ocultando detalhes em produção.
-2. **`authMiddleware`**: Valida o token JWT e popula o objeto `req.user`.
+2. **`authMiddleware`**: Valida o token JWT emitido pelo backend e popula o objeto `req.user`. O Supabase Auth pode ser usado antes desse ponto para validar email/senha e vincular `supabase_user_id`, mas as rotas de produto continuam usando o JWT interno.
 3. **`roleMiddleware`**: Bloqueia rotas específicas baseadas no papel (`LAWYER` / `CLIENT`).
 4. **`apiKeyMiddleware`**: Valida a chave estática para integrações de backend-to-backend.
 5. **`validationMiddleware`**: (Zod/Joi) Integração para validar o corpo e parâmetros das requisições.
@@ -103,6 +104,7 @@ erDiagram
         string whatsappNumber UK
         string cpf
         string email
+        string supabaseUserId
         enum role "ADVOGADO | CLIENTE"
         string senhaHash
         string fcmToken
@@ -114,6 +116,7 @@ erDiagram
         uuid id PK
         string whatsappNumber UK
         string nome
+        string email
         string cpf
         enum tipoCaso
         text descricaoCaso
@@ -201,6 +204,7 @@ flowchart LR
     BOT -->|Salva| MSG[Mensagem]
     APP[App Flutter] -->|Advogado: Converte| LEAD
     LEAD -->|Gera| USER[User/Cliente]
+    USER -->|Email opcional| AUTH[Supabase Auth]
     APP -->|Advogado: Cria| PROC[Processo]
     APP -->|Advogado: Atualiza Status| TL[Timeline]
     TL -->|Dispara| NOTIF[Notificação FCM]
