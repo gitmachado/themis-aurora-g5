@@ -1,4 +1,5 @@
 import { Router } from "express";
+import { sendWhatsAppMessage } from "./send-message.js";
 import { HumanMessage } from "@langchain/core/messages";
 import { graph } from "../graph/index.js";
 import { INITIAL_TRIAGE, INITIAL_CONFIG } from "../graph/state.js";
@@ -41,7 +42,7 @@ whatsappRouter.post("/webhook", async (req, res) => {
       console.log(
         `[Webhook] Mensagem não-texto ignorada (${type}) de ${whatsappNumber}`
       );
-      // TODO T20: await sendWhatsAppMessage(whatsappNumber, "Por enquanto só processo mensagens de texto. 😊");
+      await sendWhatsAppMessage(whatsappNumber, "Por enquanto só processo mensagens de texto. Por favor, envie sua dúvida escrita. 😊");
       return;
     }
 
@@ -50,7 +51,7 @@ whatsappRouter.post("/webhook", async (req, res) => {
     // Guardrail — bloqueia tentativas de prompt injection antes de invocar o grafo
     if (containsPromptInjection(textBody)) {
       console.warn(`[GUARDRAIL] Injeção detectada de ${whatsappNumber}`);
-      // TODO T20: await sendWhatsAppMessage(whatsappNumber, DEFAULT_GUARDRAIL_RESPONSE);
+      await sendWhatsAppMessage(whatsappNumber, DEFAULT_GUARDRAIL_RESPONSE);
       return;
     }
 
@@ -80,7 +81,7 @@ whatsappRouter.post("/webhook", async (req, res) => {
     const botMessage = result.messages.at(-1);
     if (botMessage) {
       const responseText = String(botMessage.content);
-      // TODO T20: await sendWhatsAppMessage(whatsappNumber, responseText);
+      await sendWhatsAppMessage(whatsappNumber, responseText);
       console.log(
         `[Webhook] Resposta para ${whatsappNumber}: ${responseText.slice(0, 100)}`
       );
