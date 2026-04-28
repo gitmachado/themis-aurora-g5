@@ -37,7 +37,7 @@ export const INITIAL_TRIAGE: TriageData = {
 export const INITIAL_CONFIG: BotConfig = {
   toneOfVoice: "formal",
   serviceHoursStart: "09:00",
-  serviceHoursEnd: "18:00",
+  serviceHoursEnd: "23:59",
   awayMessage: "Estamos fora do horário de atendimento. Retornaremos em breve.",
 };
 

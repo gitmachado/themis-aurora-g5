@@ -1,12 +1,9 @@
-import { PostgresSaver } from "@langchain/langgraph-checkpoint-postgres";
+import { MemorySaver } from "@langchain/langgraph";
 
-const DATABASE_URL =
-  process.env.DATABASE_URL ||
-  "postgresql://postgres:postgres@localhost:5432/omniconnect";
+// Substituindo PostgresSaver por MemorySaver para remover integração com DB
+export const checkpointer = new MemorySaver();
 
-export const checkpointer = PostgresSaver.fromConnString(DATABASE_URL);
-
-// Cria as tabelas internas do LangGraph no PostgreSQL (executar 1x na inicialização)
 export async function setupCheckpointer(): Promise<void> {
-  await checkpointer.setup();
+  // MemorySaver não precisa de setup assíncrono para criar tabelas
+  return Promise.resolve();
 }

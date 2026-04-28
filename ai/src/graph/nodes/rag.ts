@@ -1,12 +1,8 @@
 import { ChatOpenAI, OpenAIEmbeddings } from "@langchain/openai";
 import { AIMessage } from "@langchain/core/messages";
-import { PGVectorStore } from "@langchain/community/vectorstores/pgvector";
+import { MemoryVectorStore } from "langchain/vectorstores/memory";
 import { OmniStateType } from "../state.js";
 import { SYSTEM_PROMPT, RAG_PROMPT } from "../../config/prompts.js";
-
-const DATABASE_URL =
-  process.env.DATABASE_URL ||
-  "postgresql://postgres:postgres@localhost:5432/omniconnect";
 
 // Indicadores determinísticos de que o LLM não encontrou resposta na base
 const HANDOFF_INDICATORS = [
@@ -28,25 +24,27 @@ export async function ragNode(
   const { messages } = state;
   const query = String(messages.at(-1)?.content ?? "").trim();
 
-  // 1. Inicializa embeddings e vector store
+  // 1. Inicializa embeddings e vector store (MOCK IN MEMORY)
   const embeddings = new OpenAIEmbeddings({
     model: process.env.OPENAI_EMBEDDING_MODEL || "text-embedding-3-small",
     apiKey: process.env.OPENAI_API_KEY,
   });
 
-  let vectorStore: PGVectorStore;
+  let vectorStore: MemoryVectorStore;
   try {
-    vectorStore = await PGVectorStore.initialize(embeddings, {
-      postgresConnectionOptions: { connectionString: DATABASE_URL },
-      tableName: "knowledge_embeddings",
-      columns: {
-        contentColumnName: "content",
-        metadataColumnName: "metadata",
-        vectorColumnName: "embedding",
-      },
-    });
+    vectorStore = await MemoryVectorStore.fromTexts(
+      [
+        "O escritório OmniConnect atende casos de direito civil, empresarial e trabalhista.",
+        "Nosso horário de atendimento é de segunda a sexta, das 09:00 às 18:00.",
+        "Para iniciar a análise de um processo trabalhista, precisamos do contrato de trabalho e rescisão.",
+        "Honorários advocatícios padrão do escritório são 30% do êxito na causa trabalhista.",
+        "Nosso escritório fica localizado na Avenida Paulista, 1000, São Paulo.",
+      ],
+      [{ id: 1 }, { id: 2 }, { id: 3 }, { id: 4 }, { id: 5 }],
+      embeddings
+    );
   } catch (err) {
-    console.error("[RAG Node] Erro ao conectar ao pgvector:", err);
+    console.error("[RAG Node] Erro ao instanciar MemoryVectorStore:", err);
     return {
       currentNode: "handoff_node",
       needsHandoff: true,
@@ -66,8 +64,6 @@ export async function ragNode(
   } catch (err) {
     console.error("[RAG Node] Erro na busca vetorial:", err);
     relevantDocs = [];
-  } finally {
-    await vectorStore.end();
   }
 
   // 3. Monta contexto a partir dos chunks recuperados

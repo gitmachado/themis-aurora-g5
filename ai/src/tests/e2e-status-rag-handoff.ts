@@ -7,20 +7,20 @@ import { graph } from "../graph/index.js";
 import { INITIAL_TRIAGE, INITIAL_CONFIG } from "../graph/state.js";
 import { setupCheckpointer } from "../config/checkpointer.js";
 
-async function sendMessage(threadId: string, content: string) {
+async function sendMessage(threadId: string, content: string, isFirst: boolean = false) {
+  const input: any = {
+    messages: [new HumanMessage(content)],
+  };
+
+  if (isFirst) {
+    input.whatsappNumber = threadId;
+    input.userType = "UNKNOWN";
+    input.triage = INITIAL_TRIAGE;
+    input.config = INITIAL_CONFIG;
+  }
+
   const result = await graph.invoke(
-    {
-      whatsappNumber: threadId,
-      userType: "UNKNOWN" as const,
-      userId: null,
-      leadId: null,
-      messages: [new HumanMessage(content)],
-      triage: INITIAL_TRIAGE,
-      currentNode: "router_node",
-      needsHandoff: false,
-      handoffReason: null,
-      config: INITIAL_CONFIG,
-    },
+    input,
     { configurable: { thread_id: threadId } }
   );
   const last = result.messages.at(-1);
@@ -33,7 +33,7 @@ async function sendMessage(threadId: string, content: string) {
 async function runStatusQuery() {
   console.log("\n========== CENÁRIO 1: Consulta de Status ==========");
   const threadId = `test-status-${Date.now()}`;
-  const result = await sendMessage(threadId, "Qual o status do meu processo?");
+  const result = await sendMessage(threadId, "Qual o status do meu processo?", true);
   // Com usuário sem processos cadastrados, espera-se mensagem de ausência ou triagem
   console.log(`  ${result.needsHandoff ? "⚠️ handoff" : "✅"} status ou triagem respondidos`);
 }
@@ -41,7 +41,7 @@ async function runStatusQuery() {
 async function runRAGQuery() {
   console.log("\n========== CENÁRIO 2: Pergunta Jurídica (RAG) ==========");
   const threadId = `test-rag-${Date.now()}`;
-  const result = await sendMessage(threadId, "Quais documentos preciso para um divórcio?");
+  const result = await sendMessage(threadId, "Quais documentos preciso para um divórcio?", true);
   if (!result.needsHandoff) {
     console.log("  ✅ RAG respondeu sem acionar handoff");
   } else {
@@ -52,7 +52,7 @@ async function runRAGQuery() {
 async function runHandoffKeyword() {
   console.log("\n========== CENÁRIO 3: Handoff por Palavra-chave ==========");
   const threadId = `test-handoff-kw-${Date.now()}`;
-  const result = await sendMessage(threadId, "Quero falar com um advogado");
+  const result = await sendMessage(threadId, "Quero falar com um advogado", true);
   if (result.needsHandoff) {
     console.log(`  ✅ Handoff ativado | razão: ${result.handoffReason ?? "N/A"}`);
   } else {
@@ -63,7 +63,7 @@ async function runHandoffKeyword() {
 async function runHandoffRAGFailure() {
   console.log("\n========== CENÁRIO 4: Handoff por RAG Failure (fora do domínio) ==========");
   const threadId = `test-ragfail-${Date.now()}`;
-  const result = await sendMessage(threadId, "Quanto custa um Ferrari?");
+  const result = await sendMessage(threadId, "Quanto custa um Ferrari?", true);
   if (result.needsHandoff) {
     console.log("  ✅ Handoff acionado para pergunta fora do domínio jurídico");
   } else {

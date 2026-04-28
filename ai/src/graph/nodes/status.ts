@@ -1,9 +1,7 @@
 import { AIMessage } from "@langchain/core/messages";
-import axios from "axios";
 import { OmniStateType } from "../state.js";
 
-const BACKEND_API_URL = process.env.BACKEND_API_URL || "http://localhost:3000";
-const BOT_API_KEY = process.env.BOT_API_KEY || "";
+// Removido axios e backend url para desacoplamento de infra
 
 const STATUS_LABELS: Record<string, string> = {
   OPEN: "Aberto",
@@ -43,11 +41,18 @@ function formatList(processes: any[]): string {
 }
 
 async function fetchProcesses(whatsappNumber: string): Promise<any[]> {
-  const res = await axios.get(
-    `${BACKEND_API_URL}/api/v1/processes/by-phone/${whatsappNumber}`,
-    { headers: { "x-api-key": BOT_API_KEY } }
-  );
-  return Array.isArray(res.data) ? res.data : [];
+  // MOCK: Para independência, retornando mock em vez da chamada Axios
+  console.log(`[Status Node] Mocking fetchProcesses for ${whatsappNumber}`);
+  return [
+    {
+      id: "mock-1",
+      title: "Ação Trabalhista",
+      processNumber: "1234567-89.2024.5.02.0001",
+      currentStatus: "UNDER_ANALYSIS",
+      lastMovementDate: new Date().toISOString(),
+      lastNote: "Aguardando despacho do juiz",
+    }
+  ];
 }
 
 export async function statusNode(

@@ -16,6 +16,7 @@ const routerSchema = z.object({
     "LEGAL_QUESTION",
     "HANDOFF_REQUEST",
     "GREETING",
+    "OTHER",
   ]),
   confidence: z.number(),
 });
@@ -54,7 +55,8 @@ function resolveNextNode(
   if (userType === "UNKNOWN" || userType === "LEAD") return "triage_node";
   if (intent === "STATUS_QUERY") return "status_node";
   if (intent === "LEGAL_QUESTION") return "rag_node";
-  return "triage_node";
+  if (intent === "GREETING") return "triage_node";
+  return "triage_node"; // Fallback para OTHER ou desconhecido
 }
 
 export async function routerNode(

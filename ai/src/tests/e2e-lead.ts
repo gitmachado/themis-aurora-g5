@@ -9,20 +9,20 @@ import { setupCheckpointer } from "../config/checkpointer.js";
 
 const BASE_THREAD = `test-lead-${Date.now()}`;
 
-async function sendMessage(threadId: string, content: string) {
+async function sendMessage(threadId: string, content: string, isFirst: boolean = false) {
+  const input: any = {
+    messages: [new HumanMessage(content)],
+  };
+
+  if (isFirst) {
+    input.whatsappNumber = threadId;
+    input.userType = "UNKNOWN";
+    input.triage = INITIAL_TRIAGE;
+    input.config = INITIAL_CONFIG;
+  }
+
   const result = await graph.invoke(
-    {
-      whatsappNumber: threadId,
-      userType: "UNKNOWN" as const,
-      userId: null,
-      leadId: null,
-      messages: [new HumanMessage(content)],
-      triage: INITIAL_TRIAGE,
-      currentNode: "router_node",
-      needsHandoff: false,
-      handoffReason: null,
-      config: INITIAL_CONFIG,
-    },
+    input,
     { configurable: { thread_id: threadId } }
   );
   await new Promise(r => setTimeout(r, 3000)); // Delay para evitar 429 (Quota)
@@ -36,7 +36,7 @@ async function sendMessage(threadId: string, content: string) {
 async function runHappyPath() {
   console.log("\n========== CENÁRIO 1: Happy Path ==========");
   const thread = `${BASE_THREAD}-happy`;
-  await sendMessage(thread, "Olá, preciso de ajuda");
+  await sendMessage(thread, "Olá, preciso de ajuda", true);
   await sendMessage(thread, "Maria da Silva Oliveira");
   await sendMessage(thread, "529.982.247-25");
   await sendMessage(thread, "Trabalhista");
@@ -53,7 +53,7 @@ async function runHappyPath() {
 async function runInvalidCPF() {
   console.log("\n========== CENÁRIO 2: CPF Inválido ==========");
   const thread = `${BASE_THREAD}-cpf`;
-  await sendMessage(thread, "Carlos Teste");
+  await sendMessage(thread, "Carlos Teste", true);
   const r1 = await sendMessage(thread, "000.000.000-00");
   const r2 = await sendMessage(thread, "111.111.111-11");
   await sendMessage(thread, "529.982.247-25");
@@ -67,7 +67,7 @@ async function runInvalidCPF() {
 async function runInvalidEnum() {
   console.log("\n========== CENÁRIO 3: Enum Inválido ==========");
   const thread = `${BASE_THREAD}-enum`;
-  await sendMessage(thread, "João Teste");
+  await sendMessage(thread, "João Teste", true);
   await sendMessage(thread, "529.982.247-25");
   const r1 = await sendMessage(thread, "XYZ tipo qualquer");
   await sendMessage(thread, "Cível");
@@ -81,7 +81,7 @@ async function runInvalidEnum() {
 async function runEmptyMessage() {
   console.log("\n========== CENÁRIO 4: Mensagem Vazia ==========");
   const thread = `${BASE_THREAD}-empty`;
-  await sendMessage(thread, "Pedro Teste");
+  await sendMessage(thread, "Pedro Teste", true);
   await sendMessage(thread, "");
   const r = await sendMessage(thread, "529.982.247-25");
   if (r.triage?.currentStep !== undefined) {

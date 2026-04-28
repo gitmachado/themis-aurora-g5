@@ -40,12 +40,13 @@ PERGUNTA: {query}`;
  * Usado no Router Node para classificar a intenção do usuário.
  */
 export const ROUTER_PROMPT = `Classifique a intenção do usuário em uma das categorias abaixo:
-- TRIAGE: Se o usuário quer iniciar um atendimento, tirar dúvidas sobre como funciona ou fornecer dados.
-- RAG: Se o usuário fez uma pergunta jurídica específica que pode estar na base de conhecimento.
-- HANDOFF: Se o usuário quer falar explicitamente com um advogado humano.
-- OTHER: Outros assuntos não relacionados.
+- TRIAGE: Se o usuário quer iniciar um atendimento ou fornecer dados.
+- STATUS_QUERY: Se o usuário quer saber como está o processo dele.
+- LEGAL_QUESTION: Se o usuário fez uma pergunta jurídica específica.
+- HANDOFF_REQUEST: Se o usuário quer falar explicitamente com um advogado humano.
+- GREETING: Se o usuário está apenas cumprimentando (Olá, bom dia).
 
-Resposta apenas com a categoria em caixa alta.`;
+Responda apenas com o nome da categoria em caixa alta.`;
 
 /**
  * Mensagem enviada quando o atendimento é transferido para um humano.
