@@ -5,6 +5,7 @@ export interface CreateUserDTO {
   whatsappNumber: string;
   cpf?: string;
   email?: string;
+  supabaseUserId?: string | null;
   role: UserRole;
   passwordHash?: string;
   fcmToken?: string;
@@ -16,6 +17,7 @@ export interface UpdateUserDTO {
   whatsappNumber?: string;
   cpf?: string;
   email?: string;
+  supabaseUserId?: string | null;
   role?: UserRole;
   passwordHash?: string;
   fcmToken?: string;
@@ -29,6 +31,7 @@ export interface UserResponseDTO {
   cpf: string | null;
   role: UserRole;
   email: string | null;
+  supabaseUserId: string | null;
 }
 
 export interface AccountResponseDTO {
@@ -37,6 +40,7 @@ export interface AccountResponseDTO {
   whatsappNumber: string;
   cpf: string | null;
   email: string | null;
+  supabaseUserId: string | null;
   role: UserRole;
   notificationPreferences: Record<string, boolean> | null;
   createdAt: Date;
