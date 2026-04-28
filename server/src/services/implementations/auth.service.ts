@@ -3,48 +3,60 @@ import bcrypt from 'bcryptjs';
 import { IAuthService } from '../interfaces/auth.service';
 import { IUserRepository } from '../../repositories/interfaces/user.repository';
 import type { LoginDTO, RegisterDTO, AuthResponseDTO } from '@dtos';
-import { UnauthorizedError, ConflictError, ValidationError } from './errors';
+import { UnauthorizedError, ConflictError } from './errors';
 import { UserRole } from '@enums';
 import { getJwtSecret } from '../../config/runtime';
+import {
+  ISupabaseAuthService,
+  SupabaseAuthUserResult,
+} from '../interfaces/supabase-auth.service';
 
 export class AuthService implements IAuthService {
   private readonly jwtSecret: string;
   private readonly jwtExpiresIn: string;
 
-  constructor(private readonly userRepository: IUserRepository) {
+  constructor(
+    private readonly userRepository: IUserRepository,
+    private readonly supabaseAuthService?: ISupabaseAuthService
+  ) {
     this.jwtSecret = getJwtSecret();
     this.jwtExpiresIn = process.env.JWT_EXPIRE_IN || '7d';
   }
 
   async login(dto: LoginDTO): Promise<AuthResponseDTO> {
-    const rawIdentifier = dto.identifier || dto.whatsappNumber || dto.cpf || '';
-    const identifier = this.onlyDigits(rawIdentifier);
-    const candidates = identifier
-      ? await this.userRepository.findByCpfOrWhatsapp(identifier)
-      : [];
+    const email = dto.email.trim().toLowerCase();
+    const supabaseResult = await this.trySupabasePasswordSignIn(
+      email,
+      dto.password
+    );
 
-    if (!candidates.length) {
+    const user = supabaseResult
+      ? await this.userRepository.findBySupabaseUserId(supabaseResult.supabaseUserId)
+        || await this.userRepository.findByEmail(email)
+      : await this.userRepository.findByEmail(email);
+
+    if (!user) {
       throw new UnauthorizedError('Credenciais inválidas');
     }
 
-    for (const user of candidates) {
+    if (!supabaseResult) {
       if (!user.passwordHash) {
-        continue;
+        throw new UnauthorizedError('Credenciais inválidas');
       }
 
       const isPasswordValid = await bcrypt.compare(dto.password, user.passwordHash);
-      if (isPasswordValid) {
-        const token = this.generateToken(user.id, user.role);
-
-        return {
-          token,
-          userId: user.id,
-          role: user.role,
-        };
+      if (!isPasswordValid) {
+        throw new UnauthorizedError('Credenciais inválidas');
       }
+    } else if (!user.supabaseUserId) {
+      await this.userRepository.update(user.id, { supabaseUserId: supabaseResult.supabaseUserId });
     }
 
-    throw new UnauthorizedError('Credenciais inválidas');
+    return {
+      token: this.generateToken(user.id, user.role),
+      userId: user.id,
+      role: user.role,
+    };
   }
 
   async register(dto: RegisterDTO): Promise<AuthResponseDTO> {
@@ -58,13 +70,37 @@ export class AuthService implements IAuthService {
       throw new ConflictError('CPF já cadastrado');
     }
 
-    const passwordHash = await bcrypt.hash(dto.password, 10);
+    if (dto.email) {
+      const existingEmail = await this.userRepository.findByEmail(dto.email);
+      if (existingEmail) {
+        throw new ConflictError('Email já cadastrado');
+      }
+    }
+
+    let supabaseUserId: string | null = null;
+    let passwordHash: string | null = await bcrypt.hash(dto.password, 10);
+    let requiresEmailConfirmation = false;
+
+    if (dto.email && this.supabaseAuthService?.isPasswordAuthConfigured()) {
+      const supabaseResult = await this.supabaseAuthService.signUpWithPassword({
+        email: dto.email,
+        password: dto.password,
+        name: dto.name,
+        role: 'CLIENT',
+        whatsappNumber: dto.whatsappNumber,
+        cpf: dto.cpf,
+      });
+      supabaseUserId = supabaseResult.supabaseUserId;
+      passwordHash = null;
+      requiresEmailConfirmation = !supabaseResult.accessToken;
+    }
 
     const user = await this.userRepository.create({
       name: dto.name,
       whatsappNumber: dto.whatsappNumber,
       cpf: dto.cpf,
-      email: '', // Default empty
+      email: dto.email || '',
+      supabaseUserId,
       role: 'CLIENT',
       passwordHash,
       fcmToken: null,
@@ -77,9 +113,10 @@ export class AuthService implements IAuthService {
     const token = this.generateToken(user.id, user.role);
 
     return {
-      token,
+      token: requiresEmailConfirmation ? null : token,
       userId: user.id,
       role: user.role,
+      requiresEmailConfirmation,
     };
   }
 
@@ -106,7 +143,25 @@ export class AuthService implements IAuthService {
     });
   }
 
-  private onlyDigits(value: string): string {
-    return value.replace(/\D/g, '');
+  private async trySupabasePasswordSignIn(
+    email: string,
+    password: string
+  ): Promise<SupabaseAuthUserResult | null> {
+    if (!this.supabaseAuthService?.isPasswordAuthConfigured()) {
+      return null;
+    }
+
+    try {
+      return await this.supabaseAuthService.signInWithPassword({
+        email,
+        password,
+      });
+    } catch (error) {
+      if (error instanceof UnauthorizedError) {
+        return null;
+      }
+
+      throw error;
+    }
   }
 }

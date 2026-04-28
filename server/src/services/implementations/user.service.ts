@@ -18,6 +18,7 @@ export class UserService implements IUserService {
       whatsappNumber: dto.whatsappNumber,
       cpf: dto.cpf || null,
       email: dto.email || null,
+      supabaseUserId: dto.supabaseUserId || null,
       role: dto.role,
       passwordHash: dto.passwordHash || null,
       fcmToken: dto.fcmToken || null,
@@ -33,10 +34,7 @@ export class UserService implements IUserService {
   }
 
   async getByEmail(email: string): Promise<User | null> {
-    // Current repository might not have findByEmail, need to add or keep as is.
-    // For now, I'll assume findById and findByWhatsapp are the main ones.
-    // If needed, I'll use findByWhatsapp for now or fix repository.
-    return null; 
+    return this.userRepository.findByEmail(email);
   }
 
   async getByWhatsapp(whatsapp: string): Promise<User | null> {
