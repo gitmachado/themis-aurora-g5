@@ -8,7 +8,8 @@
     "build": "tsc",
     "start": "node dist/index.js",
     "dev": "ts-node src/index.ts",
-    "test:graph": "ts-node src/test-graph.ts"
+    "test:graph": "ts-node src/test-graph.ts",
+    "index:pdf": "ts-node src/rag/indexer.ts"
   },
   "keywords": [],
   "author": "",
