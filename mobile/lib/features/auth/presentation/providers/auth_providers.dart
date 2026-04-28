@@ -39,15 +39,12 @@ class AuthController extends StateNotifier<AsyncValue<AuthSession?>> {
   AuthController(this._repository) : super(const AsyncData(null));
 
   Future<AuthSession> login({
-    required String identifier,
+    required String email,
     required String password,
   }) async {
     state = const AsyncLoading();
     try {
-      final session = await _repository.login(
-        identifier: identifier,
-        password: password,
-      );
+      final session = await _repository.login(email: email, password: password);
       state = AsyncData(session);
       return session;
     } catch (error, stackTrace) {

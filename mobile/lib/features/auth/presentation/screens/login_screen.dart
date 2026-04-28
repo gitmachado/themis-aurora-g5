@@ -14,28 +14,15 @@ class LoginScreen extends ConsumerStatefulWidget {
   ConsumerState<LoginScreen> createState() => _LoginScreenState();
 }
 
-class _LoginScreenState extends ConsumerState<LoginScreen>
-    with SingleTickerProviderStateMixin {
-  late TabController _tabController;
-  final _clientIdentifierController = TextEditingController();
-  final _clientPasswordController = TextEditingController();
-  final _lawyerIdentifierController = TextEditingController();
-  final _lawyerPasswordController = TextEditingController();
+class _LoginScreenState extends ConsumerState<LoginScreen> {
+  final _emailController = TextEditingController();
+  final _passwordController = TextEditingController();
   bool _isObscure = true;
 
   @override
-  void initState() {
-    super.initState();
-    _tabController = TabController(length: 2, vsync: this);
-  }
-
-  @override
   void dispose() {
-    _tabController.dispose();
-    _clientIdentifierController.dispose();
-    _clientPasswordController.dispose();
-    _lawyerIdentifierController.dispose();
-    _lawyerPasswordController.dispose();
+    _emailController.dispose();
+    _passwordController.dispose();
     super.dispose();
   }
 
@@ -94,45 +81,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
                           ),
                           const SizedBox(height: 40),
 
-                          // Custom Tab Bar
-                          Container(
-                            height: 50,
-                            decoration: BoxDecoration(
-                              color: AppColors.background,
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                            child: TabBar(
-                              controller: _tabController,
-                              indicator: BoxDecoration(
-                                color: AppColors.primary,
-                                borderRadius: BorderRadius.circular(10),
-                              ),
-                              labelColor: Colors.white,
-                              unselectedLabelColor: AppColors.textCaption,
-                              labelStyle: const TextStyle(
-                                fontWeight: FontWeight.bold,
-                              ),
-                              indicatorSize: TabBarIndicatorSize.tab,
-                              dividerColor: Colors.transparent,
-                              tabs: const [
-                                Tab(text: 'Sou Cliente'),
-                                Tab(text: 'Sou Advogado'),
-                              ],
-                            ),
-                          ),
-                          const SizedBox(height: 32),
-
-                          // Tab View
-                          SizedBox(
-                            height: 340,
-                            child: TabBarView(
-                              controller: _tabController,
-                              children: [
-                                _buildLoginForm(isLawyer: false),
-                                _buildLoginForm(isLawyer: true),
-                              ],
-                            ),
-                          ),
+                          _buildLoginForm(),
 
                           const Spacer(),
                         ],
@@ -148,28 +97,21 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
     );
   }
 
-  Widget _buildLoginForm({required bool isLawyer}) {
+  Widget _buildLoginForm() {
     final authState = ref.watch(authControllerProvider);
-    final identifierController = isLawyer
-        ? _lawyerIdentifierController
-        : _clientIdentifierController;
-    final passwordController = isLawyer
-        ? _lawyerPasswordController
-        : _clientPasswordController;
     final isLoading = authState.isLoading;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         TextField(
-          controller: identifierController,
-          keyboardType: TextInputType.phone,
+          controller: _emailController,
+          keyboardType: TextInputType.emailAddress,
           textInputAction: TextInputAction.next,
+          autofillHints: const [AutofillHints.email],
           decoration: InputDecoration(
-            labelText: 'CPF ou telefone',
-            prefixIcon: Icon(
-              isLawyer ? Icons.badge_outlined : Icons.person_outline,
-            ),
+            labelText: 'Email',
+            prefixIcon: const Icon(Icons.mail_outline),
             border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
             enabledBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
@@ -179,12 +121,13 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
         ),
         const SizedBox(height: 16),
         TextField(
-          controller: passwordController,
+          controller: _passwordController,
           obscureText: _isObscure,
           textInputAction: TextInputAction.done,
+          autofillHints: const [AutofillHints.password],
           onSubmitted: (_) => _submitLogin(
-            identifier: identifierController.text,
-            password: passwordController.text,
+            email: _emailController.text,
+            password: _passwordController.text,
           ),
           decoration: InputDecoration(
             labelText: 'Senha',
@@ -216,8 +159,8 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
           onPressed: isLoading
               ? null
               : () => _submitLogin(
-                  identifier: identifierController.text,
-                  password: passwordController.text,
+                  email: _emailController.text,
+                  password: _passwordController.text,
                 ),
           style: ElevatedButton.styleFrom(
             backgroundColor: AppColors.primary,
@@ -247,21 +190,21 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
   }
 
   Future<void> _submitLogin({
-    required String identifier,
+    required String email,
     required String password,
   }) async {
-    final trimmedIdentifier = identifier.trim();
-    if (trimmedIdentifier.isEmpty || password.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Informe CPF/telefone e senha.')),
-      );
+    final trimmedEmail = email.trim();
+    if (trimmedEmail.isEmpty || password.isEmpty) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Informe email e senha.')));
       return;
     }
 
     try {
       final session = await ref
           .read(authControllerProvider.notifier)
-          .login(identifier: trimmedIdentifier, password: password);
+          .login(email: trimmedEmail, password: password);
 
       if (!mounted) return;
 

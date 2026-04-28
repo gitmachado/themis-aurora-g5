@@ -16,11 +16,11 @@ final class AuthRepositoryImpl implements AuthRepository {
 
   @override
   Future<AuthSession> login({
-    required String identifier,
+    required String email,
     required String password,
   }) async {
     final session = await _remoteDataSource.login(
-      identifier: identifier,
+      email: email,
       password: password,
     );
     await _tokenStorage.saveToken(session.token);

@@ -8,12 +8,12 @@ final class AuthRemoteDataSource {
   const AuthRemoteDataSource(this._apiClient);
 
   Future<AuthSessionModel> login({
-    required String identifier,
+    required String email,
     required String password,
   }) async {
     final json = await _apiClient.postJson(
       '/auth/login',
-      data: {'identifier': identifier, 'password': password},
+      data: {'email': email, 'password': password},
     );
 
     return AuthSessionModel.fromJson(json);

@@ -6,7 +6,7 @@ import 'package:mobile/features/auth/domain/entities/account.dart';
 import '../../../helpers/fakes.dart';
 
 void main() {
-  test('login sends identifier, saves token, and loads account', () async {
+  test('login sends email, saves token, and loads account', () async {
     final apiClient = FakeApiClient()
       ..jsonResponses['POST /auth/login'] = {
         'token': 'jwt-token',
@@ -38,7 +38,7 @@ void main() {
     );
 
     final session = await repository.login(
-      identifier: '123.456.789-00',
+      email: 'lucas@example.com',
       password: 'secret123',
     );
     final updated = await repository.updateNotificationPreferences({
@@ -51,7 +51,7 @@ void main() {
     expect(apiClient.calls.first.method, 'POST');
     expect(apiClient.calls.first.path, '/auth/login');
     expect(apiClient.calls.first.data, {
-      'identifier': '123.456.789-00',
+      'email': 'lucas@example.com',
       'password': 'secret123',
     });
     expect(apiClient.calls.last.path, '/account');
