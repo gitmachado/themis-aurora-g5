@@ -36,7 +36,7 @@ async function main() {
     leadId: null,
     messages: [new HumanMessage(message)],
     triage: INITIAL_TRIAGE,
-    currentNode: "router",
+    currentNode: "router_node",
     needsHandoff: false,
     handoffReason: null,
     config,

@@ -28,37 +28,37 @@ const routeByCurrentNode = (state: OmniStateType): string => state.currentNode;
 
 // Encadeamento para inferência correta dos tipos de nó no TypeScript
 const graphBuilder = new StateGraph(OmniState)
-  .addNode("router", routerNode)
-  .addNode("triage", triageNode)
-  .addNode("status", statusNode)
-  .addNode("rag", ragNode)
-  .addNode("handoff", handoffNode)
-  .addNode("sync", syncNode)
+  .addNode("router_node", routerNode)
+  .addNode("triage_node", triageNode)
+  .addNode("status_node", statusNode)
+  .addNode("rag_node", ragNode)
+  .addNode("handoff_node", handoffNode)
+  .addNode("sync_node", syncNode)
   // Entrada
-  .addEdge(START, "router")
+  .addEdge(START, "router_node")
   // Arestas condicionais
-  .addConditionalEdges("router", routeByCurrentNode, {
-    triage: "triage",
-    status: "status",
-    rag: "rag",
-    handoff: "handoff",
-    sync: "sync",
+  .addConditionalEdges("router_node", routeByCurrentNode, {
+    triage_node: "triage_node",
+    status_node: "status_node",
+    rag_node: "rag_node",
+    handoff_node: "handoff_node",
+    sync_node: "sync_node",
   })
-  .addConditionalEdges("triage", routeByCurrentNode, {
-    triage: "triage",
-    sync: "sync",
+  .addConditionalEdges("triage_node", routeByCurrentNode, {
+    triage_node: "triage_node",
+    sync_node: "sync_node",
   })
-  .addConditionalEdges("status", routeByCurrentNode, {
-    status: "status",
-    sync: "sync",
+  .addConditionalEdges("status_node", routeByCurrentNode, {
+    status_node: "status_node",
+    sync_node: "sync_node",
   })
-  .addConditionalEdges("rag", routeByCurrentNode, {
-    handoff: "handoff",
-    sync: "sync",
+  .addConditionalEdges("rag_node", routeByCurrentNode, {
+    handoff_node: "handoff_node",
+    sync_node: "sync_node",
   })
   // Arestas fixas
-  .addEdge("handoff", "sync")
-  .addEdge("sync", END);
+  .addEdge("handoff_node", "sync_node")
+  .addEdge("sync_node", END);
 
 // Compila com checkpointer PostgreSQL (persistência de estado por thread)
 export const graph = graphBuilder.compile({ checkpointer });

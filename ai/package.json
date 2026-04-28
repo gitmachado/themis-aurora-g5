@@ -3,15 +3,16 @@
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
+  "type": "module",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "build": "tsc",
     "start": "node dist/index.js",
-    "dev": "ts-node src/index.ts",
-    "test:graph": "ts-node src/test-graph.ts",
-    "index:pdf": "ts-node src/rag/indexer.ts",
-    "test:e2e-lead": "ts-node src/tests/e2e-lead.ts",
-    "test:e2e-rag": "ts-node src/tests/e2e-status-rag-handoff.ts"
+    "dev": "tsx src/index.ts",
+    "test:graph": "tsx src/test-graph.ts",
+    "index:pdf": "tsx src/rag/indexer.ts",
+    "test:e2e-lead": "tsx src/tests/e2e-lead.ts",
+    "test:e2e-rag": "tsx src/tests/e2e-status-rag-handoff.ts"
   },
   "keywords": [],
   "author": "",
@@ -22,14 +23,15 @@
     "@types/pg": "^8.20.0",
     "dotenv": "^17.4.2",
     "ts-node": "^10.9.2",
+    "tsx": "^4.21.0",
     "typescript": "^6.0.3"
   },
   "dependencies": {
     "@langchain/community": "^1.1.27",
     "@langchain/core": "^1.1.41",
+    "@langchain/google-genai": "^0.1.8",
     "@langchain/langgraph": "^1.2.9",
     "@langchain/langgraph-checkpoint-postgres": "^1.0.1",
-    "@langchain/google-genai": "^0.1.8",
     "axios": "^1.15.2",
     "express": "^5.2.1",
     "pdf-parse": "^2.4.5",

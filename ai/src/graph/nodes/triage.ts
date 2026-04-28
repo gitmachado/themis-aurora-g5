@@ -78,7 +78,7 @@ export async function triageNode(
       const leadId = await createLead(triage, whatsappNumber);
       return {
         leadId,
-        currentNode: "sync",
+        currentNode: "sync_node",
         messages: [
           new AIMessage(
             `✅ Informações registradas! Um advogado entrará em contato no período da ${triage.contactAvailability}.`
@@ -88,7 +88,7 @@ export async function triageNode(
     } catch (err) {
       console.error("[Triage Node] Erro ao criar lead:", err);
       return {
-        currentNode: "sync",
+        currentNode: "sync_node",
         messages: [
           new AIMessage("Houve um erro ao registrar suas informações. Por favor, tente novamente."),
         ],
@@ -148,7 +148,7 @@ export async function triageNode(
   if (errorMsg) {
     return {
       triage: updatedTriage,
-      currentNode: "triage",
+      currentNode: "triage_node",
       messages: [new AIMessage(errorMsg)],
     };
   }
@@ -177,7 +177,7 @@ export async function triageNode(
 
   return {
     triage: updatedTriage,
-    currentNode: "triage",
+    currentNode: "triage_node",
     messages: [new AIMessage(String(response.content))],
   };
 }

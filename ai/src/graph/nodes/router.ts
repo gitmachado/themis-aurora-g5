@@ -50,11 +50,11 @@ function resolveNextNode(
   userType: "UNKNOWN" | "LEAD" | "CLIENT",
   intent: string
 ): string {
-  if (intent === "HANDOFF_REQUEST") return "handoff";
-  if (userType === "UNKNOWN" || userType === "LEAD") return "triage";
-  if (intent === "STATUS_QUERY") return "status";
-  if (intent === "LEGAL_QUESTION") return "rag";
-  return "triage";
+  if (intent === "HANDOFF_REQUEST") return "handoff_node";
+  if (userType === "UNKNOWN" || userType === "LEAD") return "triage_node";
+  if (intent === "STATUS_QUERY") return "status_node";
+  if (intent === "LEGAL_QUESTION") return "rag_node";
+  return "triage_node";
 }
 
 export async function routerNode(
@@ -65,7 +65,7 @@ export async function routerNode(
   // 1. Verifica horário de atendimento
   if (!isWithinServiceHours(new Date(), config.serviceHoursStart, config.serviceHoursEnd)) {
     return {
-      currentNode: "sync",
+      currentNode: "sync_node",
       messages: [new AIMessage(config.awayMessage)],
     };
   }

@@ -58,7 +58,7 @@ export async function handoffNode(
 
   // 3. Retorna estado com mensagem de transferência ao cliente
   return {
-    currentNode: "sync",
+    currentNode: "sync_node",
     needsHandoff: true,
     messages: [new AIMessage(HANDOFF_MESSAGE)],
   };

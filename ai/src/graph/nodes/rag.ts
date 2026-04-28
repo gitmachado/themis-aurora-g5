@@ -48,7 +48,7 @@ export async function ragNode(
   } catch (err) {
     console.error("[RAG Node] Erro ao conectar ao pgvector:", err);
     return {
-      currentNode: "handoff",
+      currentNode: "handoff_node",
       needsHandoff: true,
       handoffReason: "Falha ao acessar a base de conhecimento",
       messages: [
@@ -95,7 +95,7 @@ export async function ragNode(
   // 5. Se sem chunks ou LLM indicou falta de informação → aciona handoff
   if (relevantDocs.length === 0 || containsHandoffIndicator(responseText)) {
     return {
-      currentNode: "handoff",
+      currentNode: "handoff_node",
       needsHandoff: true,
       handoffReason: "Pergunta fora da base de conhecimento",
       messages: [new AIMessage(responseText)],
@@ -103,7 +103,7 @@ export async function ragNode(
   }
 
   return {
-    currentNode: "sync",
+    currentNode: "sync_node",
     needsHandoff: false,
     messages: [new AIMessage(responseText)],
   };

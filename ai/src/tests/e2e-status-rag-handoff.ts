@@ -16,7 +16,7 @@ async function sendMessage(threadId: string, content: string) {
       leadId: null,
       messages: [new HumanMessage(content)],
       triage: INITIAL_TRIAGE,
-      currentNode: "router",
+      currentNode: "router_node",
       needsHandoff: false,
       handoffReason: null,
       config: INITIAL_CONFIG,

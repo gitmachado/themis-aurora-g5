@@ -62,7 +62,7 @@ export async function statusNode(
   } catch (err) {
     console.error("[Status Node] Erro ao buscar processos:", err);
     return {
-      currentNode: "sync",
+      currentNode: "sync_node",
       messages: [
         new AIMessage("Não consegui consultar seus processos agora. Tente novamente em instantes."),
       ],
@@ -73,14 +73,14 @@ export async function statusNode(
   const choice = parseInt(userInput, 10);
   if (!isNaN(choice) && choice >= 1 && choice <= processes.length) {
     return {
-      currentNode: "sync",
+      currentNode: "sync_node",
       messages: [new AIMessage(formatSingle(processes[choice - 1]))],
     };
   }
 
   if (processes.length === 0) {
     return {
-      currentNode: "sync",
+      currentNode: "sync_node",
       messages: [
         new AIMessage(
           "Você não tem processos abertos no nosso escritório.\nQuer abrir um novo caso? Posso ajudar com a triagem! 😊"
@@ -91,14 +91,14 @@ export async function statusNode(
 
   if (processes.length === 1) {
     return {
-      currentNode: "sync",
+      currentNode: "sync_node",
       messages: [new AIMessage(formatSingle(processes[0]))],
     };
   }
 
   // Múltiplos processos — lista numerada, aguarda escolha
   return {
-    currentNode: "status",
+    currentNode: "status_node",
     messages: [new AIMessage(formatList(processes))],
   };
 }
