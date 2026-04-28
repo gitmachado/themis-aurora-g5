@@ -1,4 +1,4 @@
-import { ChatOpenAI } from "@langchain/openai";
+import { ChatGoogleGenerativeAI } from "@langchain/google-genai";
 import { AIMessage } from "@langchain/core/messages";
 import { z } from "zod";
 import axios from "axios";
@@ -74,8 +74,9 @@ export async function routerNode(
   const userInfo = await checkUserExists(whatsappNumber);
 
   // 3. Classifica intenção via LLM com saída estruturada
-  const model = new ChatOpenAI({
-    modelName: process.env.OPENAI_MODEL || "gpt-4o-mini",
+  const model = new ChatGoogleGenerativeAI({
+    modelName: process.env.GOOGLE_MODEL || "gemini-1.5-flash",
+    apiKey: process.env.GOOGLE_API_KEY,
     temperature: 0,
   });
   const structured = model.withStructuredOutput(routerSchema);

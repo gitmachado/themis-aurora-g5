@@ -1,6 +1,6 @@
 import { PDFLoader } from "@langchain/community/document_loaders/fs/pdf";
 import { RecursiveCharacterTextSplitter } from "@langchain/textsplitters";
-import { OpenAIEmbeddings } from "@langchain/openai";
+import { GoogleGenerativeAIEmbeddings } from "@langchain/google-genai";
 import { PGVectorStore } from "@langchain/community/vectorstores/pgvector";
 import path from "path";
 
@@ -39,8 +39,9 @@ async function indexPDF(filePath: string): Promise<void> {
   }));
 
   // Etapa 4 — Embed + Store: gera vetores e salva no pgvector
-  const embeddings = new OpenAIEmbeddings({
-    model: process.env.EMBEDDING_MODEL || "text-embedding-3-small",
+  const embeddings = new GoogleGenerativeAIEmbeddings({
+    modelName: process.env.GOOGLE_EMBEDDING_MODEL || "text-embedding-004",
+    apiKey: process.env.GOOGLE_API_KEY,
   });
 
   const vectorStore = await PGVectorStore.initialize(embeddings, {

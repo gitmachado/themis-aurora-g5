@@ -152,7 +152,7 @@ CREATE TABLE IF NOT EXISTS knowledge_embeddings (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     content TEXT NOT NULL,
     metadata JSONB DEFAULT '{}',
-    embedding vector(1536),
+    embedding vector(768),
     created_at TIMESTAMPTZ DEFAULT NOW()
 );
 
