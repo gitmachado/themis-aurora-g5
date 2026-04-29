@@ -38,6 +38,7 @@ whatsappRouter.post("/webhook", async (req, res) => {
     const type: string = message.type;
 
     // Ignora mensagens não-texto (áudio, imagem, vídeo, etc.)
+    // TODO: Integrar com validateMessageType de ai/src/utils/message-validator.ts após conclusão da T19
     if (type !== "text" || !message.text?.body) {
       console.log(
         `[Webhook] Mensagem não-texto ignorada (${type}) de ${whatsappNumber}`

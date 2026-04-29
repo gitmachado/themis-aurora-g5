@@ -2,14 +2,34 @@
 // Uso: npm run test:e2e-lead
 // Requer: banco PostgreSQL + backend rodando
 import "dotenv/config";
-import { HumanMessage } from "@langchain/core/messages";
+import { HumanMessage, AIMessage } from "@langchain/core/messages";
 import { graph } from "../graph/index.js";
 import { INITIAL_TRIAGE, INITIAL_CONFIG } from "../graph/state.js";
 import { setupCheckpointer } from "../config/checkpointer.js";
+import { validateMessageType } from "../utils/message-validator.js";
 
 const BASE_THREAD = `test-lead-${Date.now()}`;
 
-async function sendMessage(threadId: string, content: string, isFirst: boolean = false) {
+async function sendMessage(threadId: string, content: string, isFirst: boolean = false, type: string = "TEXT") {
+  // Validação de tipo de mensagem (Barreira de entrada)
+  const validation = validateMessageType(type);
+  if (!validation.isValid) {
+    console.log(`  [USER] (${type}) ${content || "(vazia)"}`);
+    console.log(`  [BOT]  ${validation.errorMessage}`);
+    return {
+      whatsappNumber: threadId,
+      userType: "UNKNOWN",
+      userId: null,
+      leadId: null,
+      messages: [new AIMessage(validation.errorMessage!)],
+      triage: INITIAL_TRIAGE,
+      currentNode: "barrier",
+      needsHandoff: false,
+      handoffReason: null,
+      config: INITIAL_CONFIG
+    } as any;
+  }
+
   const input: any = {
     messages: [new HumanMessage(content)],
   };

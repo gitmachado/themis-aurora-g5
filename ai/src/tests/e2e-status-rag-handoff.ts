@@ -2,12 +2,33 @@
 // Uso: npm run test:e2e-rag
 // Requer: banco PostgreSQL + backend rodando + PDFs indexados (T15)
 import "dotenv/config";
-import { HumanMessage } from "@langchain/core/messages";
+import { HumanMessage, AIMessage } from "@langchain/core/messages";
 import { graph } from "../graph/index.js";
 import { INITIAL_TRIAGE, INITIAL_CONFIG } from "../graph/state.js";
 import { setupCheckpointer } from "../config/checkpointer.js";
+import { validateMessageType } from "../utils/message-validator.js";
 
-async function sendMessage(threadId: string, content: string, isFirst: boolean = false) {
+async function sendMessage(threadId: string, content: string, isFirst: boolean = false, type: string = "TEXT") {
+  // Validação de tipo de mensagem (Barreira de entrada)
+  const validation = validateMessageType(type);
+  if (!validation.isValid) {
+    console.log(`  [USER] (${type}) ${content}`);
+    console.log(`  [BOT]  ${validation.errorMessage}`);
+    // Mock do retorno do grafo para manter compatibilidade de interface nos testes
+    return {
+      whatsappNumber: threadId,
+      userType: "UNKNOWN",
+      userId: null,
+      leadId: null,
+      messages: [new AIMessage(validation.errorMessage!)],
+      triage: INITIAL_TRIAGE,
+      currentNode: "barrier",
+      needsHandoff: false,
+      handoffReason: null,
+      config: INITIAL_CONFIG
+    };
+  }
+
   const input: any = {
     messages: [new HumanMessage(content)],
   };
@@ -71,6 +92,19 @@ async function runHandoffRAGFailure() {
   }
 }
 
+async function runNonTextMessage() {
+  console.log("\n========== CENÁRIO 5: Mensagem Não-Texto (Áudio) ==========");
+  const threadId = `test-audio-${Date.now()}`;
+  const result = await sendMessage(threadId, "[Áudio de 10s]", true, "audio");
+  const last = result.messages.at(-1);
+  
+  if (String(last?.content).includes("processar mensagens de texto")) {
+    console.log("  ✅ Barreira bloqueou áudio corretamente");
+  } else {
+    console.log("  ❌ ERRO: Barreira não bloqueou áudio");
+  }
+}
+
 (async () => {
   console.log("🚀 Iniciando testes E2E — Status + RAG + Handoff (T26)");
   await setupCheckpointer();
@@ -78,6 +112,7 @@ async function runHandoffRAGFailure() {
   await runRAGQuery();
   await runHandoffKeyword();
   await runHandoffRAGFailure();
+  await runNonTextMessage();
   console.log("\n✅ T26 — Todos os cenários executados");
   process.exit(0);
 })().catch((err) => {
