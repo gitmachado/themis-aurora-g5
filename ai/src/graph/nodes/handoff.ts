@@ -40,10 +40,8 @@ export async function handoffNode(
   // 1. Notifica o advogado via backend
   await notifyLawyer(whatsappNumber, handoffReason, leadId);
 
-  // 2. Pausa o grafo até intervenção humana (Human-in-the-loop)
-  interrupt("HANDOFF_IN_PROGRESS");
-
-  // 3. Retorna estado com mensagem de transferência ao cliente
+  // 2. Retorna estado com mensagem de transferência ao cliente
+  // Nota: Removido interrupt() pois ele impediria o bot de responder a última mensagem.
   return {
     currentNode: "sync_node",
     needsHandoff: true,

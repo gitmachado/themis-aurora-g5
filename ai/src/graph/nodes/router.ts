@@ -51,13 +51,18 @@ function resolveNextNode(
   userType: "UNKNOWN" | "LEAD" | "CLIENT",
   intent: string
 ): string {
+  // Prioridade 1: Pedido explícito de falar com humano
   if (intent === "HANDOFF_REQUEST") return "handoff_node";
-  if (userType === "UNKNOWN" || userType === "LEAD") return "triage_node";
-  if (intent === "STATUS_QUERY") return "status_node";
+
+  // Prioridade 2: Perguntas jurídicas ou status (independente de quem é o usuário)
   if (intent === "LEGAL_QUESTION") return "rag_node";
-  if (intent === "GREETING") return "triage_node";
-  return "triage_node"; // Fallback para OTHER ou desconhecido
+  if (intent === "STATUS_QUERY") return "status_node";
+
+  // Prioridade 3: Se é novo ou lead em progresso, segue para triagem
+  return "triage_node";
 }
+
+
 
 export async function routerNode(
   state: OmniStateType
