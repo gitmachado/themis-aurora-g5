@@ -22,6 +22,18 @@ final class AppNotificationModel extends AppNotification {
       createdAt: _date(json['createdAt']),
     );
   }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'userId': userId,
+      'type': type,
+      'title': title,
+      'body': body,
+      'isRead': isRead,
+      'createdAt': createdAt?.toIso8601String(),
+    };
+  }
 }
 
 DateTime? _date(Object? value) {

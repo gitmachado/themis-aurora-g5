@@ -1,4 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:mobile/shared/errors/either_failure_extensions.dart';
 
 import '../../../../shared/network/api_client.dart';
 import '../../data/datasources/procedure_remote_data_source.dart';
@@ -7,6 +8,7 @@ import '../../domain/entities/legal_process.dart';
 import '../../domain/entities/process_document.dart';
 import '../../domain/entities/timeline_event.dart';
 import '../../domain/repositories/procedure_repository.dart';
+import '../../domain/usecases/procedure_use_cases.dart';
 
 final procedureRemoteDataSourceProvider = Provider<ProcedureRemoteDataSource>((
   ref,
@@ -18,44 +20,102 @@ final procedureRepositoryProvider = Provider<ProcedureRepository>((ref) {
   return ProcedureRepositoryImpl(ref.watch(procedureRemoteDataSourceProvider));
 });
 
-final myProceduresProvider = FutureProvider<List<LegalProcess>>((ref) {
-  return ref.watch(procedureRepositoryProvider).getMyProcesses();
+final getMyProceduresUseCaseProvider = Provider<GetMyProceduresUseCase>((ref) {
+  return GetMyProceduresUseCase(ref.watch(procedureRepositoryProvider));
+});
+
+final getProcedureByIdUseCaseProvider = Provider<GetProcedureByIdUseCase>((
+  ref,
+) {
+  return GetProcedureByIdUseCase(ref.watch(procedureRepositoryProvider));
+});
+
+final getProcedureTimelineUseCaseProvider =
+    Provider<GetProcedureTimelineUseCase>((ref) {
+      return GetProcedureTimelineUseCase(
+        ref.watch(procedureRepositoryProvider),
+      );
+    });
+
+final getProcedureDocumentsUseCaseProvider =
+    Provider<GetProcedureDocumentsUseCase>((ref) {
+      return GetProcedureDocumentsUseCase(
+        ref.watch(procedureRepositoryProvider),
+      );
+    });
+
+final getMyDocumentsUseCaseProvider = Provider<GetMyDocumentsUseCase>((ref) {
+  return GetMyDocumentsUseCase(ref.watch(procedureRepositoryProvider));
+});
+
+final getDocumentByIdUseCaseProvider = Provider<GetDocumentByIdUseCase>((ref) {
+  return GetDocumentByIdUseCase(ref.watch(procedureRepositoryProvider));
+});
+
+final uploadDocumentUseCaseProvider = Provider<UploadDocumentUseCase>((ref) {
+  return UploadDocumentUseCase(ref.watch(procedureRepositoryProvider));
+});
+
+final deleteDocumentUseCaseProvider = Provider<DeleteDocumentUseCase>((ref) {
+  return DeleteDocumentUseCase(ref.watch(procedureRepositoryProvider));
+});
+
+final updateProcedureStatusUseCaseProvider =
+    Provider<UpdateProcedureStatusUseCase>((ref) {
+      return UpdateProcedureStatusUseCase(
+        ref.watch(procedureRepositoryProvider),
+      );
+    });
+
+final myProceduresProvider = FutureProvider<List<LegalProcess>>((ref) async {
+  return (await ref.watch(getMyProceduresUseCaseProvider)()).getOrThrow();
 });
 
 final procedureDetailsProvider = FutureProvider.family<LegalProcess, String>((
   ref,
   processId,
-) {
-  return ref.watch(procedureRepositoryProvider).getProcessById(processId);
+) async {
+  return (await ref.watch(getProcedureByIdUseCaseProvider)(
+    processId,
+  )).getOrThrow();
 });
 
 final procedureTimelineProvider =
-    FutureProvider.family<List<TimelineEvent>, String>((ref, processId) {
-      return ref.watch(procedureRepositoryProvider).getTimeline(processId);
+    FutureProvider.family<List<TimelineEvent>, String>((ref, processId) async {
+      return (await ref.watch(getProcedureTimelineUseCaseProvider)(
+        processId,
+      )).getOrThrow();
     });
 
 final procedureDocumentsProvider =
-    FutureProvider.family<List<ProcessDocument>, String>((ref, processId) {
-      return ref.watch(procedureRepositoryProvider).getDocuments(processId);
+    FutureProvider.family<List<ProcessDocument>, String>((
+      ref,
+      processId,
+    ) async {
+      return (await ref.watch(getProcedureDocumentsUseCaseProvider)(
+        processId,
+      )).getOrThrow();
     });
 
-final myDocumentsProvider = FutureProvider<List<ProcessDocument>>((ref) {
-  return ref.watch(procedureRepositoryProvider).getMyDocuments();
+final myDocumentsProvider = FutureProvider<List<ProcessDocument>>((ref) async {
+  return (await ref.watch(getMyDocumentsUseCaseProvider)()).getOrThrow();
 });
 
 final documentDetailsProvider = FutureProvider.family<ProcessDocument, String>((
   ref,
   documentId,
-) {
-  return ref.watch(procedureRepositoryProvider).getDocumentById(documentId);
+) async {
+  return (await ref.watch(getDocumentByIdUseCaseProvider)(
+    documentId,
+  )).getOrThrow();
 });
 
 final myRecentDocumentsProvider = FutureProvider<List<ProcessDocument>>((
   ref,
 ) async {
-  final documents = await ref
-      .watch(procedureRepositoryProvider)
-      .getMyDocuments();
+  final documents = (await ref.watch(
+    getMyDocumentsUseCaseProvider,
+  )()).getOrThrow();
   documents.sort((a, b) {
     final aDate = a.createdAt ?? DateTime.fromMillisecondsSinceEpoch(0);
     final bDate = b.createdAt ?? DateTime.fromMillisecondsSinceEpoch(0);
@@ -79,9 +139,10 @@ final class ProcedureActions {
     required String status,
     String? reason,
   }) async {
-    await _ref
-        .read(procedureRepositoryProvider)
-        .updateStatus(processId: processId, status: status, reason: reason);
+    (await _ref
+            .read(updateProcedureStatusUseCaseProvider)
+            .call(processId: processId, status: status, reason: reason))
+        .getOrThrow();
     _ref.invalidate(myProceduresProvider);
     _ref.invalidate(procedureDetailsProvider(processId));
     _ref.invalidate(procedureTimelineProvider(processId));
@@ -91,7 +152,7 @@ final class ProcedureActions {
     required String processId,
     required String documentId,
   }) async {
-    await _ref.read(procedureRepositoryProvider).deleteDocument(documentId);
+    (await _ref.read(deleteDocumentUseCaseProvider)(documentId)).getOrThrow();
     _ref.invalidate(procedureDocumentsProvider(processId));
     _ref.invalidate(documentDetailsProvider(documentId));
     _ref.invalidate(myDocumentsProvider);
@@ -103,13 +164,10 @@ final class ProcedureActions {
     required String filePath,
     required String fileName,
   }) async {
-    await _ref
-        .read(procedureRepositoryProvider)
-        .uploadDocument(
-          processId: processId,
-          filePath: filePath,
-          fileName: fileName,
-        );
+    (await _ref
+            .read(uploadDocumentUseCaseProvider)
+            .call(processId: processId, filePath: filePath, fileName: fileName))
+        .getOrThrow();
     _ref.invalidate(procedureDocumentsProvider(processId));
     _ref.invalidate(myDocumentsProvider);
     _ref.invalidate(myRecentDocumentsProvider);

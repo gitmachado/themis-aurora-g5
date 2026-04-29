@@ -22,6 +22,18 @@ final class ChatMessageModel extends ChatMessage {
       createdAt: _date(json['createdAt']),
     );
   }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'leadId': leadId,
+      'userId': userId,
+      'sender': sender,
+      'content': content,
+      'whatsappMessageId': whatsappMessageId,
+      'createdAt': createdAt?.toIso8601String(),
+    };
+  }
 }
 
 DateTime? _date(Object? value) {

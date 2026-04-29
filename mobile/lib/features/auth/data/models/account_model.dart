@@ -24,6 +24,19 @@ final class AccountModel extends Account {
       notificationPreferences: _preferences(json['notificationPreferences']),
     );
   }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'name': name,
+      'whatsappNumber': whatsappNumber,
+      'cpf': cpf,
+      'email': email,
+      'avatarUrl': avatarUrl,
+      'role': role.apiValue,
+      'notificationPreferences': notificationPreferences,
+    };
+  }
 }
 
 Map<String, bool> _preferences(Object? value) {

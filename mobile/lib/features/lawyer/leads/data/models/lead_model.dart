@@ -28,6 +28,21 @@ final class LeadModel extends Lead {
       createdAt: _date(json['createdAt']),
     );
   }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'whatsappNumber': whatsappNumber,
+      'name': name,
+      'cpf': cpf,
+      'caseType': caseType,
+      'caseDescription': caseDescription,
+      'urgency': urgency,
+      'contactAvailability': contactAvailability,
+      'status': status,
+      'createdAt': createdAt?.toIso8601String(),
+    };
+  }
 }
 
 DateTime? _date(Object? value) {

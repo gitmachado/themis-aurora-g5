@@ -1,7 +1,7 @@
 import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import 'api_config.dart';
+import '../constants/app_constants.dart';
 import 'api_exception.dart';
 import 'token_storage.dart';
 
@@ -20,14 +20,14 @@ class ApiClient {
   ApiClient({
     Dio? dio,
     TokenStorage? tokenStorage,
-    String baseUrl = ApiConfig.baseUrl,
+    String baseUrl = AppConstants.apiBaseUrl,
   }) : _dio =
            dio ??
            Dio(
              BaseOptions(
                baseUrl: baseUrl,
-               connectTimeout: const Duration(seconds: 15),
-               receiveTimeout: const Duration(seconds: 20),
+               connectTimeout: AppConstants.requestConnectTimeout,
+               receiveTimeout: AppConstants.requestReceiveTimeout,
                headers: const {'Accept': 'application/json'},
              ),
            ),
@@ -155,6 +155,7 @@ class ApiClient {
 
   ApiException _mapDioException(DioException error) {
     final data = error.response?.data;
+    final statusCode = error.response?.statusCode;
     String message = 'Nao foi possivel falar com o servidor';
 
     if (data is Map) {
@@ -166,6 +167,24 @@ class ApiClient {
       message = error.message!;
     }
 
-    return ApiException(message, statusCode: error.response?.statusCode);
+    return ApiException(
+      message,
+      statusCode: statusCode,
+      type: _apiExceptionType(error, statusCode),
+    );
+  }
+
+  ApiExceptionType _apiExceptionType(DioException error, int? statusCode) {
+    if (statusCode == 401 || statusCode == 403) {
+      return ApiExceptionType.auth;
+    }
+
+    return switch (error.type) {
+      DioExceptionType.connectionTimeout ||
+      DioExceptionType.sendTimeout ||
+      DioExceptionType.receiveTimeout ||
+      DioExceptionType.connectionError => ApiExceptionType.network,
+      _ => ApiExceptionType.server,
+    };
   }
 }

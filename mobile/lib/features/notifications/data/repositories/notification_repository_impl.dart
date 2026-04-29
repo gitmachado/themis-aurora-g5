@@ -1,3 +1,7 @@
+import 'package:fpdart/fpdart.dart';
+import 'package:mobile/shared/errors/failures.dart';
+import 'package:mobile/shared/errors/repository_guard.dart';
+
 import '../../domain/entities/app_notification.dart';
 import '../../domain/repositories/notification_repository.dart';
 import '../datasources/notification_remote_data_source.dart';
@@ -8,16 +12,22 @@ final class NotificationRepositoryImpl implements NotificationRepository {
   const NotificationRepositoryImpl(this._remoteDataSource);
 
   @override
-  Future<List<AppNotification>> getMyNotifications() {
-    return _remoteDataSource.getMyNotifications();
+  Future<Either<Failure, List<AppNotification>>> getMyNotifications() {
+    return guardRepository(_remoteDataSource.getMyNotifications);
   }
 
   @override
-  Future<void> markAsRead(String id) => _remoteDataSource.markAsRead(id);
+  Future<Either<Failure, Unit>> markAsRead(String id) {
+    return guardRepositoryUnit(() => _remoteDataSource.markAsRead(id));
+  }
 
   @override
-  Future<void> markAllAsRead() => _remoteDataSource.markAllAsRead();
+  Future<Either<Failure, Unit>> markAllAsRead() {
+    return guardRepositoryUnit(_remoteDataSource.markAllAsRead);
+  }
 
   @override
-  Future<void> delete(String id) => _remoteDataSource.delete(id);
+  Future<Either<Failure, Unit>> delete(String id) {
+    return guardRepositoryUnit(() => _remoteDataSource.delete(id));
+  }
 }

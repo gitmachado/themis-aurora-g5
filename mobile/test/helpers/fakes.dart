@@ -19,7 +19,7 @@ final class ApiCall {
   ]);
 }
 
-final class FakeApiClient implements ApiClient {
+class FakeApiClient implements ApiClient {
   static const _baseUrl = 'http://localhost:3000/api/v1';
 
   final List<ApiCall> calls = [];

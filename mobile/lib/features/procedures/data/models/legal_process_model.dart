@@ -32,6 +32,23 @@ final class LegalProcessModel extends LegalProcess {
       updatedAt: _date(json['updatedAt']),
     );
   }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'clientId': clientId,
+      'lawyerId': lawyerId,
+      'title': title,
+      'description': description,
+      'currentStatus': currentStatus,
+      'processNumber': processNumber,
+      'caseType': caseType,
+      'lastNote': lastNote,
+      'lastMovementDate': lastMovementDate?.toIso8601String(),
+      'createdAt': createdAt?.toIso8601String(),
+      'updatedAt': updatedAt?.toIso8601String(),
+    };
+  }
 }
 
 DateTime? _date(Object? value) {

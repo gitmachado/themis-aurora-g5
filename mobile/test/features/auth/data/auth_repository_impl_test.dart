@@ -2,6 +2,8 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:mobile/features/auth/data/datasources/auth_remote_data_source.dart';
 import 'package:mobile/features/auth/data/repositories/auth_repository_impl.dart';
 import 'package:mobile/features/auth/domain/entities/account.dart';
+import 'package:mobile/shared/errors/failures.dart';
+import 'package:mobile/shared/network/api_exception.dart';
 
 import '../../../helpers/fakes.dart';
 
@@ -37,16 +39,18 @@ void main() {
       tokenStorage: tokenStorage,
     );
 
-    final session = await repository.login(
+    final session = (await repository.login(
       email: 'lucas@example.com',
       password: 'secret123',
-    );
-    final updated = await repository.updateNotificationPreferences({
+    )).getOrElse((failure) => throw failure);
+    final updated = (await repository.updateNotificationPreferences({
       'documents': false,
-    });
-    final restored = await repository.restoreSession();
+    })).getOrElse((failure) => throw failure);
+    final restored = (await repository.restoreSession()).getOrElse(
+      (failure) => throw failure,
+    );
     expect(tokenStorage.token, 'jwt-token');
-    await repository.logout();
+    (await repository.logout()).getOrElse((failure) => throw failure);
 
     expect(apiClient.calls.first.method, 'POST');
     expect(apiClient.calls.first.path, '/auth/login');
@@ -72,4 +76,43 @@ void main() {
       'notificationPreferences': {'documents': false},
     });
   });
+
+  test('login returns AuthFailure when remote login is unauthorized', () async {
+    final repository = AuthRepositoryImpl(
+      remoteDataSource: AuthRemoteDataSource(
+        _ThrowingLoginApiClient(
+          const ApiException(
+            'Credenciais invalidas',
+            statusCode: 401,
+            type: ApiExceptionType.auth,
+          ),
+        ),
+      ),
+      tokenStorage: FakeTokenStorage(),
+    );
+
+    final result = await repository.login(
+      email: 'lucas@example.com',
+      password: 'wrong',
+    );
+
+    result.match((failure) {
+      expect(failure, isA<AuthFailure>());
+      expect(failure.message, 'Credenciais invalidas');
+    }, (_) => fail('Expected login to return a failure'));
+  });
+}
+
+final class _ThrowingLoginApiClient extends FakeApiClient {
+  final ApiException exception;
+
+  _ThrowingLoginApiClient(this.exception);
+
+  @override
+  Future<Map<String, dynamic>> postJson(
+    String path, {
+    Map<String, dynamic>? data,
+  }) async {
+    throw exception;
+  }
 }

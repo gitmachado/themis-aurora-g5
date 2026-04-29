@@ -20,6 +20,17 @@ final class TimelineEventModel extends TimelineEvent {
       createdAt: _date(json['createdAt']),
     );
   }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'legalProcessId': legalProcessId,
+      'type': type,
+      'content': content,
+      'previousStatus': previousStatus,
+      'createdAt': createdAt?.toIso8601String(),
+    };
+  }
 }
 
 DateTime? _date(Object? value) {

@@ -1,3 +1,7 @@
+import 'package:fpdart/fpdart.dart';
+import 'package:mobile/shared/errors/failures.dart';
+import 'package:mobile/shared/errors/repository_guard.dart';
+
 import '../../../../shared/network/token_storage.dart';
 import '../../domain/entities/account.dart';
 import '../../domain/entities/auth_session.dart';
@@ -15,63 +19,73 @@ final class AuthRepositoryImpl implements AuthRepository {
        _tokenStorage = tokenStorage;
 
   @override
-  Future<AuthSession> login({
+  Future<Either<Failure, AuthSession>> login({
     required String email,
     required String password,
-  }) async {
-    final session = await _remoteDataSource.login(
-      email: email,
-      password: password,
-    );
-    await _tokenStorage.saveToken(session.token);
+  }) {
+    return guardRepository(() async {
+      final session = await _remoteDataSource.login(
+        email: email,
+        password: password,
+      );
+      await _tokenStorage.saveToken(session.token);
 
-    final account = await _remoteDataSource.getAccount();
-    return session.copyWith(
-      userId: account.id,
-      role: account.role,
-      account: account,
-    );
+      final account = await _remoteDataSource.getAccount();
+      return session.copyWith(
+        userId: account.id,
+        role: account.role,
+        account: account,
+      );
+    });
   }
 
   @override
-  Future<AuthSession?> restoreSession() async {
-    final token = await _tokenStorage.readToken();
-    if (token == null || token.isEmpty) return null;
+  Future<Either<Failure, AuthSession?>> restoreSession() {
+    return guardRepository(() async {
+      final token = await _tokenStorage.readToken();
+      if (token == null || token.isEmpty) return null;
 
-    final account = await _remoteDataSource.getAccount();
-    return AuthSession(
-      token: token,
-      userId: account.id,
-      role: account.role,
-      account: account,
-    );
+      final account = await _remoteDataSource.getAccount();
+      return AuthSession(
+        token: token,
+        userId: account.id,
+        role: account.role,
+        account: account,
+      );
+    });
   }
 
   @override
-  Future<Account> getAccount() {
-    return _remoteDataSource.getAccount();
+  Future<Either<Failure, Account>> getAccount() {
+    return guardRepository(_remoteDataSource.getAccount);
   }
 
   @override
-  Future<Account> updateNotificationPreferences(
+  Future<Either<Failure, Account>> updateNotificationPreferences(
     Map<String, bool> notificationPreferences,
   ) {
-    return _remoteDataSource.updateNotificationPreferences(
-      notificationPreferences,
+    return guardRepository(
+      () => _remoteDataSource.updateNotificationPreferences(
+        notificationPreferences,
+      ),
     );
   }
 
   @override
-  Future<Account> uploadAvatar({
+  Future<Either<Failure, Account>> uploadAvatar({
     required String filePath,
     required String fileName,
   }) {
-    return _remoteDataSource.uploadAvatar(
-      filePath: filePath,
-      fileName: fileName,
+    return guardRepository(
+      () => _remoteDataSource.uploadAvatar(
+        filePath: filePath,
+        fileName: fileName,
+      ),
     );
   }
 
   @override
-  Future<void> logout() => _tokenStorage.clearToken();
+  Future<Either<Failure, Unit>> logout() {
+    return guardRepositoryUnit(_tokenStorage.clearToken);
+  }
 }

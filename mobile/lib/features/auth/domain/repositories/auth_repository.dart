@@ -1,21 +1,27 @@
+import 'package:fpdart/fpdart.dart';
+import 'package:mobile/shared/errors/failures.dart';
+
 import '../entities/auth_session.dart';
 import '../entities/account.dart';
 
 abstract interface class AuthRepository {
-  Future<AuthSession> login({required String email, required String password});
+  Future<Either<Failure, AuthSession>> login({
+    required String email,
+    required String password,
+  });
 
-  Future<AuthSession?> restoreSession();
+  Future<Either<Failure, AuthSession?>> restoreSession();
 
-  Future<Account> getAccount();
+  Future<Either<Failure, Account>> getAccount();
 
-  Future<Account> updateNotificationPreferences(
+  Future<Either<Failure, Account>> updateNotificationPreferences(
     Map<String, bool> notificationPreferences,
   );
 
-  Future<Account> uploadAvatar({
+  Future<Either<Failure, Account>> uploadAvatar({
     required String filePath,
     required String fileName,
   });
 
-  Future<void> logout();
+  Future<Either<Failure, Unit>> logout();
 }

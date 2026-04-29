@@ -24,6 +24,19 @@ final class ProcessDocumentModel extends ProcessDocument {
       createdAt: _date(json['createdAt']),
     );
   }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'legalProcessId': legalProcessId,
+      'fileName': fileName,
+      'fileUrl': fileUrl,
+      'sizeBytes': sizeBytes,
+      'mimeType': mimeType,
+      'sentById': sentById,
+      'createdAt': createdAt?.toIso8601String(),
+    };
+  }
 }
 
 DateTime? _date(Object? value) {

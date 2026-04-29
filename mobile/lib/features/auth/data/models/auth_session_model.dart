@@ -23,4 +23,30 @@ final class AuthSessionModel extends AuthSession {
       account: account,
     );
   }
+
+  Map<String, dynamic> toJson() {
+    final account = this.account;
+
+    return {
+      'token': token,
+      'userId': userId,
+      'role': role.apiValue,
+      'account': account == null ? null : _accountToJson(account),
+    };
+  }
+}
+
+Map<String, dynamic> _accountToJson(Account account) {
+  if (account is AccountModel) return account.toJson();
+
+  return {
+    'id': account.id,
+    'name': account.name,
+    'whatsappNumber': account.whatsappNumber,
+    'cpf': account.cpf,
+    'email': account.email,
+    'avatarUrl': account.avatarUrl,
+    'role': account.role.apiValue,
+    'notificationPreferences': account.notificationPreferences,
+  };
 }

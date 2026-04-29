@@ -1,8 +1,11 @@
+import 'package:fpdart/fpdart.dart';
+import 'package:mobile/shared/errors/failures.dart';
+
 import '../entities/lead.dart';
 
 abstract interface class LeadRepository {
-  Future<List<Lead>> getPending();
-  Future<Lead> getById(String id);
-  Future<void> convert(String id);
-  Future<void> discard(String id, {String? reason});
+  Future<Either<Failure, List<Lead>>> getPending();
+  Future<Either<Failure, Lead>> getById(String id);
+  Future<Either<Failure, Unit>> convert(String id);
+  Future<Either<Failure, Unit>> discard(String id, {String? reason});
 }

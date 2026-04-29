@@ -1,10 +1,12 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:mobile/shared/errors/either_failure_extensions.dart';
 
 import '../../../../shared/network/api_client.dart';
 import '../../data/datasources/notification_remote_data_source.dart';
 import '../../data/repositories/notification_repository_impl.dart';
 import '../../domain/entities/app_notification.dart';
 import '../../domain/repositories/notification_repository.dart';
+import '../../domain/usecases/notification_use_cases.dart';
 
 final notificationRemoteDataSourceProvider =
     Provider<NotificationRemoteDataSource>((ref) {
@@ -17,8 +19,36 @@ final notificationRepositoryProvider = Provider<NotificationRepository>((ref) {
   );
 });
 
-final myNotificationsProvider = FutureProvider<List<AppNotification>>((ref) {
-  return ref.watch(notificationRepositoryProvider).getMyNotifications();
+final getMyNotificationsUseCaseProvider = Provider<GetMyNotificationsUseCase>((
+  ref,
+) {
+  return GetMyNotificationsUseCase(ref.watch(notificationRepositoryProvider));
+});
+
+final markNotificationAsReadUseCaseProvider =
+    Provider<MarkNotificationAsReadUseCase>((ref) {
+      return MarkNotificationAsReadUseCase(
+        ref.watch(notificationRepositoryProvider),
+      );
+    });
+
+final markAllNotificationsAsReadUseCaseProvider =
+    Provider<MarkAllNotificationsAsReadUseCase>((ref) {
+      return MarkAllNotificationsAsReadUseCase(
+        ref.watch(notificationRepositoryProvider),
+      );
+    });
+
+final deleteNotificationUseCaseProvider = Provider<DeleteNotificationUseCase>((
+  ref,
+) {
+  return DeleteNotificationUseCase(ref.watch(notificationRepositoryProvider));
+});
+
+final myNotificationsProvider = FutureProvider<List<AppNotification>>((
+  ref,
+) async {
+  return (await ref.watch(getMyNotificationsUseCaseProvider)()).getOrThrow();
 });
 
 final notificationActionsProvider = Provider<NotificationActions>((ref) {
@@ -31,17 +61,17 @@ final class NotificationActions {
   const NotificationActions(this._ref);
 
   Future<void> markAsRead(String id) async {
-    await _ref.read(notificationRepositoryProvider).markAsRead(id);
+    (await _ref.read(markNotificationAsReadUseCaseProvider)(id)).getOrThrow();
     _ref.invalidate(myNotificationsProvider);
   }
 
   Future<void> markAllAsRead() async {
-    await _ref.read(notificationRepositoryProvider).markAllAsRead();
+    (await _ref.read(markAllNotificationsAsReadUseCaseProvider)()).getOrThrow();
     _ref.invalidate(myNotificationsProvider);
   }
 
   Future<void> delete(String id) async {
-    await _ref.read(notificationRepositoryProvider).delete(id);
+    (await _ref.read(deleteNotificationUseCaseProvider)(id)).getOrThrow();
     _ref.invalidate(myNotificationsProvider);
   }
 }

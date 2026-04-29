@@ -1,4 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:mobile/shared/errors/either_failure_extensions.dart';
 
 import '../../../../shared/network/api_client.dart';
 import '../../data/datasources/auth_remote_data_source.dart';
@@ -6,6 +7,7 @@ import '../../data/repositories/auth_repository_impl.dart';
 import '../../domain/entities/account.dart';
 import '../../domain/entities/auth_session.dart';
 import '../../domain/repositories/auth_repository.dart';
+import '../../domain/usecases/auth_use_cases.dart';
 
 final authRemoteDataSourceProvider = Provider<AuthRemoteDataSource>((ref) {
   return AuthRemoteDataSource(ref.watch(apiClientProvider));
@@ -18,15 +20,47 @@ final authRepositoryProvider = Provider<AuthRepository>((ref) {
   );
 });
 
+final loginUseCaseProvider = Provider<LoginUseCase>((ref) {
+  return LoginUseCase(ref.watch(authRepositoryProvider));
+});
+
+final restoreSessionUseCaseProvider = Provider<RestoreSessionUseCase>((ref) {
+  return RestoreSessionUseCase(ref.watch(authRepositoryProvider));
+});
+
+final getCurrentAccountUseCaseProvider = Provider<GetCurrentAccountUseCase>((
+  ref,
+) {
+  return GetCurrentAccountUseCase(ref.watch(authRepositoryProvider));
+});
+
+final updateNotificationPreferencesUseCaseProvider =
+    Provider<UpdateNotificationPreferencesUseCase>((ref) {
+      return UpdateNotificationPreferencesUseCase(
+        ref.watch(authRepositoryProvider),
+      );
+    });
+
+final uploadAvatarUseCaseProvider = Provider<UploadAvatarUseCase>((ref) {
+  return UploadAvatarUseCase(ref.watch(authRepositoryProvider));
+});
+
+final logoutUseCaseProvider = Provider<LogoutUseCase>((ref) {
+  return LogoutUseCase(ref.watch(authRepositoryProvider));
+});
+
 final authControllerProvider =
     StateNotifierProvider<AuthController, AsyncValue<AuthSession?>>((ref) {
-      return AuthController(ref.watch(authRepositoryProvider));
+      return AuthController(
+        loginUseCase: ref.watch(loginUseCaseProvider),
+        logoutUseCase: ref.watch(logoutUseCaseProvider),
+      );
     });
 
 final currentAccountProvider = FutureProvider<Account>((ref) async {
   final session = ref.watch(authControllerProvider).valueOrNull;
   if (session?.account != null) return session!.account!;
-  return ref.read(authRepositoryProvider).getAccount();
+  return (await ref.read(getCurrentAccountUseCaseProvider)()).getOrThrow();
 });
 
 final accountActionsProvider = Provider<AccountActions>((ref) {
@@ -34,9 +68,15 @@ final accountActionsProvider = Provider<AccountActions>((ref) {
 });
 
 class AuthController extends StateNotifier<AsyncValue<AuthSession?>> {
-  final AuthRepository _repository;
+  final LoginUseCase _loginUseCase;
+  final LogoutUseCase _logoutUseCase;
 
-  AuthController(this._repository) : super(const AsyncData(null));
+  AuthController({
+    required LoginUseCase loginUseCase,
+    required LogoutUseCase logoutUseCase,
+  }) : _loginUseCase = loginUseCase,
+       _logoutUseCase = logoutUseCase,
+       super(const AsyncData(null));
 
   Future<AuthSession> login({
     required String email,
@@ -44,7 +84,10 @@ class AuthController extends StateNotifier<AsyncValue<AuthSession?>> {
   }) async {
     state = const AsyncLoading();
     try {
-      final session = await _repository.login(email: email, password: password);
+      final session = (await _loginUseCase(
+        email: email,
+        password: password,
+      )).getOrThrow();
       state = AsyncData(session);
       return session;
     } catch (error, stackTrace) {
@@ -54,7 +97,7 @@ class AuthController extends StateNotifier<AsyncValue<AuthSession?>> {
   }
 
   Future<void> logout() async {
-    await _repository.logout();
+    (await _logoutUseCase()).getOrThrow();
     state = const AsyncData(null);
   }
 
@@ -74,9 +117,11 @@ final class AccountActions {
   Future<Account> updateNotificationPreferences(
     Map<String, bool> preferences,
   ) async {
-    final account = await _ref
-        .read(authRepositoryProvider)
-        .updateNotificationPreferences(preferences);
+    final account =
+        (await _ref
+                .read(updateNotificationPreferencesUseCaseProvider)
+                .call(preferences))
+            .getOrThrow();
     _ref.read(authControllerProvider.notifier).updateSessionAccount(account);
     return account;
   }
@@ -85,9 +130,11 @@ final class AccountActions {
     required String filePath,
     required String fileName,
   }) async {
-    final account = await _ref
-        .read(authRepositoryProvider)
-        .uploadAvatar(filePath: filePath, fileName: fileName);
+    final account =
+        (await _ref
+                .read(uploadAvatarUseCaseProvider)
+                .call(filePath: filePath, fileName: fileName))
+            .getOrThrow();
     _ref.read(authControllerProvider.notifier).updateSessionAccount(account);
     _ref.invalidate(currentAccountProvider);
     return account;

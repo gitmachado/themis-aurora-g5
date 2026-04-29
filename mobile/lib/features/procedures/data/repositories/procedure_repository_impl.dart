@@ -1,3 +1,7 @@
+import 'package:fpdart/fpdart.dart';
+import 'package:mobile/shared/errors/failures.dart';
+import 'package:mobile/shared/errors/repository_guard.dart';
+
 import '../../domain/entities/legal_process.dart';
 import '../../domain/entities/process_document.dart';
 import '../../domain/entities/timeline_event.dart';
@@ -10,61 +14,69 @@ final class ProcedureRepositoryImpl implements ProcedureRepository {
   const ProcedureRepositoryImpl(this._remoteDataSource);
 
   @override
-  Future<List<LegalProcess>> getMyProcesses() =>
-      _remoteDataSource.getMyProcesses();
-
-  @override
-  Future<LegalProcess> getProcessById(String id) =>
-      _remoteDataSource.getProcessById(id);
-
-  @override
-  Future<List<TimelineEvent>> getTimeline(String processId) {
-    return _remoteDataSource.getTimeline(processId);
+  Future<Either<Failure, List<LegalProcess>>> getMyProcesses() {
+    return guardRepository(_remoteDataSource.getMyProcesses);
   }
 
   @override
-  Future<List<ProcessDocument>> getDocuments(String processId) {
-    return _remoteDataSource.getDocuments(processId);
+  Future<Either<Failure, LegalProcess>> getProcessById(String id) {
+    return guardRepository(() => _remoteDataSource.getProcessById(id));
   }
 
   @override
-  Future<List<ProcessDocument>> getMyDocuments() {
-    return _remoteDataSource.getMyDocuments();
+  Future<Either<Failure, List<TimelineEvent>>> getTimeline(String processId) {
+    return guardRepository(() => _remoteDataSource.getTimeline(processId));
   }
 
   @override
-  Future<ProcessDocument> getDocumentById(String id) {
-    return _remoteDataSource.getDocumentById(id);
+  Future<Either<Failure, List<ProcessDocument>>> getDocuments(
+    String processId,
+  ) {
+    return guardRepository(() => _remoteDataSource.getDocuments(processId));
   }
 
   @override
-  Future<ProcessDocument> uploadDocument({
+  Future<Either<Failure, List<ProcessDocument>>> getMyDocuments() {
+    return guardRepository(_remoteDataSource.getMyDocuments);
+  }
+
+  @override
+  Future<Either<Failure, ProcessDocument>> getDocumentById(String id) {
+    return guardRepository(() => _remoteDataSource.getDocumentById(id));
+  }
+
+  @override
+  Future<Either<Failure, ProcessDocument>> uploadDocument({
     required String processId,
     required String filePath,
     required String fileName,
   }) {
-    return _remoteDataSource.uploadDocument(
-      processId: processId,
-      filePath: filePath,
-      fileName: fileName,
+    return guardRepository(
+      () => _remoteDataSource.uploadDocument(
+        processId: processId,
+        filePath: filePath,
+        fileName: fileName,
+      ),
     );
   }
 
   @override
-  Future<void> deleteDocument(String id) {
-    return _remoteDataSource.deleteDocument(id);
+  Future<Either<Failure, Unit>> deleteDocument(String id) {
+    return guardRepositoryUnit(() => _remoteDataSource.deleteDocument(id));
   }
 
   @override
-  Future<LegalProcess> updateStatus({
+  Future<Either<Failure, LegalProcess>> updateStatus({
     required String processId,
     required String status,
     String? reason,
   }) {
-    return _remoteDataSource.updateStatus(
-      processId: processId,
-      status: status,
-      reason: reason,
+    return guardRepository(
+      () => _remoteDataSource.updateStatus(
+        processId: processId,
+        status: status,
+        reason: reason,
+      ),
     );
   }
 }

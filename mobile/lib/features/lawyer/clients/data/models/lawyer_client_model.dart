@@ -18,4 +18,14 @@ final class LawyerClientModel extends LawyerClient {
       email: json['email'] as String?,
     );
   }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'name': name,
+      'whatsappNumber': whatsappNumber,
+      'cpf': cpf,
+      'email': email,
+    };
+  }
 }
