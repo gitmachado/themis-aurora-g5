@@ -125,3 +125,8 @@ Desktop.ini
 
 # Ferramentas locais e rascunhos
 scratch/
+
+server/uploads/*
+server/temp/*
+!server/uploads/.gitkeep
+!server/temp/.gitkeep
