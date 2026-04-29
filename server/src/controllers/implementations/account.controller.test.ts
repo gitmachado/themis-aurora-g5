@@ -4,22 +4,26 @@ import { AccountController } from './account.controller';
 
 test('updateNotificationPreferences validates and persists boolean map', async () => {
   let savedPreferences: Record<string, boolean> | undefined;
-  const controller = new AccountController({
-    update: async (_id: string, data: { notificationPreferences: Record<string, boolean> }) => {
-      savedPreferences = data.notificationPreferences;
-      return {
-        id: 'user-1',
-        name: 'Lucas',
-        whatsappNumber: '5511999999999',
-        cpf: '12345678900',
-        email: 'lucas@example.com',
-        role: 'CLIENT',
-        notificationPreferences: data.notificationPreferences,
-        createdAt: new Date(),
-        updatedAt: new Date(),
-      };
-    },
-  } as any);
+  const controller = new AccountController(
+    {
+      update: async (_id: string, data: { notificationPreferences: Record<string, boolean> }) => {
+        savedPreferences = data.notificationPreferences;
+        return {
+          id: 'user-1',
+          name: 'Lucas',
+          whatsappNumber: '5511999999999',
+          cpf: '12345678900',
+          email: 'lucas@example.com',
+          avatarUrl: null,
+          role: 'CLIENT',
+          notificationPreferences: data.notificationPreferences,
+          createdAt: new Date(),
+          updatedAt: new Date(),
+        };
+      },
+    } as any,
+    createStorageProvider()
+  );
   const response = createResponse();
 
   await controller.updateNotificationPreferences(
@@ -37,7 +41,10 @@ test('updateNotificationPreferences validates and persists boolean map', async (
 });
 
 test('updateNotificationPreferences rejects non-boolean values', async () => {
-  const controller = new AccountController({ update: async () => undefined } as any);
+  const controller = new AccountController(
+    { update: async () => undefined } as any,
+    createStorageProvider()
+  );
   let nextError: Error | undefined;
 
   await controller.updateNotificationPreferences(
@@ -66,5 +73,13 @@ function createResponse() {
       this.body = body;
       return this;
     },
+  };
+}
+
+function createStorageProvider() {
+  return {
+    saveFile: async () => 'avatars/user-1/foto.jpg',
+    deleteFile: async () => undefined,
+    getAccessUrl: async (fileUrl: string) => `https://storage.example.test/${fileUrl}`,
   };
 }

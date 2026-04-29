@@ -63,6 +63,36 @@ test('getById rejects document metadata from another client process', async () =
   assert.equal((nextError as any)?.errorCode, 'FORBIDDEN');
 });
 
+test('getAccessUrl returns signed document URL when user can access process', async () => {
+  const controller = new DocumentController(
+    { getById: async () => document } as any,
+    {
+      getById: async () => ({
+        id: 'process-1',
+        clientId: 'client-1',
+        lawyerId: 'lawyer-1',
+      }),
+    } as any,
+    {
+      getAccessUrl: async (fileUrl: string) =>
+        `https://storage.example.test/signed?path=${encodeURIComponent(fileUrl)}`,
+    } as any
+  );
+  const response = createResponse();
+
+  await controller.getAccessUrl(
+    { params: { id: 'document-1' }, user: { id: 'client-1', role: 'CLIENT' } } as any,
+    response as any,
+    assert.ifError
+  );
+
+  assert.equal(response.statusCode, 200);
+  assert.equal(
+    response.body.url,
+    'https://storage.example.test/signed?path=%2Fuploads%2Fcontrato.pdf'
+  );
+});
+
 function createResponse() {
   return {
     statusCode: 200,
