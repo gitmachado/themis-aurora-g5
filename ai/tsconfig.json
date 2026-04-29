@@ -11,6 +11,10 @@
     "skipLibCheck": true,
     "types": ["node"]
   },
+  "ts-node": {
+    "esm": true,
+    "experimentalResolver": true
+  },
   "include": ["src/**/*"],
   "exclude": ["node_modules", "**/*.spec.ts", "**/*.test.ts"]
 }
