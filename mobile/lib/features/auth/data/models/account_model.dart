@@ -8,6 +8,7 @@ final class AccountModel extends Account {
     required super.role,
     super.cpf,
     super.email,
+    super.avatarUrl,
     super.notificationPreferences,
   });
 
@@ -18,6 +19,7 @@ final class AccountModel extends Account {
       whatsappNumber: json['whatsappNumber'] as String? ?? '',
       cpf: json['cpf'] as String?,
       email: json['email'] as String?,
+      avatarUrl: json['avatarUrl'] as String?,
       role: UserRole.fromApi(json['role'] as String? ?? 'CLIENT'),
       notificationPreferences: _preferences(json['notificationPreferences']),
     );

@@ -45,8 +45,7 @@ class LawyerOverviewScreen extends ConsumerWidget {
           AppDashboardHeader(
             name: account?.name ?? 'Advogado',
             subtitle: account?.email ?? 'Área do advogado',
-            avatarUrl:
-                'https://images.unsplash.com/photo-1560250097-0b93528c311a?q=80&w=256&h=256&auto=format&fit=crop',
+            avatarUrl: account?.avatarUrl,
             notificationCount: notifications
                 .where((notification) => !notification.isRead)
                 .length,

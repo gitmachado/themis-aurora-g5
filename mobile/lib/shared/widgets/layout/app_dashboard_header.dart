@@ -31,6 +31,8 @@ class AppDashboardHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final resolvedAvatarUrl = avatarUrl?.isNotEmpty == true ? avatarUrl : null;
+
     return Container(
       decoration: BoxDecoration(
         color: AppColors.white,
@@ -52,10 +54,10 @@ class AppDashboardHeader extends StatelessWidget {
                 child: CircleAvatar(
                   radius: 30,
                   backgroundColor: AppColors.secondaryLight,
-                  backgroundImage: avatarUrl != null
-                      ? NetworkImage(avatarUrl!)
+                  backgroundImage: resolvedAvatarUrl != null
+                      ? NetworkImage(resolvedAvatarUrl)
                       : null,
-                  child: avatarUrl == null
+                  child: resolvedAvatarUrl == null
                       ? Text(
                           _getInitials(name),
                           style: const TextStyle(

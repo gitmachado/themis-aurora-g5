@@ -79,6 +79,18 @@ final class FakeApiClient implements ApiClient {
   }
 
   @override
+  Future<String> getDocumentAccessUrl(String documentId) async {
+    final path = '/documents/$documentId/access-url';
+    calls.add(ApiCall('GET', path));
+    final url = jsonResponses['GET $path']?['url'];
+    if (url is String && url.isNotEmpty) {
+      return url;
+    }
+
+    return buildDocumentUrl(documentId);
+  }
+
+  @override
   String buildDocumentUrl(String filename) {
     final normalized = filename.replaceAll('\\', '/');
     final resolved = normalized

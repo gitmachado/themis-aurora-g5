@@ -101,6 +101,20 @@ class ApiClient {
     await _send(() => _dio.delete<Object?>(path));
   }
 
+  Future<String> getDocumentAccessUrl(String documentId) async {
+    final json = await getJson('/documents/$documentId/access-url');
+    final url = json['url'];
+    if (url is! String || url.isEmpty) {
+      throw const ApiException('URL do arquivo nao retornada pelo servidor');
+    }
+
+    if (url.startsWith('http://') || url.startsWith('https://')) {
+      return url;
+    }
+
+    return buildDocumentUrl(url);
+  }
+
   String buildDocumentUrl(String filenameOrUrl) {
     if (filenameOrUrl.startsWith('http://') ||
         filenameOrUrl.startsWith('https://')) {
@@ -113,6 +127,14 @@ class ApiClient {
         .where((part) => part.isNotEmpty)
         .last;
     return '${_dio.options.baseUrl}/documents/view/${Uri.encodeComponent(filename)}';
+  }
+
+  String buildAbsoluteUrl(String urlOrPath) {
+    if (urlOrPath.startsWith('http://') || urlOrPath.startsWith('https://')) {
+      return urlOrPath;
+    }
+
+    return Uri.parse(_dio.options.baseUrl).resolve(urlOrPath).toString();
   }
 
   Future<Response<Object?>> _send(

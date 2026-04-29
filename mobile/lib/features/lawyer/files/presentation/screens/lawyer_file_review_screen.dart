@@ -147,10 +147,9 @@ class LawyerFileReviewScreen extends ConsumerWidget {
     WidgetRef ref,
     ProcessDocument document,
   ) async {
-    final source = document.fileUrl.isNotEmpty
-        ? document.fileUrl
-        : document.fileName;
-    final uri = Uri.parse(ref.read(apiClientProvider).buildDocumentUrl(source));
+    final uri = Uri.parse(
+      await ref.read(apiClientProvider).getDocumentAccessUrl(document.id),
+    );
 
     if (await canLaunchUrl(uri)) {
       await launchUrl(uri, mode: LaunchMode.externalApplication);

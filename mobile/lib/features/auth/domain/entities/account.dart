@@ -20,6 +20,7 @@ class Account extends Equatable {
   final String whatsappNumber;
   final String? cpf;
   final String? email;
+  final String? avatarUrl;
   final UserRole role;
   final Map<String, bool> notificationPreferences;
 
@@ -30,6 +31,7 @@ class Account extends Equatable {
     required this.role,
     this.cpf,
     this.email,
+    this.avatarUrl,
     this.notificationPreferences = const {},
   });
 
@@ -40,6 +42,7 @@ class Account extends Equatable {
     whatsappNumber,
     cpf,
     email,
+    avatarUrl,
     role,
     notificationPreferences,
   ];

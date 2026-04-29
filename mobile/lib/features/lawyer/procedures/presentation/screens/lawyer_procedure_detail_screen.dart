@@ -442,10 +442,19 @@ class _LawyerProcedureDetailScreenState
     }
   }
 
-  void _showDocumentDetails(ProcessDocument document) {
-    final url = document.fileUrl.isNotEmpty
-        ? document.fileUrl
-        : ref.read(apiClientProvider).buildDocumentUrl(document.fileName);
+  Future<void> _showDocumentDetails(ProcessDocument document) async {
+    late final String url;
+    try {
+      url = await ref.read(apiClientProvider).getDocumentAccessUrl(document.id);
+    } catch (error) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(error.toString())));
+      return;
+    }
+
+    if (!mounted) return;
 
     showModalBottomSheet<void>(
       context: context,

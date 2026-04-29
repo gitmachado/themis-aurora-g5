@@ -62,5 +62,16 @@ final class AuthRepositoryImpl implements AuthRepository {
   }
 
   @override
+  Future<Account> uploadAvatar({
+    required String filePath,
+    required String fileName,
+  }) {
+    return _remoteDataSource.uploadAvatar(
+      filePath: filePath,
+      fileName: fileName,
+    );
+  }
+
+  @override
   Future<void> logout() => _tokenStorage.clearToken();
 }

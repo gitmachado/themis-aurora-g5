@@ -12,5 +12,10 @@ abstract interface class AuthRepository {
     Map<String, bool> notificationPreferences,
   );
 
+  Future<Account> uploadAvatar({
+    required String filePath,
+    required String fileName,
+  });
+
   Future<void> logout();
 }

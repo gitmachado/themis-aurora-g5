@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:file_picker/file_picker.dart';
 
 import '../../../../../../features/auth/domain/entities/account.dart';
 import '../../../../../../features/auth/presentation/providers/auth_providers.dart';
@@ -50,7 +51,7 @@ class LawyerProfileScreen extends ConsumerWidget {
       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
       child: Column(
         children: [
-          _buildProfileHeader(account),
+          _buildProfileHeader(context, ref, account),
           const SizedBox(height: 24),
           _buildSection(
             title: 'Dados da Conta',
@@ -114,53 +115,100 @@ class LawyerProfileScreen extends ConsumerWidget {
     );
   }
 
-  Widget _buildProfileHeader(Account account) {
+  Widget _buildProfileHeader(
+    BuildContext context,
+    WidgetRef ref,
+    Account account,
+  ) {
     final initial = account.name.isEmpty ? '?' : account.name[0].toUpperCase();
+    final avatarUrl = account.avatarUrl;
 
     return AppCard(
       padding: EdgeInsets.zero,
       child: Column(
         children: [
-          Stack(
-            alignment: Alignment.topCenter,
-            clipBehavior: Clip.none,
-            children: [
-              Container(
-                height: 80,
-                decoration: const BoxDecoration(
-                  gradient: LinearGradient(
-                    colors: [AppColors.primary, AppColors.secondary],
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                  ),
-                  borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
-                ),
-              ),
-              Positioned(
-                top: 40,
-                child: Container(
-                  padding: const EdgeInsets.all(4),
-                  decoration: const BoxDecoration(
-                    color: AppColors.white,
-                    shape: BoxShape.circle,
-                  ),
-                  child: CircleAvatar(
-                    radius: 40,
-                    backgroundColor: AppColors.primary,
-                    child: Text(
-                      initial,
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 28,
-                        fontWeight: FontWeight.bold,
+          SizedBox(
+            height: 132,
+            child: Stack(
+              alignment: Alignment.topCenter,
+              clipBehavior: Clip.none,
+              children: [
+                Positioned(
+                  top: 0,
+                  left: 0,
+                  right: 0,
+                  child: Container(
+                    height: 80,
+                    decoration: const BoxDecoration(
+                      gradient: LinearGradient(
+                        colors: [AppColors.primary, AppColors.secondary],
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                      ),
+                      borderRadius: BorderRadius.vertical(
+                        top: Radius.circular(16),
                       ),
                     ),
                   ),
                 ),
-              ),
-            ],
+                Positioned(
+                  top: 40,
+                  child: Tooltip(
+                    message: 'Alterar foto',
+                    child: GestureDetector(
+                      onTap: () => _pickAndUploadAvatar(context, ref),
+                      child: Container(
+                        padding: const EdgeInsets.all(4),
+                        decoration: const BoxDecoration(
+                          color: AppColors.white,
+                          shape: BoxShape.circle,
+                        ),
+                        child: CircleAvatar(
+                          radius: 40,
+                          backgroundColor: AppColors.primary,
+                          backgroundImage:
+                              avatarUrl != null && avatarUrl.isNotEmpty
+                              ? NetworkImage(avatarUrl)
+                              : null,
+                          child: avatarUrl == null || avatarUrl.isEmpty
+                              ? Text(
+                                  initial,
+                                  style: const TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 28,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                )
+                              : null,
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+                Positioned(
+                  top: 96,
+                  child: Transform.translate(
+                    offset: const Offset(30, 0),
+                    child: SizedBox(
+                      width: 36,
+                      height: 36,
+                      child: IconButton.filled(
+                        padding: EdgeInsets.zero,
+                        tooltip: 'Alterar foto',
+                        icon: const Icon(Icons.photo_camera_outlined, size: 18),
+                        onPressed: () => _pickAndUploadAvatar(context, ref),
+                        style: IconButton.styleFrom(
+                          backgroundColor: AppColors.secondary,
+                          foregroundColor: AppColors.primary,
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
           ),
-          const SizedBox(height: 52),
+          const SizedBox(height: 12),
           Text(account.name, style: AppTextStyles.h1),
           const SizedBox(height: 4),
           Container(
@@ -183,6 +231,31 @@ class LawyerProfileScreen extends ConsumerWidget {
         ],
       ),
     );
+  }
+
+  Future<void> _pickAndUploadAvatar(BuildContext context, WidgetRef ref) async {
+    final result = await FilePicker.pickFiles(
+      type: FileType.custom,
+      allowedExtensions: const ['png', 'jpg', 'jpeg', 'heic', 'heif'],
+      withData: false,
+    );
+    final file = result?.files.single;
+    if (file == null || file.path == null) return;
+
+    try {
+      await ref
+          .read(accountActionsProvider)
+          .uploadAvatar(filePath: file.path!, fileName: file.name);
+      if (!context.mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Foto de perfil atualizada.')),
+      );
+    } catch (error) {
+      if (!context.mounted) return;
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(error.toString())));
+    }
   }
 
   Widget _buildPreferenceSection(

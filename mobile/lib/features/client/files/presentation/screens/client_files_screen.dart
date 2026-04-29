@@ -332,7 +332,22 @@ class _ClientFilesScreenState extends ConsumerState<ClientFilesScreen> {
         : await _selectProcess(procedures);
     if (process == null) return;
 
-    final result = await FilePicker.pickFiles(withData: false);
+    final result = await FilePicker.pickFiles(
+      type: FileType.custom,
+      allowedExtensions: const [
+        'pdf',
+        'png',
+        'jpg',
+        'jpeg',
+        'heic',
+        'heif',
+        'doc',
+        'docx',
+        'xls',
+        'xlsx',
+      ],
+      withData: false,
+    );
     final file = result?.files.single;
     if (file == null || file.path == null) return;
 
@@ -385,10 +400,9 @@ class _ClientFilesScreenState extends ConsumerState<ClientFilesScreen> {
   }
 
   Future<void> _openDocument(ProcessDocument document) async {
-    final source = document.fileUrl.isNotEmpty
-        ? document.fileUrl
-        : document.fileName;
-    final url = ref.read(apiClientProvider).buildDocumentUrl(source);
+    final url = await ref
+        .read(apiClientProvider)
+        .getDocumentAccessUrl(document.id);
     final uri = Uri.parse(url);
     if (await canLaunchUrl(uri)) {
       await launchUrl(uri, mode: LaunchMode.externalApplication);

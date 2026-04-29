@@ -2,6 +2,7 @@ import express from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
 import morgan from 'morgan';
+import path from 'path';
 import { errorHandler } from './middlewares/implementations/errorHandler';
 import routes from './routes';
 import swaggerUi from 'swagger-ui-express';
@@ -24,6 +25,7 @@ app.use(cors({
 }));
 app.use(morgan('dev'));
 app.use(express.json());
+app.use('/uploads', express.static(path.resolve(__dirname, '../../uploads')));
 
 // API Routes
 app.use('/api/v1', routes);

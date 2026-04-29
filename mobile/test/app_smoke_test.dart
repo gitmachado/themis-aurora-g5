@@ -8,7 +8,7 @@ void main() {
     await tester.pumpWidget(const ProviderScope(child: OmniConnectApp()));
 
     expect(find.textContaining('OmniConnect'), findsOneWidget);
-    expect(find.text('CPF ou telefone'), findsOneWidget);
+    expect(find.text('Email'), findsOneWidget);
     expect(find.text('Entrar'), findsOneWidget);
   });
 }

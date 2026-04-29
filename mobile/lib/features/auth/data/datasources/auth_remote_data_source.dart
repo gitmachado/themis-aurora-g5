@@ -21,7 +21,7 @@ final class AuthRemoteDataSource {
 
   Future<AccountModel> getAccount() async {
     final json = await _apiClient.getJson('/account');
-    return AccountModel.fromJson(json);
+    return AccountModel.fromJson(_normalizeAccountJson(json));
   }
 
   Future<AccountModel> updateNotificationPreferences(
@@ -31,6 +31,28 @@ final class AuthRemoteDataSource {
       '/account/notification-preferences',
       data: {'notificationPreferences': notificationPreferences},
     );
-    return AccountModel.fromJson(json);
+    return AccountModel.fromJson(_normalizeAccountJson(json));
+  }
+
+  Future<AccountModel> uploadAvatar({
+    required String filePath,
+    required String fileName,
+  }) async {
+    final json = await _apiClient.postMultipart(
+      '/account/avatar',
+      fileField: 'file',
+      filePath: filePath,
+      fileName: fileName,
+    );
+    return AccountModel.fromJson(_normalizeAccountJson(json));
+  }
+
+  Map<String, dynamic> _normalizeAccountJson(Map<String, dynamic> json) {
+    final avatarUrl = json['avatarUrl'];
+    if (avatarUrl is! String || avatarUrl.isEmpty) {
+      return json;
+    }
+
+    return {...json, 'avatarUrl': _apiClient.buildAbsoluteUrl(avatarUrl)};
   }
 }

@@ -138,10 +138,9 @@ class LawyerFileListScreen extends ConsumerWidget {
     WidgetRef ref,
     ProcessDocument document,
   ) async {
-    final source = document.fileUrl.isNotEmpty
-        ? document.fileUrl
-        : document.fileName;
-    final url = ref.read(apiClientProvider).buildDocumentUrl(source);
+    final url = await ref
+        .read(apiClientProvider)
+        .getDocumentAccessUrl(document.id);
     final uri = Uri.parse(url);
 
     if (await canLaunchUrl(uri)) {

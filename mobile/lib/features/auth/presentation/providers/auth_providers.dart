@@ -80,4 +80,16 @@ final class AccountActions {
     _ref.read(authControllerProvider.notifier).updateSessionAccount(account);
     return account;
   }
+
+  Future<Account> uploadAvatar({
+    required String filePath,
+    required String fileName,
+  }) async {
+    final account = await _ref
+        .read(authRepositoryProvider)
+        .uploadAvatar(filePath: filePath, fileName: fileName);
+    _ref.read(authControllerProvider.notifier).updateSessionAccount(account);
+    _ref.invalidate(currentAccountProvider);
+    return account;
+  }
 }
