@@ -47,6 +47,14 @@ Este comando irá:
 - Criar todas as tabelas e chaves estrangeiras (`schema.sql`).
 - Popular o banco com dados de teste (`seed.sql`).
 
+Para aplicar mudanças incrementais em um banco local já existente, execute:
+
+```bash
+npm run db:migrate
+```
+
+As migrations ficam em `database/migrations` e são registradas na tabela `schema_migrations`.
+
 ## 💡 Exemplo de Uso no Repository
 
 ```typescript
