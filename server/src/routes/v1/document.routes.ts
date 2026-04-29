@@ -4,7 +4,7 @@ import path from 'path';
 import { DocumentController } from '../../controllers/implementations/document.controller';
 import { DocumentService, LegalProcessService, TimelineService, NotificationService } from '@services';
 import { DocumentRepository, LegalProcessRepository, TimelineEventRepository, NotificationRepository } from '@repositories';
-import { LocalFileStorageProvider } from '../../utils/storage/implementations/local-storage.provider';
+import { createStorageProvider } from '../../utils/storage/storage-provider.factory';
 import { authMiddleware } from '../../middlewares/implementations/authMiddleware';
 
 const router = Router();
@@ -24,7 +24,7 @@ const legalProcessService = new LegalProcessService(
   notificationService
 );
 
-const storageProvider = new LocalFileStorageProvider();
+const storageProvider = createStorageProvider();
 
 const controller = new DocumentController(
   documentService,
@@ -123,6 +123,34 @@ router.get('/view/:filename', authMiddleware, controller.viewFile);
  */
 router.get('/process/:processId', authMiddleware, controller.listByProcess);
 
+/**
+ * @openapi
+ * /documents/{id}/access-url:
+ *   get:
+ *     summary: Gera uma URL temporária para abrir um documento privado
+ *     tags: [Documentos]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: URL temporária do arquivo
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 url:
+ *                   type: string
+ *       404:
+ *         description: Documento não encontrado
+ */
+router.get('/:id/access-url', authMiddleware, controller.getAccessUrl);
 router.get('/:id', authMiddleware, controller.getById);
 
 /**

@@ -1,6 +1,6 @@
 import fs from 'fs';
 import path from 'path';
-import { IStorageProvider } from '../storage.provider';
+import { IStorageProvider, SaveFileOptions, StorageFile } from '../storage.provider';
 
 export class LocalFileStorageProvider implements IStorageProvider {
   private readonly uploadDir: string;
@@ -12,7 +12,10 @@ export class LocalFileStorageProvider implements IStorageProvider {
     }
   }
 
-  async saveFile(file: Express.Multer.File): Promise<string> {
+  async saveFile(
+    file: StorageFile,
+    _options?: SaveFileOptions
+  ): Promise<string> {
     const filename = `${Date.now()}-${file.originalname.replace(/\s/g, '_')}`;
     const filePath = path.join(this.uploadDir, filename);
 
@@ -31,5 +34,9 @@ export class LocalFileStorageProvider implements IStorageProvider {
     if (fs.existsSync(filePath)) {
       await fs.promises.unlink(filePath);
     }
+  }
+
+  async getAccessUrl(fileUrl: string): Promise<string> {
+    return fileUrl;
   }
 }

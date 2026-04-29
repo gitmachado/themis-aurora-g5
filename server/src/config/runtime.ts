@@ -49,6 +49,14 @@ export const getSupabaseServiceRoleKey = (): string | undefined =>
 export const getSupabaseAuthRedirectUrl = (): string | undefined =>
   process.env.SUPABASE_AUTH_REDIRECT_URL;
 
+export const getSupabaseStorageBucket = (): string =>
+  process.env.SUPABASE_STORAGE_BUCKET || 'omniconnect-documents';
+
+export const getSupabaseStorageSignedUrlExpiresIn = (): number => {
+  const value = Number(process.env.SUPABASE_STORAGE_SIGNED_URL_EXPIRES_IN || '300');
+  return Number.isFinite(value) && value > 0 ? value : 300;
+};
+
 export const getAllowedCorsOrigins = (): string[] => {
   const configuredOrigins = process.env.CORS_ORIGIN
     ?.split(',')

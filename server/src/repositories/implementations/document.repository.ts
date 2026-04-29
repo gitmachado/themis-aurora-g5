@@ -23,8 +23,11 @@ export class DocumentRepository implements IDocumentRepository {
     return dbGet<Document>(
       `SELECT ${this.selectFields}
        FROM documents
-       WHERE file_name = $1 OR file_url = $2`,
-      [fileName, `/uploads/${fileName}`]
+       WHERE file_name = $1
+          OR file_url = $1
+          OR file_url = $2
+          OR file_url LIKE $3`,
+      [fileName, `/uploads/${fileName}`, `%/${fileName}`]
     );
   }
 

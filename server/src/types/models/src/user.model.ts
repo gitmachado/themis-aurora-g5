@@ -7,6 +7,7 @@ export interface User {
   cpf: string | null;
   email: string | null;
   supabaseUserId: string | null;
+  avatarUrl: string | null;
   role: UserRole;
   passwordHash: string | null;
   fcmToken: string | null;

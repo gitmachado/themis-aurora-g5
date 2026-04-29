@@ -101,6 +101,7 @@ export class AuthService implements IAuthService {
       cpf: dto.cpf,
       email: dto.email || '',
       supabaseUserId,
+      avatarUrl: null,
       role: 'CLIENT',
       passwordHash,
       fcmToken: null,

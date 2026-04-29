@@ -5,7 +5,7 @@ import { dbAll, dbGet, dbRun } from '../../config/database';
 export class UserRepository implements IUserRepository {
   private readonly userSelect = `
     id, name, whatsapp_number as "whatsappNumber", cpf, email,
-    supabase_user_id as "supabaseUserId", role,
+    supabase_user_id as "supabaseUserId", avatar_url as "avatarUrl", role,
     password_hash as "passwordHash", fcm_token as "fcmToken", 
     notification_preferences as "notificationPreferences", 
     created_at as "createdAt", updated_at as "updatedAt"
@@ -65,6 +65,7 @@ export class UserRepository implements IUserRepository {
         users.cpf,
         users.email,
         users.supabase_user_id as "supabaseUserId",
+        users.avatar_url as "avatarUrl",
         users.role,
         users.password_hash as "passwordHash",
         users.fcm_token as "fcmToken",
@@ -89,6 +90,7 @@ export class UserRepository implements IUserRepository {
         users.cpf,
         users.email,
         users.supabase_user_id as "supabaseUserId",
+        users.avatar_url as "avatarUrl",
         users.role,
         users.password_hash as "passwordHash",
         users.fcm_token as "fcmToken",
@@ -106,8 +108,8 @@ export class UserRepository implements IUserRepository {
 
   async create(user: Omit<User, 'id' | 'createdAt' | 'updatedAt'>): Promise<User> {
     return (await dbGet<User>(
-      `INSERT INTO users (name, whatsapp_number, cpf, email, supabase_user_id, role, password_hash, fcm_token, notification_preferences)
-       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+      `INSERT INTO users (name, whatsapp_number, cpf, email, supabase_user_id, avatar_url, role, password_hash, fcm_token, notification_preferences)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
        RETURNING ${this.userSelect}`,
       [
         user.name,
@@ -115,6 +117,7 @@ export class UserRepository implements IUserRepository {
         user.cpf,
         user.email,
         user.supabaseUserId,
+        user.avatarUrl,
         user.role,
         user.passwordHash,
         user.fcmToken,

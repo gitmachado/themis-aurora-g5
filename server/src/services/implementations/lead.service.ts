@@ -86,6 +86,7 @@ export class LeadService implements ILeadService {
       cpf: lead.cpf || '',
       email: lead.email || '',
       supabaseUserId: null,
+      avatarUrl: null,
       role: 'CLIENT',
       passwordHash,
       fcmToken: null,

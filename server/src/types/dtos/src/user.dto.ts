@@ -6,6 +6,7 @@ export interface CreateUserDTO {
   cpf?: string;
   email?: string;
   supabaseUserId?: string | null;
+  avatarUrl?: string | null;
   role: UserRole;
   passwordHash?: string;
   fcmToken?: string;
@@ -18,6 +19,7 @@ export interface UpdateUserDTO {
   cpf?: string;
   email?: string;
   supabaseUserId?: string | null;
+  avatarUrl?: string | null;
   role?: UserRole;
   passwordHash?: string;
   fcmToken?: string;
@@ -32,6 +34,7 @@ export interface UserResponseDTO {
   role: UserRole;
   email: string | null;
   supabaseUserId: string | null;
+  avatarUrl?: string | null;
 }
 
 export interface AccountResponseDTO {
@@ -41,6 +44,7 @@ export interface AccountResponseDTO {
   cpf: string | null;
   email: string | null;
   supabaseUserId: string | null;
+  avatarUrl: string | null;
   role: UserRole;
   notificationPreferences: Record<string, boolean> | null;
   createdAt: Date;
