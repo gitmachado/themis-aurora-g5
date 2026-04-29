@@ -5,6 +5,7 @@
   "main": "index.js",
   "scripts": {
     "db:setup": "npx ts-node src/scripts/setup-db.ts",
+    "db:migrate": "npx ts-node src/scripts/migrate-db.ts",
     "dev": "ts-node -r tsconfig-paths/register src/server.ts",
     "start": "node dist/server.js",
     "build": "tsc",
