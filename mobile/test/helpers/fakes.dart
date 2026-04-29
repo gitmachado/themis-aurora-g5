@@ -20,6 +20,8 @@ final class ApiCall {
 }
 
 final class FakeApiClient implements ApiClient {
+  static const _baseUrl = 'http://localhost:3000/api/v1';
+
   final List<ApiCall> calls = [];
   final Map<String, Map<String, dynamic>> jsonResponses = {};
   final Map<String, List<dynamic>> listResponses = {};
@@ -97,7 +99,16 @@ final class FakeApiClient implements ApiClient {
         .split('/')
         .where((part) => part.isNotEmpty)
         .last;
-    return 'http://localhost:3000/api/v1/documents/view/$resolved';
+    return '$_baseUrl/documents/view/$resolved';
+  }
+
+  @override
+  String buildAbsoluteUrl(String urlOrPath) {
+    if (urlOrPath.startsWith('http://') || urlOrPath.startsWith('https://')) {
+      return urlOrPath;
+    }
+
+    return Uri.parse(_baseUrl).resolve(urlOrPath).toString();
   }
 }
 
