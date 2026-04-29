@@ -1,8 +1,8 @@
 import { Response, NextFunction, RequestHandler } from 'express';
 import fs from 'fs';
-import path from 'path';
 import { IDocumentService, ILegalProcessService } from '@services';
 import { IStorageProvider } from '../../utils/storage/storage.provider';
+import { resolveUploadFilePath } from '../../utils/storage/storage-paths';
 import { AuthRequest } from '../../middlewares/implementations/authMiddleware';
 import { ValidationError, ForbiddenError, NotFoundError } from '../../services/implementations/errors';
 import { Document, User } from '@models';
@@ -178,7 +178,7 @@ export class DocumentController {
           throw new NotFoundError('Arquivo físico não encontrado no storage');
         }
 
-        const filePath = path.resolve(__dirname, '../../../../../uploads', filename);
+        const filePath = resolveUploadFilePath(filename);
         if (!fs.existsSync(filePath)) {
           throw new NotFoundError('Arquivo físico não encontrado no storage');
         }

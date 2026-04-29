@@ -9,7 +9,7 @@ export interface RegisterDTO {
   name: string;
   whatsappNumber: string;
   cpf: string;
-  email?: string;
+  email: string;
   password: string;
 }
 

@@ -60,6 +60,7 @@ export class AuthService implements IAuthService {
   }
 
   async register(dto: RegisterDTO): Promise<AuthResponseDTO> {
+    const email = dto.email.trim().toLowerCase();
     const existingUser = await this.userRepository.findByWhatsapp(dto.whatsappNumber);
     if (existingUser) {
       throw new ConflictError('Número de WhatsApp já cadastrado');
@@ -70,20 +71,18 @@ export class AuthService implements IAuthService {
       throw new ConflictError('CPF já cadastrado');
     }
 
-    if (dto.email) {
-      const existingEmail = await this.userRepository.findByEmail(dto.email);
-      if (existingEmail) {
-        throw new ConflictError('Email já cadastrado');
-      }
+    const existingEmail = await this.userRepository.findByEmail(email);
+    if (existingEmail) {
+      throw new ConflictError('Email já cadastrado');
     }
 
     let supabaseUserId: string | null = null;
     let passwordHash: string | null = await bcrypt.hash(dto.password, 10);
     let requiresEmailConfirmation = false;
 
-    if (dto.email && this.supabaseAuthService?.isPasswordAuthConfigured()) {
+    if (this.supabaseAuthService?.isPasswordAuthConfigured()) {
       const supabaseResult = await this.supabaseAuthService.signUpWithPassword({
-        email: dto.email,
+        email,
         password: dto.password,
         name: dto.name,
         role: 'CLIENT',
@@ -99,7 +98,7 @@ export class AuthService implements IAuthService {
       name: dto.name,
       whatsappNumber: dto.whatsappNumber,
       cpf: dto.cpf,
-      email: dto.email || '',
+      email,
       supabaseUserId,
       avatarUrl: null,
       role: 'CLIENT',

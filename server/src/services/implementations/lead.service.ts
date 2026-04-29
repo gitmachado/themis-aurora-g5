@@ -84,7 +84,7 @@ export class LeadService implements ILeadService {
       name: lead.name || 'Cliente',
       whatsappNumber: lead.whatsappNumber!,
       cpf: lead.cpf || '',
-      email: lead.email || '',
+      email: lead.email || null,
       supabaseUserId: null,
       avatarUrl: null,
       role: 'CLIENT',

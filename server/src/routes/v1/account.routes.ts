@@ -1,11 +1,11 @@
 import { Router } from 'express';
 import multer from 'multer';
-import path from 'path';
 import { AccountController } from '../../controllers/implementations/account.controller';
 import { UserRepository } from '@repositories';
 import { UserService } from '@services';
 import { authMiddleware } from '../../middlewares/implementations/authMiddleware';
 import { createStorageProvider } from '../../utils/storage/storage-provider.factory';
+import { ensureDirectory, getTempDir } from '../../utils/storage/storage-paths';
 
 const router = Router();
 
@@ -14,7 +14,7 @@ const userService = new UserService(userRepository);
 const storageProvider = createStorageProvider();
 const controller = new AccountController(userService, storageProvider);
 const upload = multer({
-  dest: path.resolve(__dirname, '../../../../temp'),
+  dest: ensureDirectory(getTempDir()),
   limits: {
     fileSize: 5 * 1024 * 1024,
   },

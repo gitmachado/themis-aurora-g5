@@ -1,10 +1,10 @@
 import { Router } from 'express';
 import multer from 'multer';
-import path from 'path';
 import { DocumentController } from '../../controllers/implementations/document.controller';
 import { DocumentService, LegalProcessService, TimelineService, NotificationService } from '@services';
 import { DocumentRepository, LegalProcessRepository, TimelineEventRepository, NotificationRepository } from '@repositories';
 import { createStorageProvider } from '../../utils/storage/storage-provider.factory';
+import { ensureDirectory, getTempDir } from '../../utils/storage/storage-paths';
 import { authMiddleware } from '../../middlewares/implementations/authMiddleware';
 
 const router = Router();
@@ -34,7 +34,7 @@ const controller = new DocumentController(
 
 // Multer configuration for temporary storage
 const upload = multer({ 
-  dest: path.resolve(__dirname, '../../../../temp'),
+  dest: ensureDirectory(getTempDir()),
   limits: {
     fileSize: 10 * 1024 * 1024 // 10MB
   }
