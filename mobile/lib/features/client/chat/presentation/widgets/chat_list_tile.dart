@@ -47,7 +47,9 @@ class ChatListTile extends StatelessWidget {
                 width: 48,
                 height: 48,
                 decoration: BoxDecoration(
-                  color: isAi ? AppColors.primary.withValues(alpha: 0.1) : AppColors.background,
+                  color: isAi
+                      ? AppColors.primary.withValues(alpha: 0.1)
+                      : AppColors.background,
                   shape: BoxShape.circle,
                 ),
                 child: Icon(
@@ -75,8 +77,12 @@ class ChatListTile extends StatelessWidget {
                           time,
                           style: AppTextStyles.caption.copyWith(
                             fontSize: 12,
-                            color: unreadCount > 0 ? AppColors.primary : AppColors.textCaption,
-                            fontWeight: unreadCount > 0 ? FontWeight.bold : FontWeight.normal,
+                            color: unreadCount > 0
+                                ? AppColors.primary
+                                : AppColors.textCaption,
+                            fontWeight: unreadCount > 0
+                                ? FontWeight.bold
+                                : FontWeight.normal,
                           ),
                         ),
                       ],
@@ -88,8 +94,12 @@ class ChatListTile extends StatelessWidget {
                           child: Text(
                             subtitle,
                             style: AppTextStyles.caption.copyWith(
-                              color: unreadCount > 0 ? AppColors.textPrimary : AppColors.textCaption,
-                              fontWeight: unreadCount > 0 ? FontWeight.w500 : FontWeight.normal,
+                              color: unreadCount > 0
+                                  ? AppColors.textPrimary
+                                  : AppColors.textCaption,
+                              fontWeight: unreadCount > 0
+                                  ? FontWeight.w500
+                                  : FontWeight.normal,
                             ),
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
@@ -98,7 +108,10 @@ class ChatListTile extends StatelessWidget {
                         if (unreadCount > 0) ...[
                           const SizedBox(width: 8),
                           Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 8,
+                              vertical: 2,
+                            ),
                             decoration: BoxDecoration(
                               color: AppColors.primary,
                               borderRadius: BorderRadius.circular(12),

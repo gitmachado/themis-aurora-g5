@@ -6,9 +6,11 @@ import { z } from 'zod';
  *   schemas:
  *     LeadCreateRequest:
  *       type: object
- *       required: [name, whatsappNumber, cpf, caseType, description, urgency, contactAvailability]
+ *       required: [whatsappNumber]
  *       properties:
  *         name:
+ *           type: string
+ *         email:
  *           type: string
  *         whatsappNumber:
  *           type: string
@@ -17,7 +19,7 @@ import { z } from 'zod';
  *         caseType:
  *           type: string
  *           enum: [Labor, Civil, Family, Criminal, SocialSecurity]
- *         description:
+ *         caseDescription:
  *           type: string
  *         urgency:
  *           type: string
@@ -29,12 +31,14 @@ import { z } from 'zod';
 
 export const createLeadSchema = z.object({
   body: z.object({
-    name: z.string().min(3),
+    name: z.string().min(3).optional(),
+    email: z.string().email().optional(),
     whatsappNumber: z.string().min(10),
-    cpf: z.string().length(11),
-    caseType: z.enum(['Labor', 'Civil', 'Family', 'Criminal', 'SocialSecurity']),
-    description: z.string(),
-    urgency: z.enum(['High', 'Medium', 'Low']),
-    contactAvailability: z.enum(['Morning', 'Afternoon', 'Evening']),
+    cpf: z.string().length(11).optional(),
+    caseType: z.enum(['Labor', 'Civil', 'Family', 'Criminal', 'SocialSecurity']).optional(),
+    caseDescription: z.string().optional(),
+    description: z.string().optional(),
+    urgency: z.enum(['High', 'Medium', 'Low']).optional(),
+    contactAvailability: z.enum(['Morning', 'Afternoon', 'Evening']).optional(),
   }),
 });

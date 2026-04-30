@@ -50,4 +50,3 @@ class FileFilterChips extends StatelessWidget {
     );
   }
 }
-

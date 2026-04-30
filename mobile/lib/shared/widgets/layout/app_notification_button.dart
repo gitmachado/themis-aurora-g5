@@ -19,7 +19,11 @@ class AppNotificationButton extends StatelessWidget {
       alignment: Alignment.center,
       children: [
         IconButton(
-          icon: Icon(Icons.notifications_none_rounded, size: size, color: AppColors.primary),
+          icon: Icon(
+            Icons.notifications_none_rounded,
+            size: size,
+            color: AppColors.primary,
+          ),
           onPressed: onTap,
         ),
         if (notificationCount > 0)

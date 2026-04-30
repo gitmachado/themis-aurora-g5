@@ -5,10 +5,11 @@
   "main": "index.js",
   "scripts": {
     "db:setup": "npx ts-node src/scripts/setup-db.ts",
+    "db:migrate": "npx ts-node src/scripts/migrate-db.ts",
     "dev": "ts-node -r tsconfig-paths/register src/server.ts",
     "start": "node dist/server.js",
     "build": "tsc",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "node --test --require ts-node/register --require tsconfig-paths/register \"src/**/*.test.ts\""
   },
   "keywords": [],
   "author": "",
@@ -30,6 +31,7 @@
     "typescript": "^6.0.2"
   },
   "dependencies": {
+    "@supabase/supabase-js": "^2.104.1",
     "bcryptjs": "^3.0.3",
     "cors": "^2.8.6",
     "dotenv": "^17.4.1",

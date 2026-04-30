@@ -24,6 +24,8 @@ CREATE TABLE IF NOT EXISTS users (
     whatsapp_number TEXT UNIQUE NOT NULL,
     cpf TEXT UNIQUE,
     email TEXT UNIQUE,
+    supabase_user_id TEXT,
+    avatar_url TEXT,
     role TEXT NOT NULL CHECK (role IN ('LAWYER', 'CLIENT')),
     password_hash TEXT,
     fcm_token TEXT,
@@ -37,6 +39,7 @@ CREATE TABLE IF NOT EXISTS leads (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     whatsapp_number TEXT NOT NULL,
     name TEXT,
+    email TEXT,
     cpf TEXT,
     case_type TEXT CHECK (case_type IN ('Labor', 'Civil', 'Family', 'Criminal', 'SocialSecurity')),
     case_description TEXT,
@@ -49,6 +52,13 @@ CREATE TABLE IF NOT EXISTS leads (
     created_at TIMESTAMPTZ DEFAULT NOW(),
     updated_at TIMESTAMPTZ DEFAULT NOW()
 );
+
+ALTER TABLE users ADD COLUMN IF NOT EXISTS supabase_user_id TEXT;
+ALTER TABLE users ADD COLUMN IF NOT EXISTS avatar_url TEXT;
+ALTER TABLE leads ADD COLUMN IF NOT EXISTS email TEXT;
+CREATE UNIQUE INDEX IF NOT EXISTS users_supabase_user_id_unique
+    ON users(supabase_user_id)
+    WHERE supabase_user_id IS NOT NULL;
 
 -- 4. Legal Processes
 CREATE TABLE IF NOT EXISTS legal_processes (

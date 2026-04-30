@@ -27,7 +27,11 @@ class QuickAiCard extends StatelessWidget {
                 color: AppColors.primary,
                 shape: BoxShape.circle,
               ),
-              child: const Icon(Icons.smart_toy_outlined, color: AppColors.white, size: 24),
+              child: const Icon(
+                Icons.smart_toy_outlined,
+                color: AppColors.white,
+                size: 24,
+              ),
             ),
             const SizedBox(width: 16),
             Expanded(
@@ -36,7 +40,9 @@ class QuickAiCard extends StatelessWidget {
                 children: [
                   Text(
                     'Dúvida rápida com a IA?',
-                    style: AppTextStyles.body.copyWith(fontWeight: FontWeight.bold),
+                    style: AppTextStyles.body.copyWith(
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                   Text(
                     'Nosso chatbot te responde na hora',

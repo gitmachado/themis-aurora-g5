@@ -29,16 +29,33 @@ class AppBottomNavigationBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final navItems = items ?? const [
-      NavItem(icon: Icons.grid_view_rounded, label: 'Início', size: 25),
-      NavItem(icon: Icons.business_center_rounded, label: 'Trâmites', size: 27, offsetY: -1.0),
-      NavItem(icon: Icons.description_rounded, label: 'Arquivos', size: 24),
-      NavItem(icon: Icons.chat_rounded, label: 'Chat', size: 24, offsetY: 1.0),
-      NavItem(icon: Icons.person_rounded, label: 'Perfil', size: 25),
-    ];
+    final navItems =
+        items ??
+        const [
+          NavItem(icon: Icons.grid_view_rounded, label: 'Início', size: 25),
+          NavItem(
+            icon: Icons.business_center_rounded,
+            label: 'Trâmites',
+            size: 27,
+            offsetY: -1.0,
+          ),
+          NavItem(icon: Icons.description_rounded, label: 'Arquivos', size: 24),
+          NavItem(
+            icon: Icons.chat_rounded,
+            label: 'Chat',
+            size: 24,
+            offsetY: 1.0,
+          ),
+          NavItem(icon: Icons.person_rounded, label: 'Perfil', size: 25),
+        ];
 
     return Container(
-      margin: const EdgeInsets.fromLTRB(16, 0, 16, 13), // Reduzido de 18 para 13 (-5px para descer)
+      margin: const EdgeInsets.fromLTRB(
+        16,
+        0,
+        16,
+        13,
+      ), // Reduzido de 18 para 13 (-5px para descer)
       padding: const EdgeInsets.symmetric(vertical: 10),
       decoration: BoxDecoration(
         color: AppColors.white,
@@ -92,12 +109,17 @@ class _NavBarItemWidget extends StatelessWidget {
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 300),
         width: double.infinity,
-        height: 64, 
+        height: 64,
         margin: const EdgeInsets.symmetric(horizontal: 4),
-        padding: const EdgeInsets.symmetric(vertical: 2, horizontal: 4), // Pequeno respiro na bolha ativa
+        padding: const EdgeInsets.symmetric(
+          vertical: 2,
+          horizontal: 4,
+        ), // Pequeno respiro na bolha ativa
 
         decoration: BoxDecoration(
-          color: isSelected ? AppColors.primary.withValues(alpha: 0.1) : Colors.transparent,
+          color: isSelected
+              ? AppColors.primary.withValues(alpha: 0.1)
+              : Colors.transparent,
           borderRadius: BorderRadius.circular(20),
         ),
         child: Column(
@@ -129,7 +151,9 @@ class _NavBarItemWidget extends StatelessWidget {
                         SizedBox(
                           height: 14,
                           child: Padding(
-                            padding: const EdgeInsets.symmetric(horizontal: 6.0),
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 6.0,
+                            ),
                             child: FittedBox(
                               fit: BoxFit.scaleDown,
                               alignment: Alignment.center,

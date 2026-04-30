@@ -6,15 +6,16 @@ import { z } from 'zod';
  *   schemas:
  *     LoginRequest:
  *       type: object
- *       required: [whatsappNumber, password]
+ *       required: [email, password]
  *       properties:
- *         whatsappNumber:
+ *         email:
  *           type: string
+ *           format: email
  *         password:
  *           type: string
  *     RegisterRequest:
  *       type: object
- *       required: [name, whatsappNumber, cpf, password]
+ *       required: [name, whatsappNumber, cpf, email, password]
  *       properties:
  *         name:
  *           type: string
@@ -22,13 +23,15 @@ import { z } from 'zod';
  *           type: string
  *         cpf:
  *           type: string
+ *         email:
+ *           type: string
  *         password:
  *           type: string
  */
 
 export const loginSchema = z.object({
   body: z.object({
-    whatsappNumber: z.string().min(10),
+    email: z.string().email(),
     password: z.string().min(6),
   }),
 });
@@ -38,6 +41,7 @@ export const registerSchema = z.object({
     name: z.string().min(3),
     whatsappNumber: z.string().min(10),
     cpf: z.string().length(11),
+    email: z.string().email(),
     password: z.string().min(6),
   }),
 });

@@ -10,16 +10,19 @@ Esta pasta foi simplificada para refletir o fluxo real do OmniConnect.
 4. `create-spec-prompt.md`
 5. `create-plan-prompt.md`
 6. `implement-spec-prompt.md`
-7. `create-tests-prompt.md` - quando for preciso criar ou reforcar cobertura de testes
-8. `review-code-prompt.md`
-9. `commit-code-prompt.md`
-10. `create-pr-prompt.md`
+7. `integration-mapping-prompt.md` - quando for preciso mapear a paridade entre server e mobile
+8. `create-tests-prompt.md` - quando for preciso criar ou reforcar cobertura de testes
+9. `review-code-prompt.md`
+10. `commit-code-prompt.md`
+11. `create-pr-prompt.md`
 
 ## O que foi consolidado
 
 - `create-spec-prompt.md` agora cobre criacao e refinamento de spec
 - `implement-spec-prompt.md` agora cobre implementacao, ajuste de rota,
   mudancas em implementacao existente e atualizacao da spec quando necessario
+- `integration-mapping-prompt.md` cobre auditoria narrativa entre rotas do
+  server e chamadas/telas do mobile, destacando lacunas de paridade
 - `update-spec-prompt.md` e `change-implementation-prompt.md` foram removidos
   para reduzir ambiguidade no fluxo
 

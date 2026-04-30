@@ -7,4 +7,5 @@ export interface INotificationRepository {
   create(notification: Omit<Notification, 'id' | 'createdAt' | 'updatedAt'>): Promise<Notification>;
   markAsRead(id: string): Promise<void>;
   markAllAsRead(userId: string): Promise<void>;
+  delete(id: string): Promise<void>;
 }

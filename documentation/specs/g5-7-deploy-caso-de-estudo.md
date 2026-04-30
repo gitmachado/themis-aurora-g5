@@ -5,6 +5,8 @@ status: open
 last_updated_at: 2026-04-19
 ---
 
+> Atualizacao 2026-04-28: a decisao de storage local descrita nesta spec foi superada pela ADR 0008. O deploy publico agora deve usar Supabase Storage privado para binarios de documentos, mantendo metadados e ownership no backend/PostgreSQL.
+
 # 1. Objetivo
 
 Definir a estrategia de hospedagem e a arquitetura de rede minima para publicar o backend do OmniConnect em ambiente acessivel pela internet, sem contradizer a stack atual do monorepo e sem assumir componentes que ainda nao existem no repositorio. A entrega deste ticket e uma decisao tecnica documentada para o primeiro deploy publico do MVP, com topologia recomendada, limites claros e follow-ups obrigatorios.

@@ -1,18 +1,19 @@
 import fs from 'fs';
 import path from 'path';
-import { IStorageProvider } from '../storage.provider';
+import { IStorageProvider, SaveFileOptions, StorageFile } from '../storage.provider';
+import { ensureDirectory, getUploadDir } from '../storage-paths';
 
 export class LocalFileStorageProvider implements IStorageProvider {
   private readonly uploadDir: string;
 
   constructor() {
-    this.uploadDir = path.resolve(__dirname, '../../../../uploads');
-    if (!fs.existsSync(this.uploadDir)) {
-      fs.mkdirSync(this.uploadDir, { recursive: true });
-    }
+    this.uploadDir = ensureDirectory(getUploadDir());
   }
 
-  async saveFile(file: Express.Multer.File): Promise<string> {
+  async saveFile(
+    file: StorageFile,
+    _options?: SaveFileOptions
+  ): Promise<string> {
     const filename = `${Date.now()}-${file.originalname.replace(/\s/g, '_')}`;
     const filePath = path.join(this.uploadDir, filename);
 
@@ -31,5 +32,9 @@ export class LocalFileStorageProvider implements IStorageProvider {
     if (fs.existsSync(filePath)) {
       await fs.promises.unlink(filePath);
     }
+  }
+
+  async getAccessUrl(fileUrl: string): Promise<string> {
+    return fileUrl;
   }
 }

@@ -5,19 +5,35 @@ INSERT INTO configurations (id, ai_tone_of_voice, service_hours_start, service_h
 VALUES ('f5a2b3c4-d5e6-4f88-8912-0123456789ab', 'Profissional e acolhedor', '09:00', '18:00', 'Olá! No momento não estamos atendendo, mas deixe sua dúvida que responderemos em breve.')
 ON CONFLICT (id) DO NOTHING;
 
+-- Test users password: Omni@123456
+
 -- Insert Lawyer (User)
-INSERT INTO users (id, name, whatsapp_number, cpf, email, role, password_hash)
-VALUES ('a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11', 'Dr. Maurício Advogado', '5511999999999', '12345678901', 'mauricio@adv.com.br', 'LAWYER', '$2b$12$EjP.Xm6.mK.Xm6.mK.Xm6.mK.Xm6.mK.Xm6.mK.Xm6.mK.Xm6')
-ON CONFLICT (id) DO NOTHING;
+INSERT INTO users (id, name, whatsapp_number, cpf, email, supabase_user_id, role, password_hash)
+VALUES ('a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11', 'Dr. Thigs Advogado', '5511999999999', '12345678901', 'mauricio@adv.com.br', NULL, 'LAWYER', '$2b$10$cRgWfrw64noRMgk7mwJQcu6jlljE8YPirk0NJ6AuDV3Q7.XfPCUku')
+ON CONFLICT (id) DO UPDATE SET
+    name = EXCLUDED.name,
+    whatsapp_number = EXCLUDED.whatsapp_number,
+    cpf = EXCLUDED.cpf,
+    email = EXCLUDED.email,
+    supabase_user_id = EXCLUDED.supabase_user_id,
+    role = EXCLUDED.role,
+    password_hash = EXCLUDED.password_hash;
 
 -- Insert Client (User)
-INSERT INTO users (id, name, whatsapp_number, cpf, email, role)
-VALUES ('b1f9e8d7-c6b5-a4b3-92a1-0f9e8d7c6b5a', 'João Cliente Exemplo', '5511888888888', '98765432100', 'joao@cliente.com', 'CLIENT')
-ON CONFLICT (id) DO NOTHING;
+INSERT INTO users (id, name, whatsapp_number, cpf, email, supabase_user_id, role, password_hash)
+VALUES ('b1f9e8d7-c6b5-a4b3-92a1-0f9e8d7c6b5a', 'João Cliente Exemplo', '5511888888888', '98765432100', 'joao@cliente.com', NULL, 'CLIENT', '$2b$10$cRgWfrw64noRMgk7mwJQcu6jlljE8YPirk0NJ6AuDV3Q7.XfPCUku')
+ON CONFLICT (id) DO UPDATE SET
+    name = EXCLUDED.name,
+    whatsapp_number = EXCLUDED.whatsapp_number,
+    cpf = EXCLUDED.cpf,
+    email = EXCLUDED.email,
+    supabase_user_id = EXCLUDED.supabase_user_id,
+    role = EXCLUDED.role,
+    password_hash = EXCLUDED.password_hash;
 
 -- Insert Pending Lead
-INSERT INTO leads (id, whatsapp_number, name, case_type, case_description, urgency, status)
-VALUES ('c2e1d0c9-b8a7-a6b5-94c3-2d1e0f9a8b7c', '5511777777777', 'Maria Leads', 'Labor', 'Fui demitida sem justa causa e não recebi verbas.', 'High', 'PENDING')
+INSERT INTO leads (id, whatsapp_number, name, email, case_type, case_description, urgency, status)
+VALUES ('c2e1d0c9-b8a7-a6b5-94c3-2d1e0f9a8b7c', '5511777777777', 'Maria Leads', 'maria.leads@example.com', 'Labor', 'Fui demitida sem justa causa e não recebi verbas.', 'High', 'PENDING')
 ON CONFLICT (id) DO NOTHING;
 
 -- Insert Converted Lead

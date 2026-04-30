@@ -5,7 +5,7 @@ import '../../../../../../shared/constants/app_text_styles.dart';
 class HeroUpdateCard extends StatelessWidget {
   final String title;
   final String subtitle;
-  final VoidCallback onDetailsTap;
+  final VoidCallback? onDetailsTap;
 
   const HeroUpdateCard({
     super.key,
@@ -35,7 +35,11 @@ class HeroUpdateCard extends StatelessWidget {
         children: [
           Row(
             children: [
-              const Icon(Icons.error_outline_rounded, color: AppColors.warning, size: 20),
+              const Icon(
+                Icons.error_outline_rounded,
+                color: AppColors.warning,
+                size: 20,
+              ),
               const SizedBox(width: 8),
               Text(
                 'Atualização no seu processo',
@@ -47,10 +51,7 @@ class HeroUpdateCard extends StatelessWidget {
             ],
           ),
           const SizedBox(height: 12),
-          Text(
-            title,
-            style: AppTextStyles.h2.copyWith(color: AppColors.white),
-          ),
+          Text(title, style: AppTextStyles.h2.copyWith(color: AppColors.white)),
           const SizedBox(height: 4),
           Text(
             subtitle,
@@ -59,27 +60,29 @@ class HeroUpdateCard extends StatelessWidget {
               fontSize: 14,
             ),
           ),
-          const SizedBox(height: 20),
-          SizedBox(
-            width: double.infinity,
-            child: TextButton(
-              onPressed: onDetailsTap,
-              style: TextButton.styleFrom(
-                backgroundColor: AppColors.white,
-                padding: const EdgeInsets.symmetric(vertical: 12),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(8),
+          if (onDetailsTap != null) ...[
+            const SizedBox(height: 20),
+            SizedBox(
+              width: double.infinity,
+              child: TextButton(
+                onPressed: onDetailsTap,
+                style: TextButton.styleFrom(
+                  backgroundColor: AppColors.white,
+                  padding: const EdgeInsets.symmetric(vertical: 12),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8),
+                  ),
                 ),
-              ),
-              child: const Text(
-                'Ver Linha do Tempo',
-                style: TextStyle(
-                  color: AppColors.primary,
-                  fontWeight: FontWeight.bold,
+                child: const Text(
+                  'Ver Linha do Tempo',
+                  style: TextStyle(
+                    color: AppColors.primary,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
               ),
             ),
-          ),
+          ],
         ],
       ),
     );

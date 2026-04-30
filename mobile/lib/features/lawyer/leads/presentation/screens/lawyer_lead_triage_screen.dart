@@ -1,77 +1,51 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../../../app/routes/app_router.dart';
+import '../../../../../../features/lawyer/leads/domain/entities/lead.dart';
+import '../../../../../../features/lawyer/leads/presentation/lead_display.dart';
+import '../../../../../../features/lawyer/leads/presentation/providers/lead_providers.dart';
 import '../../../../../../shared/constants/app_colors.dart';
 import '../../../../../../shared/constants/app_text_styles.dart';
 import '../../../../../../shared/constants/app_dimensions.dart';
 import '../../../../../../shared/widgets/layout/custom_app_bar.dart';
 import '../widgets/lead_card.dart';
 import '../../../../../../shared/widgets/app_app_bar_actions.dart';
+import '../../../../../../shared/widgets/layout/loading_skeleton.dart';
 
-class LawyerLeadTriageScreen extends StatefulWidget {
+class LawyerLeadTriageScreen extends ConsumerStatefulWidget {
   const LawyerLeadTriageScreen({super.key});
 
   @override
-  State<LawyerLeadTriageScreen> createState() => _LawyerLeadTriageScreenState();
+  ConsumerState<LawyerLeadTriageScreen> createState() =>
+      _LawyerLeadTriageScreenState();
 }
 
-class _LawyerLeadTriageScreenState extends State<LawyerLeadTriageScreen> {
+class _LawyerLeadTriageScreenState
+    extends ConsumerState<LawyerLeadTriageScreen> {
   String _selectedFilter = 'Todos';
-
-  final List<Map<String, String>> _leads = [
-    {
-      'name': 'Carla Menezes',
-      'caseType': 'Trabalhista',
-      'time': 'há 2 min',
-      'urgency': 'Alta',
-    },
-    {
-      'name': 'Roberto Santos',
-      'caseType': 'Cível',
-      'time': 'há 15 min',
-      'urgency': 'Média',
-    },
-    {
-      'name': 'Mariana Lima',
-      'caseType': 'Família',
-      'time': 'há 1 hora',
-      'urgency': 'Baixa',
-    },
-    {
-      'name': 'João Pedro',
-      'caseType': 'Previdenciário',
-      'time': 'há 3 horas',
-      'urgency': 'Alta',
-    },
-    {
-      'name': 'Ana Paula',
-      'caseType': 'Consumidor',
-      'time': 'há 5 horas',
-      'urgency': 'Média',
-    },
-  ];
 
   @override
   Widget build(BuildContext context) {
+    final leads = ref.watch(pendingLeadsProvider);
+
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: CustomAppBar(
         title: 'Leads',
-        actions: [AppAppBarActions(chatCount: 3, notificationCount: 2)],
+        actions: [AppAppBarActions()],
         showDivider: false,
       ),
       body: Column(
         children: [
-          Container(
-            color: AppColors.white,
-            child: _buildFilters(),
-          ),
-          Container(
-            height: 1,
-            color: AppColors.divider.withValues(alpha: 0.7),
-          ),
+          Container(color: AppColors.white, child: _buildFilters()),
+          Container(height: 1, color: AppColors.divider.withValues(alpha: 0.7)),
           const SizedBox(height: 16),
           Expanded(
-            child: _buildLeadsList(),
+            child: leads.when(
+              data: _buildLeadsList,
+              loading: _buildLoadingList,
+              error: (error, _) => _buildErrorState(error),
+            ),
           ),
         ],
       ),
@@ -114,13 +88,12 @@ class _LawyerLeadTriageScreenState extends State<LawyerLeadTriageScreen> {
     );
   }
 
-  Widget _buildLeadsList() {
-    // Basic filtering logic for demo purposes
-    final filteredLeads = _leads.where((lead) {
+  Widget _buildLeadsList(List<Lead> leads) {
+    final filteredLeads = leads.where((lead) {
       if (_selectedFilter == 'Todos') return true;
-      if (_selectedFilter == 'Urgentes') return lead['urgency'] == 'Alta';
-      if (_selectedFilter == 'Novos') return lead['time']!.contains('min');
-      return lead['caseType'] == _selectedFilter;
+      if (_selectedFilter == 'Urgentes') return lead.urgencyLabel == 'Alta';
+      if (_selectedFilter == 'Novos') return lead.timeLabel.contains('min');
+      return lead.caseTypeLabel == _selectedFilter;
     }).toList();
 
     if (filteredLeads.isEmpty) {
@@ -128,7 +101,11 @@ class _LawyerLeadTriageScreenState extends State<LawyerLeadTriageScreen> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.person_search_rounded, size: 64, color: AppColors.textCaption.withValues(alpha: 0.5)),
+            Icon(
+              Icons.person_search_rounded,
+              size: 64,
+              color: AppColors.textCaption.withValues(alpha: 0.5),
+            ),
             const SizedBox(height: 16),
             Text(
               'Nenhum lead encontrado',
@@ -140,41 +117,84 @@ class _LawyerLeadTriageScreenState extends State<LawyerLeadTriageScreen> {
     }
 
     return ListView.separated(
-      padding: EdgeInsets.fromLTRB(20, 0, 20, AppDimensions.bottomPadding(context)),
-
+      padding: EdgeInsets.fromLTRB(
+        20,
+        0,
+        20,
+        AppDimensions.bottomPadding(context),
+      ),
 
       itemCount: filteredLeads.length,
       separatorBuilder: (_, _) => const SizedBox(height: 16),
       itemBuilder: (context, index) {
         final lead = filteredLeads[index];
         return LeadCard(
-          name: lead['name']!,
-          caseType: lead['caseType']!,
-          time: lead['time']!,
-          urgency: lead['urgency']!,
+          name: lead.displayName,
+          caseType: lead.caseTypeLabel,
+          time: lead.timeLabel,
+          urgency: lead.urgencyLabel,
           onTap: () {
             Navigator.pushNamed(
               context,
               AppRouter.lawyerLeadDetailRoute,
               arguments: {
-                'name': lead['name']!,
-                'caseType': lead['caseType']!,
-                'urgency': lead['urgency']!,
+                'id': lead.id,
+                'name': lead.displayName,
+                'caseType': lead.caseTypeLabel,
+                'urgency': lead.urgencyLabel,
               },
             );
           },
-          onAccept: () {
+          onAccept: () async {
+            await ref.read(leadActionsProvider).convert(lead.id);
+            if (!context.mounted) return;
             ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text('Lead ${lead['name']} aceito!')),
+              SnackBar(
+                content: Text(
+                  'Lead ${lead.displayName} convertido em cliente.',
+                ),
+              ),
             );
           },
-          onArchive: () {
+          onArchive: () async {
+            await ref
+                .read(leadActionsProvider)
+                .discard(lead.id, reason: 'Arquivado no app mobile');
+            if (!context.mounted) return;
             ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text('Lead ${lead['name']} arquivado.')),
+              SnackBar(content: Text('Lead ${lead.displayName} arquivado.')),
             );
           },
         );
       },
+    );
+  }
+
+  Widget _buildLoadingList() {
+    return ListView.separated(
+      padding: EdgeInsets.fromLTRB(
+        20,
+        0,
+        20,
+        AppDimensions.bottomPadding(context),
+      ),
+      itemCount: 4,
+      separatorBuilder: (_, _) => const SizedBox(height: 16),
+      itemBuilder: (_, _) =>
+          const LoadingSkeleton(height: 132, borderRadius: 16),
+    );
+  }
+
+  Widget _buildErrorState(Object error) {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(24),
+        child: Text(
+          error.toString(),
+          textAlign: TextAlign.center,
+          style: AppTextStyles.body.copyWith(color: AppColors.error),
+        ),
+      ),
     );
   }
 }

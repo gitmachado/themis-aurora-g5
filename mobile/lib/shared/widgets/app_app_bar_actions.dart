@@ -28,14 +28,20 @@ class AppAppBarActions extends StatelessWidget {
             context,
             icon: Icons.chat_bubble_outline_rounded,
             count: chatCount,
-            onTap: onChatTap ?? () => Navigator.pushNamed(context, '/lawyer-chats'),
+            onTap:
+                onChatTap ??
+                () => Navigator.pushNamed(context, '/lawyer-chats'),
           ),
         AppNotificationButton(
           notificationCount: notificationCount,
-          onTap: onNotificationTap ?? () {
-            final route = showChat ? '/lawyer-notifications' : '/notifications';
-            Navigator.pushNamed(context, route);
-          },
+          onTap:
+              onNotificationTap ??
+              () {
+                final route = showChat
+                    ? '/lawyer-notifications'
+                    : '/notifications';
+                Navigator.pushNamed(context, route);
+              },
           size: 22,
         ),
         const SizedBox(width: 12),

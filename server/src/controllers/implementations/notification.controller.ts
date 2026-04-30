@@ -58,4 +58,29 @@ export class NotificationController {
       next(error);
     }
   };
+
+  delete: RequestHandler<{ id: string }> = async (
+    req: AuthRequest<{ id: string }>,
+    res: Response,
+    next: NextFunction
+  ) => {
+    try {
+      const notificationId = req.params.id;
+      const user = req.user!;
+
+      const notification = await this.notificationService.getById(notificationId);
+      if (!notification) {
+        throw new NotFoundError('Notificação não encontrada');
+      }
+
+      if (notification.userId !== user.id) {
+        throw new ForbiddenError('Você não tem permissão para excluir esta notificação');
+      }
+
+      await this.notificationService.delete(notificationId);
+      return res.status(204).send();
+    } catch (error) {
+      next(error);
+    }
+  };
 }

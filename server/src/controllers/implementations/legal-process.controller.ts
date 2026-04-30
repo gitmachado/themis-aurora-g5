@@ -14,8 +14,10 @@ export class LegalProcessController {
     next: NextFunction
   ) => {
     try {
-      const userId = req.user!.id;
-      const processes = await this.legalProcessService.getByClientId(userId);
+      const user = req.user!;
+      const processes = user.role === 'LAWYER'
+        ? await this.legalProcessService.getByLawyerId(user.id)
+        : await this.legalProcessService.getByClientId(user.id);
       return res.status(200).json(processes);
     } catch (error) {
       next(error);
@@ -39,6 +41,10 @@ export class LegalProcessController {
 
       // Ownership check for Clients
       if (user.role === 'CLIENT' && process.clientId !== user.id) {
+        throw new ForbiddenError('Você não tem permissão para visualizar este processo');
+      }
+
+      if (user.role === 'LAWYER' && process.lawyerId && process.lawyerId !== user.id) {
         throw new ForbiddenError('Você não tem permissão para visualizar este processo');
       }
 

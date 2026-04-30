@@ -7,6 +7,7 @@ import routes from './routes';
 import swaggerUi from 'swagger-ui-express';
 import { swaggerSpec } from './config/swagger';
 import { getAllowedCorsOrigins, isSwaggerEnabled } from './config/runtime';
+import { getUploadDir } from './utils/storage/storage-paths';
 
 const app = express();
 const allowedCorsOrigins = getAllowedCorsOrigins();
@@ -24,6 +25,7 @@ app.use(cors({
 }));
 app.use(morgan('dev'));
 app.use(express.json());
+app.use('/uploads', express.static(getUploadDir()));
 
 // API Routes
 app.use('/api/v1', routes);

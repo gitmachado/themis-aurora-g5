@@ -69,10 +69,7 @@ class _ClientMainLayoutState extends State<ClientMainLayout> {
                 ).createShader(bounds);
               },
               blendMode: BlendMode.dstIn,
-              child: IndexedStack(
-                index: _currentIndex,
-                children: _screens,
-              ),
+              child: IndexedStack(index: _currentIndex, children: _screens),
             );
           },
         ),
@@ -83,8 +80,12 @@ class _ClientMainLayoutState extends State<ClientMainLayout> {
               begin: Alignment.topCenter,
               end: Alignment.bottomCenter,
               colors: [
-                Theme.of(context).scaffoldBackgroundColor.withValues(alpha: 0.0),
-                Theme.of(context).scaffoldBackgroundColor.withValues(alpha: 0.95),
+                Theme.of(
+                  context,
+                ).scaffoldBackgroundColor.withValues(alpha: 0.0),
+                Theme.of(
+                  context,
+                ).scaffoldBackgroundColor.withValues(alpha: 0.95),
                 Theme.of(context).scaffoldBackgroundColor,
               ],
               stops: const [0.0, 0.4, 1.0],
@@ -99,7 +100,5 @@ class _ClientMainLayoutState extends State<ClientMainLayout> {
         ),
       ),
     );
-
   }
 }
-

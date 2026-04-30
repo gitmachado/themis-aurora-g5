@@ -33,10 +33,7 @@ class LeadCard extends StatelessWidget {
         decoration: BoxDecoration(
           color: AppColors.white,
           borderRadius: BorderRadius.circular(16),
-          border: Border.all(
-            color: AppColors.border,
-            width: 1,
-          ),
+          border: Border.all(color: AppColors.border, width: 1),
           boxShadow: [
             BoxShadow(
               color: Colors.black.withValues(alpha: 0.04),
@@ -84,10 +81,7 @@ class LeadCard extends StatelessWidget {
                     ],
                   ),
                 ),
-                AppBadge(
-                  label: urgency.toUpperCase(),
-                  type: urgencyType,
-                ),
+                AppBadge(label: urgency.toUpperCase(), type: urgencyType),
               ],
             ),
             const SizedBox(height: 16),
