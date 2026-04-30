@@ -1,24 +1,49 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../../../../../features/procedures/domain/entities/legal_process.dart';
+import '../../../../../../features/procedures/domain/entities/process_document.dart';
+import '../../../../../../features/procedures/domain/entities/timeline_event.dart';
+import '../../../../../../features/procedures/presentation/procedure_display.dart';
+import '../../../../../../features/procedures/presentation/providers/procedure_providers.dart';
 import '../../../../../../shared/constants/app_colors.dart';
 import '../../../../../../shared/constants/app_text_styles.dart';
+import '../../../../../../shared/utils/api_formatters.dart';
 import '../../../../../../shared/widgets/layout/custom_app_bar.dart';
 import '../../../../../../shared/widgets/buttons/primary_button.dart';
 import '../../../../../../shared/widgets/buttons/app_badge.dart';
 import '../../../../../../shared/widgets/cards/labeled_field.dart';
 import '../../../../../../shared/widgets/cards/file_card.dart';
+import '../../../../../../shared/widgets/layout/loading_skeleton.dart';
 import '../widgets/timeline_summary_card.dart';
 import '../widgets/timeline_event_tile.dart';
 
-class ClientProcedureTimelineScreen extends StatefulWidget {
-  const ClientProcedureTimelineScreen({super.key});
+class ClientProcedureTimelineScreen extends ConsumerStatefulWidget {
+  final String? processId;
+
+  const ClientProcedureTimelineScreen({super.key, this.processId});
 
   @override
-  State<ClientProcedureTimelineScreen> createState() => _ClientProcedureTimelineScreenState();
+  ConsumerState<ClientProcedureTimelineScreen> createState() =>
+      _ClientProcedureTimelineScreenState();
 }
 
-class _ClientProcedureTimelineScreenState extends State<ClientProcedureTimelineScreen> {
+class _ClientProcedureTimelineScreenState
+    extends ConsumerState<ClientProcedureTimelineScreen> {
   @override
   Widget build(BuildContext context) {
+    final processId = widget.processId;
+    if (processId == null || processId.isEmpty) {
+      return Scaffold(
+        backgroundColor: AppColors.background,
+        appBar: const CustomAppBar(showBackButton: true, title: 'Tramite'),
+        body: const Center(child: Text('Tramite nao informado')),
+      );
+    }
+
+    final process = ref.watch(procedureDetailsProvider(processId));
+    final timeline = ref.watch(procedureTimelineProvider(processId));
+    final documents = ref.watch(procedureDocumentsProvider(processId));
+
     return DefaultTabController(
       length: 4,
       child: Scaffold(
@@ -27,39 +52,55 @@ class _ClientProcedureTimelineScreenState extends State<ClientProcedureTimelineS
           showBackButton: true,
           titleWidget: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const Text(
-                '0012345-67.2023.8.26',
-                style: TextStyle(
-                  color: AppColors.textPrimary,
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
+            children: process.maybeWhen(
+              data: (data) => [
+                Text(
+                  data.processNumber ?? data.title,
+                  style: const TextStyle(
+                    color: AppColors.textPrimary,
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
                 ),
-              ),
-              Row(
-                children: [
-                  Text(
-                    'Ação Trabalhista',
-                    style: AppTextStyles.caption.copyWith(fontSize: 12),
-                  ),
-                  const SizedBox(width: 8),
-                  Text(
-                    '• Atualizado há 15 min',
-                    style: AppTextStyles.caption.copyWith(
-                      fontSize: 11,
-                      color: AppColors.primary,
-                      fontWeight: FontWeight.w500,
+                Row(
+                  children: [
+                    Text(
+                      data.caseTypeLabel,
+                      style: AppTextStyles.caption.copyWith(fontSize: 12),
                     ),
-                  ),
-                ],
-              ),
-            ],
+                    const SizedBox(width: 8),
+                    Text(
+                      'Atualizado ${formatRelativeDate(data.updatedAt)}',
+                      style: AppTextStyles.caption.copyWith(
+                        fontSize: 11,
+                        color: AppColors.primary,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+              orElse: () => const [
+                LoadingSkeleton(width: 180, height: 18),
+                SizedBox(height: 6),
+                LoadingSkeleton(width: 120, height: 12),
+              ],
+            ),
           ),
           title: '',
           actions: [
             IconButton(
-              icon: const Icon(Icons.more_vert, color: AppColors.textCaption),
-              onPressed: () {},
+              icon: const Icon(
+                Icons.refresh_rounded,
+                color: AppColors.textCaption,
+              ),
+              onPressed: () {
+                ref.invalidate(procedureDetailsProvider(processId));
+                ref.invalidate(procedureTimelineProvider(processId));
+                ref.invalidate(procedureDocumentsProvider(processId));
+              },
             ),
           ],
           bottom: const TabBar(
@@ -78,9 +119,21 @@ class _ClientProcedureTimelineScreenState extends State<ClientProcedureTimelineS
         ),
         body: TabBarView(
           children: [
-            _buildTimelineTab(),
-            _buildAiResumoTab(),
-            _buildFilesTab(),
+            timeline.when(
+              data: _buildTimelineTab,
+              loading: () => _buildLoadingTab(),
+              error: (error, _) => _buildErrorTab(error),
+            ),
+            process.when(
+              data: _buildAiResumoTab,
+              loading: () => _buildLoadingTab(),
+              error: (error, _) => _buildErrorTab(error),
+            ),
+            documents.when(
+              data: _buildFilesTab,
+              loading: () => _buildLoadingTab(),
+              error: (error, _) => _buildErrorTab(error),
+            ),
             _buildChatTab(),
           ],
         ),
@@ -89,7 +142,11 @@ class _ClientProcedureTimelineScreenState extends State<ClientProcedureTimelineS
     );
   }
 
-  Widget _buildTimelineTab() {
+  Widget _buildTimelineTab(List<TimelineEvent> events) {
+    if (events.isEmpty) {
+      return _buildEmptyTab('Nenhum evento de timeline encontrado');
+    }
+
     return SingleChildScrollView(
       padding: const EdgeInsets.all(20),
       child: Container(
@@ -105,48 +162,35 @@ class _ClientProcedureTimelineScreenState extends State<ClientProcedureTimelineS
             ),
           ],
         ),
-        child: const Column(
+        child: Column(
           children: [
-            TimelineEventTile(
-              isFirst: true,
-              title: 'Petição Inicial Protocolada',
-              date: '05 Abr 2026 • 14:30',
-              description: 'Trâmite distribuído e aguardando primeira análise do juiz.',
-              responsible: 'Dr. Marcelo Costa',
-            ),
-            TimelineEventTile(
-              title: 'Audiência Marcada',
-              date: '12 May 2026 • 10:00',
-              description: 'Aguardando a realização da audiência de conciliação.',
-              responsible: 'Dr. Rodrigo Machado',
-            ),
-            TimelineEventTile(
-              title: 'Aguardando Sentença',
-              date: '--',
-              description: 'O trâmite está em fase de conclusão para o juiz.',
-            ),
-            TimelineEventTile(
-              isLast: true,
-              title: 'Sentença Proferida',
-              date: 'Previsão: Junho 2026',
-              description: 'Previsão estimada baseada na média do tribunal.',
-            ),
+            for (var index = 0; index < events.length; index++)
+              TimelineEventTile(
+                isFirst: index == 0,
+                isLast: index == events.length - 1,
+                title: _timelineTitle(events[index].type),
+                date: formatRelativeDate(events[index].createdAt),
+                description: events[index].content,
+              ),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildAiResumoTab() {
+  Widget _buildAiResumoTab(LegalProcess process) {
     return SingleChildScrollView(
       padding: const EdgeInsets.all(16),
       child: Column(
         children: [
           TimelineSummaryCard(
-            status: 'Em Análise',
-            lastMovement: '08/04/2026',
+            status: process.displayStatus,
+            lastMovement: formatDateLabel(
+              process.lastMovementDate ?? process.updatedAt,
+            ),
             onAiAnalysisTap: () {},
-            onChatMirrorTap: () => DefaultTabController.of(context).animateTo(3),
+            onChatMirrorTap: () =>
+                DefaultTabController.of(context).animateTo(3),
           ),
           const SizedBox(height: 16),
           Container(
@@ -154,7 +198,9 @@ class _ClientProcedureTimelineScreenState extends State<ClientProcedureTimelineS
             decoration: BoxDecoration(
               color: AppColors.white,
               borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: AppColors.divider.withValues(alpha: 0.5)),
+              border: Border.all(
+                color: AppColors.divider.withValues(alpha: 0.5),
+              ),
               boxShadow: [
                 BoxShadow(
                   color: Colors.black.withValues(alpha: 0.04),
@@ -168,53 +214,59 @@ class _ClientProcedureTimelineScreenState extends State<ClientProcedureTimelineS
               children: [
                 const LabeledField(
                   label: 'DESCRIÇÃO DO CASO',
-                  value:
-                      'O cliente foi demitido sem justa causa e não recebeu as verbas rescisórias. Alega também horas extras não pagas durante os últimos 2 anos em que desempenhou suas funções.',
                   isDescription: true,
+                  value: '',
                 ),
+                if (process.description != null &&
+                    process.description!.isNotEmpty)
+                  Text(
+                    process.description!,
+                    style: AppTextStyles.body.copyWith(height: 1.5),
+                  )
+                else
+                  Text(
+                    'Descricao ainda nao cadastrada.',
+                    style: AppTextStyles.caption,
+                  ),
                 const SizedBox(height: 24),
-                const Column(
+                Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     LabeledField(
-                      label: 'PARTES DO TRÂMITE',
-                      value: 'João Ricardo Mendes (Autor/Cliente)',
+                      label: 'IDENTIFICADOR DO CLIENTE',
+                      value: process.clientId,
                       icon: Icons.person_outline,
                       iconColor: AppColors.primary,
-                    ),
-                    SizedBox(height: 12),
-                    LabeledField(
-                      label: '',
-                      value: 'Tecnologia Global S.A. (Réu)',
-                      icon: Icons.shield_outlined,
-                      iconColor: Color(0xFFEF4444),
                     ),
                   ],
                 ),
                 const SizedBox(height: 24),
                 LabeledField(
                   label: 'STATUS ATUAL',
-                  value: 'Em andamento',
-                  valueWidget: const Row(
+                  value: process.displayStatus,
+                  valueWidget: Row(
                     children: [
-                      AppBadge(label: 'Em andamento', type: BadgeType.success),
+                      AppBadge(
+                        label: process.displayStatus,
+                        type: process.badgeType,
+                      ),
                     ],
                   ),
                 ),
                 const SizedBox(height: 24),
-                const LabeledField(
-                  label: 'TRIBUNAL / VARA',
-                  value: '2ª Vara do Trabalho',
+                LabeledField(
+                  label: 'TIPO DE CASO',
+                  value: process.caseTypeLabel,
                 ),
                 const SizedBox(height: 16),
-                const LabeledField(
-                  label: 'VALOR DA CAUSA',
-                  value: 'R\$ 50.000,00',
+                LabeledField(
+                  label: 'NUMERO DO TRAMITE',
+                  value: process.processNumber ?? '--',
                 ),
                 const SizedBox(height: 16),
-                const LabeledField(
-                  label: 'DATA DE DISTRIBUIÇÃO',
-                  value: '12/01/2024',
+                LabeledField(
+                  label: 'CRIADO EM',
+                  value: formatDateLabel(process.createdAt),
                 ),
               ],
             ),
@@ -224,7 +276,11 @@ class _ClientProcedureTimelineScreenState extends State<ClientProcedureTimelineS
     );
   }
 
-  Widget _buildFilesTab() {
+  Widget _buildFilesTab(List<ProcessDocument> documents) {
+    if (documents.isEmpty) {
+      return _buildEmptyTab('Nenhum arquivo vinculado a este tramite');
+    }
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -242,32 +298,29 @@ class _ClientProcedureTimelineScreenState extends State<ClientProcedureTimelineS
           ),
         ),
         Expanded(
-          child: ListView(
+          child: ListView.builder(
             padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
-            children: const [
-              AppFileCard(
-                category: 'PETIÇÃO',
-                fileName: 'Petição Inicial.pdf',
-                fileSize: '345 KB',
-                dateAdded: '05 Abr',
-              ),
-              AppFileCard(
-                category: 'PROCURAÇÃO',
-                fileName: 'Procuração_Assinada.pdf',
-                fileSize: '1.2 MB',
-                dateAdded: '01 Apr',
-              ),
-              AppFileCard(
-                category: 'PROVA',
-                fileName: 'Foto_Local_Acidente.jpg',
-                fileSize: '2.5 MB',
-                dateAdded: 'ontem',
-                icon: Icons.image_outlined,
-                iconColor: Color(0xFFEA580C),
-                iconBackgroundColor: Color(0xFFFFF7ED),
+            itemCount: documents.length,
+            itemBuilder: (context, index) {
+              final document = documents[index];
+              final isImage = document.mimeType?.startsWith('image/') ?? false;
+              return AppFileCard(
+                category: document.mimeType ?? 'arquivo',
+                fileName: document.fileName,
+                fileSize: formatFileSize(document.sizeBytes),
+                dateAdded: formatDateLabel(document.createdAt),
+                icon: isImage
+                    ? Icons.image_outlined
+                    : Icons.description_outlined,
+                iconColor: isImage
+                    ? const Color(0xFFEA580C)
+                    : AppColors.primary,
+                iconBackgroundColor: isImage
+                    ? const Color(0xFFFFF7ED)
+                    : const Color(0xFFEEF2FF),
                 actionIcon: Icons.visibility_outlined,
-              ),
-            ],
+              );
+            },
           ),
         ),
       ],
@@ -300,7 +353,11 @@ class _ClientProcedureTimelineScreenState extends State<ClientProcedureTimelineS
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(Icons.chat_bubble_outline_rounded, size: 48, color: AppColors.textCaption),
+          Icon(
+            Icons.chat_bubble_outline_rounded,
+            size: 48,
+            color: AppColors.textCaption,
+          ),
           SizedBox(height: 16),
           Text('Histórico de Conversas', style: AppTextStyles.h2),
           SizedBox(height: 8),
@@ -321,7 +378,9 @@ class _ClientProcedureTimelineScreenState extends State<ClientProcedureTimelineS
     return Container(
       decoration: BoxDecoration(
         color: AppColors.white,
-        border: Border(top: BorderSide(color: AppColors.divider.withValues(alpha: 0.5))),
+        border: Border(
+          top: BorderSide(color: AppColors.divider.withValues(alpha: 0.5)),
+        ),
       ),
       child: SafeArea(
         top: false,
@@ -337,5 +396,48 @@ class _ClientProcedureTimelineScreenState extends State<ClientProcedureTimelineS
       ),
     );
   }
-}
 
+  Widget _buildLoadingTab() {
+    return ListView.separated(
+      padding: const EdgeInsets.all(20),
+      itemCount: 4,
+      separatorBuilder: (_, _) => const SizedBox(height: 12),
+      itemBuilder: (_, _) =>
+          const LoadingSkeleton(height: 72, borderRadius: 12),
+    );
+  }
+
+  Widget _buildErrorTab(Object error) {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(24),
+        child: Text(
+          error.toString(),
+          textAlign: TextAlign.center,
+          style: AppTextStyles.body.copyWith(color: AppColors.error),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildEmptyTab(String message) {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(24),
+        child: Text(
+          message,
+          textAlign: TextAlign.center,
+          style: AppTextStyles.body.copyWith(color: AppColors.textCaption),
+        ),
+      ),
+    );
+  }
+
+  String _timelineTitle(String type) => switch (type) {
+    'PROCESS_CREATED' => 'Tramite criado',
+    'DOCUMENT_SENT' => 'Documento enviado',
+    'LAWYER_NOTE' => 'Nota do advogado',
+    'STATUS_UPDATE' => 'Status atualizado',
+    _ => 'Atualizacao',
+  };
+}

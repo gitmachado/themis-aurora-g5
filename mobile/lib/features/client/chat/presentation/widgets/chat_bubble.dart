@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import '../../../../../../shared/constants/app_colors.dart';
 import '../../../../../../shared/constants/app_dimensions.dart';
 import '../../../../../../shared/constants/app_text_styles.dart';
@@ -33,8 +33,12 @@ class ChatBubble extends StatelessWidget {
           borderRadius: BorderRadius.only(
             topLeft: const Radius.circular(AppDimensions.radiusL),
             topRight: const Radius.circular(AppDimensions.radiusL),
-            bottomLeft: isMe ? const Radius.circular(AppDimensions.radiusL) : Radius.zero,
-            bottomRight: isMe ? Radius.zero : const Radius.circular(AppDimensions.radiusL),
+            bottomLeft: isMe
+                ? const Radius.circular(AppDimensions.radiusL)
+                : Radius.zero,
+            bottomRight: isMe
+                ? Radius.zero
+                : const Radius.circular(AppDimensions.radiusL),
           ),
           boxShadow: [
             BoxShadow(
@@ -58,13 +62,14 @@ class ChatBubble extends StatelessWidget {
             Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Text(
-                  time,
-                  style: AppTextStyles.caption.copyWith(fontSize: 11),
-                ),
+                Text(time, style: AppTextStyles.caption.copyWith(fontSize: 11)),
                 if (isMe) ...[
                   const SizedBox(width: AppDimensions.spacingXS),
-                  const Icon(Icons.done_all, size: AppDimensions.iconXS, color: AppColors.primary),
+                  const Icon(
+                    Icons.done_all,
+                    size: AppDimensions.iconXS,
+                    color: AppColors.primary,
+                  ),
                 ],
               ],
             ),

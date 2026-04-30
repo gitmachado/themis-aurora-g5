@@ -40,7 +40,9 @@ class AppNotificationTile extends StatelessWidget {
       },
       background: _buildSwipeBackground(
         color: isRead ? AppColors.textCaption : AppColors.primary,
-        icon: isRead ? Icons.mark_email_unread_rounded : Icons.mark_email_read_rounded,
+        icon: isRead
+            ? Icons.mark_email_unread_rounded
+            : Icons.mark_email_read_rounded,
         alignment: Alignment.centerLeft,
       ),
       secondaryBackground: _buildSwipeBackground(
@@ -73,7 +75,9 @@ class AppNotificationTile extends StatelessWidget {
                 body,
                 style: AppTextStyles.caption.copyWith(
                   fontSize: 13,
-                  color: isRead ? AppColors.textCaption : AppColors.textPrimary.withValues(alpha: 0.8),
+                  color: isRead
+                      ? AppColors.textCaption
+                      : AppColors.textPrimary.withValues(alpha: 0.8),
                 ),
               ),
               const SizedBox(height: 4),
@@ -157,4 +161,3 @@ class AppNotificationTile extends StatelessWidget {
     }
   }
 }
-

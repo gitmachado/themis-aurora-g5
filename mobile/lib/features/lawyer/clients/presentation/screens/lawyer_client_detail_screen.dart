@@ -1,27 +1,43 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+
 import '../../../../../../app/routes/app_router.dart';
+import '../../../../../../features/lawyer/clients/domain/entities/lawyer_client.dart';
+import '../../../../../../features/lawyer/clients/presentation/providers/lawyer_client_providers.dart';
+import '../../../../../../features/procedures/domain/entities/legal_process.dart';
+import '../../../../../../features/procedures/presentation/procedure_display.dart';
+import '../../../../../../features/procedures/presentation/providers/procedure_providers.dart';
 import '../../../../../../shared/constants/app_colors.dart';
 import '../../../../../../shared/constants/app_text_styles.dart';
+import '../../../../../../shared/widgets/buttons/app_badge.dart';
 import '../../../../../../shared/widgets/cards/app_card.dart';
 import '../../../../../../shared/widgets/layout/custom_app_bar.dart';
+import '../../../../../../shared/widgets/layout/loading_skeleton.dart';
 
-class LawyerClientDetailScreen extends StatefulWidget {
+class LawyerClientDetailScreen extends ConsumerWidget {
+  final String? clientId;
   final String name;
   final String cpf;
+  final String phone;
+  final String? email;
 
   const LawyerClientDetailScreen({
     super.key,
+    this.clientId,
     required this.name,
     required this.cpf,
+    this.phone = '',
+    this.email,
   });
 
   @override
-  State<LawyerClientDetailScreen> createState() => _LawyerClientDetailScreenState();
-}
+  Widget build(BuildContext context, WidgetRef ref) {
+    final clientAsync = clientId == null || clientId!.isEmpty
+        ? null
+        : ref.watch(lawyerClientDetailsProvider(clientId!));
+    final client = clientAsync?.valueOrNull ?? _fallbackClient();
+    final procedures = ref.watch(myProceduresProvider);
 
-class _LawyerClientDetailScreenState extends State<LawyerClientDetailScreen> {
-  @override
-  Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: CustomAppBar(
@@ -29,8 +45,17 @@ class _LawyerClientDetailScreenState extends State<LawyerClientDetailScreen> {
         showBackButton: true,
         actions: [
           IconButton(
-            icon: const Icon(Icons.edit_outlined),
-            onPressed: () {},
+            icon: const Icon(Icons.chat_outlined),
+            onPressed: client.whatsappNumber.isEmpty
+                ? null
+                : () => Navigator.pushNamed(
+                    context,
+                    AppRouter.lawyerChatHandoffRoute,
+                    arguments: {
+                      'clientName': client.name,
+                      'whatsappNumber': client.whatsappNumber,
+                    },
+                  ),
           ),
         ],
       ),
@@ -38,11 +63,23 @@ class _LawyerClientDetailScreenState extends State<LawyerClientDetailScreen> {
         padding: const EdgeInsets.all(24),
         child: Column(
           children: [
-            _buildProfileHeader(),
+            if (clientAsync?.isLoading ?? false) ...[
+              const LoadingSkeleton(height: 4, borderRadius: 2),
+              const SizedBox(height: 16),
+            ],
+            _buildProfileHeader(client),
             const SizedBox(height: 24),
-            _buildInfoCard(),
+            _buildInfoCard(client),
             const SizedBox(height: 24),
-            _buildProcedureHistory(),
+            procedures.when(
+              data: (items) => _buildProcedureHistory(context, items),
+              loading: () =>
+                  const LoadingSkeleton(height: 180, borderRadius: 16),
+              error: (error, _) => Text(
+                error.toString(),
+                style: AppTextStyles.body.copyWith(color: AppColors.error),
+              ),
+            ),
           ],
         ),
       ),
@@ -53,65 +90,69 @@ class _LawyerClientDetailScreenState extends State<LawyerClientDetailScreen> {
     );
   }
 
-  Widget _buildProfileHeader() {
+  LawyerClient _fallbackClient() {
+    return LawyerClient(
+      id: clientId ?? '',
+      name: name.isEmpty ? 'Cliente' : name,
+      whatsappNumber: phone,
+      cpf: cpf.isEmpty ? null : cpf,
+      email: email,
+    );
+  }
+
+  Widget _buildProfileHeader(LawyerClient client) {
+    final initial = client.name.isEmpty ? '?' : client.name[0].toUpperCase();
+
     return Column(
       children: [
         CircleAvatar(
           radius: 50,
           backgroundColor: AppColors.primary.withValues(alpha: 0.1),
           child: Text(
-            widget.name[0].toUpperCase(),
-            style: const TextStyle(fontSize: 40, fontWeight: FontWeight.bold, color: AppColors.primary),
+            initial,
+            style: const TextStyle(
+              fontSize: 40,
+              fontWeight: FontWeight.bold,
+              color: AppColors.primary,
+            ),
           ),
         ),
         const SizedBox(height: 16),
-        Text(widget.name, style: AppTextStyles.h1),
+        Text(
+          client.name.isEmpty ? 'Cliente' : client.name,
+          style: AppTextStyles.h1,
+        ),
         const SizedBox(height: 4),
-        Text('CPF: ${widget.cpf}', style: AppTextStyles.caption),
-        const SizedBox(height: 16),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            _buildCircleAction(Icons.phone_outlined, AppColors.primary, () {}),
-            const SizedBox(width: 20),
-            _buildCircleAction(Icons.chat_outlined, AppColors.success, () {}),
-            const SizedBox(width: 20),
-            _buildCircleAction(Icons.email_outlined, AppColors.warning, () {}),
-          ],
+        Text(
+          client.cpf?.isNotEmpty == true
+              ? 'CPF: ${client.cpf}'
+              : 'CPF nao informado',
+          style: AppTextStyles.caption,
         ),
       ],
     );
   }
 
-  Widget _buildCircleAction(IconData icon, Color color, VoidCallback onTap) {
-    return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(30),
-      child: Container(
-        padding: const EdgeInsets.all(12),
-        decoration: BoxDecoration(
-          color: color.withValues(alpha: 0.1),
-          shape: BoxShape.circle,
-        ),
-        child: Icon(icon, color: color, size: 24),
-      ),
-    );
-  }
-
-  Widget _buildInfoCard() {
+  Widget _buildInfoCard(LawyerClient client) {
     return AppCard(
       child: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text('Informações de Contato', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+            const Text(
+              'Informações de Contato',
+              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+            ),
             const SizedBox(height: 16),
-            _buildDetailRow('Telefone', '(11) 98888-7777'),
+            _buildDetailRow(
+              'Telefone',
+              client.whatsappNumber.isEmpty
+                  ? 'Nao informado'
+                  : client.whatsappNumber,
+            ),
             const Divider(height: 24),
-            _buildDetailRow('E-mail', 'cliente.email@exemplo.com'),
-            const Divider(height: 24),
-            _buildDetailRow('Endereço', 'Rua das Flores, 123 - São Paulo/SP'),
+            _buildDetailRow('E-mail', client.email ?? 'Nao informado'),
           ],
         ),
       ),
@@ -124,24 +165,44 @@ class _LawyerClientDetailScreenState extends State<LawyerClientDetailScreen> {
       children: [
         Text(label, style: AppTextStyles.caption),
         const SizedBox(height: 4),
-        Text(value, style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w500)),
+        Text(
+          value,
+          style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
+        ),
       ],
     );
   }
 
-  Widget _buildProcedureHistory() {
+  Widget _buildProcedureHistory(
+    BuildContext context,
+    List<LegalProcess> procedures,
+  ) {
+    final linked = clientId == null || clientId!.isEmpty
+        ? <LegalProcess>[]
+        : procedures.where((process) => process.clientId == clientId).toList();
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text('Trâmites Vinculados', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+        const Text(
+          'Trâmites Vinculados',
+          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+        ),
         const SizedBox(height: 12),
-        _buildProcedureTile('1023456-88.2024.8.26.0100', 'Indenização por Dano Moral', 'Em andamento'),
-        _buildProcedureTile('0055443-12.2023.8.26.0100', 'Ação Revisional', 'Concluído'),
+        if (linked.isEmpty)
+          AppCard(
+            child: Text(
+              'Nenhum trâmite vinculado encontrado.',
+              style: AppTextStyles.caption,
+            ),
+          )
+        else
+          for (final process in linked) _buildProcedureTile(context, process),
       ],
     );
   }
 
-  Widget _buildProcedureTile(String number, String type, String status) {
+  Widget _buildProcedureTile(BuildContext context, LegalProcess process) {
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
       decoration: BoxDecoration(
@@ -150,24 +211,23 @@ class _LawyerClientDetailScreenState extends State<LawyerClientDetailScreen> {
         border: Border.all(color: AppColors.divider),
       ),
       child: ListTile(
-        title: Text(type, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
-        subtitle: Text(number, style: AppTextStyles.caption.copyWith(fontSize: 12)),
-        trailing: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-          decoration: BoxDecoration(
-            color: status == 'Concluído' ? AppColors.success.withValues(alpha: 0.1) : AppColors.primary.withValues(alpha: 0.1),
-            borderRadius: BorderRadius.circular(8),
-          ),
-          child: Text(
-            status,
-            style: TextStyle(
-              color: status == 'Concluído' ? AppColors.success : AppColors.primary,
-              fontSize: 10,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
+        title: Text(
+          process.title,
+          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
         ),
-        onTap: () => Navigator.pushNamed(context, AppRouter.lawyerProcedureDetailRoute),
+        subtitle: Text(
+          process.processNumber ?? process.id,
+          style: AppTextStyles.caption.copyWith(fontSize: 12),
+        ),
+        trailing: AppBadge(
+          label: process.displayStatus,
+          type: process.badgeType,
+        ),
+        onTap: () => Navigator.pushNamed(
+          context,
+          AppRouter.lawyerProcedureDetailRoute,
+          arguments: {'processId': process.id},
+        ),
       ),
     );
   }

@@ -5,5 +5,6 @@ export interface ILegalProcessService {
   create(dto: CreateLegalProcessDTO): Promise<LegalProcess>;
   updateStatus(dto: UpdateLegalProcessStatusDTO): Promise<LegalProcess>;
   getByClientId(clientId: string): Promise<LegalProcess[]>;
+  getByLawyerId(lawyerId: string): Promise<LegalProcess[]>;
   getById(id: string): Promise<LegalProcess | null>;
 }

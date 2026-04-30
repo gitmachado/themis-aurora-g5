@@ -2,6 +2,11 @@ import { Request, Response, NextFunction, RequestHandler } from 'express';
 import { ILeadService } from '@services';
 import { Lead, User } from '@models';
 import { CreateLeadDTO } from '@dtos';
+import { AuthRequest } from '../../middlewares/implementations/authMiddleware';
+
+interface DiscardLeadBody {
+  reason?: string;
+}
 
 export class LeadController {
   constructor(private readonly leadService: ILeadService) {}
@@ -51,7 +56,23 @@ export class LeadController {
     next: NextFunction
   ) => {
     try {
-      const result = await this.leadService.convertToClient({ leadId: req.params.id });
+      const result = await this.leadService.convertToClient({
+        leadId: req.params.id,
+        lawyerId: (req as AuthRequest<{ id: string }, User>).user!.id,
+      });
+      return res.status(200).json(result);
+    } catch (error) {
+      next(error);
+    }
+  };
+
+  discard: RequestHandler<{ id: string }, Lead, DiscardLeadBody> = async (
+    req: Request<{ id: string }, Lead, DiscardLeadBody>,
+    res: Response,
+    next: NextFunction
+  ) => {
+    try {
+      const result = await this.leadService.discard(req.params.id, req.body.reason);
       return res.status(200).json(result);
     } catch (error) {
       next(error);

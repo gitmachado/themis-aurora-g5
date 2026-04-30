@@ -38,22 +38,29 @@ class LabeledField extends StatelessWidget {
           const SizedBox(height: 8),
         ],
         Row(
-          crossAxisAlignment: isDescription ? CrossAxisAlignment.start : CrossAxisAlignment.center,
+          crossAxisAlignment: isDescription
+              ? CrossAxisAlignment.start
+              : CrossAxisAlignment.center,
           children: [
             if (icon != null) ...[
               Icon(icon, size: 16, color: iconColor ?? AppColors.primary),
               const SizedBox(width: 8),
             ],
             Expanded(
-              child: valueWidget ??
+              child:
+                  valueWidget ??
                   Text(
                     value,
                     style: TextStyle(
                       fontFamily: AppTextStyles.fontFamily,
                       fontSize: isDescription ? 13 : 14,
                       height: isDescription ? 1.5 : 1.2,
-                      color: isDescription ? const Color(0xFF475569) : AppColors.textPrimary,
-                      fontWeight: isDescription ? FontWeight.normal : FontWeight.normal,
+                      color: isDescription
+                          ? const Color(0xFF475569)
+                          : AppColors.textPrimary,
+                      fontWeight: isDescription
+                          ? FontWeight.normal
+                          : FontWeight.normal,
                     ),
                   ),
             ),

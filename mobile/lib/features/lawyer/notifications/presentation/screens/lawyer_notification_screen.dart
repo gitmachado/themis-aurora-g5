@@ -1,62 +1,35 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../../../../../features/notifications/domain/entities/app_notification.dart';
+import '../../../../../../features/notifications/presentation/notification_display.dart';
+import '../../../../../../features/notifications/presentation/providers/notification_providers.dart';
 import '../../../../../../shared/constants/app_colors.dart';
 import '../../../../../../shared/constants/app_text_styles.dart';
 import '../../../../../../shared/widgets/layout/custom_app_bar.dart';
 import '../../../../../../shared/widgets/cards/app_notification_tile.dart';
+import '../../../../../../shared/widgets/layout/loading_skeleton.dart';
 
-class LawyerNotificationScreen extends StatefulWidget {
+class LawyerNotificationScreen extends ConsumerStatefulWidget {
   const LawyerNotificationScreen({super.key});
 
   @override
-  State<LawyerNotificationScreen> createState() =>
+  ConsumerState<LawyerNotificationScreen> createState() =>
       _LawyerNotificationScreenState();
 }
 
-class _LawyerNotificationScreenState extends State<LawyerNotificationScreen> {
-  final List<Map<String, dynamic>> _notifications = [
-    {
-      'id': '1',
-      'title': 'Novo Lead Urgente',
-      'body': 'Carla Menezes solicitou triagem para caso Trabalhista.',
-      'time': 'há 2 min',
-      'isRead': false,
-      'type': 'lead',
-    },
-    {
-      'id': '2',
-      'title': 'Arquivo Recebido',
-      'body': 'Maria Oliveira enviou o comprovante de residência.',
-      'time': 'há 1 hora',
-      'isRead': false,
-      'type': 'file',
-    },
-    {
-      'id': '3',
-      'title': 'Audiência Amanhã',
-      'body': 'Lembrete: Audiência do trâmite 1023456-88 às 14:00.',
-      'time': 'há 3 horas',
-      'isRead': true,
-      'type': 'procedure',
-    },
-
-    {
-      'id': '4',
-      'title': 'Handoff de Chat',
-      'body': 'O bot solicitou sua intervenção no chat com Roberto Santos.',
-      'time': 'há 5 horas',
-      'isRead': true,
-      'type': 'chat',
-    },
-  ];
-
+class _LawyerNotificationScreenState
+    extends ConsumerState<LawyerNotificationScreen> {
   @override
   Widget build(BuildContext context) {
+    final notifications = ref.watch(myNotificationsProvider);
+
     return DefaultTabController(
       length: 2,
       child: Scaffold(
         backgroundColor: AppColors.background,
         appBar: CustomAppBar(
           title: 'Notificações',
+          showBackButton: true,
           bottom: TabBar(
             labelColor: AppColors.primary,
             unselectedLabelColor: AppColors.textCaption,
@@ -70,21 +43,28 @@ class _LawyerNotificationScreenState extends State<LawyerNotificationScreen> {
         ),
         body: SafeArea(
           top: false,
-          child: TabBarView(
-            children: [
-              _buildNotificationList(onlyUnread: true),
-              _buildNotificationList(onlyUnread: false),
-            ],
+          child: notifications.when(
+            data: (data) => TabBarView(
+              children: [
+                _buildNotificationList(data, onlyUnread: true),
+                _buildNotificationList(data, onlyUnread: false),
+              ],
+            ),
+            loading: _buildLoadingList,
+            error: (error, _) => _buildErrorState(error),
           ),
         ),
       ),
     );
   }
 
-  Widget _buildNotificationList({required bool onlyUnread}) {
+  Widget _buildNotificationList(
+    List<AppNotification> notifications, {
+    required bool onlyUnread,
+  }) {
     final list = onlyUnread
-        ? _notifications.where((n) => !n['isRead']).toList()
-        : _notifications;
+        ? notifications.where((n) => !n.isRead).toList()
+        : notifications;
 
     if (list.isEmpty) {
       return _buildEmptyState();
@@ -96,12 +76,12 @@ class _LawyerNotificationScreenState extends State<LawyerNotificationScreen> {
       itemBuilder: (context, index) {
         final n = list[index];
         return AppNotificationTile(
-          id: n['id'],
-          title: n['title'],
-          body: n['body'],
-          time: n['time'],
-          type: n['type'],
-          isRead: n['isRead'],
+          id: n.id,
+          title: n.title,
+          body: n.body,
+          time: n.timeLabel,
+          type: n.tileType,
+          isRead: n.isRead,
           onToggleRead: _toggleReadStatus,
           onDelete: _deleteNotification,
         );
@@ -129,34 +109,32 @@ class _LawyerNotificationScreenState extends State<LawyerNotificationScreen> {
     );
   }
 
-  void _toggleReadStatus(String id) {
-    setState(() {
-      final index = _notifications.indexWhere((n) => n['id'] == id);
-      if (index != -1) {
-        _notifications[index]['isRead'] = !_notifications[index]['isRead'];
-      }
-    });
+  Future<void> _toggleReadStatus(String id) async {
+    await ref.read(notificationActionsProvider).markAsRead(id);
   }
 
-  void _deleteNotification(String id) {
-    final index = _notifications.indexWhere((n) => n['id'] == id);
-    if (index == -1) return;
+  Future<void> _deleteNotification(String id) async {
+    await ref.read(notificationActionsProvider).delete(id);
+  }
 
-    final removed = _notifications[index];
-    setState(() {
-      _notifications.removeAt(index);
-    });
+  Widget _buildLoadingList() {
+    return ListView.separated(
+      padding: const EdgeInsets.all(20),
+      itemCount: 5,
+      separatorBuilder: (_, _) => const SizedBox(height: 12),
+      itemBuilder: (_, _) =>
+          const LoadingSkeleton(height: 72, borderRadius: 12),
+    );
+  }
 
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: const Text('Notificação excluída'),
-        action: SnackBarAction(
-          label: 'Desfazer',
-          onPressed: () {
-            setState(() {
-              _notifications.insert(index, removed);
-            });
-          },
+  Widget _buildErrorState(Object error) {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(24),
+        child: Text(
+          error.toString(),
+          textAlign: TextAlign.center,
+          style: AppTextStyles.body.copyWith(color: AppColors.error),
         ),
       ),
     );

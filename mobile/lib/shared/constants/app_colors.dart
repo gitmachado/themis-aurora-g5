@@ -15,16 +15,16 @@ class AppColors {
   static const Color secondaryOverlay = Color(0x33DEBC74); // 20% opacity
 
   // Background & Surfaces
-  static const Color background = Color(0xFFF4F6F9); 
+  static const Color background = Color(0xFFF4F6F9);
   static const Color surface = Color(0xFFFFFFFF);
-  
+
   // Alert & Feedback
   static const Color error = Color(0xFFC62828);
   static const Color errorOverlay = Color(0x1AC62828);
-  
+
   static const Color success = Color(0xFF2E7D32);
   static const Color successOverlay = Color(0x1A2E7D32);
-  
+
   static const Color warning = Color(0xFFFBC02D);
   static const Color warningLight = Color(0xFFFFF3E0);
   static const Color warningOverlay = Color(0x33FBC02D);

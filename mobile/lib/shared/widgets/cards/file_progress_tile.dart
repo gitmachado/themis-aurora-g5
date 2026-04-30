@@ -60,14 +60,18 @@ class FileProgressTile extends StatelessWidget {
                 children: [
                   Text(
                     title,
-                    style: AppTextStyles.body.copyWith(fontWeight: FontWeight.bold),
+                    style: AppTextStyles.body.copyWith(
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                   const SizedBox(height: 4),
                   Text(
                     status,
                     style: AppTextStyles.caption.copyWith(
                       color: statusColor ?? AppColors.textCaption,
-                      fontWeight: statusColor != null ? FontWeight.bold : FontWeight.normal,
+                      fontWeight: statusColor != null
+                          ? FontWeight.bold
+                          : FontWeight.normal,
                     ),
                   ),
                   if (progress != null) ...[
@@ -91,4 +95,3 @@ class FileProgressTile extends StatelessWidget {
     );
   }
 }
-

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter/services.dart';
 
 import 'app/app.dart';
@@ -20,5 +21,5 @@ void main() {
   // Garante o modo edge-to-edge no Android
   SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
 
-  runApp(const OmniConnectApp());
+  runApp(const ProviderScope(child: OmniConnectApp()));
 }

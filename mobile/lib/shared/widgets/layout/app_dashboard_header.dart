@@ -31,6 +31,8 @@ class AppDashboardHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final resolvedAvatarUrl = avatarUrl?.isNotEmpty == true ? avatarUrl : null;
+
     return Container(
       decoration: BoxDecoration(
         color: AppColors.white,
@@ -47,62 +49,73 @@ class AppDashboardHeader extends StatelessWidget {
           padding: const EdgeInsets.fromLTRB(20, 12, 20, 16),
           child: Row(
             children: [
-          GestureDetector(
-            onTap: onProfileTap,
-            child: CircleAvatar(
-              radius: 30,
-              backgroundColor: AppColors.secondaryLight,
-              backgroundImage: avatarUrl != null ? NetworkImage(avatarUrl!) : null,
-              child: avatarUrl == null
-                  ? Text(
-                      _getInitials(name),
-                      style: const TextStyle(
-                        color: AppColors.secondaryDark,
-                        fontWeight: FontWeight.bold,
-                        fontSize: 20,
+              GestureDetector(
+                onTap: onProfileTap,
+                child: CircleAvatar(
+                  radius: 30,
+                  backgroundColor: AppColors.secondaryLight,
+                  backgroundImage: resolvedAvatarUrl != null
+                      ? NetworkImage(resolvedAvatarUrl)
+                      : null,
+                  child: resolvedAvatarUrl == null
+                      ? Text(
+                          _getInitials(name),
+                          style: const TextStyle(
+                            color: AppColors.secondaryDark,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 20,
+                          ),
+                        )
+                      : null,
+                ),
+              ),
+              const SizedBox(width: 16),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      greeting,
+                      style: AppTextStyles.caption.copyWith(
+                        fontSize: 14,
+                        color: AppColors.textCaption,
                       ),
-                    )
-                  : null,
-            ),
-          ),
-          const SizedBox(width: 16),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  greeting,
-                  style: AppTextStyles.caption.copyWith(fontSize: 14, color: AppColors.textCaption),
+                    ),
+                    Text(
+                      name,
+                      style: AppTextStyles.h1.copyWith(
+                        fontSize: 22,
+                        color: AppColors.primary,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    if (subtitle != null) ...[
+                      const SizedBox(height: 2),
+                      Text(
+                        subtitle!,
+                        style: AppTextStyles.caption.copyWith(
+                          fontSize: 12,
+                          color: AppColors.textCaption,
+                        ),
+                      ),
+                    ],
+                  ],
                 ),
-                Text(
-                  name,
-                  style: AppTextStyles.h1.copyWith(fontSize: 22, color: AppColors.primary),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                ),
-                if (subtitle != null) ...[
-                  const SizedBox(height: 2),
-                  Text(
-                    subtitle!,
-                    style: AppTextStyles.caption.copyWith(fontSize: 12, color: AppColors.textCaption),
-                  ),
-                ],
-              ],
-            ),
+              ),
+              AppAppBarActions(
+                notificationCount: notificationCount,
+                chatCount: chatCount,
+                showChat: showChat,
+                onNotificationTap: onNotificationTap,
+                onChatTap: onChatTap,
+              ),
+            ],
           ),
-          AppAppBarActions(
-            notificationCount: notificationCount,
-            chatCount: chatCount,
-            showChat: showChat,
-            onNotificationTap: onNotificationTap,
-            onChatTap: onChatTap,
-          ),
-        ],
+        ),
       ),
-    ),
-  ),
-);
-}
+    );
+  }
 
   String _getInitials(String name) {
     if (name.isEmpty) return '';

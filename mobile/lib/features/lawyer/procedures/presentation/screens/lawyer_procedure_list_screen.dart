@@ -1,61 +1,39 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../../../../../features/procedures/domain/entities/legal_process.dart';
+import '../../../../../../features/procedures/presentation/procedure_display.dart';
+import '../../../../../../features/procedures/presentation/providers/procedure_providers.dart';
+import '../../../../../../shared/utils/api_formatters.dart';
 import '../../../../../../shared/constants/app_colors.dart';
 import '../../../../../../shared/constants/app_text_styles.dart';
 import '../../../../../../shared/constants/app_dimensions.dart';
 import '../../../../../../shared/widgets/layout/custom_app_bar.dart';
-import '../../../../../../shared/widgets/buttons/app_badge.dart';
 import '../../../../../../shared/widgets/app_app_bar_actions.dart';
 import '../../../../../../shared/widgets/cards/app_procedure_card.dart';
+import '../../../../../../shared/widgets/layout/loading_skeleton.dart';
 
-class LawyerProcedureListScreen extends StatefulWidget {
+class LawyerProcedureListScreen extends ConsumerStatefulWidget {
   const LawyerProcedureListScreen({super.key});
 
   @override
-  State<LawyerProcedureListScreen> createState() => _LawyerProcedureListScreenState();
+  ConsumerState<LawyerProcedureListScreen> createState() =>
+      _LawyerProcedureListScreenState();
 }
 
-class _LawyerProcedureListScreenState extends State<LawyerProcedureListScreen> {
+class _LawyerProcedureListScreenState
+    extends ConsumerState<LawyerProcedureListScreen> {
   String _searchQuery = '';
   String _selectedFilter = 'Todos';
 
-  final List<Map<String, dynamic>> _procedures = [
-    {
-      'number': '1023456-88.2023.8.26.0100',
-      'client': 'João Silva',
-      'type': 'Trabalhista',
-      'status': 'Em Andamento',
-      'lastUpdate': 'Petição protocolada há 2 dias',
-    },
-    {
-      'number': '0054321-12.2024.8.26.0000',
-      'client': 'Maria Oliveira',
-      'type': 'Cível',
-      'status': 'Aguardando Documentos',
-      'lastUpdate': 'Solicitado comprovante de residência',
-    },
-    {
-      'number': '5067890-44.2022.4.03.6100',
-      'client': 'Carlos Souza',
-      'type': 'Previdenciário',
-      'status': 'Concluso para Sentença',
-      'lastUpdate': 'Aguardando decisão do juiz',
-    },
-    {
-      'number': '1088776-55.2023.8.26.0100',
-      'client': 'Ana Paula',
-      'type': 'Consumidor',
-      'status': 'Audiência Designada',
-      'lastUpdate': 'Audiência em 15/05 às 14:00',
-    },
-  ];
-
   @override
   Widget build(BuildContext context) {
+    final procedures = ref.watch(myProceduresProvider);
+
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: CustomAppBar(
         title: 'Trâmites',
-        actions: [AppAppBarActions(chatCount: 3, notificationCount: 2)],
+        actions: [AppAppBarActions()],
         showDivider: false,
       ),
       body: Column(
@@ -70,19 +48,16 @@ class _LawyerProcedureListScreenState extends State<LawyerProcedureListScreen> {
               ],
             ),
           ),
-          Container(
-            height: 1,
-            color: AppColors.divider.withValues(alpha: 0.7),
-          ),
+          Container(height: 1, color: AppColors.divider.withValues(alpha: 0.7)),
           const SizedBox(height: 16),
-          Expanded(child: _buildProcedureList()),
+          Expanded(
+            child: procedures.when(
+              data: _buildProcedureList,
+              loading: _buildLoadingList,
+              error: (error, _) => _buildErrorState(error),
+            ),
+          ),
         ],
-      ),
-      floatingActionButton: FloatingActionButton(
-        heroTag: 'lawyer_procedure_fab',
-        onPressed: () => _showNewProcedureModal(context),
-        backgroundColor: AppColors.primary,
-        child: const Icon(Icons.add, color: Colors.white),
       ),
     );
   }
@@ -94,16 +69,23 @@ class _LawyerProcedureListScreenState extends State<LawyerProcedureListScreen> {
         onChanged: (val) => setState(() => _searchQuery = val),
         decoration: InputDecoration(
           hintText: 'Buscar por trâmite ou cliente...',
-          prefixIcon: const Icon(Icons.search_rounded, color: AppColors.textCaption),
+          prefixIcon: const Icon(
+            Icons.search_rounded,
+            color: AppColors.textCaption,
+          ),
           filled: true,
           fillColor: AppColors.background,
           border: OutlineInputBorder(
             borderRadius: BorderRadius.circular(12),
-            borderSide: BorderSide(color: AppColors.divider.withValues(alpha: 0.5)),
+            borderSide: BorderSide(
+              color: AppColors.divider.withValues(alpha: 0.5),
+            ),
           ),
           enabledBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(12),
-            borderSide: BorderSide(color: AppColors.divider.withValues(alpha: 0.5)),
+            borderSide: BorderSide(
+              color: AppColors.divider.withValues(alpha: 0.5),
+            ),
           ),
           focusedBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(12),
@@ -151,22 +133,41 @@ class _LawyerProcedureListScreenState extends State<LawyerProcedureListScreen> {
     );
   }
 
-  Widget _buildProcedureList() {
-    final filtered = _procedures.where((p) {
-      final matchesSearch = p['client'].toLowerCase().contains(_searchQuery.toLowerCase()) ||
-          p['number'].contains(_searchQuery);
+  Widget _buildProcedureList(List<LegalProcess> procedures) {
+    final filtered = procedures.where((p) {
+      final query = _searchQuery.toLowerCase();
+      final matchesSearch =
+          p.title.toLowerCase().contains(query) ||
+          (p.processNumber ?? '').contains(_searchQuery) ||
+          p.clientId.toLowerCase().contains(query);
       if (!matchesSearch) return false;
       if (_selectedFilter == 'Todos') return true;
-      if (_selectedFilter == 'Andamento') return p['status'].contains('Andamento');
-      if (_selectedFilter == 'Sentença') return p['status'].contains('Sentença');
-      if (_selectedFilter == 'Audiência') return p['status'].contains('Audiência');
+      if (_selectedFilter == 'Andamento') {
+        return p.currentStatus == 'OPEN' || p.currentStatus == 'UNDER_ANALYSIS';
+      }
+      if (_selectedFilter == 'Sentença') return p.currentStatus == 'COMPLETED';
+      if (_selectedFilter == 'Audiência') {
+        return p.lastNote?.toLowerCase().contains('audiencia') ?? false;
+      }
       return true;
     }).toList();
 
+    if (filtered.isEmpty) {
+      return Center(
+        child: Text(
+          'Nenhum tramite encontrado',
+          style: AppTextStyles.h2.copyWith(color: AppColors.textCaption),
+        ),
+      );
+    }
+
     return ListView.builder(
-      padding: EdgeInsets.fromLTRB(20, 20, 20, AppDimensions.bottomPadding(context)),
-
-
+      padding: EdgeInsets.fromLTRB(
+        20,
+        20,
+        20,
+        AppDimensions.bottomPadding(context),
+      ),
 
       itemCount: filtered.length,
       itemBuilder: (context, index) {
@@ -174,13 +175,20 @@ class _LawyerProcedureListScreenState extends State<LawyerProcedureListScreen> {
         return Padding(
           padding: const EdgeInsets.only(bottom: 16),
           child: AppProcedureCard(
-            title: p['client'],
-            subtitle: 'Proc: ${p['number']}',
-            statusLabel: p['status'],
-            statusType: _getStatusType(p['status']),
-            lastUpdate: p['lastUpdate'],
+            title: p.title,
+            subtitle: p.processNumber == null
+                ? 'Cliente: ${p.clientId}'
+                : 'Proc: ${p.processNumber}',
+            statusLabel: p.displayStatus,
+            statusType: p.badgeType,
+            lastUpdate:
+                p.lastNote ?? 'Atualizado ${formatRelativeDate(p.updatedAt)}',
             onTap: () {
-              Navigator.pushNamed(context, '/lawyer-procedure-detail');
+              Navigator.pushNamed(
+                context,
+                '/lawyer-procedure-detail',
+                arguments: {'processId': p.id},
+              );
             },
           ),
         );
@@ -188,48 +196,31 @@ class _LawyerProcedureListScreenState extends State<LawyerProcedureListScreen> {
     );
   }
 
-  BadgeType _getStatusType(String status) {
-    if (status.contains('Aguardando')) return BadgeType.warning;
-    if (status.contains('Sentença')) return BadgeType.success;
-    if (status.contains('Audiência')) return BadgeType.primary;
-    return BadgeType.primary;
+  Widget _buildLoadingList() {
+    return ListView.separated(
+      padding: EdgeInsets.fromLTRB(
+        20,
+        20,
+        20,
+        AppDimensions.bottomPadding(context),
+      ),
+      itemCount: 4,
+      separatorBuilder: (_, _) => const SizedBox(height: 16),
+      itemBuilder: (_, _) =>
+          const LoadingSkeleton(height: 118, borderRadius: 12),
+    );
   }
 
-
-  void _showNewProcedureModal(BuildContext context) {
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: Colors.transparent,
-      builder: (context) => Container(
-        padding: EdgeInsets.fromLTRB(24, 24, 24, MediaQuery.of(context).viewInsets.bottom + 24),
-        decoration: const BoxDecoration(
-          color: AppColors.white,
-          borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const Text('Novo Trâmite', style: AppTextStyles.h1),
-            const SizedBox(height: 16),
-            const TextField(decoration: InputDecoration(labelText: 'Cliente')),
-            const SizedBox(height: 12),
-            const TextField(decoration: InputDecoration(labelText: 'Número do Trâmite')),
-            const SizedBox(height: 12),
-            const TextField(decoration: InputDecoration(labelText: 'Tipo/Nicho')),
-            const SizedBox(height: 24),
-            ElevatedButton(
-              onPressed: () => Navigator.pop(context),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.primary,
-                minimumSize: const Size(double.infinity, 50),
-              ),
-              child: const Text('Cadastrar Trâmite', style: TextStyle(color: Colors.white)),
-            ),
-          ],
+  Widget _buildErrorState(Object error) {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(24),
+        child: Text(
+          error.toString(),
+          textAlign: TextAlign.center,
+          style: AppTextStyles.body.copyWith(color: AppColors.error),
         ),
       ),
     );
   }
 }
-

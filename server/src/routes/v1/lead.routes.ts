@@ -1,7 +1,14 @@
 import { Router } from 'express';
 import { LeadController } from '../../controllers/implementations/lead.controller';
-import { LeadService, AuthService, NotificationService } from '@services';
-import { LeadRepository, UserRepository, NotificationRepository } from '@repositories';
+import { LeadService, AuthService, NotificationService, LegalProcessService, TimelineService } from '@services';
+import { SupabaseAuthService } from '../../services/implementations/supabase-auth.service';
+import {
+  LeadRepository,
+  UserRepository,
+  NotificationRepository,
+  LegalProcessRepository,
+  TimelineEventRepository,
+} from '@repositories';
 import { authMiddleware } from '../../middlewares/implementations/authMiddleware';
 import { roleMiddleware } from '../../middlewares/implementations/roleMiddleware';
 import { apiKeyMiddleware } from '../../middlewares/implementations/apiKeyMiddleware';
@@ -12,14 +19,25 @@ const router = Router();
 
 const leadRepository = new LeadRepository();
 const userRepository = new UserRepository();
-const authService = new AuthService(userRepository);
+const supabaseAuthService = new SupabaseAuthService();
+const authService = new AuthService(userRepository, supabaseAuthService);
 const notificationRepository = new NotificationRepository();
 const notificationService = new NotificationService(notificationRepository);
+const legalProcessRepository = new LegalProcessRepository();
+const timelineRepository = new TimelineEventRepository();
+const timelineService = new TimelineService(timelineRepository);
+const legalProcessService = new LegalProcessService(
+  legalProcessRepository,
+  timelineService,
+  notificationService
+);
 const leadService = new LeadService(
   leadRepository,
   userRepository,
   authService,
-  notificationService
+  notificationService,
+  legalProcessService,
+  supabaseAuthService
 );
 
 const controller = new LeadController(leadService);
@@ -142,5 +160,7 @@ router.post('/', apiKeyMiddleware, validate(createLeadSchema), controller.create
  *               $ref: '#/components/schemas/Error'
  */
 router.patch('/:id/convert', authMiddleware, roleMiddleware(['LAWYER']), controller.convert);
+
+router.patch('/:id/discard', authMiddleware, roleMiddleware(['LAWYER']), controller.discard);
 
 export default router;
