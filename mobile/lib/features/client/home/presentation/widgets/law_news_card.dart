@@ -30,7 +30,10 @@ class LawNewsCard extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 10,
+                  vertical: 4,
+                ),
                 decoration: BoxDecoration(
                   color: AppColors.primary.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(20),
@@ -73,7 +76,11 @@ class LawNewsCard extends StatelessWidget {
                 ),
               ),
               SizedBox(width: 4),
-              Icon(Icons.arrow_forward_rounded, color: AppColors.primary, size: 14),
+              Icon(
+                Icons.arrow_forward_rounded,
+                color: AppColors.primary,
+                size: 14,
+              ),
             ],
           ),
         ],

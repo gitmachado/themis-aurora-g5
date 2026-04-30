@@ -32,10 +32,7 @@ class AppListTile extends StatelessWidget {
         ),
         child: Row(
           children: [
-            if (leading != null) ...[
-              leading!,
-              const SizedBox(width: 16),
-            ],
+            if (leading != null) ...[leading!, const SizedBox(width: 16)],
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -48,18 +45,12 @@ class AppListTile extends StatelessWidget {
                   ),
                   if (subtitle != null) ...[
                     const SizedBox(height: 4),
-                    Text(
-                      subtitle!,
-                      style: AppTextStyles.caption,
-                    ),
+                    Text(subtitle!, style: AppTextStyles.caption),
                   ],
                 ],
               ),
             ),
-            if (trailing != null) ...[
-              const SizedBox(width: 16),
-              trailing!,
-            ],
+            if (trailing != null) ...[const SizedBox(width: 16), trailing!],
           ],
         ),
       ),

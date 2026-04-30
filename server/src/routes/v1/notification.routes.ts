@@ -80,4 +80,6 @@ router.post('/read-all', authMiddleware, controller.markAllAsRead);
  */
 router.patch('/:id/read', authMiddleware, controller.markAsRead);
 
+router.delete('/:id', authMiddleware, controller.delete);
+
 export default router;

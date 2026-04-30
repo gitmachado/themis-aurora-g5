@@ -26,7 +26,9 @@ class AppProfileHeader extends StatelessWidget {
           CircleAvatar(
             radius: 20,
             backgroundColor: AppColors.secondaryLight,
-            backgroundImage: avatarUrl != null ? NetworkImage(avatarUrl!) : null,
+            backgroundImage: avatarUrl != null
+                ? NetworkImage(avatarUrl!)
+                : null,
             child: avatarUrl == null
                 ? Text(
                     _getInitials(name),
@@ -43,10 +45,7 @@ class AppProfileHeader extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisSize: MainAxisSize.min,
             children: [
-              Text(
-                name,
-                style: AppTextStyles.h2.copyWith(fontSize: 16),
-              ),
+              Text(name, style: AppTextStyles.h2.copyWith(fontSize: 16)),
               if (subtitle != null)
                 Text(
                   subtitle!,

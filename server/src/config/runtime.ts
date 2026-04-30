@@ -38,6 +38,25 @@ export const getBotApiKey = (): string | undefined => {
   return undefined;
 };
 
+export const getSupabaseUrl = (): string | undefined => process.env.SUPABASE_URL;
+
+export const getSupabasePublishableKey = (): string | undefined =>
+  process.env.SUPABASE_PUBLISHABLE_KEY || process.env.SUPABASE_ANON_KEY;
+
+export const getSupabaseServiceRoleKey = (): string | undefined =>
+  process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_SECRET_KEY;
+
+export const getSupabaseAuthRedirectUrl = (): string | undefined =>
+  process.env.SUPABASE_AUTH_REDIRECT_URL;
+
+export const getSupabaseStorageBucket = (): string =>
+  process.env.SUPABASE_STORAGE_BUCKET || 'omniconnect-documents';
+
+export const getSupabaseStorageSignedUrlExpiresIn = (): number => {
+  const value = Number(process.env.SUPABASE_STORAGE_SIGNED_URL_EXPIRES_IN || '300');
+  return Number.isFinite(value) && value > 0 ? value : 300;
+};
+
 export const getAllowedCorsOrigins = (): string[] => {
   const configuredOrigins = process.env.CORS_ORIGIN
     ?.split(',')

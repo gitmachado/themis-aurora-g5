@@ -48,13 +48,13 @@ class LawyerMetricCard extends StatelessWidget {
           const SizedBox(height: AppDimensions.spacingM),
           Text(
             value,
-            style: AppTextStyles.h1.copyWith(fontSize: 24, color: AppColors.primary),
+            style: AppTextStyles.h1.copyWith(
+              fontSize: 24,
+              color: AppColors.primary,
+            ),
           ),
           const SizedBox(height: AppDimensions.spacingXS),
-          Text(
-            label,
-            style: AppTextStyles.caption.copyWith(fontSize: 13),
-          ),
+          Text(label, style: AppTextStyles.caption.copyWith(fontSize: 13)),
         ],
       ),
     );

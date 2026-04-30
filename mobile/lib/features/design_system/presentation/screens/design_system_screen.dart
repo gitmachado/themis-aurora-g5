@@ -49,7 +49,10 @@ class _DesignSystemScreenState extends State<DesignSystemScreen> {
               const Text('H1 - Título Principal', style: AppTextStyles.h1),
               const Text('H2 - Subtítulo', style: AppTextStyles.h2),
               const Text('Corpo de texto regular', style: AppTextStyles.body),
-              const Text('Legenda / Caption light', style: AppTextStyles.caption),
+              const Text(
+                'Legenda / Caption light',
+                style: AppTextStyles.caption,
+              ),
               const SizedBox(height: 32),
               _sectionTitle('Status Badges'),
               const Wrap(
@@ -66,10 +69,7 @@ class _DesignSystemScreenState extends State<DesignSystemScreen> {
               const AppSearchInput(hintText: 'Buscar processos...'),
               const SizedBox(height: 32),
               _sectionTitle('Botões'),
-              PrimaryButton(
-                label: 'Botão Primário',
-                onPressed: () {},
-              ),
+              PrimaryButton(label: 'Botão Primário', onPressed: () {}),
               const SizedBox(height: 12),
               PrimaryButton(
                 label: 'Botão com Ícone',
@@ -81,15 +81,24 @@ class _DesignSystemScreenState extends State<DesignSystemScreen> {
               AppListTile(
                 title: 'Notificação de Prazo',
                 subtitle: 'Seu prazo para contestação vence em 2 dias.',
-                leading: const Icon(Icons.notifications_active, color: AppColors.primary),
-                trailing: const Icon(Icons.chevron_right, color: AppColors.textCaption),
+                leading: const Icon(
+                  Icons.notifications_active,
+                  color: AppColors.primary,
+                ),
+                trailing: const Icon(
+                  Icons.chevron_right,
+                  color: AppColors.textCaption,
+                ),
                 onTap: () {},
               ),
               const SizedBox(height: 12),
               AppListTile(
                 title: 'Contrato Social.pdf',
                 subtitle: '2.4 MB • PDF',
-                leading: const Icon(Icons.picture_as_pdf, color: AppColors.error),
+                leading: const Icon(
+                  Icons.picture_as_pdf,
+                  color: AppColors.error,
+                ),
                 onTap: () {},
               ),
               const SizedBox(height: 32),

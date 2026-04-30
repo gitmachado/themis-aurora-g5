@@ -58,7 +58,10 @@ class AppFileCard extends StatelessWidget {
                   children: [
                     if (category.isNotEmpty) ...[
                       Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 8,
+                          vertical: 2,
+                        ),
                         decoration: BoxDecoration(
                           color: const Color(0xFFF1F5F9),
                           borderRadius: BorderRadius.circular(4),
@@ -103,4 +106,3 @@ class AppFileCard extends StatelessWidget {
     );
   }
 }
-

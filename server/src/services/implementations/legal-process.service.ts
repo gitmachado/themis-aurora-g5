@@ -67,6 +67,10 @@ export class LegalProcessService implements ILegalProcessService {
     return this.legalProcessRepository.findByClientId(clientId);
   }
 
+  async getByLawyerId(lawyerId: string): Promise<LegalProcess[]> {
+    return this.legalProcessRepository.findByLawyerId(lawyerId);
+  }
+
   async getById(id: string): Promise<LegalProcess | null> {
     return this.legalProcessRepository.findById(id);
   }

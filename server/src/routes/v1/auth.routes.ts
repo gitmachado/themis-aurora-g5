@@ -1,13 +1,15 @@
 import { Router } from 'express';
 import { AuthController } from '../../controllers/implementations/auth.controller';
 import { AuthService } from '../../services/implementations/auth.service';
+import { SupabaseAuthService } from '../../services/implementations/supabase-auth.service';
 import { UserRepository } from '../../repositories/implementations/user.repository';
 import { validate } from '../../middlewares/implementations/validationMiddleware';
 import { loginSchema, registerSchema } from '../../types/dtos/schemas';
 
 const router = Router();
 const userRepository = new UserRepository();
-const authService = new AuthService(userRepository);
+const supabaseAuthService = new SupabaseAuthService();
+const authService = new AuthService(userRepository, supabaseAuthService);
 const controller = new AuthController(authService);
 
 /**

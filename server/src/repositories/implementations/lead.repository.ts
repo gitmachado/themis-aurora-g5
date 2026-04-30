@@ -8,6 +8,7 @@ export class LeadRepository implements ILeadRepository {
     id, 
     whatsapp_number as "whatsappNumber", 
     name, 
+    email,
     cpf, 
     case_type as "caseType", 
     case_description as "caseDescription", 
@@ -39,13 +40,13 @@ export class LeadRepository implements ILeadRepository {
 
   async create(lead: Omit<Lead, 'id' | 'createdAt' | 'updatedAt'>): Promise<Lead> {
     return (await dbGet<Lead>(
-      `INSERT INTO leads (whatsapp_number, name, cpf, case_type, case_description, urgency, contact_availability, status, converted_user_id, lawyer_notes, discard_reason)
-       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
+      `INSERT INTO leads (whatsapp_number, name, email, cpf, case_type, case_description, urgency, contact_availability, status, converted_user_id, lawyer_notes, discard_reason)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)
        RETURNING ${this.selectFields}`,
       [
-        lead.whatsappNumber, lead.name, lead.cpf, lead.caseType, lead.caseDescription, 
-        lead.urgency, lead.contactAvailability, lead.status, lead.convertedUserId, 
-        lead.lawyerNotes, lead.discardReason
+        lead.whatsappNumber, lead.name, lead.email, lead.cpf, lead.caseType,
+        lead.caseDescription, lead.urgency, lead.contactAvailability,
+        lead.status, lead.convertedUserId, lead.lawyerNotes, lead.discardReason
       ]
     ))!;
   }

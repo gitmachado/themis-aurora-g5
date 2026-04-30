@@ -58,27 +58,24 @@ class LawyerMainLayoutState extends State<LawyerMainLayout> {
         extendBody: true,
         body: LayoutBuilder(
           builder: (context, constraints) {
-              final double height = constraints.maxHeight;
-              final double stopStart = (height - 180) / height;
-              final double stopEnd = (height - 60) / height;
-  
-              return ShaderMask(
-                shaderCallback: (Rect bounds) {
-                  return LinearGradient(
-                    begin: Alignment.topCenter,
-                    end: Alignment.bottomCenter,
-                    colors: const [Colors.black, Colors.transparent],
-                    stops: [stopStart, stopEnd],
-                  ).createShader(bounds);
-                },
-                blendMode: BlendMode.dstIn,
-                child: IndexedStack(
-                  index: currentIndex,
-                  children: _screens,
-                ),
-              );
-            },
-          ),
+            final double height = constraints.maxHeight;
+            final double stopStart = (height - 180) / height;
+            final double stopEnd = (height - 60) / height;
+
+            return ShaderMask(
+              shaderCallback: (Rect bounds) {
+                return LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                  colors: const [Colors.black, Colors.transparent],
+                  stops: [stopStart, stopEnd],
+                ).createShader(bounds);
+              },
+              blendMode: BlendMode.dstIn,
+              child: IndexedStack(index: currentIndex, children: _screens),
+            );
+          },
+        ),
         bottomNavigationBar: Container(
           padding: const EdgeInsets.only(top: 16),
           decoration: BoxDecoration(
@@ -86,8 +83,12 @@ class LawyerMainLayoutState extends State<LawyerMainLayout> {
               begin: Alignment.topCenter,
               end: Alignment.bottomCenter,
               colors: [
-                Theme.of(context).scaffoldBackgroundColor.withValues(alpha: 0.0),
-                Theme.of(context).scaffoldBackgroundColor.withValues(alpha: 0.95),
+                Theme.of(
+                  context,
+                ).scaffoldBackgroundColor.withValues(alpha: 0.0),
+                Theme.of(
+                  context,
+                ).scaffoldBackgroundColor.withValues(alpha: 0.95),
                 Theme.of(context).scaffoldBackgroundColor,
               ],
               stops: const [0.0, 0.4, 1.0],
@@ -109,7 +110,5 @@ class LawyerMainLayoutState extends State<LawyerMainLayout> {
         ),
       ),
     );
-
   }
 }
-

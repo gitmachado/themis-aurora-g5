@@ -60,6 +60,7 @@ final class AppRouter {
         final args = settings.arguments as Map<String, String>?;
         return MaterialPageRoute<void>(
           builder: (_) => LawyerLeadDetailScreen(
+            leadId: args?['id'],
             name: args?['name'] ?? '',
             caseType: args?['caseType'] ?? '',
             urgency: args?['urgency'] ?? '',
@@ -72,8 +73,14 @@ final class AppRouter {
           settings: settings,
         );
       case procedureTimelineRoute:
+        final args = settings.arguments;
+        final processId = args is String
+            ? args
+            : args is Map<String, dynamic>
+            ? args['processId'] as String?
+            : null;
         return MaterialPageRoute<void>(
-          builder: (_) => const ClientProcedureTimelineScreen(),
+          builder: (_) => ClientProcedureTimelineScreen(processId: processId),
           settings: settings,
         );
       case filesRoute:
@@ -115,14 +122,23 @@ final class AppRouter {
         final args = settings.arguments as Map<String, dynamic>?;
         return MaterialPageRoute<void>(
           builder: (_) => LawyerClientDetailScreen(
-            name: args?['name'] ?? '',
-            cpf: args?['cpf'] ?? '',
+            clientId: args?['id'] as String?,
+            name: args?['name'] as String? ?? '',
+            cpf: args?['cpf'] as String? ?? '',
+            phone: args?['phone'] as String? ?? '',
+            email: args?['email'] as String?,
           ),
           settings: settings,
         );
       case lawyerProcedureDetailRoute:
+        final args = settings.arguments;
+        final processId = args is String
+            ? args
+            : args is Map<String, dynamic>
+            ? args['processId'] as String?
+            : null;
         return MaterialPageRoute<void>(
-          builder: (_) => const LawyerProcedureDetailScreen(),
+          builder: (_) => LawyerProcedureDetailScreen(processId: processId),
           settings: settings,
         );
       case lawyerProfileRoute:
@@ -141,8 +157,11 @@ final class AppRouter {
           settings: settings,
         );
       case lawyerFileReviewRoute:
+        final args = settings.arguments as Map<String, dynamic>?;
         return MaterialPageRoute<void>(
-          builder: (_) => const LawyerFileReviewScreen(),
+          builder: (_) => LawyerFileReviewScreen(
+            documentId: args?['documentId'] as String?,
+          ),
           settings: settings,
         );
       case lawyerChatsRoute:
@@ -158,7 +177,10 @@ final class AppRouter {
       case lawyerChatHandoffRoute:
         final args = settings.arguments as Map<String, dynamic>?;
         return MaterialPageRoute<void>(
-          builder: (_) => LawyerChatHandoffScreen(clientName: args?['clientName'] ?? 'Cliente'),
+          builder: (_) => LawyerChatHandoffScreen(
+            clientName: args?['clientName'] as String? ?? 'Cliente',
+            whatsappNumber: args?['whatsappNumber'] as String? ?? '',
+          ),
           settings: settings,
         );
       case designSystemRoute:
@@ -168,14 +190,10 @@ final class AppRouter {
         );
       default:
         return MaterialPageRoute<void>(
-          builder: (_) => const Scaffold(
-            body: Center(
-              child: Text('Rota não encontrada'),
-            ),
-          ),
+          builder: (_) =>
+              const Scaffold(body: Center(child: Text('Rota não encontrada'))),
           settings: settings,
         );
     }
   }
 }
-

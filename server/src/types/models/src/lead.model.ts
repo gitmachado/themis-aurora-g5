@@ -9,6 +9,7 @@ export interface Lead {
   id: string;
   whatsappNumber: string;
   name: string | null;
+  email: string | null;
   cpf: string | null;
   caseType: CaseType | null;
   caseDescription: string | null;

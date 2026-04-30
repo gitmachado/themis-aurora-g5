@@ -13,7 +13,9 @@ class LawyerAIManagerScreen extends StatefulWidget {
 class _LawyerAIManagerScreenState extends State<LawyerAIManagerScreen> {
   bool _botEnabled = true;
   double _creativity = 0.3;
-  final TextEditingController _toneController = TextEditingController(text: 'Profissional, acolhedor e direto.');
+  final TextEditingController _toneController = TextEditingController(
+    text: 'Profissional, acolhedor e direto.',
+  );
 
   @override
   Widget build(BuildContext context) {
@@ -49,15 +51,26 @@ class _LawyerAIManagerScreenState extends State<LawyerAIManagerScreen> {
       ),
       child: Row(
         children: [
-          const Icon(Icons.smart_toy_outlined, color: AppColors.primary, size: 32),
+          const Icon(
+            Icons.smart_toy_outlined,
+            color: AppColors.primary,
+            size: 32,
+          ),
           const SizedBox(width: 16),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text('Status do Bot', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
-                Text(_botEnabled ? 'Ativo e respondendo' : 'Pausado pelo advogado', 
-                  style: AppTextStyles.caption.copyWith(color: _botEnabled ? AppColors.success : AppColors.error)),
+                const Text(
+                  'Status do Bot',
+                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                ),
+                Text(
+                  _botEnabled ? 'Ativo e respondendo' : 'Pausado pelo advogado',
+                  style: AppTextStyles.caption.copyWith(
+                    color: _botEnabled ? AppColors.success : AppColors.error,
+                  ),
+                ),
               ],
             ),
           ),
@@ -87,7 +100,10 @@ class _LawyerAIManagerScreenState extends State<LawyerAIManagerScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Text('Tom de Voz', style: TextStyle(fontWeight: FontWeight.bold)),
+              const Text(
+                'Tom de Voz',
+                style: TextStyle(fontWeight: FontWeight.bold),
+              ),
               const SizedBox(height: 8),
               TextField(
                 controller: _toneController,
@@ -95,15 +111,27 @@ class _LawyerAIManagerScreenState extends State<LawyerAIManagerScreen> {
                 decoration: InputDecoration(
                   filled: true,
                   fillColor: AppColors.background,
-                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: BorderSide.none,
+                  ),
                 ),
               ),
               const SizedBox(height: 20),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  const Text('Criatividade (Temperatura)', style: TextStyle(fontWeight: FontWeight.bold)),
-                  Text(_creativity.toStringAsFixed(1), style: const TextStyle(color: AppColors.primary, fontWeight: FontWeight.bold)),
+                  const Text(
+                    'Criatividade (Temperatura)',
+                    style: TextStyle(fontWeight: FontWeight.bold),
+                  ),
+                  Text(
+                    _creativity.toStringAsFixed(1),
+                    style: const TextStyle(
+                      color: AppColors.primary,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
                 ],
               ),
               Slider(
@@ -152,15 +180,27 @@ class _LawyerAIManagerScreenState extends State<LawyerAIManagerScreen> {
         border: Border.all(color: AppColors.divider),
       ),
       child: ListTile(
-        leading: Icon(Icons.picture_as_pdf_outlined, color: isAnalyzing ? AppColors.textCaption : AppColors.error),
+        leading: Icon(
+          Icons.picture_as_pdf_outlined,
+          color: isAnalyzing ? AppColors.textCaption : AppColors.error,
+        ),
         title: Text(name, style: const TextStyle(fontSize: 14)),
-        subtitle: Text(status, style: TextStyle(fontSize: 12, color: isAnalyzing ? AppColors.warning : AppColors.success)),
+        subtitle: Text(
+          status,
+          style: TextStyle(
+            fontSize: 12,
+            color: isAnalyzing ? AppColors.warning : AppColors.success,
+          ),
+        ),
         trailing: IconButton(
-          icon: const Icon(Icons.delete_outline_rounded, color: AppColors.textCaption, size: 20),
+          icon: const Icon(
+            Icons.delete_outline_rounded,
+            color: AppColors.textCaption,
+            size: 20,
+          ),
           onPressed: () {},
         ),
       ),
     );
   }
-
 }

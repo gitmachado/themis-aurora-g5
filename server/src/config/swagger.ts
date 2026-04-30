@@ -38,6 +38,7 @@ const options: swaggerJsdoc.Options = {
             whatsappNumber: { type: 'string' },
             cpf: { type: 'string', nullable: true },
             email: { type: 'string', nullable: true },
+            supabaseUserId: { type: 'string', nullable: true },
             role: { type: 'string', enum: ['CLIENT', 'LAWYER'] },
             createdAt: { type: 'string', format: 'date-time' },
             updatedAt: { type: 'string', format: 'date-time' },
@@ -48,6 +49,7 @@ const options: swaggerJsdoc.Options = {
           properties: {
             id: { type: 'string' },
             name: { type: 'string', nullable: true },
+            email: { type: 'string', nullable: true },
             whatsappNumber: { type: 'string' },
             cpf: { type: 'string', nullable: true },
             caseType: { type: 'string', nullable: true },
