@@ -117,7 +117,9 @@ Desktop.ini
 .claude
 .codex
 .cursor
-.github
+.github/*
+!.github/workflows/
+!.github/workflows/**
 .opencode
 
 # .agents — versionar apenas conteúdo de projeto
