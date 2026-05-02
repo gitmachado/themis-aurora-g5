@@ -1,4 +1,5 @@
 import 'package:fpdart/fpdart.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 import 'package:mobile/shared/errors/failures.dart';
 import 'package:mobile/shared/errors/repository_guard.dart';
 
@@ -28,6 +29,37 @@ final class AuthRepositoryImpl implements AuthRepository {
         email: email,
         password: password,
       );
+      await _tokenStorage.saveToken(session.token);
+
+      final account = await _remoteDataSource.getAccount();
+      return session.copyWith(
+        userId: account.id,
+        role: account.role,
+        account: account,
+      );
+    });
+  }
+
+  @override
+  Future<Either<Failure, AuthSession>> signInWithGoogle() {
+    return guardRepository(() async {
+      final googleSignIn = GoogleSignIn(
+        serverClientId: '1050327728354-u3d9ptf6ms70kufgvhv026ueoe161kg8.apps.googleusercontent.com',
+      );
+      
+      final googleUser = await googleSignIn.signIn();
+      if (googleUser == null) {
+        throw const ServerFailure('Login com Google cancelado'); // Using generic ServerFailure, can adjust later if needed
+      }
+
+      final googleAuth = await googleUser.authentication;
+      final idToken = googleAuth.idToken;
+
+      if (idToken == null) {
+        throw const ServerFailure('Falha ao obter token do Google');
+      }
+
+      final session = await _remoteDataSource.googleSignIn(idToken);
       await _tokenStorage.saveToken(session.token);
 
       final account = await _remoteDataSource.getAccount();
