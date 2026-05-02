@@ -179,6 +179,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                     strokeWidth: 2,
                     color: Colors.white,
                   ),
+                )
               : const Text(
                   'Entrar',
                   style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),

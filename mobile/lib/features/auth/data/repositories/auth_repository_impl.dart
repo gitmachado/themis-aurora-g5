@@ -40,14 +40,24 @@ final class AuthRepositoryImpl implements AuthRepository {
     });
   }
 
+  bool _googleSignInInitialized = false;
+
+  Future<void> _ensureGoogleSignInInitialized() async {
+    if (!_googleSignInInitialized) {
+      await GoogleSignIn.instance.initialize(
+        serverClientId: '1050327728354-u3d9ptf6ms70kufgvhv026ueoe161kg8.apps.googleusercontent.com',
+      );
+      _googleSignInInitialized = true;
+    }
+  }
+
   @override
   Future<Either<Failure, AuthSession>> signInWithGoogle() {
     return guardRepository(() async {
-      final googleSignIn = GoogleSignIn(
-        serverClientId: '1050327728354-u3d9ptf6ms70kufgvhv026ueoe161kg8.apps.googleusercontent.com',
-      );
+      await _ensureGoogleSignInInitialized();
+      final googleSignIn = GoogleSignIn.instance;
       
-      final googleUser = await googleSignIn.signIn();
+      final googleUser = await googleSignIn.authenticate();
       if (googleUser == null) {
         throw const ServerFailure('Login com Google cancelado'); // Using generic ServerFailure, can adjust later if needed
       }
@@ -118,6 +128,10 @@ final class AuthRepositoryImpl implements AuthRepository {
 
   @override
   Future<Either<Failure, Unit>> logout() {
-    return guardRepositoryUnit(_tokenStorage.clearToken);
+    return guardRepositoryUnit(() async {
+      await _tokenStorage.clearToken();
+      await _ensureGoogleSignInInitialized();
+      await GoogleSignIn.instance.signOut();
+    });
   }
 }
