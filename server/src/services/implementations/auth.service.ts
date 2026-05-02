@@ -23,7 +23,10 @@ export class AuthService implements IAuthService {
   ) {
     this.jwtSecret = getJwtSecret();
     this.jwtExpiresIn = process.env.JWT_EXPIRE_IN || '7d';
-    this.googleClient = new OAuth2Client('1050327728354-u3d9ptf6ms70kufgvhv026ueoe161kg8.apps.googleusercontent.com');
+    this.googleClient = new OAuth2Client(
+      process.env.GOOGLE_CLIENT_ID,
+      process.env.GOOGLE_CLIENT_SECRET
+    );
   }
 
   async login(dto: LoginDTO): Promise<AuthResponseDTO> {
@@ -131,7 +134,7 @@ export class AuthService implements IAuthService {
     try {
       const ticket = await this.googleClient.verifyIdToken({
         idToken,
-        audience: '1050327728354-u3d9ptf6ms70kufgvhv026ueoe161kg8.apps.googleusercontent.com',
+        audience: process.env.GOOGLE_CLIENT_ID,
       });
       const payload = ticket.getPayload();
       

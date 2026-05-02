@@ -3,6 +3,7 @@ import 'package:google_sign_in/google_sign_in.dart';
 import 'package:mobile/shared/errors/failures.dart';
 import 'package:mobile/shared/errors/repository_guard.dart';
 
+import '../../../../shared/constants/app_constants.dart';
 import '../../../../shared/network/token_storage.dart';
 import '../../domain/entities/account.dart';
 import '../../domain/entities/auth_session.dart';
@@ -45,7 +46,7 @@ final class AuthRepositoryImpl implements AuthRepository {
   Future<void> _ensureGoogleSignInInitialized() async {
     if (!_googleSignInInitialized) {
       await GoogleSignIn.instance.initialize(
-        serverClientId: '1050327728354-u3d9ptf6ms70kufgvhv026ueoe161kg8.apps.googleusercontent.com',
+        serverClientId: AppConstants.googleClientId,
       );
       _googleSignInInitialized = true;
     }
