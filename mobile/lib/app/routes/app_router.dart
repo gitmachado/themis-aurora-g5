@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../features/design_system/presentation/screens/design_system_screen.dart';
 import '../../features/auth/presentation/screens/login_screen.dart';
+import '../../features/auth/presentation/screens/splash_screen.dart';
 // Client
 import '../../features/client/procedures/presentation/screens/client_procedure_timeline_screen.dart';
 import '../../features/client/profile/presentation/screens/client_profile_screen.dart';
@@ -21,7 +22,8 @@ import '../../shared/widgets/layout/client_main_layout.dart';
 import '../../shared/widgets/layout/lawyer_main_layout.dart';
 
 final class AppRouter {
-  static const String initialRoute = '/login';
+  static const String initialRoute = '/splash';
+  static const String splashRoute = '/splash';
   static const String loginRoute = '/login';
   static const String clientDashboardRoute = '/client-dashboard';
   static const String lawyerDashboardRoute = '/lawyer-dashboard';
@@ -46,6 +48,11 @@ final class AppRouter {
 
   static Route<dynamic> generateRoute(RouteSettings settings) {
     switch (settings.name) {
+      case splashRoute:
+        return MaterialPageRoute<void>(
+          builder: (_) => const SplashScreen(),
+          settings: settings,
+        );
       case loginRoute:
         return MaterialPageRoute<void>(
           builder: (_) => const LoginScreen(),

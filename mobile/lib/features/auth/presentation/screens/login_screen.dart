@@ -179,11 +179,26 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                     strokeWidth: 2,
                     color: Colors.white,
                   ),
-                )
               : const Text(
                   'Entrar',
                   style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                 ),
+        ),
+        const SizedBox(height: 16),
+        OutlinedButton.icon(
+          onPressed: isLoading ? null : _submitGoogleSignIn,
+          icon: const Icon(Icons.account_circle_outlined, color: AppColors.textPrimary),
+          label: const Text(
+            'Entrar com Google',
+            style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: AppColors.textPrimary),
+          ),
+          style: OutlinedButton.styleFrom(
+            padding: const EdgeInsets.symmetric(vertical: 14),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+            ),
+            side: const BorderSide(color: AppColors.border),
+          ),
         ),
       ],
     );
@@ -205,6 +220,21 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
       final session = await ref
           .read(authControllerProvider.notifier)
           .login(email: trimmedEmail, password: password);
+
+      if (!mounted) return;
+
+      final route = session.role == UserRole.lawyer
+          ? AppRouter.lawyerDashboardRoute
+          : AppRouter.clientDashboardRoute;
+      Navigator.pushReplacementNamed(context, route);
+    } catch (_) {
+      // Error state is rendered in the form.
+    }
+  }
+
+  Future<void> _submitGoogleSignIn() async {
+    try {
+      final session = await ref.read(authControllerProvider.notifier).googleSignIn();
 
       if (!mounted) return;
 
