@@ -1,0 +1,11 @@
+### Cadastro de cliente
+POST http://localhost:3000/api/v1/auth/register
+Content-Type: application/json
+
+{
+  "name": "Teste Email Supabase",
+  "whatsappNumber": "11999990808",
+  "cpf": "13345673905",
+  "email": "wamaped554@pertok.com",
+  "password": "Senha123!"
+}

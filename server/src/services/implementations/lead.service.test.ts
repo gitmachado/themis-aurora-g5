@@ -48,9 +48,10 @@ test('createFromWhatsapp preserves caseDescription and accepts legacy descriptio
   assert.equal(created.caseDescription, 'Texto vindo do bot legado');
 });
 
-test('convertToClient invites Supabase user when converted lead has email and admin auth', async () => {
+test('convertToClient creates local password and sends temporary password', async () => {
   const calls: string[] = [];
-  let updatedUser: any;
+  let createdUser: any;
+  let notificationBody: string | undefined;
   const service = new LeadService(
     {
       findById: async () => baseLead,
@@ -58,24 +59,20 @@ test('convertToClient invites Supabase user when converted lead has email and ad
     } as any,
     {
       findByWhatsapp: async () => null,
-      create: async (user: any) => ({ id: 'user-1', ...user }),
-      update: async (_id: string, data: any) => {
-        updatedUser = data;
-        return { id: 'user-1', ...data };
+      create: async (user: any) => {
+        createdUser = user;
+        return { id: 'user-1', ...user };
       },
       delete: async () => calls.push('delete-user'),
     } as any,
     { generateTempPassword: () => 'TEMP1234' } as any,
-    { sendPush: async () => calls.push('send-push') } as any,
-    { create: async () => calls.push('create-process') } as any,
     {
-      isAdminAuthConfigured: () => true,
-      inviteUserByEmail: async () => ({
-        supabaseUserId: 'supabase-user-1',
-        email: 'maria@example.com',
-        emailConfirmedAt: null,
-      }),
-    } as any
+      sendPush: async (_userId: string, _title: string, body: string) => {
+        notificationBody = body;
+        calls.push('send-push');
+      },
+    } as any,
+    { create: async () => calls.push('create-process') } as any
   );
 
   const result = await service.convertToClient({
@@ -83,7 +80,10 @@ test('convertToClient invites Supabase user when converted lead has email and ad
     lawyerId: 'lawyer-1',
   });
 
-  assert.equal(updatedUser.supabaseUserId, 'supabase-user-1');
+  assert.equal(createdUser.email, 'maria@example.com');
+  assert.ok(createdUser.passwordHash);
+  assert.notEqual(createdUser.passwordHash, 'TEMP1234');
   assert.equal(result.id, 'user-1');
+  assert.equal(notificationBody, 'Bem-vindo! Baixe nosso app e use a senha temporária: TEMP1234');
   assert.deepEqual(calls, ['create-process', 'send-push']);
 });

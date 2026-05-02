@@ -1,7 +1,6 @@
 import { Router } from 'express';
 import { LeadController } from '../../controllers/implementations/lead.controller';
 import { LeadService, AuthService, NotificationService, LegalProcessService, TimelineService } from '@services';
-import { SupabaseAuthService } from '../../services/implementations/supabase-auth.service';
 import {
   LeadRepository,
   UserRepository,
@@ -19,8 +18,7 @@ const router = Router();
 
 const leadRepository = new LeadRepository();
 const userRepository = new UserRepository();
-const supabaseAuthService = new SupabaseAuthService();
-const authService = new AuthService(userRepository, supabaseAuthService);
+const authService = new AuthService(userRepository);
 const notificationRepository = new NotificationRepository();
 const notificationService = new NotificationService(notificationRepository);
 const legalProcessRepository = new LegalProcessRepository();
@@ -36,8 +34,7 @@ const leadService = new LeadService(
   userRepository,
   authService,
   notificationService,
-  legalProcessService,
-  supabaseAuthService
+  legalProcessService
 );
 
 const controller = new LeadController(leadService);

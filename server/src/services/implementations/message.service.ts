@@ -13,9 +13,22 @@ export class MessageService implements IMessageService {
   ) {}
 
   async saveFromBot(dto: CreateMessageDTO): Promise<Message> {
+    let leadId = dto.leadId || null;
+    let userId = dto.userId || null;
+
+    if (!leadId && !userId && dto.whatsappNumber) {
+      const user = await this.userRepository.findByWhatsapp(dto.whatsappNumber);
+      if (user) {
+        userId = user.id;
+      } else {
+        const lead = await this.leadRepository.findByWhatsapp(dto.whatsappNumber);
+        leadId = lead?.id || null;
+      }
+    }
+
     return this.messageRepository.create({
-      leadId: dto.leadId || null,
-      userId: dto.userId || null,
+      leadId,
+      userId,
       content: dto.content,
       sender: dto.sender,
       whatsappMessageId: dto.whatsappMessageId || null,

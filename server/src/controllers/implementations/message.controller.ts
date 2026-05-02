@@ -41,7 +41,11 @@ export class MessageController {
     next: NextFunction
   ) => {
     try {
-      const message = await this.messageService.saveFromBot(req.body);
+      const body = req.body as CreateMessageDTO & { senderRole?: CreateMessageDTO['sender'] };
+      const message = await this.messageService.saveFromBot({
+        ...body,
+        sender: body.sender ?? body.senderRole!,
+      });
       return res.status(201).json(message);
     } catch (error) {
       next(error);

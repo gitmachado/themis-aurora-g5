@@ -9,7 +9,6 @@ import type { CreateLeadDTO, ConvertLeadDTO } from '@dtos';
 import { NotFoundError, ConflictError } from './errors';
 import { LeadStatus, UserRole } from '@enums';
 import bcrypt from 'bcryptjs';
-import { ISupabaseAuthService } from '../interfaces/supabase-auth.service';
 
 export class LeadService implements ILeadService {
   constructor(
@@ -17,8 +16,7 @@ export class LeadService implements ILeadService {
     private readonly userRepository: IUserRepository,
     private readonly authService: IAuthService,
     private readonly notificationService: INotificationService,
-    private readonly legalProcessService: ILegalProcessService,
-    private readonly supabaseAuthService?: ISupabaseAuthService
+    private readonly legalProcessService: ILegalProcessService
   ) {}
 
   async createFromWhatsapp(dto: CreateLeadDTO): Promise<Lead> {
@@ -73,11 +71,8 @@ export class LeadService implements ILeadService {
       throw new ConflictError('Usuário já cadastrado com este número');
     }
 
-    const shouldInviteByEmail = Boolean(
-      lead.email && this.supabaseAuthService?.isAdminAuthConfigured()
-    );
-    const tempPassword = shouldInviteByEmail ? null : this.authService.generateTempPassword();
-    const passwordHash = tempPassword ? await bcrypt.hash(tempPassword, 10) : null;
+    const tempPassword = this.authService.generateTempPassword();
+    const passwordHash = await bcrypt.hash(tempPassword, 10);
 
     // Create User
     const user = await this.userRepository.create({
@@ -85,7 +80,6 @@ export class LeadService implements ILeadService {
       whatsappNumber: lead.whatsappNumber!,
       cpf: lead.cpf || '',
       email: lead.email || null,
-      supabaseUserId: null,
       avatarUrl: null,
       role: 'CLIENT',
       passwordHash,
@@ -96,51 +90,27 @@ export class LeadService implements ILeadService {
       }
     });
 
-    let convertedUser = user;
-    try {
-      if (shouldInviteByEmail && lead.email) {
-        const supabaseUser = await this.supabaseAuthService!.inviteUserByEmail({
-          email: lead.email,
-          name: user.name,
-          role: 'CLIENT',
-          localUserId: user.id,
-          whatsappNumber: user.whatsappNumber,
-          cpf: user.cpf,
-        });
-        convertedUser = await this.userRepository.update(user.id, {
-          supabaseUserId: supabaseUser.supabaseUserId,
-        });
-      }
-    } catch (error) {
-      await this.userRepository.delete(user.id);
-      throw error;
-    }
-
     // Update lead status
     await this.leadRepository.update(lead.id, {
       status: 'CONVERTED',
-      convertedUserId: convertedUser.id,
+      convertedUserId: user.id,
     });
 
     await this.legalProcessService.create({
-      clientId: convertedUser.id,
+      clientId: user.id,
       lawyerId: dto.lawyerId,
       title: `${lead.caseType || 'Civil'} - ${lead.name || 'Cliente'}`,
       description: lead.caseDescription || '',
       caseType: lead.caseType || 'Civil',
     });
 
-    const accessMessage = shouldInviteByEmail
-      ? 'Bem-vindo! Enviamos um convite para o seu email para ativar o acesso ao OmniConnect.'
-      : `Bem-vindo! Baixe nosso app e use a senha temporária: ${tempPassword}`;
-
     await this.notificationService.sendPush(
-      convertedUser.id,
+      user.id,
       'Seu acesso ao OmniConnect',
-      accessMessage
+      `Bem-vindo! Baixe nosso app e use a senha temporária: ${tempPassword}`
     );
 
-    return convertedUser;
+    return user;
   }
 
   async discard(id: string, reason?: string): Promise<Lead> {
