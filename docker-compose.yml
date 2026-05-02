@@ -27,6 +27,9 @@ services:
         condition: service_healthy
     env_file:
       - ./server/.env
+    environment:
+      DB_HOST: postgres
+      DB_PORT: 5432
     ports:
       - "3000:3000"
     volumes:
