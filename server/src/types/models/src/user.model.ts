@@ -6,7 +6,6 @@ export interface User {
   whatsappNumber: string;
   cpf: string | null;
   email: string | null;
-  supabaseUserId: string | null;
   avatarUrl: string | null;
   role: UserRole;
   passwordHash: string | null;

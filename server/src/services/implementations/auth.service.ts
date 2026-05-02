@@ -6,50 +6,31 @@ import type { LoginDTO, RegisterDTO, AuthResponseDTO } from '@dtos';
 import { UnauthorizedError, ConflictError } from './errors';
 import { UserRole } from '@enums';
 import { getJwtSecret } from '../../config/runtime';
-import {
-  ISupabaseAuthService,
-  SupabaseAuthUserResult,
-} from '../interfaces/supabase-auth.service';
 
 export class AuthService implements IAuthService {
   private readonly jwtSecret: string;
   private readonly jwtExpiresIn: string;
 
-  constructor(
-    private readonly userRepository: IUserRepository,
-    private readonly supabaseAuthService?: ISupabaseAuthService
-  ) {
+  constructor(private readonly userRepository: IUserRepository) {
     this.jwtSecret = getJwtSecret();
     this.jwtExpiresIn = process.env.JWT_EXPIRE_IN || '7d';
   }
 
   async login(dto: LoginDTO): Promise<AuthResponseDTO> {
     const email = dto.email.trim().toLowerCase();
-    const supabaseResult = await this.trySupabasePasswordSignIn(
-      email,
-      dto.password
-    );
-
-    const user = supabaseResult
-      ? await this.userRepository.findBySupabaseUserId(supabaseResult.supabaseUserId)
-        || await this.userRepository.findByEmail(email)
-      : await this.userRepository.findByEmail(email);
+    const user = await this.userRepository.findByEmail(email);
 
     if (!user) {
       throw new UnauthorizedError('Credenciais inválidas');
     }
 
-    if (!supabaseResult) {
-      if (!user.passwordHash) {
-        throw new UnauthorizedError('Credenciais inválidas');
-      }
+    if (!user.passwordHash) {
+      throw new UnauthorizedError('Credenciais inválidas');
+    }
 
-      const isPasswordValid = await bcrypt.compare(dto.password, user.passwordHash);
-      if (!isPasswordValid) {
-        throw new UnauthorizedError('Credenciais inválidas');
-      }
-    } else if (!user.supabaseUserId) {
-      await this.userRepository.update(user.id, { supabaseUserId: supabaseResult.supabaseUserId });
+    const isPasswordValid = await bcrypt.compare(dto.password, user.passwordHash);
+    if (!isPasswordValid) {
+      throw new UnauthorizedError('Credenciais inválidas');
     }
 
     return {
@@ -76,30 +57,13 @@ export class AuthService implements IAuthService {
       throw new ConflictError('Email já cadastrado');
     }
 
-    let supabaseUserId: string | null = null;
-    let passwordHash: string | null = await bcrypt.hash(dto.password, 10);
-    let requiresEmailConfirmation = false;
-
-    if (this.supabaseAuthService?.isPasswordAuthConfigured()) {
-      const supabaseResult = await this.supabaseAuthService.signUpWithPassword({
-        email,
-        password: dto.password,
-        name: dto.name,
-        role: 'CLIENT',
-        whatsappNumber: dto.whatsappNumber,
-        cpf: dto.cpf,
-      });
-      supabaseUserId = supabaseResult.supabaseUserId;
-      passwordHash = null;
-      requiresEmailConfirmation = !supabaseResult.accessToken;
-    }
+    const passwordHash = await bcrypt.hash(dto.password, 10);
 
     const user = await this.userRepository.create({
       name: dto.name,
       whatsappNumber: dto.whatsappNumber,
       cpf: dto.cpf,
       email,
-      supabaseUserId,
       avatarUrl: null,
       role: 'CLIENT',
       passwordHash,
@@ -113,10 +77,9 @@ export class AuthService implements IAuthService {
     const token = this.generateToken(user.id, user.role);
 
     return {
-      token: requiresEmailConfirmation ? null : token,
+      token,
       userId: user.id,
       role: user.role,
-      requiresEmailConfirmation,
     };
   }
 
@@ -141,27 +104,5 @@ export class AuthService implements IAuthService {
       subject: userId,
       expiresIn: this.jwtExpiresIn as any,
     });
-  }
-
-  private async trySupabasePasswordSignIn(
-    email: string,
-    password: string
-  ): Promise<SupabaseAuthUserResult | null> {
-    if (!this.supabaseAuthService?.isPasswordAuthConfigured()) {
-      return null;
-    }
-
-    try {
-      return await this.supabaseAuthService.signInWithPassword({
-        email,
-        password,
-      });
-    } catch (error) {
-      if (error instanceof UnauthorizedError) {
-        return null;
-      }
-
-      throw error;
-    }
   }
 }

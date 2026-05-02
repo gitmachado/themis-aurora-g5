@@ -18,7 +18,6 @@ export class UserService implements IUserService {
       whatsappNumber: dto.whatsappNumber,
       cpf: dto.cpf || null,
       email: dto.email || null,
-      supabaseUserId: dto.supabaseUserId || null,
       avatarUrl: dto.avatarUrl || null,
       role: dto.role,
       passwordHash: dto.passwordHash || null,

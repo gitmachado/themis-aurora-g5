@@ -5,7 +5,7 @@ import { dbAll, dbGet, dbRun } from '../../config/database';
 export class UserRepository implements IUserRepository {
   private readonly userSelect = `
     id, name, whatsapp_number as "whatsappNumber", cpf, email,
-    supabase_user_id as "supabaseUserId", avatar_url as "avatarUrl", role,
+    avatar_url as "avatarUrl", role,
     password_hash as "passwordHash", fcm_token as "fcmToken", 
     notification_preferences as "notificationPreferences", 
     created_at as "createdAt", updated_at as "updatedAt"
@@ -39,13 +39,6 @@ export class UserRepository implements IUserRepository {
     );
   }
 
-  async findBySupabaseUserId(supabaseUserId: string): Promise<User | null> {
-    return dbGet<User>(
-      `SELECT ${this.userSelect} FROM users WHERE supabase_user_id = $1`,
-      [supabaseUserId]
-    );
-  }
-
   async findByCpfOrWhatsapp(identifier: string): Promise<User[]> {
     return dbAll<User>(
       `SELECT ${this.userSelect}
@@ -64,7 +57,6 @@ export class UserRepository implements IUserRepository {
         users.whatsapp_number as "whatsappNumber",
         users.cpf,
         users.email,
-        users.supabase_user_id as "supabaseUserId",
         users.avatar_url as "avatarUrl",
         users.role,
         users.password_hash as "passwordHash",
@@ -89,7 +81,6 @@ export class UserRepository implements IUserRepository {
         users.whatsapp_number as "whatsappNumber",
         users.cpf,
         users.email,
-        users.supabase_user_id as "supabaseUserId",
         users.avatar_url as "avatarUrl",
         users.role,
         users.password_hash as "passwordHash",
@@ -108,15 +99,14 @@ export class UserRepository implements IUserRepository {
 
   async create(user: Omit<User, 'id' | 'createdAt' | 'updatedAt'>): Promise<User> {
     return (await dbGet<User>(
-      `INSERT INTO users (name, whatsapp_number, cpf, email, supabase_user_id, avatar_url, role, password_hash, fcm_token, notification_preferences)
-       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
+      `INSERT INTO users (name, whatsapp_number, cpf, email, avatar_url, role, password_hash, fcm_token, notification_preferences)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
        RETURNING ${this.userSelect}`,
       [
         user.name,
         user.whatsappNumber,
         user.cpf,
         user.email,
-        user.supabaseUserId,
         user.avatarUrl,
         user.role,
         user.passwordHash,

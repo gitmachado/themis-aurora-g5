@@ -5,7 +5,6 @@ export interface IUserRepository {
   findByWhatsapp(whatsappNumber: string): Promise<User | null>;
   findByCpf(cpf: string): Promise<User | null>;
   findByEmail(email: string): Promise<User | null>;
-  findBySupabaseUserId(supabaseUserId: string): Promise<User | null>;
   findByCpfOrWhatsapp(identifier: string): Promise<User[]>;
   findClientsByLawyerId(lawyerId: string): Promise<User[]>;
   findClientByLawyerId(lawyerId: string, clientId: string): Promise<User | null>;
