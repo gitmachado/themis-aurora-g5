@@ -23,10 +23,28 @@ class LawyerLeadTriageScreen extends ConsumerStatefulWidget {
 class _LawyerLeadTriageScreenState
     extends ConsumerState<LawyerLeadTriageScreen> {
   String _selectedFilter = 'Todos';
+  int _selectedTabIndex = 0;
+  final TextEditingController _searchController = TextEditingController();
+
+  bool get _isArchivedTab => _selectedTabIndex == 1;
+
+  @override
+  void initState() {
+    super.initState();
+    _searchController.addListener(() => setState(() {}));
+  }
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
-    final leads = ref.watch(pendingLeadsProvider);
+    final leads = ref.watch(
+      _isArchivedTab ? archivedLeadsProvider : pendingLeadsProvider,
+    );
 
     return Scaffold(
       backgroundColor: AppColors.background,
@@ -37,12 +55,17 @@ class _LawyerLeadTriageScreenState
       ),
       body: Column(
         children: [
-          Container(color: AppColors.white, child: _buildFilters()),
+          Container(
+            color: AppColors.white,
+            child: Column(
+              children: [_buildSearchField(), _buildTabs(), _buildFilters()],
+            ),
+          ),
           Container(height: 1, color: AppColors.divider.withValues(alpha: 0.7)),
           const SizedBox(height: 16),
           Expanded(
             child: leads.when(
-              data: _buildLeadsList,
+              data: (items) => _buildLeadsList(items, archived: _isArchivedTab),
               loading: _buildLoadingList,
               error: (error, _) => _buildErrorState(error),
             ),
@@ -52,11 +75,60 @@ class _LawyerLeadTriageScreenState
     );
   }
 
+  Widget _buildSearchField() {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(20, 4, 20, 12),
+      child: TextField(
+        controller: _searchController,
+        textInputAction: TextInputAction.search,
+        decoration: InputDecoration(
+          hintText: 'Pesquisar por nome, WhatsApp ou caso',
+          prefixIcon: const Icon(Icons.search_rounded, size: 20),
+          suffixIcon: _searchController.text.isEmpty
+              ? null
+              : IconButton(
+                  tooltip: 'Limpar pesquisa',
+                  icon: const Icon(Icons.close_rounded, size: 20),
+                  onPressed: _searchController.clear,
+                ),
+          filled: true,
+          fillColor: AppColors.background,
+          contentPadding: const EdgeInsets.symmetric(
+            horizontal: 16,
+            vertical: 12,
+          ),
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+            borderSide: BorderSide.none,
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildTabs() {
+    return DefaultTabController(
+      length: 2,
+      initialIndex: _selectedTabIndex,
+      child: TabBar(
+        onTap: (index) => setState(() => _selectedTabIndex = index),
+        labelColor: AppColors.primary,
+        unselectedLabelColor: AppColors.textCaption,
+        indicatorColor: AppColors.primary,
+        indicatorWeight: 3,
+        tabs: const [
+          Tab(text: 'Ativos'),
+          Tab(text: 'Arquivados'),
+        ],
+      ),
+    );
+  }
+
   Widget _buildFilters() {
     final filters = ['Todos', 'Urgentes', 'Novos', 'Trabalhista', 'Cível'];
     return SingleChildScrollView(
       scrollDirection: Axis.horizontal,
-      padding: const EdgeInsets.fromLTRB(20, 0, 20, 16),
+      padding: const EdgeInsets.fromLTRB(20, 12, 20, 16),
       child: Row(
         children: filters.map((filter) {
           final isSelected = _selectedFilter == filter;
@@ -88,30 +160,52 @@ class _LawyerLeadTriageScreenState
     );
   }
 
-  Widget _buildLeadsList(List<Lead> leads) {
+  Widget _buildLeadsList(List<Lead> leads, {required bool archived}) {
+    final query = _searchController.text.trim().toLowerCase();
     final filteredLeads = leads.where((lead) {
-      if (_selectedFilter == 'Todos') return true;
-      if (_selectedFilter == 'Urgentes') return lead.urgencyLabel == 'Alta';
-      if (_selectedFilter == 'Novos') return lead.timeLabel.contains('min');
-      return lead.caseTypeLabel == _selectedFilter;
+      final matchesFilter = switch (_selectedFilter) {
+        'Todos' => true,
+        'Urgentes' => lead.urgencyLabel == 'Alta',
+        'Novos' => lead.timeLabel.contains('min'),
+        _ => lead.caseTypeLabel == _selectedFilter,
+      };
+      if (!matchesFilter) return false;
+      if (query.isEmpty) return true;
+
+      final searchable = [
+        lead.displayName,
+        lead.whatsappNumber,
+        lead.caseTypeLabel,
+        lead.caseDescription ?? '',
+        lead.urgencyLabel,
+      ].join(' ').toLowerCase();
+      return searchable.contains(query);
     }).toList();
 
     if (filteredLeads.isEmpty) {
       return Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(
-              Icons.person_search_rounded,
-              size: 64,
-              color: AppColors.textCaption.withValues(alpha: 0.5),
-            ),
-            const SizedBox(height: 16),
-            Text(
-              'Nenhum lead encontrado',
-              style: AppTextStyles.h2.copyWith(color: AppColors.textCaption),
-            ),
-          ],
+        child: Padding(
+          padding: const EdgeInsets.all(24),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(
+                archived
+                    ? Icons.inventory_2_outlined
+                    : Icons.person_search_rounded,
+                size: 64,
+                color: AppColors.textCaption.withValues(alpha: 0.5),
+              ),
+              const SizedBox(height: 16),
+              Text(
+                archived
+                    ? 'Nenhum lead arquivado encontrado'
+                    : 'Nenhum lead encontrado',
+                style: AppTextStyles.h2.copyWith(color: AppColors.textCaption),
+                textAlign: TextAlign.center,
+              ),
+            ],
+          ),
         ),
       );
     }
@@ -123,7 +217,6 @@ class _LawyerLeadTriageScreenState
         20,
         AppDimensions.bottomPadding(context),
       ),
-
       itemCount: filteredLeads.length,
       separatorBuilder: (_, _) => const SizedBox(height: 16),
       itemBuilder: (context, index) {
@@ -133,6 +226,7 @@ class _LawyerLeadTriageScreenState
           caseType: lead.caseTypeLabel,
           time: lead.timeLabel,
           urgency: lead.urgencyLabel,
+          showArchiveAction: !archived,
           onTap: () {
             Navigator.pushNamed(
               context,

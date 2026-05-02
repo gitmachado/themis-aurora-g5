@@ -71,6 +71,14 @@ export class LeadService implements ILeadService {
       throw new ConflictError('Usuário já cadastrado com este número');
     }
 
+    const cpf = lead.cpf?.trim() || null;
+    if (cpf) {
+      const existingUserByCpf = await this.userRepository.findByCpf(cpf);
+      if (existingUserByCpf) {
+        throw new ConflictError('Usuário já cadastrado com este CPF');
+      }
+    }
+
     const tempPassword = this.authService.generateTempPassword();
     const passwordHash = await bcrypt.hash(tempPassword, 10);
 
@@ -78,7 +86,7 @@ export class LeadService implements ILeadService {
     const user = await this.userRepository.create({
       name: lead.name || 'Cliente',
       whatsappNumber: lead.whatsappNumber!,
-      cpf: lead.cpf || '',
+      cpf,
       email: lead.email || null,
       avatarUrl: null,
       role: 'CLIENT',
@@ -127,6 +135,10 @@ export class LeadService implements ILeadService {
 
   async getPending(): Promise<Lead[]> {
     return this.leadRepository.findPending();
+  }
+
+  async getByStatus(status: LeadStatus): Promise<Lead[]> {
+    return this.leadRepository.findByStatus(status);
   }
 
   async getById(id: string): Promise<Lead | null> {

@@ -59,6 +59,7 @@ test('convertToClient creates local password and sends temporary password', asyn
     } as any,
     {
       findByWhatsapp: async () => null,
+      findByCpf: async () => null,
       create: async (user: any) => {
         createdUser = user;
         return { id: 'user-1', ...user };
@@ -86,4 +87,34 @@ test('convertToClient creates local password and sends temporary password', asyn
   assert.equal(result.id, 'user-1');
   assert.equal(notificationBody, 'Bem-vindo! Baixe nosso app e use a senha temporária: TEMP1234');
   assert.deepEqual(calls, ['create-process', 'send-push']);
+});
+
+test('convertToClient stores null cpf when lead cpf is blank', async () => {
+  let createdUser: any;
+  const service = new LeadService(
+    {
+      findById: async () => ({ ...baseLead, cpf: '' }),
+      update: async (_id: string, data: any) => ({ ...baseLead, ...data }),
+    } as any,
+    {
+      findByWhatsapp: async () => null,
+      findByCpf: async () => {
+        throw new Error('findByCpf should not be called for blank cpf');
+      },
+      create: async (user: any) => {
+        createdUser = user;
+        return { id: 'user-1', ...user };
+      },
+    } as any,
+    { generateTempPassword: () => 'TEMP1234' } as any,
+    { sendPush: async () => undefined } as any,
+    { create: async () => undefined } as any
+  );
+
+  await service.convertToClient({
+    leadId: 'lead-1',
+    lawyerId: 'lawyer-1',
+  });
+
+  assert.equal(createdUser.cpf, null);
 });

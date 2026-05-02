@@ -24,6 +24,16 @@ final class GetLeadByIdUseCase {
   }
 }
 
+final class GetLeadsByStatusUseCase {
+  final LeadRepository _repository;
+
+  const GetLeadsByStatusUseCase(this._repository);
+
+  Future<Either<Failure, List<Lead>>> call(String status) {
+    return _repository.getByStatus(status);
+  }
+}
+
 final class ConvertLeadUseCase {
   final LeadRepository _repository;
 

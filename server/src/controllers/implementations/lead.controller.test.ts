@@ -42,6 +42,27 @@ test('discard archives lead with reason', async () => {
   assert.equal(response.body.status, 'DISCARDED');
 });
 
+test('listAll returns archived leads when status query is discarded', async () => {
+  let requestedStatus: string | undefined;
+  const controller = new LeadController({
+    getPending: async () => [{ id: 'pending-1', status: 'PENDING' }],
+    getByStatus: async (status: string) => {
+      requestedStatus = status;
+      return [{ id: 'archived-1', status }];
+    },
+  } as any);
+  const response = createResponse();
+
+  await controller.listAll(
+    { query: { status: 'discarded' } } as any,
+    response as any,
+    assert.ifError
+  );
+
+  assert.equal(requestedStatus, 'DISCARDED');
+  assert.equal(response.body[0].id, 'archived-1');
+});
+
 function createResponse() {
   return {
     statusCode: 200,

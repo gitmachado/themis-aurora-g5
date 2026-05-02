@@ -2,22 +2,34 @@ import { Request, Response, NextFunction, RequestHandler } from 'express';
 import { ILeadService } from '@services';
 import { Lead, User } from '@models';
 import { CreateLeadDTO } from '@dtos';
+import { LeadStatus } from '@enums';
 import { AuthRequest } from '../../middlewares/implementations/authMiddleware';
 
 interface DiscardLeadBody {
   reason?: string;
 }
 
+const validLeadStatuses: LeadStatus[] = [
+  'PENDING',
+  'IN_CONTACT',
+  'CONVERTED',
+  'DISCARDED',
+];
+
 export class LeadController {
   constructor(private readonly leadService: ILeadService) {}
 
-  listAll: RequestHandler<any, Lead[]> = async (
-    req: Request,
+  listAll: RequestHandler<any, Lead[], any, { status?: string }> = async (
+    req: Request<any, Lead[], any, { status?: string }>,
     res: Response,
     next: NextFunction
   ) => {
     try {
-      const leads = await this.leadService.getPending();
+      const status = req.query.status?.toUpperCase();
+      const leads =
+        status && validLeadStatuses.includes(status as LeadStatus)
+          ? await this.leadService.getByStatus(status as LeadStatus)
+          : await this.leadService.getPending();
       return res.status(200).json(leads);
     } catch (error) {
       next(error);

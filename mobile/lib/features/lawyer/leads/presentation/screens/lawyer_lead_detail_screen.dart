@@ -259,7 +259,17 @@ class _LawyerLeadDetailScreenState extends ConsumerState<LawyerLeadDetailScreen>
     );
   }
 
-  Widget _buildStickyFooter(Lead? lead) {
+  Widget? _buildStickyFooter(Lead? lead) {
+    if (widget.leadId != null && lead == null) {
+      return null;
+    }
+
+    if (lead != null && lead.status == 'CONVERTED') {
+      return null;
+    }
+
+    final showArchiveAction = lead == null || lead.status == 'PENDING';
+
     return Container(
       decoration: BoxDecoration(
         color: AppColors.white,
@@ -280,21 +290,23 @@ class _LawyerLeadDetailScreenState extends ConsumerState<LawyerLeadDetailScreen>
           padding: const EdgeInsets.fromLTRB(24, 16, 24, 16),
           child: Row(
             children: [
-              Expanded(
-                child: OutlinedButton(
-                  onPressed: () => _discardLead(lead),
-                  style: OutlinedButton.styleFrom(
-                    foregroundColor: AppColors.error,
-                    side: const BorderSide(color: AppColors.error),
-                    minimumSize: const Size(0, 56),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
+              if (showArchiveAction) ...[
+                Expanded(
+                  child: OutlinedButton(
+                    onPressed: () => _discardLead(lead),
+                    style: OutlinedButton.styleFrom(
+                      foregroundColor: AppColors.error,
+                      side: const BorderSide(color: AppColors.error),
+                      minimumSize: const Size(0, 56),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
                     ),
+                    child: const Text('Arquivar'),
                   ),
-                  child: const Text('Arquivar'),
                 ),
-              ),
-              const SizedBox(width: 12),
+                const SizedBox(width: 12),
+              ],
               Expanded(
                 child: ElevatedButton(
                   onPressed: () => _showConversionDialog(lead),

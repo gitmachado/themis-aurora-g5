@@ -24,6 +24,12 @@ final getLeadByIdUseCaseProvider = Provider<GetLeadByIdUseCase>((ref) {
   return GetLeadByIdUseCase(ref.watch(leadRepositoryProvider));
 });
 
+final getLeadsByStatusUseCaseProvider = Provider<GetLeadsByStatusUseCase>((
+  ref,
+) {
+  return GetLeadsByStatusUseCase(ref.watch(leadRepositoryProvider));
+});
+
 final convertLeadUseCaseProvider = Provider<ConvertLeadUseCase>((ref) {
   return ConvertLeadUseCase(ref.watch(leadRepositoryProvider));
 });
@@ -34,6 +40,12 @@ final discardLeadUseCaseProvider = Provider<DiscardLeadUseCase>((ref) {
 
 final pendingLeadsProvider = FutureProvider<List<Lead>>((ref) async {
   return (await ref.watch(getPendingLeadsUseCaseProvider)()).getOrThrow();
+});
+
+final archivedLeadsProvider = FutureProvider<List<Lead>>((ref) async {
+  return (await ref.watch(getLeadsByStatusUseCaseProvider)(
+    'DISCARDED',
+  )).getOrThrow();
 });
 
 final leadDetailsProvider = FutureProvider.family<Lead, String>((
@@ -55,6 +67,7 @@ final class LeadActions {
   Future<void> convert(String id) async {
     (await _ref.read(convertLeadUseCaseProvider)(id)).getOrThrow();
     _ref.invalidate(pendingLeadsProvider);
+    _ref.invalidate(archivedLeadsProvider);
     _ref.invalidate(leadDetailsProvider(id));
   }
 
@@ -64,6 +77,7 @@ final class LeadActions {
       reason: reason,
     )).getOrThrow();
     _ref.invalidate(pendingLeadsProvider);
+    _ref.invalidate(archivedLeadsProvider);
     _ref.invalidate(leadDetailsProvider(id));
   }
 }

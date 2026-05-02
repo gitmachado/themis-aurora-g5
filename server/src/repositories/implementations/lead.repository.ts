@@ -31,11 +31,17 @@ export class LeadRepository implements ILeadRepository {
   }
 
   async findByStatus(status: LeadStatus): Promise<Lead[]> {
-    return dbAll<Lead>(`SELECT ${this.selectFields} FROM leads WHERE status = $1`, [status]);
+    return dbAll<Lead>(
+      `SELECT ${this.selectFields}
+       FROM leads
+       WHERE status = $1
+       ORDER BY updated_at DESC`,
+      [status]
+    );
   }
 
   async findPending(): Promise<Lead[]> {
-    return dbAll<Lead>(`SELECT ${this.selectFields} FROM leads WHERE status = 'PENDING'`);
+    return this.findByStatus('PENDING');
   }
 
   async create(lead: Omit<Lead, 'id' | 'createdAt' | 'updatedAt'>): Promise<Lead> {

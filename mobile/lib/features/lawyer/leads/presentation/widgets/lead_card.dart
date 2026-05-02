@@ -11,6 +11,7 @@ class LeadCard extends StatelessWidget {
   final VoidCallback onTap;
   final VoidCallback onAccept;
   final VoidCallback onArchive;
+  final bool showArchiveAction;
 
   const LeadCard({
     super.key,
@@ -21,6 +22,7 @@ class LeadCard extends StatelessWidget {
     required this.onTap,
     required this.onAccept,
     required this.onArchive,
+    this.showArchiveAction = true,
   });
 
   @override
@@ -87,15 +89,17 @@ class LeadCard extends StatelessWidget {
             const SizedBox(height: 16),
             Row(
               children: [
-                Expanded(
-                  child: _buildActionButton(
-                    icon: Icons.close_rounded,
-                    color: AppColors.textCaption,
-                    onPressed: onArchive,
-                    label: 'Arquivar',
+                if (showArchiveAction) ...[
+                  Expanded(
+                    child: _buildActionButton(
+                      icon: Icons.archive_outlined,
+                      color: AppColors.textCaption,
+                      onPressed: onArchive,
+                      label: 'Arquivar',
+                    ),
                   ),
-                ),
-                const SizedBox(width: 12),
+                  const SizedBox(width: 12),
+                ],
                 Expanded(
                   child: _buildActionButton(
                     icon: Icons.check_circle_rounded,

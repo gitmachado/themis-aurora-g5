@@ -8,6 +8,15 @@ final class LeadRemoteDataSource {
 
   Future<List<LeadModel>> getPending() async {
     final list = await _apiClient.getList('/leads');
+    return _parseList(list);
+  }
+
+  Future<List<LeadModel>> getByStatus(String status) async {
+    final list = await _apiClient.getList('/leads?status=$status');
+    return _parseList(list);
+  }
+
+  List<LeadModel> _parseList(List<dynamic> list) {
     return list
         .map(
           (json) => LeadModel.fromJson(Map<String, dynamic>.from(json as Map)),

@@ -17,6 +17,11 @@ final class LeadRepositoryImpl implements LeadRepository {
   }
 
   @override
+  Future<Either<Failure, List<Lead>>> getByStatus(String status) {
+    return guardRepository(() => _remoteDataSource.getByStatus(status));
+  }
+
+  @override
   Future<Either<Failure, Lead>> getById(String id) {
     return guardRepository(() => _remoteDataSource.getById(id));
   }
