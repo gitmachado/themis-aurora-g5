@@ -46,8 +46,8 @@ server/src/
 | Arquitetura | Camadas (Controller → Service → Repository) | Separação clara de responsabilidades |
 | Proteção Bot | API Key | Garante que apenas o robô de WhatsApp acesse endpoints de ingestão |
 | Segurança | Ownership/Tutor | Proteção contra IDOR e acesso não autorizado ([ADR-0004](decisions/0004-fine-grained-security-and-tutor-ownership.md)) |
-| Auth complementar | Supabase Auth | Email/senha, confirmacao de email e convites sem transformar lead bruto em conta autenticada (`../.agents/decisions/0007-supabase-auth-complementar.md`) |
-| Storage de documentos e avatares | Supabase Storage privado | Binarios em bucket privado com URLs assinadas pelo backend; metadados seguem no PostgreSQL (`../.agents/decisions/0008-supabase-storage-documentos.md`) |
+| Auth | Backend local | Email/senha com `password_hash` local e JWT proprio, sem confirmacao de email (`../.agents/decisions/0009-auth-storage-local.md`) |
+| Storage de documentos e avatares | Filesystem local | Binarios em volume persistente local expostos por `/uploads`; metadados seguem no PostgreSQL (`../.agents/decisions/0009-auth-storage-local.md`) |
 | Hospedagem MVP | VM unica com Docker e proxy HTTPS | Menor distancia entre o ambiente atual e o primeiro deploy publico (`../.agents/decisions/0006-hospedagem-mvp-publico.md`) |
 
 ### 2.5 Middlewares Globais
@@ -55,7 +55,7 @@ server/src/
 A aplicação utiliza um pipeline de middlewares para garantir segurança e consistência:
 
 1. **`errorHandler`**: Captura todas as exceções e as formata conforme os DTOs de erro, ocultando detalhes em produção.
-2. **`authMiddleware`**: Valida o token JWT emitido pelo backend e popula o objeto `req.user`. O Supabase Auth pode ser usado antes desse ponto para validar email/senha e vincular `supabase_user_id`, mas as rotas de produto continuam usando o JWT interno.
+2. **`authMiddleware`**: Valida o token JWT emitido pelo backend e popula o objeto `req.user`. Email/senha sao validados localmente contra `users.password_hash`.
 3. **`roleMiddleware`**: Bloqueia rotas específicas baseadas no papel (`LAWYER` / `CLIENT`).
 4. **`apiKeyMiddleware`**: Valida a chave estática para integrações de backend-to-backend.
 5. **`validationMiddleware`**: (Zod/Joi) Integração para validar o corpo e parâmetros das requisições.
@@ -79,13 +79,13 @@ A API é 100% documentada utilizando o padrão **OpenAPI 3.0** via `swagger-jsdo
 
 ### 2.8 Deploy Público do MVP
 
-Para o primeiro deploy publico, a arquitetura aprovada usa uma unica VM/VPS Linux com proxy HTTPS na borda. Os metadados e regras de ownership continuam no backend/PostgreSQL, enquanto os binarios de documentos e fotos de perfil ficam em Supabase Storage privado.
+Para o primeiro deploy publico, a arquitetura aprovada usa uma unica VM/VPS Linux com proxy HTTPS na borda. Os metadados e regras de ownership continuam no backend/PostgreSQL, enquanto os binarios de documentos e fotos de perfil ficam em volume local persistente.
 
 - O trafego publico entra apenas por `443` no proxy reverso.
 - O `server` responde internamente na mesma VM e nao deve ser exposto diretamente na internet.
 - O PostgreSQL permanece na mesma VM, acessivel apenas pela rede interna.
 - O endpoint `/health` e um liveness check simples para operacao e smoke tests.
-- Uploads usam `SUPABASE_SERVICE_ROLE_KEY` no backend e o app abre arquivos/fotos por URL assinada temporaria.
+- Uploads usam `LocalFileStorageProvider`; o app abre arquivos/fotos por URL resolvida a partir de `/uploads`.
 - O Swagger fica desabilitado quando `NODE_ENV=production`.
 
 ```mermaid
@@ -93,7 +93,7 @@ flowchart LR
     CLIENTE[App Flutter / Integracao externa] -->|HTTPS 443| PROXY[Proxy reverso]
     PROXY -->|Rede interna| API[Container server]
     API -->|Rede interna| DB[(PostgreSQL)]
-    API -->|Service role| STORAGE[(Supabase Storage privado)]
+    API -->|Volume local| UPLOADS[(server/uploads)]
 ```
 
 ### 2.3 Diagrama de Entidades (ER)
@@ -106,7 +106,6 @@ erDiagram
         string whatsappNumber UK
         string cpf
         string email
-        string supabaseUserId
         enum role "ADVOGADO | CLIENTE"
         string senhaHash
         string fcmToken
@@ -206,7 +205,7 @@ flowchart LR
     BOT -->|Salva| MSG[Mensagem]
     APP[App Flutter] -->|Advogado: Converte| LEAD
     LEAD -->|Gera| USER[User/Cliente]
-    USER -->|Email opcional| AUTH[Supabase Auth]
+    USER -->|Senha local| AUTH[JWT Backend]
     APP -->|Advogado: Cria| PROC[Processo]
     APP -->|Advogado: Atualiza Status| TL[Timeline]
     TL -->|Dispara| NOTIF[Notificação FCM]
@@ -233,7 +232,7 @@ Cada sub-feature abriga os pilares da Clean Architecture:
 ```
 <sub-feature_name>/
 ├── data/
-│   ├── data_sources/    ← Mapeamento HTTP/Supabase (Remote)
+│   ├── data_sources/    ← Mapeamento HTTP do backend
 │   ├── models/          ← DTOs para parse JSON
 │   └── repositories/    ← Ponte conectando API à regra local
 ├── domain/
