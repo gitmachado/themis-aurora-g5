@@ -13,7 +13,7 @@ final class AuthRepositoryImpl implements AuthRepository {
   final AuthRemoteDataSource _remoteDataSource;
   final TokenStorage _tokenStorage;
 
-  const AuthRepositoryImpl({
+  AuthRepositoryImpl({
     required AuthRemoteDataSource remoteDataSource,
     required TokenStorage tokenStorage,
   }) : _remoteDataSource = remoteDataSource,
@@ -58,11 +58,8 @@ final class AuthRepositoryImpl implements AuthRepository {
       final googleSignIn = GoogleSignIn.instance;
       
       final googleUser = await googleSignIn.authenticate();
-      if (googleUser == null) {
-        throw const ServerFailure('Login com Google cancelado'); // Using generic ServerFailure, can adjust later if needed
-      }
 
-      final googleAuth = await googleUser.authentication;
+      final googleAuth = googleUser.authentication;
       final idToken = googleAuth.idToken;
 
       if (idToken == null) {
