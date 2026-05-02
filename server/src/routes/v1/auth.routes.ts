@@ -73,4 +73,29 @@ router.post('/login', validate(loginSchema), controller.login);
  */
 router.post('/register', validate(registerSchema), controller.register);
 
+/**
+ * @openapi
+ * /auth/google:
+ *   post:
+ *     summary: Realiza o login do usuário via Google OAuth
+ *     tags: [Autenticação]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               idToken:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: Login realizado com sucesso
+ *       400:
+ *         description: idToken não fornecido
+ *       401:
+ *         description: Token inválido ou usuário não cadastrado
+ */
+router.post('/google', controller.googleSignIn);
+
 export default router;

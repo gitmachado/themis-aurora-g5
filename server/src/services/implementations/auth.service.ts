@@ -1,5 +1,6 @@
 import jwt from 'jsonwebtoken';
 import bcrypt from 'bcryptjs';
+import { OAuth2Client } from 'google-auth-library';
 import { IAuthService } from '../interfaces/auth.service';
 import { IUserRepository } from '../../repositories/interfaces/user.repository';
 import type { LoginDTO, RegisterDTO, AuthResponseDTO } from '@dtos';
@@ -14,6 +15,7 @@ import {
 export class AuthService implements IAuthService {
   private readonly jwtSecret: string;
   private readonly jwtExpiresIn: string;
+  private readonly googleClient: OAuth2Client;
 
   constructor(
     private readonly userRepository: IUserRepository,
@@ -21,6 +23,7 @@ export class AuthService implements IAuthService {
   ) {
     this.jwtSecret = getJwtSecret();
     this.jwtExpiresIn = process.env.JWT_EXPIRE_IN || '7d';
+    this.googleClient = new OAuth2Client('1050327728354-u3d9ptf6ms70kufgvhv026ueoe161kg8.apps.googleusercontent.com');
   }
 
   async login(dto: LoginDTO): Promise<AuthResponseDTO> {
@@ -122,6 +125,38 @@ export class AuthService implements IAuthService {
 
   generateTempPassword(): string {
     return Math.random().toString(36).slice(-8).toUpperCase();
+  }
+
+  async googleSignIn(idToken: string): Promise<AuthResponseDTO> {
+    try {
+      const ticket = await this.googleClient.verifyIdToken({
+        idToken,
+        audience: '1050327728354-u3d9ptf6ms70kufgvhv026ueoe161kg8.apps.googleusercontent.com',
+      });
+      const payload = ticket.getPayload();
+      
+      if (!payload || !payload.email) {
+        throw new UnauthorizedError('Token Google inválido ou sem email');
+      }
+
+      const email = payload.email.trim().toLowerCase();
+      const user = await this.userRepository.findByEmail(email);
+
+      if (!user) {
+        throw new UnauthorizedError('Usuário não cadastrado. Registre-se primeiro.');
+      }
+
+      return {
+        token: this.generateToken(user.id, user.role),
+        userId: user.id,
+        role: user.role,
+      };
+    } catch (error) {
+      if (error instanceof UnauthorizedError) {
+        throw error;
+      }
+      throw new UnauthorizedError('Falha ao validar token Google');
+    }
   }
 
   async validateToken(token: string): Promise<{ userId: string; role: UserRole }> {

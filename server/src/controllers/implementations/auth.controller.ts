@@ -31,4 +31,21 @@ export class AuthController {
       next(error);
     }
   };
+
+  googleSignIn: RequestHandler<any, AuthResponseDTO, { idToken: string }> = async (
+    req: AuthRequest<any, AuthResponseDTO, { idToken: string }>,
+    res: Response,
+    next: NextFunction
+  ) => {
+    try {
+      const { idToken } = req.body;
+      if (!idToken) {
+        return res.status(400).json({ error: 'idToken is required' } as any);
+      }
+      const result = await this.authService.googleSignIn(idToken);
+      return res.status(200).json(result);
+    } catch (error) {
+      next(error);
+    }
+  };
 }
