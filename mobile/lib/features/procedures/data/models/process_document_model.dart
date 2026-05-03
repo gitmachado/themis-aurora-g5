@@ -18,7 +18,7 @@ final class ProcessDocumentModel extends ProcessDocument {
       legalProcessId: json['legalProcessId'] as String? ?? '',
       fileName: json['fileName'] as String? ?? 'documento',
       fileUrl: json['fileUrl'] as String? ?? '',
-      sizeBytes: json['sizeBytes'] as int?,
+      sizeBytes: _int(json['sizeBytes']),
       mimeType: json['mimeType'] as String?,
       sentById: json['sentById'] as String? ?? '',
       createdAt: _date(json['createdAt']),
@@ -42,4 +42,12 @@ final class ProcessDocumentModel extends ProcessDocument {
 DateTime? _date(Object? value) {
   if (value == null) return null;
   return DateTime.tryParse(value.toString());
+}
+
+int? _int(Object? value) {
+  if (value == null) return null;
+  if (value is int) return value;
+  if (value is num) return value.toInt();
+  if (value is String) return int.tryParse(value);
+  return null;
 }
