@@ -20,24 +20,24 @@ class AppBadge extends StatelessWidget {
 
     switch (type) {
       case BadgeType.primary:
-        backgroundColor = AppColors.primaryOverlay;
-        textColor = AppColors.primary;
+        backgroundColor = AppColors.surface2;
+        textColor = AppColors.ink2;
         break;
       case BadgeType.success:
-        backgroundColor = AppColors.successOverlay;
+        backgroundColor = AppColors.successBackground;
         textColor = AppColors.success;
         break;
       case BadgeType.error:
-        backgroundColor = AppColors.errorOverlay;
+        backgroundColor = AppColors.errorBackground;
         textColor = AppColors.error;
         break;
       case BadgeType.warning:
-        backgroundColor = AppColors.warningOverlay;
+        backgroundColor = AppColors.warningLight;
         textColor = AppColors.warning;
         break;
       case BadgeType.neutral:
-        backgroundColor = AppColors.divider.withValues(alpha: 0.3);
-        textColor = AppColors.textCaption;
+        backgroundColor = AppColors.surface2;
+        textColor = AppColors.ink3;
         break;
     }
 
@@ -45,14 +45,14 @@ class AppBadge extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
       decoration: BoxDecoration(
         color: backgroundColor,
-        borderRadius: BorderRadius.circular(20),
+        borderRadius: BorderRadius.circular(999),
       ),
       child: Text(
         label,
         style: TextStyle(
           color: textColor,
-          fontSize: 12,
-          fontWeight: FontWeight.bold,
+          fontSize: 11,
+          fontWeight: FontWeight.w700,
         ),
       ),
     );
