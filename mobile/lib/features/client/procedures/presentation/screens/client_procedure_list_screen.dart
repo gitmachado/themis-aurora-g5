@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../../../app/routes/app_router.dart';
 import '../../../../../../features/auth/domain/entities/account.dart';
 import '../../../../../../features/auth/presentation/providers/auth_providers.dart';
+import '../../../../../../features/notifications/presentation/providers/notification_providers.dart';
 import '../../../../../../features/procedures/domain/entities/legal_process.dart';
 import '../../../../../../features/procedures/presentation/procedure_display.dart';
 import '../../../../../../features/procedures/presentation/providers/procedure_providers.dart';
@@ -31,13 +32,18 @@ class _ClientProcedureListScreenState
   Widget build(BuildContext context) {
     final account = ref.watch(currentAccountProvider);
     final procedures = ref.watch(myProceduresProvider);
+    final notifications =
+        ref.watch(myNotificationsProvider).valueOrNull ?? const [];
+    final unreadCount = notifications.where((n) => !n.isRead).length;
 
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: CustomAppBar(
         title: 'Processos',
         showBackButton: false,
-        actions: [AppAppBarActions(showChat: false, notificationCount: 2)],
+        actions: [
+          AppAppBarActions(showChat: false, notificationCount: unreadCount),
+        ],
         showDivider: false,
       ),
       body: Column(
