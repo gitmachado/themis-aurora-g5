@@ -34,26 +34,18 @@ class AppDashboardHeader extends StatelessWidget {
     final resolvedAvatarUrl = avatarUrl?.isNotEmpty == true ? avatarUrl : null;
 
     return Container(
-      decoration: BoxDecoration(
-        color: AppColors.white,
-        border: Border(
-          bottom: BorderSide(
-            color: AppColors.border.withValues(alpha: 0.7),
-            width: 1,
-          ),
-        ),
-      ),
+      color: AppColors.background,
       child: SafeArea(
         bottom: false,
         child: Padding(
-          padding: const EdgeInsets.fromLTRB(20, 12, 20, 16),
+          padding: const EdgeInsets.fromLTRB(22, 20, 22, 8),
           child: Row(
             children: [
               GestureDetector(
                 onTap: onProfileTap,
                 child: CircleAvatar(
-                  radius: 30,
-                  backgroundColor: AppColors.secondaryLight,
+                  radius: 20,
+                  backgroundColor: AppColors.yellow,
                   backgroundImage: resolvedAvatarUrl != null
                       ? NetworkImage(resolvedAvatarUrl)
                       : null,
@@ -61,32 +53,24 @@ class AppDashboardHeader extends StatelessWidget {
                       ? Text(
                           _getInitials(name),
                           style: const TextStyle(
-                            color: AppColors.secondaryDark,
+                            color: AppColors.ink,
                             fontWeight: FontWeight.bold,
-                            fontSize: 20,
+                            fontSize: 14,
+                            fontFamily: AppTextStyles.monoFontFamily,
                           ),
                         )
                       : null,
                 ),
               ),
-              const SizedBox(width: 16),
+              const SizedBox(width: 12),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      greeting,
-                      style: AppTextStyles.caption.copyWith(
-                        fontSize: 14,
-                        color: AppColors.textCaption,
-                      ),
-                    ),
+                    Text(greeting, style: AppTextStyles.tiny),
                     Text(
                       name,
-                      style: AppTextStyles.h1.copyWith(
-                        fontSize: 22,
-                        color: AppColors.primary,
-                      ),
+                      style: AppTextStyles.h2.copyWith(fontSize: 15),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                     ),
