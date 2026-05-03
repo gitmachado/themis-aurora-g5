@@ -1,6 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:mobile/shared/errors/either_failure_extensions.dart';
 
+import '../../../../features/auth/presentation/providers/auth_providers.dart';
 import '../../../../shared/network/api_client.dart';
 import '../../data/datasources/notification_remote_data_source.dart';
 import '../../data/repositories/notification_repository_impl.dart';
@@ -48,6 +49,9 @@ final deleteNotificationUseCaseProvider = Provider<DeleteNotificationUseCase>((
 final myNotificationsProvider = FutureProvider<List<AppNotification>>((
   ref,
 ) async {
+  // Tie the cache to the logged-in account so a previous user's notifications
+  // are never served to a different user after switching accounts.
+  await ref.watch(currentAccountProvider.future);
   return (await ref.watch(getMyNotificationsUseCaseProvider)()).getOrThrow();
 });
 
