@@ -12,36 +12,39 @@ import '../../../../../../shared/widgets/layout/loading_skeleton.dart';
 import '../widgets/chat_bubble.dart';
 
 class ClientChatMirrorScreen extends ConsumerWidget {
-  const ClientChatMirrorScreen({super.key});
+  final bool showBackButton;
+
+  const ClientChatMirrorScreen({super.key, this.showBackButton = true});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final account = ref.watch(currentAccountProvider);
 
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: const Color(0xFFECE5DD),
       appBar: CustomAppBar(
         title: '',
-        showBackButton: true,
+        showBackButton: showBackButton,
         centerTitle: false,
         titleWidget: Row(
           children: [
             const CircleAvatar(
               radius: 18,
-              backgroundColor: AppColors.primary,
-              child: Icon(Icons.history_rounded, color: Colors.white, size: 18),
+              backgroundColor: AppColors.yellow,
+              child: Icon(
+                Icons.smart_toy_outlined,
+                color: AppColors.ink,
+                size: 18,
+              ),
             ),
             const SizedBox(width: 12),
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisSize: MainAxisSize.min,
               children: [
+                Text('Themis', style: AppTextStyles.h2.copyWith(fontSize: 15)),
                 Text(
-                  'Histórico do WhatsApp',
-                  style: AppTextStyles.h2.copyWith(fontSize: 15),
-                ),
-                Text(
-                  'Somente leitura',
+                  'via WhatsApp',
                   style: AppTextStyles.caption.copyWith(fontSize: 11),
                 ),
               ],
@@ -61,7 +64,6 @@ class ClientChatMirrorScreen extends ConsumerWidget {
             );
             return Column(
               children: [
-                _buildReadOnlyBanner(),
                 Expanded(
                   child: history.when(
                     data: _buildMessageList,
@@ -75,30 +77,6 @@ class ClientChatMirrorScreen extends ConsumerWidget {
           loading: _buildLoadingList,
           error: (error, _) => _buildErrorState(error),
         ),
-      ),
-    );
-  }
-
-  Widget _buildReadOnlyBanner() {
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
-      color: AppColors.primary.withValues(alpha: 0.05),
-      child: const Row(
-        children: [
-          Icon(Icons.lock_outline_rounded, color: AppColors.primary, size: 20),
-          SizedBox(width: 12),
-          Expanded(
-            child: Text(
-              'Este chat espelha o WhatsApp. O envio de mensagens pelo app fica fora desta etapa.',
-              style: TextStyle(
-                color: AppColors.primary,
-                fontSize: 13,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-          ),
-        ],
       ),
     );
   }
@@ -117,6 +95,7 @@ class ClientChatMirrorScreen extends ConsumerWidget {
           message: message.content,
           time: formatRelativeDate(message.createdAt),
           isMe: message.sender == 'CLIENT',
+          highlight: message.sender == 'BOT' || message.sender == 'LAWYER',
         );
       },
     );
