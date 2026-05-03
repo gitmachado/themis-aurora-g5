@@ -7,12 +7,14 @@ class ChatBubble extends StatelessWidget {
   final String message;
   final String time;
   final bool isMe;
+  final bool highlight;
 
   const ChatBubble({
     super.key,
     required this.message,
     required this.time,
     required this.isMe,
+    this.highlight = false,
   });
 
   @override
@@ -29,7 +31,7 @@ class ChatBubble extends StatelessWidget {
           maxWidth: MediaQuery.of(context).size.width * 0.75,
         ),
         decoration: BoxDecoration(
-          color: isMe ? AppColors.chatBubbleMe : AppColors.white,
+          color: isMe || highlight ? AppColors.yellow : AppColors.white,
           borderRadius: BorderRadius.only(
             topLeft: const Radius.circular(AppDimensions.radiusL),
             topRight: const Radius.circular(AppDimensions.radiusL),
@@ -42,7 +44,7 @@ class ChatBubble extends StatelessWidget {
           ),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withValues(alpha: 0.05),
+              color: Colors.black.withValues(alpha: 0.04),
               blurRadius: 2,
               offset: const Offset(0, 1),
             ),
@@ -68,7 +70,7 @@ class ChatBubble extends StatelessWidget {
                   const Icon(
                     Icons.done_all,
                     size: AppDimensions.iconXS,
-                    color: AppColors.primary,
+                    color: AppColors.ink3,
                   ),
                 ],
               ],

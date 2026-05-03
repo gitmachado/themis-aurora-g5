@@ -26,19 +26,19 @@ class ChatListTile extends StatelessWidget {
       margin: const EdgeInsets.only(bottom: 12),
       decoration: BoxDecoration(
         color: AppColors.white,
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(20),
         border: Border.all(color: AppColors.border),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withValues(alpha: 0.03),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
+            blurRadius: 2,
+            offset: const Offset(0, 1),
           ),
         ],
       ),
       child: InkWell(
         onTap: onTap,
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(20),
         child: Padding(
           padding: const EdgeInsets.all(16),
           child: Row(
@@ -47,14 +47,12 @@ class ChatListTile extends StatelessWidget {
                 width: 48,
                 height: 48,
                 decoration: BoxDecoration(
-                  color: isAi
-                      ? AppColors.primary.withValues(alpha: 0.1)
-                      : AppColors.background,
+                  color: isAi ? AppColors.yellowSoft : AppColors.surface2,
                   shape: BoxShape.circle,
                 ),
                 child: Icon(
                   isAi ? Icons.auto_awesome : Icons.headset_mic_rounded,
-                  color: isAi ? AppColors.primary : AppColors.textCaption,
+                  color: isAi ? AppColors.ink : AppColors.textCaption,
                   size: 24,
                 ),
               ),
