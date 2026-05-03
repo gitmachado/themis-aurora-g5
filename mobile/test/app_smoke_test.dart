@@ -7,7 +7,7 @@ void main() {
   testWidgets('renders login screen', (tester) async {
     await tester.pumpWidget(const ProviderScope(child: OmniConnectApp()));
 
-    expect(find.textContaining('OmniConnect'), findsOneWidget);
+    expect(find.text('Bem-vindo'), findsOneWidget);
     expect(find.text('Email'), findsOneWidget);
     expect(find.text('Entrar'), findsOneWidget);
   });
