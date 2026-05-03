@@ -107,13 +107,13 @@ class LawyerClientDetailScreen extends ConsumerWidget {
       children: [
         CircleAvatar(
           radius: 50,
-          backgroundColor: AppColors.primary.withValues(alpha: 0.1),
+          backgroundColor: AppColors.surface2,
           child: Text(
             initial,
             style: const TextStyle(
               fontSize: 40,
               fontWeight: FontWeight.bold,
-              color: AppColors.primary,
+              color: AppColors.ink,
             ),
           ),
         ),
@@ -206,9 +206,9 @@ class LawyerClientDetailScreen extends ConsumerWidget {
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
       decoration: BoxDecoration(
-        color: AppColors.white,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: AppColors.divider),
+        color: AppColors.surface,
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: AppColors.line),
       ),
       child: ListTile(
         title: Text(
