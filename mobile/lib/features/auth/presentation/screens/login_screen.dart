@@ -4,6 +4,8 @@ import 'package:flutter/services.dart';
 import '../../../../app/routes/app_router.dart';
 import '../../../../shared/constants/app_colors.dart';
 import '../../../../shared/constants/app_text_styles.dart';
+import '../../../../shared/widgets/buttons/primary_button.dart';
+import '../../../../shared/widgets/themis/themis_widgets.dart';
 import '../../domain/entities/account.dart';
 import '../providers/auth_providers.dart';
 
@@ -30,13 +32,13 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   Widget build(BuildContext context) {
     return AnnotatedRegion<SystemUiOverlayStyle>(
       value: const SystemUiOverlayStyle(
-        systemNavigationBarColor: Colors.white,
+        systemNavigationBarColor: AppColors.background,
 
         systemNavigationBarIconBrightness: Brightness.dark,
         systemNavigationBarDividerColor: Colors.transparent,
       ),
       child: Scaffold(
-        backgroundColor: AppColors.white,
+        backgroundColor: AppColors.background,
         body: SafeArea(
           child: LayoutBuilder(
             builder: (context, constraints) {
@@ -51,35 +53,24 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                         crossAxisAlignment: CrossAxisAlignment.stretch,
                         children: [
                           const SizedBox(height: 48),
-                          // Logo Placeholder
-                          Center(
-                            child: Container(
-                              width: 80,
-                              height: 80,
-                              decoration: BoxDecoration(
-                                color: AppColors.primary,
-                                borderRadius: BorderRadius.circular(20),
-                              ),
-                              child: const Icon(
-                                Icons.gavel_rounded,
-                                color: Colors.white,
-                                size: 40,
-                              ),
-                            ),
+                          const Align(
+                            alignment: Alignment.centerLeft,
+                            child: ThemisLogo(size: 38),
                           ),
-                          const SizedBox(height: 32),
-                          const Text(
-                            'Bem-vindo ao\nOmniConnect',
-                            textAlign: TextAlign.center,
-                            style: AppTextStyles.h1,
+                          const SizedBox(height: 44),
+                          Text(
+                            'Bem-vindo',
+                            style: AppTextStyles.h1.copyWith(fontSize: 34),
                           ),
                           const SizedBox(height: 12),
                           Text(
-                            'Acesse sua conta para continuar',
-                            textAlign: TextAlign.center,
-                            style: AppTextStyles.caption.copyWith(fontSize: 14),
+                            'Entre para acompanhar seus processos',
+                            style: AppTextStyles.body.copyWith(
+                              color: AppColors.textCaption,
+                              fontWeight: FontWeight.w500,
+                            ),
                           ),
-                          const SizedBox(height: 40),
+                          const SizedBox(height: 44),
 
                           _buildLoginForm(),
 
@@ -109,6 +100,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
           keyboardType: TextInputType.emailAddress,
           textInputAction: TextInputAction.next,
           autofillHints: const [AutofillHints.email],
+          style: AppTextStyles.body.copyWith(fontWeight: FontWeight.w600),
           decoration: InputDecoration(
             labelText: 'Email',
             prefixIcon: const Icon(Icons.mail_outline),
@@ -125,6 +117,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
           obscureText: _isObscure,
           textInputAction: TextInputAction.done,
           autofillHints: const [AutofillHints.password],
+          style: AppTextStyles.body.copyWith(fontWeight: FontWeight.w600),
           onSubmitted: (_) => _submitLogin(
             email: _emailController.text,
             password: _passwordController.text,
@@ -155,34 +148,14 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
           ),
         ],
         const SizedBox(height: 10),
-        ElevatedButton(
+        PrimaryButton(
+          label: 'Entrar',
+          isLoading: isLoading,
           onPressed: isLoading
               ? null
               : () => _submitLogin(
                   email: _emailController.text,
                   password: _passwordController.text,
-                ),
-          style: ElevatedButton.styleFrom(
-            backgroundColor: AppColors.primary,
-            foregroundColor: Colors.white,
-            padding: const EdgeInsets.symmetric(vertical: 16),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(12),
-            ),
-            elevation: 0,
-          ),
-          child: isLoading
-              ? const SizedBox(
-                  height: 20,
-                  width: 20,
-                  child: CircularProgressIndicator(
-                    strokeWidth: 2,
-                    color: Colors.white,
-                  ),
-                )
-              : const Text(
-                  'Entrar',
-                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                 ),
         ),
       ],
