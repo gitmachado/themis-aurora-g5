@@ -25,7 +25,7 @@ class LawyerChatHandoffScreen extends ConsumerWidget {
         : ref.watch(chatHistoryProvider(whatsappNumber));
 
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: const Color(0xFFECE5DD),
       appBar: CustomAppBar(
         title: clientName,
         showBackButton: true,
@@ -59,16 +59,16 @@ class LawyerChatHandoffScreen extends ConsumerWidget {
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
-      color: AppColors.primary.withValues(alpha: 0.05),
+      color: AppColors.yellowSoft,
       child: const Row(
         children: [
-          Icon(Icons.history_rounded, color: AppColors.primary, size: 22),
+          Icon(Icons.history_rounded, color: AppColors.yellowDeep, size: 22),
           SizedBox(width: 12),
           Expanded(
             child: Text(
               'Histórico do WhatsApp em modo somente leitura.',
               style: TextStyle(
-                color: AppColors.primary,
+                color: AppColors.yellowDeep,
                 fontSize: 13,
                 fontWeight: FontWeight.bold,
               ),
@@ -116,9 +116,7 @@ class LawyerChatHandoffScreen extends ConsumerWidget {
           maxWidth: MediaQuery.of(context).size.width * 0.75,
         ),
         decoration: BoxDecoration(
-          color: isClient
-              ? AppColors.surface
-              : (isBot ? AppColors.primaryOverlay : AppColors.primary),
+          color: isClient ? AppColors.surface : AppColors.yellow,
           borderRadius: BorderRadius.only(
             topLeft: const Radius.circular(16),
             topRight: const Radius.circular(16),
@@ -138,7 +136,7 @@ class LawyerChatHandoffScreen extends ConsumerWidget {
                   style: TextStyle(
                     fontSize: 10,
                     fontWeight: FontWeight.w800,
-                    color: isLawyer ? Colors.white : AppColors.primary,
+                    color: AppColors.ink,
                     letterSpacing: 0.5,
                   ),
                 ),
@@ -146,7 +144,7 @@ class LawyerChatHandoffScreen extends ConsumerWidget {
             Text(
               message.content,
               style: TextStyle(
-                color: isLawyer ? Colors.white : AppColors.textPrimary,
+                color: AppColors.textPrimary,
                 fontSize: 15,
                 height: 1.4,
               ),
@@ -156,12 +154,7 @@ class LawyerChatHandoffScreen extends ConsumerWidget {
               alignment: Alignment.bottomRight,
               child: Text(
                 formatRelativeDate(message.createdAt),
-                style: TextStyle(
-                  color: isLawyer
-                      ? Colors.white.withValues(alpha: 0.7)
-                      : AppColors.textCaption,
-                  fontSize: 10,
-                ),
+                style: TextStyle(color: AppColors.textCaption, fontSize: 10),
               ),
             ),
           ],

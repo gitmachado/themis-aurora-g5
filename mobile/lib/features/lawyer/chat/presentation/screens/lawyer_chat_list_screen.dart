@@ -24,10 +24,7 @@ class LawyerChatListScreen extends ConsumerWidget {
 
     return Scaffold(
       backgroundColor: AppColors.background,
-      appBar: const CustomAppBar(
-        title: 'Mensagens e Handoffs',
-        showBackButton: true,
-      ),
+      appBar: const CustomAppBar(title: 'Handoffs', showBackButton: true),
       body: Column(
         children: [
           _buildSummary(handoffCount),
@@ -53,10 +50,10 @@ class LawyerChatListScreen extends ConsumerWidget {
       margin: const EdgeInsets.fromLTRB(20, 16, 20, 12),
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: handoffCount > 0 ? AppColors.warningOverlay : AppColors.white,
-        borderRadius: BorderRadius.circular(16),
+        color: handoffCount > 0 ? AppColors.yellowSoft : AppColors.surface,
+        borderRadius: BorderRadius.circular(20),
         border: Border.all(
-          color: handoffCount > 0 ? AppColors.warning : AppColors.divider,
+          color: handoffCount > 0 ? AppColors.yellow : AppColors.line,
         ),
       ),
       child: Row(
@@ -65,7 +62,7 @@ class LawyerChatListScreen extends ConsumerWidget {
             handoffCount > 0
                 ? Icons.support_agent_rounded
                 : Icons.chat_bubble_outline_rounded,
-            color: handoffCount > 0 ? AppColors.warning : AppColors.primary,
+            color: handoffCount > 0 ? AppColors.yellowDeep : AppColors.ink,
           ),
           const SizedBox(width: 12),
           Expanded(
@@ -100,18 +97,18 @@ class LawyerChatListScreen extends ConsumerWidget {
           margin: const EdgeInsets.only(bottom: 12),
           decoration: BoxDecoration(
             color: AppColors.surface,
-            borderRadius: BorderRadius.circular(16),
-            border: Border.all(color: AppColors.divider),
+            borderRadius: BorderRadius.circular(20),
+            border: Border.all(color: AppColors.line),
           ),
           child: ListTile(
             contentPadding: const EdgeInsets.all(16),
             leading: CircleAvatar(
               radius: 24,
-              backgroundColor: AppColors.primaryOverlay,
+              backgroundColor: AppColors.surface2,
               child: Text(
                 client.name.isEmpty ? '?' : client.name[0].toUpperCase(),
                 style: const TextStyle(
-                  color: AppColors.primary,
+                  color: AppColors.ink,
                   fontWeight: FontWeight.bold,
                 ),
               ),
