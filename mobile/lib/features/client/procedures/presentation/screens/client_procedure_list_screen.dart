@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../../../app/routes/app_router.dart';
+import '../../../../../../features/auth/domain/entities/account.dart';
+import '../../../../../../features/auth/presentation/providers/auth_providers.dart';
 import '../../../../../../features/procedures/domain/entities/legal_process.dart';
 import '../../../../../../features/procedures/presentation/procedure_display.dart';
 import '../../../../../../features/procedures/presentation/providers/procedure_providers.dart';
@@ -27,24 +29,28 @@ class _ClientProcedureListScreenState
 
   @override
   Widget build(BuildContext context) {
+    final account = ref.watch(currentAccountProvider);
     final procedures = ref.watch(myProceduresProvider);
 
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: CustomAppBar(
-        title: 'Trâmites',
+        title: 'Processos',
         showBackButton: false,
         actions: [AppAppBarActions(showChat: false, notificationCount: 2)],
         showDivider: false,
       ),
       body: Column(
         children: [
-          Container(color: AppColors.white, child: _buildFilters()),
-          Container(height: 1, color: AppColors.divider.withValues(alpha: 0.7)),
+          Container(color: AppColors.background, child: _buildFilters()),
           const SizedBox(height: 16),
           Expanded(
-            child: procedures.when(
-              data: _buildList,
+            child: account.when(
+              data: (account) => procedures.when(
+                data: (items) => _buildList(_onlyCurrentClient(items, account)),
+                loading: _buildLoadingList,
+                error: (error, _) => _buildErrorState(error),
+              ),
               loading: _buildLoadingList,
               error: (error, _) => _buildErrorState(error),
             ),
@@ -68,17 +74,17 @@ class _ClientProcedureListScreenState
               label: Text(f),
               selected: isSelected,
               onSelected: (val) => setState(() => _selectedFilter = f),
-              backgroundColor: AppColors.white,
-              selectedColor: AppColors.primary,
+              backgroundColor: AppColors.surface2,
+              selectedColor: AppColors.yellow,
               labelStyle: TextStyle(
-                color: isSelected ? AppColors.white : AppColors.textPrimary,
+                color: AppColors.textPrimary,
                 fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
                 fontSize: 12,
               ),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(20),
                 side: BorderSide(
-                  color: isSelected ? AppColors.primary : AppColors.border,
+                  color: isSelected ? AppColors.yellow : AppColors.border,
                 ),
               ),
               showCheckmark: false,
@@ -88,6 +94,16 @@ class _ClientProcedureListScreenState
         }).toList(),
       ),
     );
+  }
+
+  List<LegalProcess> _onlyCurrentClient(
+    List<LegalProcess> procedures,
+    Account account,
+  ) {
+    if (account.role != UserRole.client) return procedures;
+    return procedures
+        .where((process) => process.clientId == account.id)
+        .toList();
   }
 
   Widget _buildList(List<LegalProcess> allProcedures) {
@@ -158,7 +174,7 @@ class _ClientProcedureListScreenState
   Widget _buildEmptyState() {
     return Center(
       child: Text(
-        'Nenhum tramite encontrado',
+        'Nenhum processo encontrado',
         style: AppTextStyles.h2.copyWith(color: AppColors.textCaption),
       ),
     );
