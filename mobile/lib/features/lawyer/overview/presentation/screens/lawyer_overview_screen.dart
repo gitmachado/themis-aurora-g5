@@ -59,10 +59,23 @@ class LawyerOverviewScreen extends ConsumerWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   const SizedBox(height: 18),
-                  _buildMetricsGrid(context, procedures.length, leads.length),
-                  const SizedBox(height: 24),
-                  _buildHandoffsCard(context, handoffCount),
-                  const SizedBox(height: 24),
+                  Text(
+                    'Resumo\nde Hoje',
+                    style: AppTextStyles.h1.copyWith(
+                      fontSize: 28,
+                      height: 0.92,
+                    ),
+                  ),
+                  const SizedBox(height: 0),
+                  const SizedBox(height: 20),
+                  _buildMetricsGrid(
+                    context,
+                    procedures.length,
+                    leads.length,
+                    handoffCount,
+                    recentDocuments.length,
+                  ),
+                  const SizedBox(height: 14),
                   NicheChart(procedures: procedures),
                   const SizedBox(height: 24),
                   _buildSectionHeader(
@@ -97,84 +110,52 @@ class LawyerOverviewScreen extends ConsumerWidget {
     BuildContext context,
     int procedureCount,
     int leadCount,
+    int handoffCount,
+    int docsToReview,
   ) {
     final layoutState = context
         .findAncestorStateOfType<LawyerMainLayoutState>();
 
-    return Row(
+    return GridView.count(
+      padding: EdgeInsets.zero,
+      crossAxisCount: 2,
+      mainAxisSpacing: 10,
+      crossAxisSpacing: 10,
+      childAspectRatio: 1.48,
+      shrinkWrap: true,
+      physics: const NeverScrollableScrollPhysics(),
       children: [
-        Expanded(
-          child: MetricCard(
-            title: 'Trâmites',
-            value: '$procedureCount',
-            subtitle: 'Ativos',
-            icon: Icons.folder_open_rounded,
-            onTap: () => layoutState?.setIndex(2), // Trâmites Tab
-          ),
+        MetricCard(
+          title: 'Casos ativos',
+          value: '$procedureCount',
+          icon: Icons.folder_open_rounded,
+          backgroundColor: AppColors.ink,
+          titleColor: AppColors.white.withValues(alpha: 0.74),
+          valueColor: AppColors.white,
+          hasBorder: false,
+          onTap: () => layoutState?.setIndex(2),
         ),
-        const SizedBox(width: 16),
-        Expanded(
-          child: MetricCard(
-            title: 'Leads Hoje',
-            value: '$leadCount',
-            icon: Icons.people_alt_rounded,
-            iconColor: AppColors.secondaryLight,
-            onTap: () => layoutState?.setIndex(1), // Leads Tab
-          ),
+        MetricCard(
+          title: 'Leads hoje',
+          value: '$leadCount',
+          icon: Icons.people_alt_rounded,
+          onTap: () => layoutState?.setIndex(1),
+        ),
+        MetricCard(
+          title: 'Handoff humano',
+          value: '$handoffCount',
+          icon: Icons.support_agent_rounded,
+          iconColor: AppColors.secondaryLight,
+          titleColor: AppColors.yellowDeep,
+          onTap: () => Navigator.pushNamed(context, AppRouter.lawyerChatsRoute),
+        ),
+        MetricCard(
+          title: 'Docs p/ revisar',
+          value: '$docsToReview',
+          icon: Icons.description_outlined,
+          onTap: () => Navigator.pushNamed(context, AppRouter.lawyerFilesRoute),
         ),
       ],
-    );
-  }
-
-  Widget _buildHandoffsCard(BuildContext context, int handoffCount) {
-    return InkWell(
-      onTap: () => Navigator.pushNamed(context, AppRouter.lawyerChatsRoute),
-      child: AppCard(
-        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-        color: const Color(0xFFFFF4E5),
-        hasBorder: false,
-        child: Row(
-          children: [
-            const Icon(
-              Icons.info_outline_rounded,
-              color: AppColors.secondaryLight,
-              size: 24,
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    handoffCount == 1
-                        ? '1 handoff aguardando'
-                        : '$handoffCount handoffs aguardando',
-                    style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 14,
-                      color: AppColors.textPrimary,
-                    ),
-                  ),
-                  Text(
-                    handoffCount > 0
-                        ? 'Clique para revisar o histórico'
-                        : 'Nenhum handoff pendente no momento',
-                    style: TextStyle(
-                      fontSize: 12,
-                      color: AppColors.textCaption,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            const Icon(
-              Icons.chevron_right_rounded,
-              color: AppColors.secondaryLight,
-              size: 20,
-            ),
-          ],
-        ),
-      ),
     );
   }
 
