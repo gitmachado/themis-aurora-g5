@@ -32,14 +32,14 @@ class _LawyerProcedureListScreenState
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: CustomAppBar(
-        title: 'Trâmites',
+        title: 'Processos',
         actions: [AppAppBarActions()],
         showDivider: false,
       ),
       body: Column(
         children: [
           Container(
-            color: AppColors.white,
+            color: AppColors.background,
             child: Column(
               children: [
                 _buildSearchBar(),
@@ -48,7 +48,6 @@ class _LawyerProcedureListScreenState
               ],
             ),
           ),
-          Container(height: 1, color: AppColors.divider.withValues(alpha: 0.7)),
           const SizedBox(height: 16),
           Expanded(
             child: procedures.when(
@@ -67,14 +66,24 @@ class _LawyerProcedureListScreenState
       padding: const EdgeInsets.fromLTRB(20, 0, 20, 8),
       child: TextField(
         onChanged: (val) => setState(() => _searchQuery = val),
+        style: AppTextStyles.body.copyWith(
+          fontSize: 15.5,
+          fontWeight: FontWeight.w600,
+          color: AppColors.ink,
+        ),
         decoration: InputDecoration(
           hintText: 'Buscar por trâmite ou cliente...',
+          hintStyle: AppTextStyles.body.copyWith(
+            color: AppColors.ink4,
+            fontSize: 15.5,
+            fontWeight: FontWeight.w500,
+          ),
           prefixIcon: const Icon(
             Icons.search_rounded,
             color: AppColors.textCaption,
           ),
           filled: true,
-          fillColor: AppColors.background,
+          fillColor: AppColors.surface2,
           border: OutlineInputBorder(
             borderRadius: BorderRadius.circular(12),
             borderSide: BorderSide(
@@ -89,7 +98,7 @@ class _LawyerProcedureListScreenState
           ),
           focusedBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(12),
-            borderSide: const BorderSide(color: AppColors.primary, width: 1.5),
+            borderSide: const BorderSide(color: AppColors.yellow, width: 1.5),
           ),
           contentPadding: const EdgeInsets.symmetric(vertical: 0),
         ),
@@ -111,17 +120,17 @@ class _LawyerProcedureListScreenState
               label: Text(f),
               selected: isSelected,
               onSelected: (val) => setState(() => _selectedFilter = f),
-              backgroundColor: AppColors.white,
-              selectedColor: AppColors.primary,
+              backgroundColor: AppColors.surface2,
+              selectedColor: AppColors.yellow,
               labelStyle: TextStyle(
-                color: isSelected ? AppColors.white : AppColors.textPrimary,
+                color: AppColors.textPrimary,
                 fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-                fontSize: 12,
+                fontSize: 13,
               ),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(20),
                 side: BorderSide(
-                  color: isSelected ? AppColors.primary : AppColors.divider,
+                  color: isSelected ? AppColors.yellow : AppColors.divider,
                 ),
               ),
               showCheckmark: false,
@@ -155,7 +164,7 @@ class _LawyerProcedureListScreenState
     if (filtered.isEmpty) {
       return Center(
         child: Text(
-          'Nenhum tramite encontrado',
+          'Nenhum processo encontrado',
           style: AppTextStyles.h2.copyWith(color: AppColors.textCaption),
         ),
       );
