@@ -58,25 +58,34 @@ class AppAppBarActions extends StatelessWidget {
     return Stack(
       alignment: Alignment.center,
       children: [
-        IconButton(
-          icon: Icon(icon, color: AppColors.primary, size: 22),
-          onPressed: onTap,
+        Container(
+          width: 40,
+          height: 40,
+          decoration: const BoxDecoration(
+            color: AppColors.surface2,
+            shape: BoxShape.circle,
+          ),
+          child: IconButton(
+            icon: Icon(icon, color: AppColors.ink2, size: 20),
+            onPressed: onTap,
+            padding: EdgeInsets.zero,
+          ),
         ),
         if (count > 0)
           Positioned(
-            right: 8,
-            top: 8,
+            right: 0,
+            top: 0,
             child: Container(
               padding: const EdgeInsets.all(2),
               decoration: const BoxDecoration(
-                color: AppColors.error,
+                color: AppColors.yellow,
                 shape: BoxShape.circle,
               ),
               constraints: const BoxConstraints(minWidth: 14, minHeight: 14),
               child: Text(
                 count > 9 ? '+9' : count.toString(),
                 style: const TextStyle(
-                  color: Colors.white,
+                  color: AppColors.ink,
                   fontSize: 8,
                   fontWeight: FontWeight.bold,
                 ),
