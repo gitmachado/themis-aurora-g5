@@ -11,6 +11,7 @@ import '../../../../../../shared/widgets/layout/custom_app_bar.dart';
 import '../widgets/lead_card.dart';
 import '../../../../../../shared/widgets/app_app_bar_actions.dart';
 import '../../../../../../shared/widgets/layout/loading_skeleton.dart';
+import '../../../../../../shared/widgets/themis/themis_widgets.dart';
 
 class LawyerLeadTriageScreen extends ConsumerStatefulWidget {
   const LawyerLeadTriageScreen({super.key});
@@ -56,13 +57,12 @@ class _LawyerLeadTriageScreenState
       body: Column(
         children: [
           Container(
-            color: AppColors.white,
+            color: AppColors.background,
             child: Column(
               children: [_buildSearchField(), _buildTabs(), _buildFilters()],
             ),
           ),
-          Container(height: 1, color: AppColors.divider.withValues(alpha: 0.7)),
-          const SizedBox(height: 16),
+          const SizedBox(height: 8),
           Expanded(
             child: leads.when(
               data: (items) => _buildLeadsList(items, archived: _isArchivedTab),
@@ -81,8 +81,18 @@ class _LawyerLeadTriageScreenState
       child: TextField(
         controller: _searchController,
         textInputAction: TextInputAction.search,
+        style: AppTextStyles.body.copyWith(
+          fontSize: 15.5,
+          fontWeight: FontWeight.w600,
+          color: AppColors.ink,
+        ),
         decoration: InputDecoration(
           hintText: 'Pesquisar por nome, WhatsApp ou caso',
+          hintStyle: AppTextStyles.body.copyWith(
+            color: AppColors.ink4,
+            fontSize: 15.5,
+            fontWeight: FontWeight.w500,
+          ),
           prefixIcon: const Icon(Icons.search_rounded, size: 20),
           suffixIcon: _searchController.text.isEmpty
               ? null
@@ -92,7 +102,7 @@ class _LawyerLeadTriageScreenState
                   onPressed: _searchController.clear,
                 ),
           filled: true,
-          fillColor: AppColors.background,
+          fillColor: AppColors.surface2,
           contentPadding: const EdgeInsets.symmetric(
             horizontal: 16,
             vertical: 12,
@@ -107,19 +117,12 @@ class _LawyerLeadTriageScreenState
   }
 
   Widget _buildTabs() {
-    return DefaultTabController(
-      length: 2,
-      initialIndex: _selectedTabIndex,
-      child: TabBar(
-        onTap: (index) => setState(() => _selectedTabIndex = index),
-        labelColor: AppColors.primary,
-        unselectedLabelColor: AppColors.textCaption,
-        indicatorColor: AppColors.primary,
-        indicatorWeight: 3,
-        tabs: const [
-          Tab(text: 'Ativos'),
-          Tab(text: 'Arquivados'),
-        ],
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(20, 0, 20, 4),
+      child: ThemisSegmentedControl(
+        labels: const ['Ativos', 'Arquivados'],
+        selectedIndex: _selectedTabIndex,
+        onChanged: (index) => setState(() => _selectedTabIndex = index),
       ),
     );
   }
@@ -128,7 +131,7 @@ class _LawyerLeadTriageScreenState
     final filters = ['Todos', 'Urgentes', 'Novos', 'Trabalhista', 'Cível'];
     return SingleChildScrollView(
       scrollDirection: Axis.horizontal,
-      padding: const EdgeInsets.fromLTRB(20, 12, 20, 16),
+      padding: const EdgeInsets.fromLTRB(20, 4, 20, 10),
       child: Row(
         children: filters.map((filter) {
           final isSelected = _selectedFilter == filter;
@@ -138,17 +141,17 @@ class _LawyerLeadTriageScreenState
               label: Text(filter),
               selected: isSelected,
               onSelected: (val) => setState(() => _selectedFilter = filter),
-              backgroundColor: AppColors.white,
-              selectedColor: AppColors.primary,
+              backgroundColor: AppColors.surface2,
+              selectedColor: AppColors.yellow,
               labelStyle: TextStyle(
-                color: isSelected ? AppColors.white : AppColors.textPrimary,
+                color: AppColors.textPrimary,
                 fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-                fontSize: 12,
+                fontSize: 13,
               ),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(20),
                 side: BorderSide(
-                  color: isSelected ? AppColors.primary : AppColors.border,
+                  color: isSelected ? AppColors.yellow : AppColors.border,
                 ),
               ),
               showCheckmark: false,
