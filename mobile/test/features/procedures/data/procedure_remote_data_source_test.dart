@@ -71,6 +71,7 @@ void main() {
       expect(timeline.single.legalProcessId, 'process-1');
       expect(documents.single.fileName, 'rg.pdf');
       expect(myDocuments.single.id, 'doc-2');
+      expect(myDocuments.single.sizeBytes, 2048);
       expect(document.fileName, 'contrato.pdf');
       expect(uploaded.id, 'doc-3');
       expect(updated.currentStatus, 'UNDER_ANALYSIS');
@@ -103,7 +104,7 @@ Map<String, dynamic> _documentJson(String id, String fileName) {
     'legalProcessId': 'process-1',
     'fileName': fileName,
     'fileUrl': '/uploads/$fileName',
-    'sizeBytes': 2048,
+    'sizeBytes': '2048',
     'mimeType': 'application/pdf',
     'sentById': 'user-1',
     'createdAt': '2026-04-24T12:00:00.000Z',

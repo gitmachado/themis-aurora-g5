@@ -22,16 +22,16 @@ void main() {
 
     expect(find.text('Lucas Silva'), findsOneWidget);
     expect(find.text('Aguardando envio do RG'), findsOneWidget);
-    expect(find.text('Historico do WhatsApp'), findsOneWidget);
+    expect(find.text('Falar com a Themis'), findsOneWidget);
 
-    await tester.tap(find.text('Ver Linha do Tempo'));
+    await tester.tap(find.text('Ver linha do tempo'));
     await tester.pumpAndSettle();
 
     expect(find.text('OC-2026-0001'), findsOneWidget);
     expect(find.text('Tramite criado'), findsOneWidget);
     expect(find.text('Documento do cliente anexado'), findsOneWidget);
 
-    await tester.tap(find.text('Arquivos'));
+    await tester.tap(find.text('Documentos'));
     await tester.pumpAndSettle();
 
     expect(find.text('cliente-rg.pdf'), findsOneWidget);
@@ -45,15 +45,9 @@ void main() {
     expect(find.text('cliente-rg.pdf'), findsOneWidget);
 
     await _tapBottomNavAt(tester, 3);
-    expect(find.text('Assistente coletou os dados iniciais'), findsOneWidget);
-
-    await tester.tap(find.text('Historico do WhatsApp'));
-    await tester.pumpAndSettle();
-
     expect(find.text('Mensagem enviada pelo cliente'), findsOneWidget);
+    expect(find.text('Assistente coletou os dados iniciais'), findsOneWidget);
     expect(find.byType(TextField), findsNothing);
-
-    await _goBack(tester);
 
     await _tapBottomNavAt(tester, 4);
     expect(find.text('Conta de cliente'), findsOneWidget);
@@ -80,7 +74,7 @@ void main() {
       await _login(tester, email: 'advogado@omniconnect.test');
 
       expect(find.text('Dra. Paula Nunes'), findsOneWidget);
-      expect(find.text('1 handoff aguardando'), findsOneWidget);
+      expect(find.text('Handoff humano'), findsOneWidget);
       expect(find.text('Maria Oliveira'), findsOneWidget);
 
       await _tapBottomNavAt(tester, 1);
@@ -124,11 +118,11 @@ void main() {
       expect(find.text('Status atualizado.'), findsOneWidget);
       _expectCall(apiClient, 'PATCH', '/processes/process-1/status');
 
-      await tester.tap(find.text('Timeline'));
+      await tester.tap(find.text('Andamento'));
       await tester.pumpAndSettle();
       expect(find.text('Nota do advogado registrada'), findsOneWidget);
 
-      await tester.tap(find.text('Arquivos'));
+      await tester.tap(find.text('Documentos'));
       await tester.pumpAndSettle();
       expect(find.text('peticao-inicial.pdf'), findsOneWidget);
 
