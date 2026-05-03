@@ -146,16 +146,17 @@ class _LawyerLeadDetailScreenState extends ConsumerState<LawyerLeadDetailScreen>
     final name = lead?.displayName ?? widget.name;
 
     return SliverAppBar(
-      expandedHeight: 200.0,
+      expandedHeight: 154.0,
       floating: false,
       pinned: true,
-      backgroundColor: AppColors.primary,
+      backgroundColor: AppColors.background,
+      surfaceTintColor: Colors.transparent,
       elevation: 0,
       leading: IconButton(
         icon: const Icon(
           Icons.arrow_back_ios_new_rounded,
-          color: Colors.white,
-          size: 22,
+          color: AppColors.ink,
+          size: 18,
         ),
         onPressed: () => Navigator.pop(context),
       ),
@@ -164,29 +165,23 @@ class _LawyerLeadDetailScreenState extends ConsumerState<LawyerLeadDetailScreen>
         title: Text(
           name,
           style: const TextStyle(
-            color: Colors.white,
+            color: AppColors.ink,
             fontWeight: FontWeight.bold,
             fontSize: 18,
           ),
         ),
         background: Container(
-          decoration: const BoxDecoration(
-            gradient: LinearGradient(
-              begin: Alignment.topCenter,
-              end: Alignment.bottomCenter,
-              colors: [AppColors.primary, Color(0xFF3949AB)],
-            ),
-          ),
+          color: AppColors.background,
           child: Center(
             child: Hero(
               tag: 'avatar_${widget.name}',
               child: CircleAvatar(
                 radius: 40,
-                backgroundColor: Colors.white.withValues(alpha: 0.2),
+                backgroundColor: AppColors.yellow,
                 child: Text(
                   name.isEmpty ? '?' : name[0].toUpperCase(),
                   style: const TextStyle(
-                    color: Colors.white,
+                    color: AppColors.ink,
                     fontSize: 32,
                     fontWeight: FontWeight.bold,
                   ),
@@ -209,21 +204,21 @@ class _LawyerLeadDetailScreenState extends ConsumerState<LawyerLeadDetailScreen>
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
         color: AppColors.white,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: AppColors.divider),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: AppColors.line),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
             children: [
-              Icon(icon, color: AppColors.primary, size: 20),
+              Icon(icon, color: AppColors.ink, size: 20),
               const SizedBox(width: 8),
               Text(
                 title,
                 style: AppTextStyles.h2.copyWith(
                   fontSize: 16,
-                  color: AppColors.primary,
+                  color: AppColors.textPrimary,
                 ),
               ),
             ],
@@ -299,7 +294,7 @@ class _LawyerLeadDetailScreenState extends ConsumerState<LawyerLeadDetailScreen>
                       side: const BorderSide(color: AppColors.error),
                       minimumSize: const Size(0, 56),
                       shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
+                        borderRadius: BorderRadius.circular(999),
                       ),
                     ),
                     child: const Text('Arquivar'),
@@ -311,10 +306,10 @@ class _LawyerLeadDetailScreenState extends ConsumerState<LawyerLeadDetailScreen>
                 child: ElevatedButton(
                   onPressed: () => _showConversionDialog(lead),
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.primary,
+                    backgroundColor: AppColors.ink,
                     minimumSize: const Size(0, 56),
                     shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
+                      borderRadius: BorderRadius.circular(999),
                     ),
                     elevation: 0,
                   ),
@@ -372,7 +367,7 @@ class _LawyerLeadDetailScreenState extends ConsumerState<LawyerLeadDetailScreen>
       backgroundColor: Colors.transparent,
       builder: (context) => Container(
         decoration: const BoxDecoration(
-          color: AppColors.white,
+          color: AppColors.background,
           borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
         ),
         child: SafeArea(
@@ -386,7 +381,7 @@ class _LawyerLeadDetailScreenState extends ConsumerState<LawyerLeadDetailScreen>
                   width: 40,
                   height: 4,
                   decoration: BoxDecoration(
-                    color: AppColors.divider,
+                    color: AppColors.line,
                     borderRadius: BorderRadius.circular(2),
                   ),
                 ),
@@ -415,10 +410,10 @@ class _LawyerLeadDetailScreenState extends ConsumerState<LawyerLeadDetailScreen>
                     _showSuccessAnimation();
                   },
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.success,
+                    backgroundColor: AppColors.ink,
                     minimumSize: const Size(double.infinity, 56),
                     shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
+                      borderRadius: BorderRadius.circular(999),
                     ),
                   ),
                   child: const Text(
@@ -479,9 +474,7 @@ class _LawyerLeadDetailScreenState extends ConsumerState<LawyerLeadDetailScreen>
                 Navigator.pop(context); // Close dialog
                 Navigator.pop(context); // Go back to list
               },
-              style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.primary,
-              ),
+              style: ElevatedButton.styleFrom(backgroundColor: AppColors.ink),
               child: const Text(
                 'Voltar à Fila',
                 style: TextStyle(color: Colors.white),

@@ -34,13 +34,13 @@ class LeadCard extends StatelessWidget {
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
           color: AppColors.white,
-          borderRadius: BorderRadius.circular(16),
+          borderRadius: BorderRadius.circular(20),
           border: Border.all(color: AppColors.border, width: 1),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withValues(alpha: 0.04),
-              blurRadius: 10,
-              offset: const Offset(0, 4),
+              color: Colors.black.withValues(alpha: 0.03),
+              blurRadius: 2,
+              offset: const Offset(0, 1),
             ),
           ],
         ),
@@ -52,11 +52,11 @@ class LeadCard extends StatelessWidget {
                   tag: 'avatar_$name',
                   child: CircleAvatar(
                     radius: 24,
-                    backgroundColor: AppColors.primary.withValues(alpha: 0.1),
+                    backgroundColor: AppColors.surface2,
                     child: Text(
                       name.isNotEmpty ? name[0].toUpperCase() : '?',
                       style: const TextStyle(
-                        color: AppColors.primary,
+                        color: AppColors.ink,
                         fontWeight: FontWeight.bold,
                         fontSize: 18,
                       ),
@@ -103,7 +103,7 @@ class LeadCard extends StatelessWidget {
                 Expanded(
                   child: _buildActionButton(
                     icon: Icons.check_circle_rounded,
-                    color: AppColors.success,
+                    color: AppColors.ink,
                     onPressed: onAccept,
                     label: 'Aceitar',
                     isPrimary: true,
@@ -143,10 +143,10 @@ class LeadCard extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
         decoration: BoxDecoration(
-          color: isPrimary ? color.withValues(alpha: 0.1) : Colors.transparent,
-          borderRadius: BorderRadius.circular(8),
+          color: isPrimary ? AppColors.yellow : Colors.transparent,
+          borderRadius: BorderRadius.circular(999),
           border: Border.all(
-            color: isPrimary ? color.withValues(alpha: 0.2) : AppColors.border,
+            color: isPrimary ? AppColors.yellow : AppColors.border,
           ),
         ),
         child: Row(
