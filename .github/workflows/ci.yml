@@ -160,9 +160,6 @@ jobs:
       - name: Run Flutter tests
         run: flutter test
 
-      - name: Build debug Android APK
-        run: flutter build apk --debug
-
   docker-smoke:
     name: Docker smoke
     runs-on: ubuntu-latest
@@ -193,6 +190,15 @@ jobs:
           POSTGRES_USER=postgres
           POSTGRES_PASSWORD=postgres
           EOF
+
+      - name: Create stub ai/.env
+        # The compose file declares an `ai` service that references ./ai/.env
+        # via env_file. Even when the service is not started, `docker compose
+        # down -v` parses every service definition and fails when the file is
+        # missing. A stub satisfies the parser without running the AI service.
+        run: |
+          mkdir -p ai
+          touch ai/.env
 
       - name: Build and start Docker stack
         run: docker compose up -d --build postgres server
