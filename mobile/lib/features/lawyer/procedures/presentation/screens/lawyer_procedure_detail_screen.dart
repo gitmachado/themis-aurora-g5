@@ -6,6 +6,7 @@ import '../../../../../../features/procedures/domain/entities/process_document.d
 import '../../../../../../features/procedures/domain/entities/timeline_event.dart';
 import '../../../../../../features/procedures/presentation/procedure_display.dart';
 import '../../../../../../features/procedures/presentation/providers/procedure_providers.dart';
+import '../../../../../../features/lawyer/clients/presentation/providers/lawyer_client_providers.dart';
 import '../../../../../../shared/constants/app_colors.dart';
 import '../../../../../../shared/constants/app_text_styles.dart';
 import '../../../../../../shared/network/api_client.dart';
@@ -50,36 +51,23 @@ class _LawyerProcedureDetailScreenState
   }
 
   Widget _buildContent(LegalProcess process) {
+    final clientName = _clientNameFor(process);
+
     return DefaultTabController(
       length: 3,
       child: Scaffold(
         backgroundColor: AppColors.background,
         appBar: CustomAppBar(
-          title: process.processNumber?.isNotEmpty == true
-              ? process.processNumber!
-              : process.title,
+          title: '',
+          titleWidget: _buildHeaderTitle(process, clientName),
           showBackButton: true,
-          bottom: TabBar(
-            labelColor: AppColors.primary,
-            unselectedLabelColor: AppColors.textCaption,
-            indicatorColor: AppColors.primary,
-            indicatorSize: TabBarIndicatorSize.label,
-            labelStyle: const TextStyle(
-              fontSize: 12,
-              fontWeight: FontWeight.bold,
-            ),
-            tabs: const [
-              Tab(text: 'Resumo'),
-              Tab(text: 'Timeline'),
-              Tab(text: 'Arquivos'),
-            ],
-          ),
+          bottom: _buildDetailTabs(),
         ),
         body: SafeArea(
           top: false,
           child: TabBarView(
             children: [
-              _buildSummaryTab(process),
+              _buildSummaryTab(process, clientName),
               _buildTimelineTab(process.id),
               _buildFilesTab(process.id),
             ],
@@ -88,8 +76,8 @@ class _LawyerProcedureDetailScreenState
         floatingActionButton: FloatingActionButton.extended(
           heroTag: 'lawyer_procedure_detail_fab_${process.id}',
           onPressed: () => _showStatusSheet(process),
-          backgroundColor: AppColors.primary,
-          foregroundColor: Colors.white,
+          backgroundColor: AppColors.yellow,
+          foregroundColor: AppColors.ink,
           icon: const Icon(Icons.edit_note_rounded),
           label: const Text('Status'),
         ),
@@ -97,7 +85,85 @@ class _LawyerProcedureDetailScreenState
     );
   }
 
-  Widget _buildSummaryTab(LegalProcess process) {
+  Widget _buildHeaderTitle(LegalProcess process, String clientName) {
+    final title = process.processNumber?.isNotEmpty == true
+        ? process.processNumber!
+        : process.title;
+
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          title,
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+          style: AppTextStyles.h2.copyWith(
+            color: AppColors.textPrimary,
+            fontSize: 19,
+            fontWeight: FontWeight.w800,
+          ),
+        ),
+        const SizedBox(height: 2),
+        Text(
+          'Cliente: $clientName',
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+          style: AppTextStyles.caption.copyWith(
+            color: AppColors.textCaption,
+            fontWeight: FontWeight.w700,
+          ),
+        ),
+      ],
+    );
+  }
+
+  PreferredSizeWidget _buildDetailTabs() {
+    return PreferredSize(
+      preferredSize: const Size.fromHeight(56),
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(20, 0, 20, 12),
+        child: Container(
+          height: 44,
+          padding: const EdgeInsets.all(4),
+          decoration: BoxDecoration(
+            color: AppColors.surface2,
+            borderRadius: BorderRadius.circular(14),
+          ),
+          child: TabBar(
+            dividerColor: Colors.transparent,
+            indicatorSize: TabBarIndicatorSize.tab,
+            indicator: BoxDecoration(
+              color: AppColors.surface,
+              borderRadius: BorderRadius.circular(11),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.04),
+                  blurRadius: 2,
+                  offset: const Offset(0, 1),
+                ),
+              ],
+            ),
+            labelColor: AppColors.ink,
+            unselectedLabelColor: AppColors.ink3,
+            labelStyle: AppTextStyles.caption.copyWith(
+              fontWeight: FontWeight.w800,
+            ),
+            unselectedLabelStyle: AppTextStyles.caption.copyWith(
+              fontWeight: FontWeight.w700,
+            ),
+            tabs: const [
+              SizedBox(height: 36, child: Center(child: Text('Resumo'))),
+              SizedBox(height: 36, child: Center(child: Text('Andamento'))),
+              SizedBox(height: 36, child: Center(child: Text('Documentos'))),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildSummaryTab(LegalProcess process, String clientName) {
     return ListView(
       padding: const EdgeInsets.all(24),
       children: [
@@ -128,7 +194,7 @@ class _LawyerProcedureDetailScreenState
         _buildInfoSection('Dados do trâmite', [
           ('Número', process.processNumber ?? '--'),
           ('Área', process.caseTypeLabel),
-          ('Cliente', process.clientId),
+          ('Cliente', clientName),
           ('Última nota', process.lastNote ?? '--'),
           ('Última movimentação', formatDateLabel(process.lastMovementDate)),
           ('Atualizado em', formatRelativeDate(process.updatedAt)),
@@ -149,19 +215,30 @@ class _LawyerProcedureDetailScreenState
           );
         }
 
+        final sortedEvents = [...events]
+          ..sort((a, b) {
+            final aDate = a.createdAt ?? DateTime.fromMillisecondsSinceEpoch(0);
+            final bDate = b.createdAt ?? DateTime.fromMillisecondsSinceEpoch(0);
+            return bDate.compareTo(aDate);
+          });
+
         return RefreshIndicator(
           onRefresh: () =>
               ref.refresh(procedureTimelineProvider(processId).future),
-          child: ListView.builder(
+          child: ListView(
             padding: const EdgeInsets.all(24),
-            itemCount: events.length,
-            itemBuilder: (context, index) {
-              final event = events[index];
-              return _buildTimelineItem(
-                event,
-                isLast: index == events.length - 1,
-              );
-            },
+            children: [
+              _buildTimelineLegend('Atual'),
+              const SizedBox(height: 14),
+              for (var index = 0; index < sortedEvents.length; index++)
+                _buildTimelineItem(
+                  sortedEvents[index],
+                  isCurrent: index == 0,
+                  isLast: index == sortedEvents.length - 1,
+                ),
+              const SizedBox(height: 2),
+              _buildTimelineLegend('Antigo'),
+            ],
           ),
         );
       },
@@ -229,12 +306,12 @@ class _LawyerProcedureDetailScreenState
         leading: Container(
           padding: const EdgeInsets.all(10),
           decoration: BoxDecoration(
-            color: AppColors.primary.withValues(alpha: 0.1),
+            color: AppColors.yellowSoft,
             borderRadius: BorderRadius.circular(12),
           ),
           child: Icon(
             isPdf ? Icons.picture_as_pdf_rounded : Icons.image_rounded,
-            color: isPdf ? AppColors.error : AppColors.primary,
+            color: isPdf ? AppColors.error : AppColors.ink,
           ),
         ),
         trailing: PopupMenuButton<String>(
@@ -256,19 +333,36 @@ class _LawyerProcedureDetailScreenState
     );
   }
 
-  Widget _buildTimelineItem(TimelineEvent event, {required bool isLast}) {
+  Widget _buildTimelineLegend(String label) {
+    return Text(
+      label,
+      style: AppTextStyles.cap.copyWith(
+        color: AppColors.ink,
+        fontWeight: FontWeight.w800,
+      ),
+    );
+  }
+
+  Widget _buildTimelineItem(
+    TimelineEvent event, {
+    required bool isCurrent,
+    required bool isLast,
+  }) {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Column(
           children: [
             Container(
-              width: 16,
-              height: 16,
+              width: isCurrent ? 18 : 15,
+              height: isCurrent ? 18 : 15,
               decoration: BoxDecoration(
-                color: AppColors.primary,
+                color: AppColors.yellow,
                 shape: BoxShape.circle,
-                border: Border.all(color: Colors.white, width: 3),
+                border: Border.all(
+                  color: isCurrent ? AppColors.ink : AppColors.white,
+                  width: isCurrent ? 2.5 : 3,
+                ),
               ),
             ),
             if (!isLast)
@@ -286,7 +380,7 @@ class _LawyerProcedureDetailScreenState
                   _timelineTitle(event.type),
                   style: const TextStyle(
                     fontWeight: FontWeight.bold,
-                    fontSize: 15,
+                    fontSize: 16,
                     color: AppColors.textPrimary,
                   ),
                 ),
@@ -300,7 +394,7 @@ class _LawyerProcedureDetailScreenState
                   event.content,
                   style: AppTextStyles.caption.copyWith(
                     color: AppColors.textPrimary,
-                    fontSize: 13,
+                    fontSize: 14,
                   ),
                 ),
               ],
@@ -329,6 +423,17 @@ class _LawyerProcedureDetailScreenState
         ),
       ],
     );
+  }
+
+  String _clientNameFor(LegalProcess process) {
+    final clients = ref.watch(myLawyerClientsProvider).valueOrNull ?? const [];
+    for (final client in clients) {
+      if (client.id == process.clientId && client.name.trim().isNotEmpty) {
+        return client.name.trim();
+      }
+    }
+
+    return process.clientId.isEmpty ? 'Cliente' : process.clientId;
   }
 
   Widget _buildDetailRow(String label, String value) {
