@@ -31,9 +31,9 @@ class _LawyerNotificationScreenState
           title: 'Notificações',
           showBackButton: true,
           bottom: TabBar(
-            labelColor: AppColors.primary,
+            labelColor: AppColors.ink,
             unselectedLabelColor: AppColors.textCaption,
-            indicatorColor: AppColors.primary,
+            indicatorColor: AppColors.yellow,
             indicatorSize: TabBarIndicatorSize.label,
             tabs: const [
               Tab(text: 'Não lidas'),
@@ -71,7 +71,7 @@ class _LawyerNotificationScreenState
     }
 
     return ListView.builder(
-      padding: const EdgeInsets.only(bottom: 24),
+      padding: const EdgeInsets.only(top: 16, bottom: 24),
       itemCount: list.length,
       itemBuilder: (context, index) {
         final n = list[index];
@@ -119,7 +119,7 @@ class _LawyerNotificationScreenState
 
   Widget _buildLoadingList() {
     return ListView.separated(
-      padding: const EdgeInsets.all(20),
+      padding: const EdgeInsets.fromLTRB(20, 20, 20, 24),
       itemCount: 5,
       separatorBuilder: (_, _) => const SizedBox(height: 12),
       itemBuilder: (_, _) =>

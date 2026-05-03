@@ -35,8 +35,8 @@ class _ClientNotificationsScreenState
               onPressed: () =>
                   ref.read(notificationActionsProvider).markAllAsRead(),
               child: const Text(
-                'Lidas',
-                style: TextStyle(color: AppColors.primary),
+                'Limpar',
+                style: TextStyle(color: AppColors.ink),
               ),
             ),
           ],
@@ -45,9 +45,9 @@ class _ClientNotificationsScreenState
               Tab(text: 'Não lidas'),
               Tab(text: 'Todas'),
             ],
-            labelColor: AppColors.primary,
+            labelColor: AppColors.ink,
             unselectedLabelColor: AppColors.textCaption,
-            indicatorColor: AppColors.primary,
+            indicatorColor: AppColors.yellow,
             indicatorWeight: 3,
           ),
         ),
@@ -81,7 +81,7 @@ class _ClientNotificationsScreenState
     }
 
     return ListView.builder(
-      padding: const EdgeInsets.only(bottom: 24),
+      padding: const EdgeInsets.only(top: 16, bottom: 24),
       itemCount: list.length,
       itemBuilder: (context, index) {
         final n = list[index];
@@ -129,7 +129,7 @@ class _ClientNotificationsScreenState
 
   Widget _buildLoadingList() {
     return ListView.separated(
-      padding: const EdgeInsets.all(20),
+      padding: const EdgeInsets.fromLTRB(20, 20, 20, 24),
       itemCount: 5,
       separatorBuilder: (_, _) => const SizedBox(height: 12),
       itemBuilder: (_, _) =>
