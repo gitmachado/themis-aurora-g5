@@ -8,7 +8,7 @@ export interface CreateUserDTO {
   avatarUrl?: string | null;
   role: UserRole;
   passwordHash?: string;
-  fcmToken?: string;
+  fcmToken?: string | null;
   notificationPreferences?: Record<string, boolean>;
 }
 
@@ -20,7 +20,7 @@ export interface UpdateUserDTO {
   avatarUrl?: string | null;
   role?: UserRole;
   passwordHash?: string;
-  fcmToken?: string;
+  fcmToken?: string | null;
   notificationPreferences?: Record<string, boolean>;
 }
 
