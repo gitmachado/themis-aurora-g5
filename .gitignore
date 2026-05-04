@@ -133,3 +133,6 @@ server/temp/*
 !server/uploads/.gitkeep
 !server/temp/.gitkeep
 html_to_flutter
+
+# Firebase Admin Service Account Key
+@omniconnect-aurora-g5-firebase-adminsdk-fbsvc-8d1b3f9702
