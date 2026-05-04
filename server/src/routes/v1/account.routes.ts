@@ -36,6 +36,7 @@ const upload = multer({
  */
 router.get('/', authMiddleware, controller.getCurrent);
 router.patch('/notification-preferences', authMiddleware, controller.updateNotificationPreferences);
+router.patch('/me/fcm-token', authMiddleware, controller.updateFcmToken);
 
 /**
  * @openapi
