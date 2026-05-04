@@ -55,22 +55,34 @@ class PushNotificationService {
         await _sendTokenToBackend(token);
       }
     } catch (e, stack) {
-      log('Error fetching or sending FCM token: $e', error: e, stackTrace: stack);
+      log(
+        'Error fetching or sending FCM token: $e',
+        error: e,
+        stackTrace: stack,
+      );
     }
   }
 
   Future<void> _sendTokenToBackend(String token) async {
     try {
-      await _apiClient.patch('/account/me/fcm-token', data: {'fcmToken': token});
+      await _apiClient.patchJson(
+        '/account/me/fcm-token',
+        data: {'fcmToken': token},
+      );
       log('FCM token sent to backend successfully.');
     } catch (e, stack) {
-      log('Error sending FCM token to backend: $e', error: e, stackTrace: stack);
+      log(
+        'Error sending FCM token to backend: $e',
+        error: e,
+        stackTrace: stack,
+      );
     }
   }
 
   Future<void> _setupLocalNotifications() async {
-    const initializationSettingsAndroid =
-        AndroidInitializationSettings('@mipmap/ic_launcher');
+    const initializationSettingsAndroid = AndroidInitializationSettings(
+      '@mipmap/ic_launcher',
+    );
     const initializationSettingsIOS = DarwinInitializationSettings(
       requestAlertPermission: false,
       requestBadgePermission: false,
@@ -93,7 +105,8 @@ class PushNotificationService {
 
     final androidPlugin = _localNotificationsPlugin
         .resolvePlatformSpecificImplementation<
-            AndroidFlutterLocalNotificationsPlugin>();
+          AndroidFlutterLocalNotificationsPlugin
+        >();
 
     await androidPlugin?.createNotificationChannel(androidChannel);
   }
@@ -111,7 +124,8 @@ class PushNotificationService {
           android: AndroidNotificationDetails(
             'high_importance_channel',
             'High Importance Notifications',
-            channelDescription: 'This channel is used for important notifications.',
+            channelDescription:
+                'This channel is used for important notifications.',
             icon: '@mipmap/ic_launcher',
             importance: Importance.max,
             priority: Priority.high,
