@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-/// A reusable loading skeleton widget for the OmniConnect project.
+/// A reusable loading skeleton widget for the Themis project.
 /// This widget provides a placeholder for content while it's loading.
 class LoadingSkeleton extends StatelessWidget {
   final double? width;

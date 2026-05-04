@@ -4,9 +4,9 @@ const options: swaggerJsdoc.Options = {
   definition: {
     openapi: '3.0.0',
     info: {
-      title: 'OmniConnect API',
+      title: 'Themis API',
       version: '1.0.0',
-      description: 'Documentação da API do projeto OmniConnect - Aurora G5',
+      description: 'Documentação da API do projeto Themis - Aurora G5',
     },
     servers: [
       {

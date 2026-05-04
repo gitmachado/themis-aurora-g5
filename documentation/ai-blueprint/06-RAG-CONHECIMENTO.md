@@ -92,7 +92,7 @@ USING hnsw (embedding vector_cosine_ops);
 
 ```typescript
 // No rag_node do LangGraph:
-async function ragNode(state: OmniState) {
+async function ragNode(state: ThemisState) {
   const query = state.messages.at(-1)?.content;
 
   // Busca semântica — top 4 chunks mais relevantes

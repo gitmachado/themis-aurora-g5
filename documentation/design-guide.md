@@ -1,6 +1,6 @@
 # Guia de Design e Especificação Funcional (App Único)
 
-Este documento é a fonte de verdade para a interface do aplicativo OmniConnect. Ele orienta a equipe de design sobre a estrutura, navegação e requisitos de dados, garantindo consistência entre os perfis de **Cliente** e **Advogado**.
+Este documento é a fonte de verdade para a interface do aplicativo Themis. Ele orienta a equipe de design sobre a estrutura, navegação e requisitos de dados, garantindo consistência entre os perfis de **Cliente** e **Advogado**.
 
 ## 🎨 Identidade Visual (Referência)
 
@@ -64,7 +64,7 @@ graph TD
 
 ## 🔄 Lógica de Troca de Perfil
 
-O OmniConnect é um **App Único**. A interface deve refletir a mudança de contexto visualmente:
+O Themis é um **App Único**. A interface deve refletir a mudança de contexto visualmente:
 1.  **Tab Bar**: Os ícones e destinos das abas mudam conforme o perfil.
 2.  **Breadcrumbs/Contexto**: Títulos de tela devem deixar claro se o usuário está agindo como "Cliente" ou "Gestor/Advogado".
 3.  **Configurações**: Deve existir um atalho claro no Perfil para alternar entre os contextos (se o usuário possuir ambas as permissões).

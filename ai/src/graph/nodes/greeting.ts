@@ -1,9 +1,9 @@
 import { AIMessage } from "@langchain/core/messages";
-import { OmniStateType } from "../state.js";
+import { ThemisStateType } from "../state.js";
 
 export async function greetingNode(
-  state: OmniStateType
-): Promise<Partial<OmniStateType>> {
+  state: ThemisStateType
+): Promise<Partial<ThemisStateType>> {
   const { triage } = state;
   const isDone = triage.currentStep === "DONE";
 

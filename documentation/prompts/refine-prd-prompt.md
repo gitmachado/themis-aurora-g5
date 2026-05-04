@@ -7,7 +7,7 @@ description: Refinar um PRD existente sem mudar o escopo original de forma indev
 ## Objetivo
 
 Melhorar clareza, estrutura e consistencia de um PRD ja existente, mantendo o
-conteudo fiel ao que foi decidido para o OmniConnect.
+conteudo fiel ao que foi decidido para o Themis.
 
 ## Entrada
 

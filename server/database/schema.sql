@@ -1,5 +1,5 @@
 SET client_encoding = 'UTF8';
--- OmniConnect Database Schema
+-- themis Database Schema
 -- Pattern: snake_case for tables/columns
 -- Architecture: ADR-0003 (No ORM)
 

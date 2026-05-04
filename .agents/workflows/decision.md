@@ -1,5 +1,5 @@
 ---
-description: "Processo para registrar decisões técnicas, arquiteturais ou estratégicas no OmniConnect."
+description: "Processo para registrar decisões técnicas, arquiteturais ou estratégicas no Themis."
 ---
 
 # Workflow de Registro de Decisões
@@ -8,7 +8,7 @@ Mantenha o histórico do projeto limpo e acessível seguindo este fluxo estrutur
 
 ## Passos
 
-1. **Identificar a Necessidade**: Decisões que impactam o futuro técnico ou estratégico do OmniConnect devem ser registradas em `.agents/decisions`.
+1. **Identificar a Necessidade**: Decisões que impactam o futuro técnico ou estratégico do Themis devem ser registradas em `.agents/decisions`.
 2. **Naming Convention**: Nomeie o arquivo como `NNNN-titulo-claro.md` (ex: `0002-uso-postgreSQL.md`).
 3. **Aplicar o Template**: Use a estrutura abaixo, preenchendo todos os campos obrigatórios e omitindo o que não for relevante (como próximos passos, que devem ir para os artifacts).
 

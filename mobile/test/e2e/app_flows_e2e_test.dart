@@ -19,7 +19,7 @@ void main() {
     _seedClientResponses(apiClient);
 
     await _pumpApp(tester, apiClient: apiClient, tokenStorage: tokenStorage);
-    await _login(tester, email: 'cliente@omniconnect.test');
+    await _login(tester, email: 'cliente@themis.test');
 
     expect(find.text('Lucas Silva'), findsOneWidget);
     expect(find.text('Aguardando envio do RG'), findsOneWidget);
@@ -52,7 +52,7 @@ void main() {
 
     await _tapBottomNavAt(tester, 4);
     expect(find.text('Conta de cliente'), findsOneWidget);
-    expect(find.text('cliente@omniconnect.test'), findsOneWidget);
+    expect(find.text('cliente@themis.test'), findsOneWidget);
 
     expect(tokenStorage.token, 'client-token');
     _expectCall(apiClient, 'POST', '/auth/login');
@@ -72,7 +72,7 @@ void main() {
       _seedLawyerResponses(apiClient);
 
       await _pumpApp(tester, apiClient: apiClient, tokenStorage: tokenStorage);
-      await _login(tester, email: 'advogado@omniconnect.test');
+      await _login(tester, email: 'advogado@themis.test');
 
       expect(find.text('Dra. Paula Nunes'), findsOneWidget);
       expect(find.text('Handoff humano'), findsOneWidget);
@@ -152,7 +152,7 @@ void main() {
       await _goBack(tester);
 
       await _tapBottomNavAt(tester, 4);
-      expect(find.text('advogado@omniconnect.test'), findsWidgets);
+      expect(find.text('advogado@themis.test'), findsWidgets);
       expect(find.text('Mensagens e Handoffs'), findsOneWidget);
 
       expect(tokenStorage.token, 'lawyer-token');
@@ -236,7 +236,7 @@ void _seedCommonResponses(
   apiClient.listResponses['GET /documents/process/process-1'] = _documents;
   apiClient.listResponses['GET /documents/my'] = _documents;
   apiClient.jsonResponses['GET /documents/doc-1/access-url'] = {
-    'url': 'https://files.omniconnect.test/peticao-inicial.pdf',
+    'url': 'https://files.themis.test/peticao-inicial.pdf',
   };
   apiClient.listResponses['GET /notifications/my'] = _notifications;
   apiClient.listResponses['GET /messages/11999999999'] = _messages;
@@ -246,7 +246,7 @@ void _seedCommonResponses(
 
 void _seedClientResponses(FakeApiClient apiClient) {
   apiClient.jsonResponses['GET /documents/doc-2/access-url'] = {
-    'url': 'https://files.omniconnect.test/cliente-rg.pdf',
+    'url': 'https://files.themis.test/cliente-rg.pdf',
   };
 }
 
@@ -269,7 +269,7 @@ final _clientAccount = {
   'name': 'Lucas Silva',
   'whatsappNumber': '11999999999',
   'cpf': '12345678900',
-  'email': 'cliente@omniconnect.test',
+  'email': 'cliente@themis.test',
   'role': 'CLIENT',
   'notificationPreferences': {
     'processUpdates': true,
@@ -283,7 +283,7 @@ final _lawyerAccount = {
   'name': 'Dra. Paula Nunes',
   'whatsappNumber': '11888888888',
   'cpf': '98765432100',
-  'email': 'advogado@omniconnect.test',
+  'email': 'advogado@themis.test',
   'role': 'LAWYER',
   'notificationPreferences': {
     'leads': true,
@@ -415,7 +415,7 @@ final _clients = [
     'name': 'Lucas Silva',
     'whatsappNumber': '11999999999',
     'cpf': '12345678900',
-    'email': 'cliente@omniconnect.test',
+    'email': 'cliente@themis.test',
   },
 ];
 

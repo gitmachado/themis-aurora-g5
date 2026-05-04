@@ -1,5 +1,5 @@
 // ========================
-// OmniConnect Domain Enums
+// Themis Domain Enums
 // ========================
 
 /** Supported legal practice niches */

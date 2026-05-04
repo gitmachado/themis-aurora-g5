@@ -5,7 +5,7 @@ Decisão 0002: Definição do Nicho de Mercado - Advocacia
 - **Activated**: Aprovado e ativo em 07/04/2026.
 
 ### 3. Contexto
-- O projeto OmniConnect visa automatizar o atendimento inicial e a gestão de serviços via WhatsApp e App.
+- O projeto Themis visa automatizar o atendimento inicial e a gestão de serviços via WhatsApp e App.
 - Precisávamos escolher um nicho específico para direcionar a base de conhecimento (RAG) e as funcionalidades do Dashboard.
 - Nichos considerados: Clínicas, Oficinas Premium, Advocacia.
 

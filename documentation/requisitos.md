@@ -1,4 +1,4 @@
-# Desafio Tech: Projeto "OmniConnect – Gestão Inteligente de Serviços"
+# Desafio Tech: Projeto "Themis – Gestão Inteligente de Serviços"
 
 📋 O Cenário
 - Fricção no Atendimento: Clientes preferem o WhatsApp para tirar dúvidas sobre seus processos ou iniciar consultas jurídicas, mas os dados se perdem em conversas informais.

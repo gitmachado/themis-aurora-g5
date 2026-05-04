@@ -13,13 +13,13 @@ role key ou SQL Editor do Supabase.
 
 ## Contexto
 
-O fluxo de documentos do OmniConnect mantem metadados no PostgreSQL local (`documents.file_url`, `file_name`, `mime_type`, `size_bytes`), mas o binario era gravado em `server/uploads` via `LocalFileStorageProvider`. Fotos de perfil tambem nao tinham armazenamento real. Esse desenho funcionava em VM unica, mas dificultava evoluir para hospedagem stateless e impedia centralizar imagens e arquivos no mesmo ecossistema Supabase ja adotado para Auth.
+O fluxo de documentos do Themis mantem metadados no PostgreSQL local (`documents.file_url`, `file_name`, `mime_type`, `size_bytes`), mas o binario era gravado em `server/uploads` via `LocalFileStorageProvider`. Fotos de perfil tambem nao tinham armazenamento real. Esse desenho funcionava em VM unica, mas dificultava evoluir para hospedagem stateless e impedia centralizar imagens e arquivos no mesmo ecossistema Supabase ja adotado para Auth.
 
 ## Decisao
 
 Usar Supabase Storage como provider primario de arquivos do app, por meio do backend Node.js.
 
-- O bucket padrao e `omniconnect-documents`.
+- O bucket padrao e `Themis-documents`.
 - O bucket deve ser privado.
 - Upload, remocao e geracao de URL assinada acontecem no backend usando `SUPABASE_SERVICE_ROLE_KEY`.
 - O app Flutter continua falando apenas com o backend e nao recebe a service role key.

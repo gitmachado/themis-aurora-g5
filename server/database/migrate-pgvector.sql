@@ -1,6 +1,6 @@
 -- Migração: Habilitar pgvector e criar tabela de embeddings (RAG)
 -- Aplicar em volumes já existentes:
--- docker exec omniconnect-postgres psql -U $POSTGRES_USER -d $POSTGRES_DB -f /tmp/migrate-pgvector.sql
+-- docker exec themis-postgres psql -U $POSTGRES_USER -d $POSTGRES_DB -f /tmp/migrate-pgvector.sql
 
 CREATE EXTENSION IF NOT EXISTS vector;
 

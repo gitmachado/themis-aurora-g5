@@ -1,6 +1,6 @@
 # Camada de Middlewares
 
-Esta camada contém as funções de interceptação global e específica que garantem a segurança, integridade e padronização das requisições na API OmniConnect.
+Esta camada contém as funções de interceptação global e específica que garantem a segurança, integridade e padronização das requisições na API Themis.
 
 ## 🏗️ Estrutura
 

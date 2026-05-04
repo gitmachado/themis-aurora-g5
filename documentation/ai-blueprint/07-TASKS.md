@@ -16,7 +16,7 @@ A Semana 2 do cronograma é dedicada ao **"Cérebro" (IA e RAG)**. Temos **5 dia
 |---|------|-------------|-----------|------------|
 | T01 | **Setup do módulo `ai/`**: init npm, tsconfig, Dockerfile, .env, estrutura de pastas | Douglas | 2h | — |
 | T02 | **Habilitar pgvector**: Adicionar `CREATE EXTENSION vector` e tabela `knowledge_embeddings` ao schema.sql | Douglas | 1h | — |
-| T03 | **State Schema**: Criar `OmniState` com Annotation do LangGraph, tipagem completa com Zod | Douglas | 2h | — |
+| T03 | **State Schema**: Criar `ThemisState` com Annotation do LangGraph, tipagem completa com Zod | Douglas | 2h | — |
 | T04 | **Checkpointer PostgreSQL**: Configurar `@langchain/langgraph-checkpoint-postgres` para persistência de estado | Douglas | 2h | T01 |
 | T05 | **Script de teste local**: Criar `test-graph.ts` para invocar o grafo sem WhatsApp | Douglas | 1h | T01 |
 | T06 | 🤝 **PDFs da base de conhecimento**: Pesquisar e montar 3-5 PDFs jurídicos de teste (FAQ, documentos por tipo de caso, regras do escritório) | Aline | 3h | — |

@@ -1,10 +1,10 @@
-# omniconnect-ai
+# Themis-ai
 
-Módulo de IA do OmniConnect — bot jurídico conversacional integrado ao WhatsApp.
+Módulo de IA do Themis — bot jurídico conversacional integrado ao WhatsApp.
 
 ## Visão Geral
 
-O `omniconnect-ai` é o cérebro do atendimento automatizado do escritório. Recebe mensagens via WhatsApp Cloud API, processa com um grafo LangGraph e responde de forma contextual:
+O `Themis-ai` é o cérebro do atendimento automatizado do escritório. Recebe mensagens via WhatsApp Cloud API, processa com um grafo LangGraph e responde de forma contextual:
 
 - **Triagem de leads**: coleta os 6 campos obrigatórios (nome, CPF, tipo de caso, descrição, urgência, disponibilidade) e cria o lead no backend
 - **Consulta de processos**: clientes existentes consultam o status dos seus processos jurídicos
@@ -21,7 +21,7 @@ O `omniconnect-ai` é o cérebro do atendimento automatizado do escritório. Rec
 - Chaves de API:
   - `GOOGLE_API_KEY` — Google AI Studio (Gemini 1.5 Flash + text-embedding-004)
   - `WA_ACCESS_TOKEN` e `WA_PHONE_NUMBER_ID` — WhatsApp Cloud API (Meta)
-  - `BOT_API_KEY` — chave de autenticação do backend OmniConnect
+  - `BOT_API_KEY` — chave de autenticação do backend Themis
 
 ---
 
@@ -48,7 +48,7 @@ cp .env.example .env
 docker compose up -d
 ```
 
-O serviço `omniconnect-ai` sobe na porta `3001` após o PostgreSQL e o backend estarem prontos.
+O serviço `Themis-ai` sobe na porta `3001` após o PostgreSQL e o backend estarem prontos.
 
 ### 4. Rodar localmente (desenvolvimento)
 
@@ -93,7 +93,7 @@ START → router → ┌─ triage  → sync → END
 
 ### Persistência de estado
 
-Cada conversa é identificada pelo `whatsappNumber` como `thread_id`. O `PostgresSaver` do LangGraph salva snapshots do `OmniState` no banco, permitindo que o bot retome conversas após reinicializações.
+Cada conversa é identificada pelo `whatsappNumber` como `thread_id`. O `PostgresSaver` do LangGraph salva snapshots do `ThemisState` no banco, permitindo que o bot retome conversas após reinicializações.
 
 ---
 
@@ -119,7 +119,7 @@ Cada conversa é identificada pelo `whatsappNumber` como `thread_id`. O `Postgre
 | `GOOGLE_MODEL` | `gemini-1.5-flash` | Modelo LLM para inferência |
 | `GOOGLE_EMBEDDING_MODEL` | `text-embedding-004` | Modelo de embeddings para RAG (768 dims) |
 | `DATABASE_URL` | `postgresql://...` | String de conexão PostgreSQL com pgvector |
-| `BACKEND_API_URL` | `http://localhost:3000` | URL base do backend OmniConnect |
+| `BACKEND_API_URL` | `http://localhost:3000` | URL base do backend Themis |
 | `BOT_API_KEY` | — | API key para autenticação no backend (`x-api-key`) |
 | `WA_VERIFY_TOKEN` | — | Token de verificação do webhook WhatsApp |
 | `WA_ACCESS_TOKEN` | — | Token de acesso para envio de mensagens |
@@ -140,7 +140,7 @@ ai/
 │   │   ├── checkpointer.ts  # PostgresSaver para persistência do estado LangGraph
 │   │   └── prompts.ts       # Templates de prompts (sistema, triagem, RAG, router)
 │   ├── graph/
-│   │   ├── state.ts         # OmniState — definição do estado compartilhado do grafo
+│   │   ├── state.ts         # ThemisState — definição do estado compartilhado do grafo
 │   │   ├── index.ts         # Montagem do grafo completo com arestas e compilação
 │   │   └── nodes/
 │   │       ├── router.ts    # Classificação de intenção e tipo de usuário

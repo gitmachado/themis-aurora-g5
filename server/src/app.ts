@@ -41,7 +41,7 @@ app.get('/health', (_req, res) => {
 
 // Base route
 app.get('/', (req, res) => {
-  res.json({ message: 'OmniConnect API is running', version: '1.0.0' });
+  res.json({ message: 'Themis API is running', version: '1.0.0' });
 });
 
 // Error handling (must be last)

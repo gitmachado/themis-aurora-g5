@@ -6,7 +6,7 @@ import dotenv from 'dotenv';
 dotenv.config({ path: path.join(__dirname, '../../.env') });
 
 async function run() {
-  const connectionString = 'postgresql://postgres:postgres@localhost:5433/omniconnect_db';
+  const connectionString = 'postgresql://postgres:postgres@localhost:5433/themis_db';
   const client = new Client({ connectionString });
 
   try {

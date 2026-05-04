@@ -1,6 +1,6 @@
 # Guia: Conectando Dispositivo Android ao Backend Local (Túnel ADB)
 
-Ao desenvolver o OmniConnect usando um dispositivo Android físico, o app mobile precisa se comunicar com o servidor backend rodando no seu computador (geralmente no Docker). Como o `localhost` do celular aponta para ele mesmo, e não para o PC, usamos o **ADB Reverse**.
+Ao desenvolver o Themis usando um dispositivo Android físico, o app mobile precisa se comunicar com o servidor backend rodando no seu computador (geralmente no Docker). Como o `localhost` do celular aponta para ele mesmo, e não para o PC, usamos o **ADB Reverse**.
 
 ## 🚀 Passo a Passo
 
@@ -22,7 +22,7 @@ Certifique-se de que o arquivo `mobile/lib/shared/constants/app_constants.dart` 
 
 ```dart
 static const String apiBaseUrl = String.fromEnvironment(
-  'OMNICONNECT_API_BASE_URL',
+  'Themis_API_BASE_URL',
   defaultValue: 'http://localhost:3000/api/v1',
 );
 ```

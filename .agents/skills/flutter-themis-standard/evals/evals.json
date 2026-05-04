@@ -1,5 +1,5 @@
 {
-  "skill_name": "flutter-omni-standard",
+  "skill_name": "flutter-themis-standard",
   "evals": [
     {
       "id": 1,
@@ -14,7 +14,7 @@
     {
       "id": 2,
       "prompt": "Create a process card widget for the global listing. The prototype shows a simple design, but I want a more premium look following the project's color palette and with accessibility support.",
-      "expected_output": "Premium card widget implemented with correct constraints, adequate touch targets, and OmniConnect brand colors.",
+      "expected_output": "Premium card widget implemented with correct constraints, adequate touch targets, and Themis brand colors.",
       "files": [
         "documentation/design-guide.md",
         "lib/shared/widgets/"

@@ -1,6 +1,6 @@
 # Camada de Rotas API
 
-Aqui são definidas todas as rotas públicas e privadas do servidor OmniConnect, organizadas por versão e por domínio.
+Aqui são definidas todas as rotas públicas e privadas do servidor Themis, organizadas por versão e por domínio.
 
 ## 🧭 Estrutura de Diretórios
 

@@ -1,7 +1,7 @@
 import { PostgresSaver } from "@langchain/langgraph-checkpoint-postgres";
 import pg from "pg";
 
-const DATABASE_URL = process.env.DATABASE_URL || "postgresql://postgres:postgres@localhost:5433/omniconnect_db";
+const DATABASE_URL = process.env.DATABASE_URL || "postgresql://postgres:postgres@localhost:5433/themis_db";
 
 const pool = new pg.Pool({ connectionString: DATABASE_URL });
 

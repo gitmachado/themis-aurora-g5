@@ -9,7 +9,7 @@ last_updated_at: 2026-04-19
 
 # 1. Objetivo
 
-Definir a estrategia de hospedagem e a arquitetura de rede minima para publicar o backend do OmniConnect em ambiente acessivel pela internet, sem contradizer a stack atual do monorepo e sem assumir componentes que ainda nao existem no repositorio. A entrega deste ticket e uma decisao tecnica documentada para o primeiro deploy publico do MVP, com topologia recomendada, limites claros e follow-ups obrigatorios.
+Definir a estrategia de hospedagem e a arquitetura de rede minima para publicar o backend do Themis em ambiente acessivel pela internet, sem contradizer a stack atual do monorepo e sem assumir componentes que ainda nao existem no repositorio. A entrega deste ticket e uma decisao tecnica documentada para o primeiro deploy publico do MVP, com topologia recomendada, limites claros e follow-ups obrigatorios.
 
 # 2. Escopo
 

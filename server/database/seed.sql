@@ -1,16 +1,16 @@
 SET client_encoding = 'UTF8';
--- Seed Data for OmniConnect MVP
+-- Seed Data for themis MVP
 
 -- Insert initial configuration
 INSERT INTO configurations (id, ai_tone_of_voice, service_hours_start, service_hours_end, away_message)
 VALUES ('f5a2b3c4-d5e6-4f88-8912-0123456789ab', 'Profissional e acolhedor', '09:00', '18:00', 'Olá! No momento não estamos atendendo, mas deixe sua dúvida que responderemos em breve.')
 ON CONFLICT (id) DO NOTHING;
 
--- Test users password: Omni@123456
+-- Test users password: Themis@123456
 
 -- Insert Lawyer (User)
 INSERT INTO users (id, name, whatsapp_number, cpf, email, role, password_hash)
-VALUES ('a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11', 'Dr. Maurício', '5511999999999', '12345678901', 'mauriciojesus.dev@gmail.com', 'LAWYER', '$2b$10$cRgWfrw64noRMgk7mwJQcu6jlljE8YPirk0NJ6AuDV3Q7.XfPCUku')
+VALUES ('a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11', 'Dr. Maurício', '5511999999999', '12345678901', 'mauriciojesus.dev@gmail.com', 'LAWYER', '$2b$10$dx3Gm9Ftqkr6crSt5MFoIO.fgZ/RoQLy5Ay20YAaawzhdl.l.7qsq')
 ON CONFLICT (id) DO UPDATE SET
     name = EXCLUDED.name,
     whatsapp_number = EXCLUDED.whatsapp_number,
@@ -21,7 +21,7 @@ ON CONFLICT (id) DO UPDATE SET
 
 -- Insert Client (User)
 INSERT INTO users (id, name, whatsapp_number, cpf, email, role, password_hash)
-VALUES ('b1f9e8d7-c6b5-a4b3-92a1-0f9e8d7c6b5a', 'João Cliente Exemplo', '5511888888888', '98765432100', 'joao@cliente.com', 'CLIENT', '$2b$10$cRgWfrw64noRMgk7mwJQcu6jlljE8YPirk0NJ6AuDV3Q7.XfPCUku')
+VALUES ('b1f9e8d7-c6b5-a4b3-92a1-0f9e8d7c6b5a', 'João Cliente Exemplo', '5511888888888', '98765432100', 'joao@cliente.com', 'CLIENT', '$2b$10$dx3Gm9Ftqkr6crSt5MFoIO.fgZ/RoQLy5Ay20YAaawzhdl.l.7qsq')
 ON CONFLICT (id) DO UPDATE SET
     name = EXCLUDED.name,
     whatsapp_number = EXCLUDED.whatsapp_number,

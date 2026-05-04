@@ -5,7 +5,7 @@
 O módulo de IA será desenvolvido como um **serviço independente** dentro do monorepo, na pasta `ai/`. Ele terá seu próprio `package.json`, Docker container e porta. Depois, será integrado via Docker Compose.
 
 ```
-omniconnect-aurora-g5/
+Themis-aurora-g5/
 ├── mobile/       # Flutter (já existe)
 ├── server/       # API Node.js (já existe)
 ├── ai/           # ← NOVO: Módulo de IA
@@ -46,7 +46,7 @@ omniconnect-aurora-g5/
 
 ```json
 {
-  "name": "omniconnect-ai",
+  "name": "Themis-ai",
   "dependencies": {
     "@langchain/core": "^0.3.x",
     "@langchain/langgraph": "^0.2.x",
@@ -82,7 +82,7 @@ OPENAI_MODEL=gpt-4o-mini
 EMBEDDING_MODEL=text-embedding-3-small
 
 # PostgreSQL (mesmo banco do backend)
-DATABASE_URL=postgresql://user:pass@postgres:5432/omniconnect
+DATABASE_URL=postgresql://user:pass@postgres:5432/Themis
 
 # Backend API
 BACKEND_API_URL=http://server:3000
@@ -107,7 +107,7 @@ NODE_ENV=development
     build:
       context: ./ai
       dockerfile: Dockerfile
-    container_name: omniconnect-ai
+    container_name: Themis-ai
     depends_on:
       postgres:
         condition: service_healthy

@@ -98,14 +98,14 @@ jobs:
           DB_PORT=5432
           DB_USER=postgres
           DB_PASSWORD=postgres
-          DB_NAME=omniconnect_db
+          DB_NAME=themis_db
           NODE_ENV=test
           PORT=3000
           CORS_ORIGIN=http://localhost:3000
           JWT_SECRET=ci_jwt_secret
           JWT_EXPIRE_IN=7d
           BOT_API_KEY=ci_bot_api_key
-          POSTGRES_DB=omniconnect_db
+          POSTGRES_DB=themis_db
           POSTGRES_USER=postgres
           POSTGRES_PASSWORD=postgres
           EOF
@@ -178,14 +178,14 @@ jobs:
           DB_PORT=5432
           DB_USER=postgres
           DB_PASSWORD=postgres
-          DB_NAME=omniconnect_db
+          DB_NAME=themis_db
           NODE_ENV=test
           PORT=3000
           CORS_ORIGIN=http://localhost:3000
           JWT_SECRET=ci_jwt_secret
           JWT_EXPIRE_IN=7d
           BOT_API_KEY=ci_bot_api_key
-          POSTGRES_DB=omniconnect_db
+          POSTGRES_DB=themis_db
           POSTGRES_USER=postgres
           POSTGRES_PASSWORD=postgres
           EOF

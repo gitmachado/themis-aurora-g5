@@ -7,7 +7,7 @@ abstract interface class TokenStorage {
 }
 
 final class SecureTokenStorage implements TokenStorage {
-  static const _tokenKey = 'omniconnect.auth_token';
+  static const _tokenKey = 'themis.auth_token';
 
   final FlutterSecureStorage _storage;
 

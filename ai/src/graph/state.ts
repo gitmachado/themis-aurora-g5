@@ -42,7 +42,7 @@ export const INITIAL_CONFIG: BotConfig = {
 };
 
 // State principal do LangGraph — "fonte da verdade" de cada conversa
-export const OmniState = Annotation.Root({
+export const ThemisState = Annotation.Root({
   // Identidade da conversa
   whatsappNumber: Annotation<string>,
   userType: Annotation<"UNKNOWN" | "LEAD" | "CLIENT">,
@@ -90,5 +90,5 @@ export const OmniState = Annotation.Root({
   }),
 });
 
-// Tipo inferido — importar nos nós como: import { OmniStateType } from "../state.js"
-export type OmniStateType = typeof OmniState.State;
+// Tipo inferido — importar nos nós como: import { ThemisStateType } from "../state.js"
+export type ThemisStateType = typeof ThemisState.State;

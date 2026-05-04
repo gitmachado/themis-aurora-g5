@@ -1,6 +1,6 @@
 # Documentação do Módulo de Tipos (`src/types`)
 
-Este diretório centraliza todas as definições de tipos, interfaces e esquemas de dados usados no backend do projeto OmniConnect. A organização segue princípios de Arquitetura Limpa (Clean Architecture), o padrão de **Barrels Nidificados (Nested Barrels)** e **Separação de Preocupações (Separation of Concerns)**.
+Este diretório centraliza todas as definições de tipos, interfaces e esquemas de dados usados no backend do projeto Themis. A organização segue princípios de Arquitetura Limpa (Clean Architecture), o padrão de **Barrels Nidificados (Nested Barrels)** e **Separação de Preocupações (Separation of Concerns)**.
 
 ## 📂 Estrutura de Diretórios
 
