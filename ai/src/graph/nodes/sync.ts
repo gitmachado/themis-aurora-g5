@@ -1,6 +1,4 @@
-// TODO: Chamar syncMessage() aqui quando T19 (Webhook receptor)
-// for implementada — sender = "CLIENT" ao receber mensagem
-// e sender = "BOT" ao enviar resposta
+import { syncMessage as syncToBackend } from "../../utils/backend-client.js";
 
 export async function syncMessage(data: {
   whatsappNumber: string;
@@ -9,6 +7,16 @@ export async function syncMessage(data: {
   messageType: "TEXT" | "IMAGE" | "DOCUMENT";
   whatsappMessageId: string | null;
 }) {
-  // MOCK: Independencia do modulo AI
-  console.log("[Sync Node] MOCK: Sincronizando mensagem com backend", data);
+  try {
+    await syncToBackend({
+      whatsappNumber: data.whatsappNumber,
+      content: data.content,
+      senderRole: data.senderRole,
+      messageType: data.messageType,
+      whatsappMessageId: data.whatsappMessageId,
+    });
+  } catch (err: any) {
+    // Sync não deve bloquear o fluxo do bot — log e segue
+    console.error("[Sync Node] Erro ao sincronizar mensagem:", err?.response?.data || err.message);
+  }
 }

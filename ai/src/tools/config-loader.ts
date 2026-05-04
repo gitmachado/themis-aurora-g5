@@ -1,8 +1,4 @@
-import axios from 'axios';
-
-// Variáveis de ambiente simuladas (deverão vir do process.env no projeto real)
-const BACKEND_API_URL = process.env.BACKEND_API_URL || 'http://localhost:3000';
-const BOT_API_KEY = process.env.BOT_API_KEY || 'default_bot_key';
+import { getBotConfig as fetchBotConfig } from '../utils/backend-client.js';
 
 export type BotConfig = {
   toneOfVoice: string;
@@ -26,12 +22,7 @@ export async function getBotConfig(): Promise<BotConfig> {
   }
 
   try {
-    const response = await axios.get(
-      `${BACKEND_API_URL}/api/v1/configurations`,
-      { headers: { "x-api-key": BOT_API_KEY } }
-    );
-    
-    const data = response.data;
+    const data = await fetchBotConfig();
     cachedConfig = data;
     
     // Limpa o cache após 5 minutos

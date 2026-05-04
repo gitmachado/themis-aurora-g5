@@ -1,3 +1,4 @@
+import "dotenv/config";
 import { HumanMessage } from "@langchain/core/messages";
 import { getBotConfig } from "./tools/config-loader.js";
 import { setupCheckpointer } from "./config/checkpointer.js";

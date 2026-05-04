@@ -49,9 +49,19 @@ export const OmniState = Annotation.Root({
   userId: Annotation<string | null>,   // UUID do users (se já é cliente)
   leadId: Annotation<string | null>,   // UUID do leads (se está em triagem)
 
-  // Histórico de mensagens com reducer de append (nunca sobrescreve)
+  // Histórico de mensagens com reducer de append inteligente
   messages: Annotation<BaseMessage[]>({
-    reducer: (a, b) => a.concat(b),
+    reducer: (a, b) => {
+      // Se b for uma única mensagem que já existe no fim de a, ignora
+      if (b.length === 1 && a.length > 0) {
+        const lastA = a[a.length - 1];
+        const newB = b[0];
+        if (lastA.content === newB.content && (lastA as any)._getType?.() === (newB as any)._getType?.()) {
+          return a;
+        }
+      }
+      return a.concat(b);
+    },
     default: () => [],
   }),
 
@@ -60,11 +70,24 @@ export const OmniState = Annotation.Root({
 
   // Controle de fluxo
   currentNode: Annotation<string>,
-  needsHandoff: Annotation<boolean>,
-  handoffReason: Annotation<string | null>,
+  needsHandoff: Annotation<boolean>({
+    reducer: (a, b) => (b !== undefined ? b : a),
+    default: () => false,
+  }),
+  handoffReason: Annotation<string | null>({
+    reducer: (a, b) => b,
+    default: () => null,
+  }),
+  interactionContext: Annotation<string | null>({
+    reducer: (a, b) => b,
+    default: () => null,
+  }),
 
   // Configuração do escritório (carregada 1x via config-loader)
-  config: Annotation<BotConfig>,
+  config: Annotation<BotConfig>({
+    reducer: (a, b) => b,
+    default: () => INITIAL_CONFIG,
+  }),
 });
 
 // Tipo inferido — importar nos nós como: import { OmniStateType } from "../state.js"

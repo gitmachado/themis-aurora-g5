@@ -50,7 +50,7 @@ void main() {
       (failure) => throw failure,
     );
     expect(tokenStorage.token, 'jwt-token');
-    (await repository.logout()).getOrElse((failure) => throw failure);
+    await repository.logout();
 
     expect(apiClient.calls.first.method, 'POST');
     expect(apiClient.calls.first.path, '/auth/login');

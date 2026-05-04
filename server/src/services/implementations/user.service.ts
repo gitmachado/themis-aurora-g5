@@ -18,7 +18,6 @@ export class UserService implements IUserService {
       whatsappNumber: dto.whatsappNumber,
       cpf: dto.cpf || null,
       email: dto.email || null,
-      supabaseUserId: dto.supabaseUserId || null,
       avatarUrl: dto.avatarUrl || null,
       role: dto.role,
       passwordHash: dto.passwordHash || null,
@@ -42,12 +41,20 @@ export class UserService implements IUserService {
     return this.userRepository.findByWhatsapp(whatsapp);
   }
 
+  async getByCpf(cpf: string): Promise<User | null> {
+    return this.userRepository.findByCpf(cpf);
+  }
+
   async getClientsByLawyerId(lawyerId: string): Promise<User[]> {
     return this.userRepository.findClientsByLawyerId(lawyerId);
   }
 
   async getClientByLawyerId(lawyerId: string, clientId: string): Promise<User | null> {
     return this.userRepository.findClientByLawyerId(lawyerId, clientId);
+  }
+
+  async getAllLawyers(): Promise<User[]> {
+    return this.userRepository.findAllLawyers();
   }
 
   async update(id: string, dto: UpdateUserDTO): Promise<User> {

@@ -8,9 +8,13 @@ class LeadCard extends StatelessWidget {
   final String caseType;
   final String time;
   final String urgency;
+  final String status;
   final VoidCallback onTap;
   final VoidCallback onAccept;
   final VoidCallback onArchive;
+  final bool showArchiveAction;
+  final bool showChatAction;
+  final String chatLabel;
 
   const LeadCard({
     super.key,
@@ -18,9 +22,13 @@ class LeadCard extends StatelessWidget {
     required this.caseType,
     required this.time,
     required this.urgency,
+    required this.status,
     required this.onTap,
     required this.onAccept,
     required this.onArchive,
+    this.showArchiveAction = true,
+    this.showChatAction = true,
+    this.chatLabel = 'Atender',
   });
 
   @override
@@ -32,13 +40,13 @@ class LeadCard extends StatelessWidget {
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
           color: AppColors.white,
-          borderRadius: BorderRadius.circular(16),
+          borderRadius: BorderRadius.circular(20),
           border: Border.all(color: AppColors.border, width: 1),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withValues(alpha: 0.04),
-              blurRadius: 10,
-              offset: const Offset(0, 4),
+              color: Colors.black.withValues(alpha: 0.03),
+              blurRadius: 2,
+              offset: const Offset(0, 1),
             ),
           ],
         ),
@@ -50,7 +58,7 @@ class LeadCard extends StatelessWidget {
                   tag: 'avatar_$name',
                   child: CircleAvatar(
                     radius: 24,
-                    backgroundColor: AppColors.primary.withValues(alpha: 0.1),
+                    backgroundColor: AppColors.primaryOverlay,
                     child: Text(
                       name.isNotEmpty ? name[0].toUpperCase() : '?',
                       style: const TextStyle(
@@ -84,29 +92,34 @@ class LeadCard extends StatelessWidget {
                 AppBadge(label: urgency.toUpperCase(), type: urgencyType),
               ],
             ),
-            const SizedBox(height: 16),
-            Row(
-              children: [
-                Expanded(
-                  child: _buildActionButton(
-                    icon: Icons.close_rounded,
-                    color: AppColors.textCaption,
-                    onPressed: onArchive,
-                    label: 'Arquivar',
-                  ),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: _buildActionButton(
-                    icon: Icons.check_circle_rounded,
-                    color: AppColors.success,
-                    onPressed: onAccept,
-                    label: 'Aceitar',
-                    isPrimary: true,
-                  ),
-                ),
-              ],
-            ),
+            if (showArchiveAction || showChatAction) ...[
+              const SizedBox(height: 16),
+              Row(
+                children: [
+                  if (showArchiveAction) ...[
+                    Expanded(
+                      child: _buildActionButton(
+                        icon: Icons.archive_outlined,
+                        color: AppColors.textCaption,
+                        onPressed: onArchive,
+                        label: 'Arquivar',
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                  ],
+                  if (showChatAction)
+                    Expanded(
+                      child: _buildActionButton(
+                        icon: Icons.support_agent_rounded,
+                        color: AppColors.ink,
+                        onPressed: onAccept,
+                        label: chatLabel,
+                        isPrimary: true,
+                      ),
+                    ),
+                ],
+              ),
+            ],
           ],
         ),
       ),
@@ -139,10 +152,10 @@ class LeadCard extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
         decoration: BoxDecoration(
-          color: isPrimary ? color.withValues(alpha: 0.1) : Colors.transparent,
-          borderRadius: BorderRadius.circular(8),
+          color: isPrimary ? AppColors.yellow : Colors.transparent,
+          borderRadius: BorderRadius.circular(999),
           border: Border.all(
-            color: isPrimary ? color.withValues(alpha: 0.2) : AppColors.border,
+            color: isPrimary ? AppColors.yellow : AppColors.border,
           ),
         ),
         child: Row(

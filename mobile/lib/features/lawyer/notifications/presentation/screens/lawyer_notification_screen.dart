@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../../../../../app/routes/app_router.dart';
 import '../../../../../../features/notifications/domain/entities/app_notification.dart';
 import '../../../../../../features/notifications/presentation/notification_display.dart';
 import '../../../../../../features/notifications/presentation/providers/notification_providers.dart';
@@ -31,9 +32,9 @@ class _LawyerNotificationScreenState
           title: 'Notificações',
           showBackButton: true,
           bottom: TabBar(
-            labelColor: AppColors.primary,
+            labelColor: AppColors.ink,
             unselectedLabelColor: AppColors.textCaption,
-            indicatorColor: AppColors.primary,
+            indicatorColor: AppColors.yellow,
             indicatorSize: TabBarIndicatorSize.label,
             tabs: const [
               Tab(text: 'Não lidas'),
@@ -71,7 +72,7 @@ class _LawyerNotificationScreenState
     }
 
     return ListView.builder(
-      padding: const EdgeInsets.only(bottom: 24),
+      padding: const EdgeInsets.only(top: 16, bottom: 24),
       itemCount: list.length,
       itemBuilder: (context, index) {
         final n = list[index];
@@ -84,9 +85,43 @@ class _LawyerNotificationScreenState
           isRead: n.isRead,
           onToggleRead: _toggleReadStatus,
           onDelete: _deleteNotification,
+          onTap: () => _handleNotificationTap(n),
         );
       },
     );
+  }
+
+  void _handleNotificationTap(AppNotification n) {
+    if (!n.isRead) {
+      _toggleReadStatus(n.id);
+    }
+
+    final extra = n.extraData;
+    if (extra == null) return;
+
+    if (n.type == 'HUMAN_SUPPORT' && extra.containsKey('whatsappNumber')) {
+      Navigator.pushNamed(
+        context,
+        AppRouter.lawyerLeadDetailRoute,
+        arguments: {
+          'id': extra['leadId'],
+          'name': extra['name'] ?? 'Cliente',
+          'caseType': extra['caseType'] ?? '',
+          'urgency': extra['urgency'] ?? '',
+        },
+      );
+    } else if (n.type == 'NEW_LEAD' && extra.containsKey('whatsappNumber')) {
+      Navigator.pushNamed(
+        context,
+        AppRouter.lawyerLeadDetailRoute,
+        arguments: {
+          'id': extra['leadId'],
+          'name': extra['name'] ?? 'Novo Lead',
+          'caseType': extra['caseType'] ?? '',
+          'urgency': extra['urgency'] ?? '',
+        },
+      );
+    }
   }
 
   Widget _buildEmptyState() {
@@ -101,7 +136,7 @@ class _LawyerNotificationScreenState
           ),
           const SizedBox(height: 16),
           Text(
-            'Nenhuma notificação por aqui',
+            'Nenhuma notificação',
             style: AppTextStyles.h2.copyWith(color: AppColors.textCaption),
           ),
         ],
@@ -119,7 +154,7 @@ class _LawyerNotificationScreenState
 
   Widget _buildLoadingList() {
     return ListView.separated(
-      padding: const EdgeInsets.all(20),
+      padding: const EdgeInsets.fromLTRB(20, 20, 20, 24),
       itemCount: 5,
       separatorBuilder: (_, _) => const SizedBox(height: 12),
       itemBuilder: (_, _) =>

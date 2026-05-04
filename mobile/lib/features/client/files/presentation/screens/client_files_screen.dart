@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+import '../../../../../../features/auth/presentation/providers/auth_providers.dart';
 import '../../../../../../features/procedures/domain/entities/legal_process.dart';
 import '../../../../../../features/procedures/domain/entities/process_document.dart';
 import '../../../../../../features/procedures/presentation/providers/procedure_providers.dart';
@@ -29,12 +30,19 @@ class _ClientFilesScreenState extends ConsumerState<ClientFilesScreen> {
   @override
   Widget build(BuildContext context) {
     final documents = ref.watch(myDocumentsProvider);
-    final procedures = ref.watch(myProceduresProvider).valueOrNull ?? const [];
+    final account = ref.watch(currentAccountProvider).valueOrNull;
+    final allProcedures =
+        ref.watch(myProceduresProvider).valueOrNull ?? const <LegalProcess>[];
+    final procedures = account == null
+        ? const <LegalProcess>[]
+        : allProcedures
+              .where((process) => process.clientId == account.id)
+              .toList();
 
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: CustomAppBar(
-        title: 'Arquivos',
+        title: 'Documentos',
         showBackButton: false,
         actions: [AppAppBarActions(showChat: false)],
         showDivider: false,
@@ -43,18 +51,17 @@ class _ClientFilesScreenState extends ConsumerState<ClientFilesScreen> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Container(
-            color: AppColors.white,
+            color: AppColors.background,
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                _buildSecurityBanner(),
                 Padding(
-                  padding: const EdgeInsets.fromLTRB(20, 16, 20, 16),
+                  padding: const EdgeInsets.fromLTRB(20, 12, 20, 16),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Text(
-                        'Seus arquivos',
+                        'Seus documentos',
                         style: AppTextStyles.h2.copyWith(fontSize: 18),
                       ),
                       _buildFilterDropdown(),
@@ -72,7 +79,7 @@ class _ClientFilesScreenState extends ConsumerState<ClientFilesScreen> {
             child: documents.when(
               data: (items) => _buildFileList(items),
               loading: _buildLoadingList,
-              error: (error, _) => _buildErrorState(error),
+              error: (_, _) => _buildErrorState(),
             ),
           ),
         ],
@@ -82,7 +89,7 @@ class _ClientFilesScreenState extends ConsumerState<ClientFilesScreen> {
         onPressed: _isUploading ? null : () => _pickAndUpload(procedures),
         backgroundColor: _isUploading
             ? AppColors.textCaption
-            : AppColors.primary,
+            : AppColors.yellow,
         child: _isUploading
             ? const SizedBox(
                 width: 20,
@@ -94,59 +101,9 @@ class _ClientFilesScreenState extends ConsumerState<ClientFilesScreen> {
               )
             : const Icon(
                 Icons.upload_file_rounded,
-                color: AppColors.white,
+                color: AppColors.ink,
                 size: 28,
               ),
-      ),
-    );
-  }
-
-  Widget _buildSecurityBanner() {
-    return Container(
-      margin: const EdgeInsets.fromLTRB(20, 12, 20, 0),
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: AppColors.primary,
-        borderRadius: BorderRadius.circular(16),
-      ),
-      child: Row(
-        children: [
-          Container(
-            padding: const EdgeInsets.all(8),
-            decoration: BoxDecoration(
-              color: AppColors.white.withValues(alpha: 0.1),
-              shape: BoxShape.circle,
-            ),
-            child: const Icon(
-              Icons.verified_user_outlined,
-              color: Colors.white,
-              size: 24,
-            ),
-          ),
-          const SizedBox(width: 16),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const Text(
-                  'Segurança garantida',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontWeight: FontWeight.bold,
-                    fontSize: 15,
-                  ),
-                ),
-                Text(
-                  'Envios e visualizações passam pelo backend autenticado.',
-                  style: TextStyle(
-                    color: Colors.white.withValues(alpha: 0.8),
-                    fontSize: 12,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ],
       ),
     );
   }
@@ -155,7 +112,7 @@ class _ClientFilesScreenState extends ConsumerState<ClientFilesScreen> {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
       decoration: BoxDecoration(
-        color: AppColors.white,
+        color: AppColors.surface2,
         borderRadius: BorderRadius.circular(20),
         border: Border.all(color: AppColors.divider.withValues(alpha: 0.7)),
       ),
@@ -164,7 +121,7 @@ class _ClientFilesScreenState extends ConsumerState<ClientFilesScreen> {
           value: _selectedFilter,
           icon: const Icon(
             Icons.keyboard_arrow_down_rounded,
-            color: AppColors.textCaption,
+            color: AppColors.ink3,
             size: 20,
           ),
           style: AppTextStyles.body.copyWith(
@@ -238,16 +195,16 @@ class _ClientFilesScreenState extends ConsumerState<ClientFilesScreen> {
 
     return Container(
       decoration: BoxDecoration(
-        color: AppColors.white,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: AppColors.divider.withValues(alpha: 0.7)),
+        color: AppColors.surface,
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: AppColors.line),
       ),
       child: ListTile(
         contentPadding: const EdgeInsets.all(16),
         leading: Container(
           padding: const EdgeInsets.all(10),
           decoration: BoxDecoration(
-            color: iconColor.withValues(alpha: 0.1),
+            color: isPdf ? AppColors.errorBackground : AppColors.yellowSoft,
             borderRadius: BorderRadius.circular(12),
           ),
           child: Icon(
@@ -284,15 +241,47 @@ class _ClientFilesScreenState extends ConsumerState<ClientFilesScreen> {
     );
   }
 
-  Widget _buildErrorState(Object error) {
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(24),
-        child: Text(
-          error.toString(),
-          textAlign: TextAlign.center,
-          style: AppTextStyles.body.copyWith(color: AppColors.error),
+  Widget _buildErrorState() {
+    return RefreshIndicator(
+      onRefresh: () => ref.refresh(myDocumentsProvider.future),
+      child: ListView(
+        physics: const AlwaysScrollableScrollPhysics(),
+        padding: EdgeInsets.fromLTRB(
+          24,
+          88,
+          24,
+          AppDimensions.bottomPadding(context),
         ),
+        children: [
+          Icon(
+            Icons.cloud_off_rounded,
+            size: 58,
+            color: AppColors.error.withValues(alpha: 0.72),
+          ),
+          const SizedBox(height: 18),
+          Text(
+            'Não foi possível carregar seus documentos',
+            textAlign: TextAlign.center,
+            style: AppTextStyles.h2.copyWith(color: AppColors.textPrimary),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            'A conexão com o servidor falhou ou a sessão precisa ser atualizada.',
+            textAlign: TextAlign.center,
+            style: AppTextStyles.body.copyWith(
+              color: AppColors.textCaption,
+              fontSize: 14,
+            ),
+          ),
+          const SizedBox(height: 22),
+          Center(
+            child: FilledButton.icon(
+              onPressed: () => ref.invalidate(myDocumentsProvider),
+              icon: const Icon(Icons.refresh_rounded),
+              label: const Text('Tentar novamente'),
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -400,13 +389,18 @@ class _ClientFilesScreenState extends ConsumerState<ClientFilesScreen> {
   }
 
   Future<void> _openDocument(ProcessDocument document) async {
-    final url = await ref
-        .read(apiClientProvider)
-        .getDocumentAccessUrl(document.id);
-    final uri = Uri.parse(url);
-    if (await canLaunchUrl(uri)) {
-      await launchUrl(uri, mode: LaunchMode.externalApplication);
-      return;
+    try {
+      final url = await ref
+          .read(apiClientProvider)
+          .getDocumentAccessUrl(document.id);
+      final uri = Uri.parse(Uri.encodeFull(url));
+      final launched = await launchUrl(
+        uri,
+        mode: LaunchMode.externalApplication,
+      );
+      if (launched) return;
+    } catch (_) {
+      // fall through to error snackbar
     }
 
     if (!mounted) return;

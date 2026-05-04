@@ -11,11 +11,20 @@ const DEFAULT_DEV_CORS_ORIGINS = [
   'http://127.0.0.1:8080',
 ];
 
+const getOptionalEnv = (name: string): string | undefined => {
+  const value = process.env[name]?.trim();
+  if (!value || value.toLowerCase() === 'disabled') {
+    return undefined;
+  }
+  return value;
+};
+
 export const isProduction = (): boolean => process.env.NODE_ENV === 'production';
 
 export const getJwtSecret = (): string => {
-  if (process.env.JWT_SECRET) {
-    return process.env.JWT_SECRET;
+  const jwtSecret = getOptionalEnv('JWT_SECRET');
+  if (jwtSecret) {
+    return jwtSecret;
   }
 
   if (isProduction()) {
@@ -27,8 +36,9 @@ export const getJwtSecret = (): string => {
 };
 
 export const getBotApiKey = (): string | undefined => {
-  if (process.env.BOT_API_KEY) {
-    return process.env.BOT_API_KEY;
+  const botApiKey = getOptionalEnv('BOT_API_KEY');
+  if (botApiKey) {
+    return botApiKey;
   }
 
   if (isProduction()) {
@@ -38,27 +48,8 @@ export const getBotApiKey = (): string | undefined => {
   return undefined;
 };
 
-export const getSupabaseUrl = (): string | undefined => process.env.SUPABASE_URL;
-
-export const getSupabasePublishableKey = (): string | undefined =>
-  process.env.SUPABASE_PUBLISHABLE_KEY || process.env.SUPABASE_ANON_KEY;
-
-export const getSupabaseServiceRoleKey = (): string | undefined =>
-  process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_SECRET_KEY;
-
-export const getSupabaseAuthRedirectUrl = (): string | undefined =>
-  process.env.SUPABASE_AUTH_REDIRECT_URL;
-
-export const getSupabaseStorageBucket = (): string =>
-  process.env.SUPABASE_STORAGE_BUCKET || 'omniconnect-documents';
-
-export const getSupabaseStorageSignedUrlExpiresIn = (): number => {
-  const value = Number(process.env.SUPABASE_STORAGE_SIGNED_URL_EXPIRES_IN || '300');
-  return Number.isFinite(value) && value > 0 ? value : 300;
-};
-
 export const getAllowedCorsOrigins = (): string[] => {
-  const configuredOrigins = process.env.CORS_ORIGIN
+  const configuredOrigins = getOptionalEnv('CORS_ORIGIN')
     ?.split(',')
     .map((origin: string) => origin.trim())
     .filter(Boolean);

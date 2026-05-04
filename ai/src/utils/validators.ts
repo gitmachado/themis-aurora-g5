@@ -1,9 +1,12 @@
 export const CASE_TYPES = [
   "Trabalhista",
   "Cível",
+  "Civil",
   "Família",
   "Criminal",
   "Previdenciário",
+  "Herança",
+  "Inventário",
 ] as const;
 
 export const URGENCY_LEVELS = ["Alta", "Média", "Baixa"] as const;

@@ -8,6 +8,7 @@ final class AppNotificationModel extends AppNotification {
     required super.title,
     required super.body,
     required super.isRead,
+    super.extraData,
     super.createdAt,
   });
 
@@ -19,6 +20,7 @@ final class AppNotificationModel extends AppNotification {
       title: json['title'] as String? ?? 'Notificacao',
       body: json['body'] as String? ?? '',
       isRead: json['isRead'] as bool? ?? false,
+      extraData: json['extraData'] as Map<String, dynamic>?,
       createdAt: _date(json['createdAt']),
     );
   }
@@ -31,6 +33,7 @@ final class AppNotificationModel extends AppNotification {
       'title': title,
       'body': body,
       'isRead': isRead,
+      'extraData': extraData,
       'createdAt': createdAt?.toIso8601String(),
     };
   }

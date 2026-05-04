@@ -6,6 +6,12 @@ final class AppConstants {
     defaultValue: 'http://10.0.2.2:3000/api/v1',
   );
 
+  static const String googleClientId = String.fromEnvironment(
+    'OMNICONNECT_GOOGLE_CLIENT_ID',
+    defaultValue:
+        '713885920352-n4ahv30vrjtp1548g2u9os3ui1t8lbci.apps.googleusercontent.com',
+  );
+
   static const Duration requestConnectTimeout = Duration(seconds: 15);
   static const Duration requestReceiveTimeout = Duration(seconds: 20);
 }

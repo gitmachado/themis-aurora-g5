@@ -6,10 +6,11 @@ import { INotificationService } from '../interfaces/notification.service';
 import { ILegalProcessService } from '../interfaces/legal-process.service';
 import type { Lead, User } from '@models';
 import type { CreateLeadDTO, ConvertLeadDTO } from '@dtos';
-import { NotFoundError, ConflictError } from './errors';
+import { NotFoundError, ConflictError, BadRequestError } from './errors';
 import { LeadStatus, UserRole } from '@enums';
 import bcrypt from 'bcryptjs';
-import { ISupabaseAuthService } from '../interfaces/supabase-auth.service';
+import { eventBus } from '../communication/InternalEventBus';
+import { dbRun } from '../../config/database';
 
 export class LeadService implements ILeadService {
   constructor(
@@ -17,8 +18,7 @@ export class LeadService implements ILeadService {
     private readonly userRepository: IUserRepository,
     private readonly authService: IAuthService,
     private readonly notificationService: INotificationService,
-    private readonly legalProcessService: ILegalProcessService,
-    private readonly supabaseAuthService?: ISupabaseAuthService
+    private readonly legalProcessService: ILegalProcessService
   ) {}
 
   async createFromWhatsapp(dto: CreateLeadDTO): Promise<Lead> {
@@ -30,7 +30,7 @@ export class LeadService implements ILeadService {
 
     const caseDescription = dto.caseDescription ?? dto.description ?? '';
 
-    return this.leadRepository.create({
+    const lead = await this.leadRepository.create({
       name: dto.name || null,
       whatsappNumber: dto.whatsappNumber,
       email: dto.email || null,
@@ -41,14 +41,23 @@ export class LeadService implements ILeadService {
       contactAvailability: dto.contactAvailability || null,
       status: 'PENDING',
       convertedUserId: null,
+      assignedLawyerId: null,
       lawyerNotes: null,
       discardReason: null,
+      isAIPaused: false,
     });
+
+    // Notify lawyers of new lead
+    eventBus.emitLeadUpdate(lead);
+
+    return lead;
   }
 
   async updateLeadData(id: string, data: Partial<CreateLeadDTO>): Promise<Lead> {
+    console.log(`[LeadService] Iniciando atualização do lead ${id}`);
     const lead = await this.leadRepository.findById(id);
     if (!lead) {
+      console.warn(`[LeadService] Lead ${id} não encontrado no banco`);
       throw new NotFoundError('Lead não encontrado');
     }
 
@@ -58,7 +67,12 @@ export class LeadService implements ILeadService {
     }
     delete (normalizedData as any).description;
 
-    return this.leadRepository.update(id, normalizedData);
+    const updatedLead = await this.leadRepository.update(id, normalizedData);
+    
+    // Notify updates
+    eventBus.emitLeadUpdate(updatedLead);
+    
+    return updatedLead;
   }
 
   async convertToClient(dto: ConvertLeadDTO): Promise<User> {
@@ -73,19 +87,23 @@ export class LeadService implements ILeadService {
       throw new ConflictError('Usuário já cadastrado com este número');
     }
 
-    const shouldInviteByEmail = Boolean(
-      lead.email && this.supabaseAuthService?.isAdminAuthConfigured()
-    );
-    const tempPassword = shouldInviteByEmail ? null : this.authService.generateTempPassword();
-    const passwordHash = tempPassword ? await bcrypt.hash(tempPassword, 10) : null;
+    const cpf = lead.cpf?.trim() || null;
+    if (cpf) {
+      const existingUserByCpf = await this.userRepository.findByCpf(cpf);
+      if (existingUserByCpf) {
+        throw new ConflictError('Usuário já cadastrado com este CPF');
+      }
+    }
+
+    const tempPassword = this.authService.generateTempPassword();
+    const passwordHash = await bcrypt.hash(tempPassword, 10);
 
     // Create User
     const user = await this.userRepository.create({
       name: lead.name || 'Cliente',
       whatsappNumber: lead.whatsappNumber!,
-      cpf: lead.cpf || '',
+      cpf,
       email: lead.email || null,
-      supabaseUserId: null,
       avatarUrl: null,
       role: 'CLIENT',
       passwordHash,
@@ -96,51 +114,30 @@ export class LeadService implements ILeadService {
       }
     });
 
-    let convertedUser = user;
-    try {
-      if (shouldInviteByEmail && lead.email) {
-        const supabaseUser = await this.supabaseAuthService!.inviteUserByEmail({
-          email: lead.email,
-          name: user.name,
-          role: 'CLIENT',
-          localUserId: user.id,
-          whatsappNumber: user.whatsappNumber,
-          cpf: user.cpf,
-        });
-        convertedUser = await this.userRepository.update(user.id, {
-          supabaseUserId: supabaseUser.supabaseUserId,
-        });
-      }
-    } catch (error) {
-      await this.userRepository.delete(user.id);
-      throw error;
-    }
-
     // Update lead status
-    await this.leadRepository.update(lead.id, {
+    const updatedLead = await this.leadRepository.update(lead.id, {
       status: 'CONVERTED',
-      convertedUserId: convertedUser.id,
+      convertedUserId: user.id,
     });
 
     await this.legalProcessService.create({
-      clientId: convertedUser.id,
+      clientId: user.id,
       lawyerId: dto.lawyerId,
       title: `${lead.caseType || 'Civil'} - ${lead.name || 'Cliente'}`,
       description: lead.caseDescription || '',
       caseType: lead.caseType || 'Civil',
     });
 
-    const accessMessage = shouldInviteByEmail
-      ? 'Bem-vindo! Enviamos um convite para o seu email para ativar o acesso ao OmniConnect.'
-      : `Bem-vindo! Baixe nosso app e use a senha temporária: ${tempPassword}`;
+    // Notify update via Socket
+    eventBus.emitLeadUpdate(updatedLead);
 
     await this.notificationService.sendPush(
-      convertedUser.id,
+      user.id,
       'Seu acesso ao OmniConnect',
-      accessMessage
+      `Bem-vindo! Baixe nosso app e use a senha temporária: ${tempPassword}`
     );
 
-    return convertedUser;
+    return user;
   }
 
   async discard(id: string, reason?: string): Promise<Lead> {
@@ -149,17 +146,155 @@ export class LeadService implements ILeadService {
       throw new NotFoundError('Lead não encontrado');
     }
 
-    return this.leadRepository.update(id, {
+    const updatedLead = await this.leadRepository.update(id, {
       status: 'DISCARDED',
       discardReason: reason || null,
     });
+
+    // Notify update via Socket
+    eventBus.emitLeadUpdate(updatedLead);
+
+    return updatedLead;
   }
 
   async getPending(): Promise<Lead[]> {
     return this.leadRepository.findPending();
   }
 
+  async getAll(): Promise<Lead[]> {
+    return this.leadRepository.findAll();
+  }
+
+  async getByStatus(status: LeadStatus): Promise<Lead[]> {
+    return this.leadRepository.findByStatus(status);
+  }
+
   async getById(id: string): Promise<Lead | null> {
     return this.leadRepository.findById(id);
+  }
+
+  async getByWhatsapp(whatsappNumber: string): Promise<Lead | null> {
+    return this.leadRepository.findByWhatsapp(whatsappNumber);
+  }
+
+  async resumeAISupport(whatsappNumber: string): Promise<void> {
+    const aiModuleUrl = process.env.AI_MODULE_URL || 'http://localhost:3001';
+    
+    try {
+      // 1. Atualiza no Banco de Dados
+      const lead = await this.leadRepository.findByWhatsapp(whatsappNumber);
+      if (lead) {
+        await this.leadRepository.update(lead.id, { 
+          isAIPaused: false,
+          assignedLawyerId: null 
+        });
+        
+        // Notify unlock
+        eventBus.emitLeadUnlocked(lead.id, lead.whatsappNumber);
+      }
+
+      // 2. Notifica Módulo de IA
+      const response = await fetch(`${aiModuleUrl}/handoff/resume`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ whatsappNumber }),
+      });
+
+      if (!response.ok) {
+        const error = await response.json() as any;
+        throw new Error(error.error || 'Falha ao retomar atendimento da IA');
+      }
+
+      console.log(`[LeadService] Sinal de retomada enviado para IA e banco atualizado (${whatsappNumber})`);
+    } catch (error) {
+      console.error('[LeadService] Erro ao comunicar com módulo de IA:', error);
+      throw error;
+    }
+  }
+
+  async startHandoffSupport(whatsappNumber: string): Promise<void> {
+    const aiModuleUrl = process.env.AI_MODULE_URL || 'http://localhost:3001';
+    
+    try {
+      // 1. Atualiza no Banco de Dados
+      const lead = await this.leadRepository.findByWhatsapp(whatsappNumber);
+      if (lead) {
+        await this.leadRepository.update(lead.id, { isAIPaused: true });
+      }
+
+      // 2. Notifica Módulo de IA
+      const response = await fetch(`${aiModuleUrl}/handoff/start`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ whatsappNumber }),
+      });
+
+      if (!response.ok) {
+        const error = await response.json() as any;
+        throw new Error(error.error || 'Falha ao iniciar handoff para humano');
+      }
+
+      console.log(`[LeadService] Sinal de handoff iniciado enviado para IA e banco atualizado (${whatsappNumber})`);
+    } catch (error) {
+      console.error('[LeadService] Erro ao comunicar com módulo de IA:', error);
+      throw error;
+    }
+  }
+
+  async assignToLawyer(leadId: string, lawyerId: string): Promise<void> {
+    const lead = await this.leadRepository.findById(leadId);
+    if (!lead) throw new NotFoundError('Lead não encontrado');
+
+    if (lead.assignedLawyerId && lead.assignedLawyerId !== lawyerId) {
+      throw new BadRequestError('Este lead já está sendo atendido por outro advogado');
+    }
+
+    const lawyer = await this.userRepository.findById(lawyerId);
+    if (!lawyer) throw new NotFoundError('Advogado não encontrado');
+
+    await this.leadRepository.update(leadId, { 
+      assignedLawyerId: lawyerId,
+      isAIPaused: true 
+    });
+
+    // Broadcast lock
+    eventBus.emitLeadLocked(leadId, lead.whatsappNumber, lawyerId, lawyer.name);
+  }
+
+  async releaseFromLawyer(leadId: string): Promise<void> {
+    const lead = await this.leadRepository.findById(leadId);
+    if (!lead) throw new NotFoundError('Lead não encontrado');
+
+    await this.leadRepository.update(leadId, { 
+      assignedLawyerId: null,
+      isAIPaused: false 
+    });
+
+    // Broadcast unlock
+    eventBus.emitLeadUnlocked(leadId, lead.whatsappNumber);
+  }
+
+  async deleteLead(id: string): Promise<void> {
+    const lead = await this.leadRepository.findById(id);
+    if (!lead) {
+      throw new NotFoundError('Lead não encontrado');
+    }
+
+    const whatsappNumber = lead.whatsappNumber;
+    console.log(`[LeadService] Iniciando DELEÇÃO TOTAL do lead ${id} (WhatsApp: ${whatsappNumber})`);
+
+    // 1. Deletar mensagens
+    const msgCount = await dbRun('DELETE FROM messages WHERE whatsapp_number = $1', [whatsappNumber]);
+    console.log(`[LeadService] ${msgCount} mensagens deletadas`);
+
+    // 2. Deletar checkpoints da IA (LangGraph)
+    await dbRun('DELETE FROM checkpoint_writes WHERE thread_id = $1', [whatsappNumber]);
+    await dbRun('DELETE FROM checkpoint_blobs WHERE thread_id = $1', [whatsappNumber]);
+    await dbRun('DELETE FROM checkpoints WHERE thread_id = $1', [whatsappNumber]);
+    console.log(`[LeadService] Memória da IA limpa para o thread ${whatsappNumber}`);
+
+    // 3. Deletar o lead
+    await this.leadRepository.delete(id);
+    console.log(`[LeadService] Lead ${id} removido do sistema`);
   }
 }

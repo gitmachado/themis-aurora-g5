@@ -38,7 +38,6 @@ const options: swaggerJsdoc.Options = {
             whatsappNumber: { type: 'string' },
             cpf: { type: 'string', nullable: true },
             email: { type: 'string', nullable: true },
-            supabaseUserId: { type: 'string', nullable: true },
             role: { type: 'string', enum: ['CLIENT', 'LAWYER'] },
             createdAt: { type: 'string', format: 'date-time' },
             updatedAt: { type: 'string', format: 'date-time' },

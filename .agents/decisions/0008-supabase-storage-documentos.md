@@ -2,7 +2,14 @@
 
 ## Status
 
-Aceita
+Superada pela ADR 0009
+
+## Nota de superacao
+
+Em 2026-05-02, documentos e fotos de perfil voltaram a usar somente
+`LocalFileStorageProvider`, com binarios persistidos em volume local e expostos
+por `/uploads`. O deploy publico nao depende mais de bucket privado, service
+role key ou SQL Editor do Supabase.
 
 ## Contexto
 

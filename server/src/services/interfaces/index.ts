@@ -5,6 +5,5 @@ export * from './lead.service';
 export * from './legal-process.service';
 export * from './message.service';
 export * from './notification.service';
-export * from './supabase-auth.service';
 export * from './timeline.service';
 export * from './user.service';

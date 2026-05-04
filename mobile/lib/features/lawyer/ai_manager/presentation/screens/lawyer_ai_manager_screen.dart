@@ -21,10 +21,7 @@ class _LawyerAIManagerScreenState extends State<LawyerAIManagerScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.background,
-      appBar: const CustomAppBar(
-        title: 'Gestão de IA (RAG)',
-        showBackButton: true,
-      ),
+      appBar: const CustomAppBar(title: 'Themis IA', showBackButton: true),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(24),
         child: Column(
@@ -45,15 +42,15 @@ class _LawyerAIManagerScreenState extends State<LawyerAIManagerScreen> {
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: AppColors.white,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: AppColors.divider),
+        color: AppColors.ink,
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: Colors.transparent),
       ),
       child: Row(
         children: [
           const Icon(
             Icons.smart_toy_outlined,
-            color: AppColors.primary,
+            color: AppColors.yellow,
             size: 32,
           ),
           const SizedBox(width: 16),
@@ -62,13 +59,17 @@ class _LawyerAIManagerScreenState extends State<LawyerAIManagerScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 const Text(
-                  'Status do Bot',
-                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                  'Themis ativa',
+                  style: TextStyle(
+                    color: AppColors.white,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 16,
+                  ),
                 ),
                 Text(
                   _botEnabled ? 'Ativo e respondendo' : 'Pausado pelo advogado',
                   style: AppTextStyles.caption.copyWith(
-                    color: _botEnabled ? AppColors.success : AppColors.error,
+                    color: AppColors.white.withValues(alpha: 0.65),
                   ),
                 ),
               ],
@@ -77,7 +78,7 @@ class _LawyerAIManagerScreenState extends State<LawyerAIManagerScreen> {
           Switch.adaptive(
             value: _botEnabled,
             onChanged: (val) => setState(() => _botEnabled = val),
-            activeTrackColor: AppColors.primary,
+            activeTrackColor: AppColors.yellow,
           ),
         ],
       ),
@@ -88,14 +89,14 @@ class _LawyerAIManagerScreenState extends State<LawyerAIManagerScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text('Configurações de Comportamento', style: AppTextStyles.h2),
+        Text('Comportamento', style: AppTextStyles.cap),
         const SizedBox(height: 16),
         Container(
           padding: const EdgeInsets.all(20),
           decoration: BoxDecoration(
-            color: AppColors.white,
-            borderRadius: BorderRadius.circular(16),
-            border: Border.all(color: AppColors.divider),
+            color: AppColors.surface,
+            borderRadius: BorderRadius.circular(20),
+            border: Border.all(color: AppColors.line),
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -110,9 +111,9 @@ class _LawyerAIManagerScreenState extends State<LawyerAIManagerScreen> {
                 maxLines: 2,
                 decoration: InputDecoration(
                   filled: true,
-                  fillColor: AppColors.background,
+                  fillColor: AppColors.surface2,
                   border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
+                    borderRadius: BorderRadius.circular(16),
                     borderSide: BorderSide.none,
                   ),
                 ),
@@ -128,7 +129,7 @@ class _LawyerAIManagerScreenState extends State<LawyerAIManagerScreen> {
                   Text(
                     _creativity.toStringAsFixed(1),
                     style: const TextStyle(
-                      color: AppColors.primary,
+                      color: AppColors.ink,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
@@ -137,7 +138,7 @@ class _LawyerAIManagerScreenState extends State<LawyerAIManagerScreen> {
               Slider(
                 value: _creativity,
                 onChanged: (val) => setState(() => _creativity = val),
-                activeColor: AppColors.primary,
+                activeColor: AppColors.yellow,
                 inactiveColor: AppColors.divider,
               ),
             ],
@@ -154,7 +155,7 @@ class _LawyerAIManagerScreenState extends State<LawyerAIManagerScreen> {
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            const Text('Base de Conhecimento', style: AppTextStyles.h2),
+            Text('Base de conhecimento', style: AppTextStyles.cap),
             TextButton.icon(
               onPressed: () {},
               icon: const Icon(Icons.add, size: 18),
@@ -175,9 +176,9 @@ class _LawyerAIManagerScreenState extends State<LawyerAIManagerScreen> {
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
       decoration: BoxDecoration(
-        color: AppColors.white,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: AppColors.divider),
+        color: AppColors.surface,
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: AppColors.line),
       ),
       child: ListTile(
         leading: Icon(

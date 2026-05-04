@@ -24,6 +24,16 @@ final class GetLeadByIdUseCase {
   }
 }
 
+final class GetLeadsByStatusUseCase {
+  final LeadRepository _repository;
+
+  const GetLeadsByStatusUseCase(this._repository);
+
+  Future<Either<Failure, List<Lead>>> call(String status) {
+    return _repository.getByStatus(status);
+  }
+}
+
 final class ConvertLeadUseCase {
   final LeadRepository _repository;
 
@@ -41,5 +51,25 @@ final class DiscardLeadUseCase {
 
   Future<Either<Failure, Unit>> call(String id, {String? reason}) {
     return _repository.discard(id, reason: reason);
+  }
+}
+
+final class GetAllLeadsUseCase {
+  final LeadRepository _repository;
+
+  const GetAllLeadsUseCase(this._repository);
+
+  Future<Either<Failure, List<Lead>>> call() {
+    return _repository.getAllLeads();
+  }
+}
+
+final class UpdateLeadUseCase {
+  final LeadRepository _repository;
+
+  const UpdateLeadUseCase(this._repository);
+
+  Future<Either<Failure, Lead>> call(String id, Map<String, dynamic> data) {
+    return _repository.update(id, data);
   }
 }

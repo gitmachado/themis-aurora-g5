@@ -15,6 +15,7 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
   final VoidCallback? onNotificationTap;
   final PreferredSizeWidget? bottom;
   final bool showDivider;
+  final Color? backgroundColor;
 
   const CustomAppBar({
     super.key,
@@ -29,6 +30,7 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
     this.onNotificationTap,
     this.bottom,
     this.showDivider = true,
+    this.backgroundColor,
   });
 
   @override
@@ -38,12 +40,17 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
 
     return AppBar(
       automaticallyImplyLeading: false,
+      leadingWidth: showBackButton ? 68 : null,
       titleSpacing: showBackButton ? 0 : 20,
       title:
           titleWidget ??
           Text(
             title,
-            style: AppTextStyles.h2.copyWith(color: AppColors.primary),
+            style: AppTextStyles.h2.copyWith(
+              color: AppColors.textPrimary,
+              fontSize: 22,
+              fontWeight: FontWeight.w800,
+            ),
           ),
       actions: hasTrailingActions
           ? [
@@ -61,25 +68,29 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
       leading:
           leading ??
           (showBackButton
-              ? IconButton(
-                  icon: const Icon(Icons.arrow_back_ios_new_rounded, size: 22),
-                  onPressed: () => Navigator.maybePop(context),
+              ? Padding(
+                  padding: const EdgeInsets.only(left: 12, right: 8),
+                  child: IconButton(
+                    icon: const Icon(
+                      Icons.arrow_back_ios_new_rounded,
+                      size: 20,
+                    ),
+                    onPressed: () => Navigator.maybePop(context),
+                  ),
                 )
               : null),
       centerTitle: centerTitle,
-      backgroundColor: AppColors.white,
+      backgroundColor: backgroundColor ?? AppColors.background,
       elevation: 0,
       scrolledUnderElevation: 0,
-      iconTheme: const IconThemeData(color: AppColors.primary, size: 24),
+      surfaceTintColor: Colors.transparent,
+      iconTheme: const IconThemeData(color: AppColors.ink, size: 24),
       bottom:
           bottom ??
           (showDivider
               ? PreferredSize(
                   preferredSize: const Size.fromHeight(1),
-                  child: Container(
-                    color: AppColors.divider.withValues(alpha: 0.7),
-                    height: 1,
-                  ),
+                  child: Container(color: AppColors.line2, height: 1),
                 )
               : null),
     );

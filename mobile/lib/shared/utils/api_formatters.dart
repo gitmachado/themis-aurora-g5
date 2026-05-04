@@ -28,3 +28,22 @@ String formatFileSize(int? bytes) {
   final mb = kb / 1024;
   return '${mb.toStringAsFixed(mb >= 100 ? 0 : 1)} MB';
 }
+
+String formatTime(DateTime? value) {
+  if (value == null) return '--:--';
+  final localValue = value.toLocal();
+  final hour = localValue.hour.toString().padLeft(2, '0');
+  final minute = localValue.minute.toString().padLeft(2, '0');
+  return '$hour:$minute';
+}
+
+String formatFullDateTime(DateTime? value) {
+  if (value == null) return '--';
+  final local = value.toLocal();
+  final day = local.day.toString().padLeft(2, '0');
+  final month = local.month.toString().padLeft(2, '0');
+  final year = local.year;
+  final hour = local.hour.toString().padLeft(2, '0');
+  final minute = local.minute.toString().padLeft(2, '0');
+  return '$day/$month/$year • $hour:$minute';
+}

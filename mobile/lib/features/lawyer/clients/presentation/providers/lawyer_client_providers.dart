@@ -1,5 +1,7 @@
+import 'dart:async';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:mobile/shared/errors/either_failure_extensions.dart';
+import '../../../../../../shared/network/websocket_client.dart';
 
 import '../../../../../../shared/network/api_client.dart';
 import '../../data/datasources/lawyer_client_remote_data_source.dart';
@@ -33,9 +35,40 @@ final getLawyerClientByIdUseCaseProvider = Provider<GetLawyerClientByIdUseCase>(
   },
 );
 
-final myLawyerClientsProvider = FutureProvider<List<LawyerClient>>((ref) async {
-  return (await ref.watch(getMyLawyerClientsUseCaseProvider)()).getOrThrow();
-});
+final myLawyerClientsProvider =
+    AsyncNotifierProvider<LawyerClientsNotifier, List<LawyerClient>>(
+      LawyerClientsNotifier.new,
+    );
+
+class LawyerClientsNotifier extends AsyncNotifier<List<LawyerClient>> {
+  StreamSubscription? _subscription;
+
+  @override
+  Future<List<LawyerClient>> build() async {
+    _listenToEvents();
+    ref.onDispose(() => _subscription?.cancel());
+    return _fetch();
+  }
+
+  void _listenToEvents() {
+    _subscription?.cancel();
+    _subscription = ref.watch(webSocketClientProvider).events.listen((event) {
+      // Refresh when a lead is updated (e.g. converted to client)
+      if (event.type == 'lead:updated' || event.type == 'connected') {
+        refresh();
+      }
+    });
+  }
+
+  Future<List<LawyerClient>> _fetch() async {
+    return (await ref.read(getMyLawyerClientsUseCaseProvider)()).getOrThrow();
+  }
+
+  Future<void> refresh() async {
+    state = const AsyncLoading();
+    state = AsyncData(await _fetch());
+  }
+}
 
 final lawyerClientDetailsProvider = FutureProvider.family<LawyerClient, String>(
   (ref, id) async {

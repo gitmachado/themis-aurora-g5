@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../../../app/routes/app_router.dart';
 import '../../../../../../features/auth/presentation/providers/auth_providers.dart';
 import '../../../../../../features/notifications/presentation/providers/notification_providers.dart';
+import '../../../../../../features/procedures/domain/entities/legal_process.dart';
 import '../../../../../../features/procedures/presentation/procedure_display.dart';
 import '../../../../../../features/procedures/presentation/providers/procedure_providers.dart';
 import '../../../../../../shared/utils/api_formatters.dart';
@@ -10,7 +11,7 @@ import '../../../../../../shared/constants/app_colors.dart';
 import '../../../../../../shared/constants/app_text_styles.dart';
 import '../../../../../../shared/widgets/cards/app_card.dart';
 import '../../../../../../shared/widgets/layout/app_dashboard_header.dart';
-import '../widgets/hero_update_card.dart';
+import '../../../../../../shared/widgets/themis/themis_widgets.dart';
 import '../../../../../../shared/constants/app_dimensions.dart';
 
 class ClientHomeScreen extends ConsumerWidget {
@@ -23,8 +24,15 @@ class ClientHomeScreen extends ConsumerWidget {
     final notifications =
         ref.watch(myNotificationsProvider).valueOrNull ?? const [];
     final unreadCount = notifications.where((n) => !n.isRead).length;
-    final procedureList = procedures.valueOrNull ?? const [];
+    final account = auth?.account;
+    final allProcedures = procedures.valueOrNull ?? const <LegalProcess>[];
+    final procedureList = account == null
+        ? const <LegalProcess>[]
+        : allProcedures
+              .where((process) => process.clientId == account.id)
+              .toList();
     final firstProcedure = procedureList.isEmpty ? null : procedureList.first;
+    final documents = ref.watch(myDocumentsProvider).valueOrNull ?? const [];
 
     return Scaffold(
       backgroundColor: AppColors.background,
@@ -51,24 +59,21 @@ class ClientHomeScreen extends ConsumerWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         const SizedBox(height: 18),
-                        HeroUpdateCard(
-                          title:
-                              firstProcedure?.lastNote ??
-                              firstProcedure?.displayStatus ??
-                              'Nenhum tramite ativo',
-                          subtitle: firstProcedure == null
-                              ? 'Quando houver atualizacoes, elas aparecerao aqui.'
-                              : '${firstProcedure.displayTitle} • ${formatRelativeDate(firstProcedure.updatedAt)}',
-                          onDetailsTap: firstProcedure == null
-                              ? null
-                              : () => Navigator.pushNamed(
-                                  context,
-                                  AppRouter.procedureTimelineRoute,
-                                  arguments: {'processId': firstProcedure.id},
-                                ),
+                        Text(
+                          'Seu processo\nem andamento',
+                          style: AppTextStyles.h1.copyWith(fontSize: 29),
                         ),
-                        const SizedBox(height: 16),
-                        _buildChatMirrorCard(context),
+                        const SizedBox(height: 18),
+                        _buildHeroProcessCard(context, firstProcedure),
+                        const SizedBox(height: 14),
+                        _buildStatsGrid(procedureList.length, documents.length),
+                        const SizedBox(height: 18),
+                        const Padding(
+                          padding: EdgeInsets.symmetric(horizontal: 4),
+                          child: ThemisSectionLabel('Ações rápidas'),
+                        ),
+                        const SizedBox(height: 10),
+                        _buildQuickActions(context),
                         SizedBox(height: AppDimensions.bottomPadding(context)),
                       ],
                     ),
@@ -82,49 +87,145 @@ class ClientHomeScreen extends ConsumerWidget {
     );
   }
 
-  Widget _buildChatMirrorCard(BuildContext context) {
-    return InkWell(
-      onTap: () => Navigator.pushNamed(context, '/chat-mirror'),
-      borderRadius: BorderRadius.circular(16),
-      child: AppCard(
-        child: Row(
-          children: [
-            Container(
-              padding: const EdgeInsets.all(12),
-              decoration: const BoxDecoration(
-                color: AppColors.primary,
-                shape: BoxShape.circle,
-              ),
-              child: const Icon(
-                Icons.history_rounded,
-                color: AppColors.white,
-                size: 24,
-              ),
+  Widget _buildHeroProcessCard(
+    BuildContext context,
+    LegalProcess? firstProcedure,
+  ) {
+    final hasProcedure = firstProcedure != null;
+
+    return AppCard(
+      color: AppColors.ink,
+      hasBorder: false,
+      padding: const EdgeInsets.all(24),
+      onTap: hasProcedure
+          ? () => Navigator.pushNamed(
+              context,
+              AppRouter.procedureTimelineRoute,
+              arguments: {'processId': firstProcedure.id},
+            )
+          : null,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            hasProcedure ? 'ATUALIZADO HOJE' : 'SEM PROCESSO ATIVO',
+            style: AppTextStyles.cap.copyWith(
+              color: AppColors.yellow,
+              fontSize: 12.5,
             ),
-            const SizedBox(width: 16),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'Historico do WhatsApp',
-                    style: AppTextStyles.body.copyWith(
-                      fontWeight: FontWeight.bold,
+          ),
+          const SizedBox(height: 12),
+          Text(
+            hasProcedure ? firstProcedure.displayTitle : 'Nenhum tramite ativo',
+            style: AppTextStyles.h2.copyWith(
+              color: AppColors.white,
+              fontSize: 21,
+            ),
+          ),
+          const SizedBox(height: 12),
+          Text(
+            hasProcedure
+                ? (firstProcedure.lastNote ??
+                      'Atualizado ${formatRelativeDate(firstProcedure.updatedAt)}')
+                : 'Quando houver atualizacoes, elas aparecerao aqui.',
+            style: AppTextStyles.body.copyWith(
+              color: AppColors.white.withValues(alpha: 0.72),
+              fontSize: 15,
+            ),
+          ),
+          const SizedBox(height: 24),
+          Row(
+            children: [
+              Expanded(
+                child: Text(
+                  hasProcedure
+                      ? (firstProcedure.processNumber ?? firstProcedure.id)
+                      : 'Aguardando dados',
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: AppTextStyles.mono.copyWith(
+                    color: AppColors.white.withValues(alpha: 0.55),
+                    fontSize: 13,
+                  ),
+                ),
+              ),
+              if (hasProcedure)
+                Row(
+                  children: [
+                    Text(
+                      'Ver linha do tempo',
+                      style: AppTextStyles.caption.copyWith(
+                        color: AppColors.yellow,
+                        fontSize: 14,
+                        fontWeight: FontWeight.w700,
+                      ),
                     ),
-                  ),
-                  Text(
-                    'Mensagens espelhadas em modo somente leitura',
-                    style: AppTextStyles.caption,
-                  ),
-                ],
-              ),
-            ),
-            const Icon(
-              Icons.chevron_right_rounded,
-              color: AppColors.textCaption,
-            ),
-          ],
+                    const Icon(
+                      Icons.chevron_right_rounded,
+                      color: AppColors.yellow,
+                      size: 18,
+                    ),
+                  ],
+                ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildStatsGrid(int procedureCount, int documentCount) {
+    return Row(
+      children: [
+        Expanded(
+          child: _buildStatCard('Processos ativos', procedureCount.toString()),
         ),
+        const SizedBox(width: 10),
+        Expanded(child: _buildStatCard('Documentos', documentCount.toString())),
+      ],
+    );
+  }
+
+  Widget _buildStatCard(String label, String value) {
+    return AppCard(
+      padding: const EdgeInsets.all(16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(label, style: AppTextStyles.caption.copyWith(fontSize: 13)),
+          const SizedBox(height: 8),
+          Text(value, style: AppTextStyles.h1.copyWith(fontSize: 32)),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildQuickActions(BuildContext context) {
+    return AppCard(
+      padding: EdgeInsets.zero,
+      child: Column(
+        children: [
+          ThemisActionRow(
+            icon: Icons.smart_toy_outlined,
+            label: 'Falar com a Themis',
+            iconBackground: AppColors.yellowSoft,
+            onTap: () => Navigator.pushNamed(context, '/chat-mirror'),
+          ),
+          const Divider(height: 1, color: AppColors.line2),
+          ThemisActionRow(
+            icon: Icons.upload_rounded,
+            label: 'Enviar documento',
+            onTap: () => Navigator.pushNamed(context, '/files'),
+          ),
+          const Divider(height: 1, color: AppColors.line2),
+          ThemisActionRow(
+            icon: Icons.chat_bubble_outline_rounded,
+            label: 'Continuar no WhatsApp',
+            iconBackground: AppColors.successBackground,
+            iconColor: AppColors.success,
+            onTap: () => Navigator.pushNamed(context, '/chat-mirror'),
+          ),
+        ],
       ),
     );
   }

@@ -6,6 +6,8 @@ class LawyerClient extends Equatable {
   final String whatsappNumber;
   final String? cpf;
   final String? email;
+  final String? lastMessage;
+  final DateTime? lastMessageAt;
 
   const LawyerClient({
     required this.id,
@@ -13,8 +15,18 @@ class LawyerClient extends Equatable {
     required this.whatsappNumber,
     this.cpf,
     this.email,
+    this.lastMessage,
+    this.lastMessageAt,
   });
 
   @override
-  List<Object?> get props => [id, name, whatsappNumber, cpf, email];
+  List<Object?> get props => [
+    id,
+    name,
+    whatsappNumber,
+    cpf,
+    email,
+    lastMessage,
+    lastMessageAt,
+  ];
 }

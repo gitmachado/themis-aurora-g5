@@ -7,16 +7,19 @@ import { triageNode } from "./nodes/triage.js";
 import { statusNode } from "./nodes/status.js";
 import { ragNode } from "./nodes/rag.js";
 import { handoffNode } from "./nodes/handoff.js";
+import { greetingNode } from "./nodes/greeting.js";
 import { syncMessage } from "./nodes/sync.js";
 
 // Wrapper do syncMessage (utilitário) para interface de nó LangGraph
 async function syncNode(state: OmniStateType): Promise<Partial<OmniStateType>> {
   const lastMsg = state.messages.at(-1);
-  if (lastMsg) {
+  // Sincroniza apenas se for uma mensagem da IA (BOT). 
+  // Mensagens do CLIENTE agora são sincronizadas pelo Webhook para garantir tempo real.
+  if (lastMsg && lastMsg instanceof AIMessage) {
     await syncMessage({
       whatsappNumber: state.whatsappNumber,
       content: String(lastMsg.content),
-      senderRole: lastMsg instanceof AIMessage ? "BOT" : "CLIENT",
+      senderRole: "BOT",
       messageType: "TEXT",
       whatsappMessageId: null,
     });
@@ -34,6 +37,7 @@ const graphBuilder = new StateGraph(OmniState)
   .addNode("status_node", statusNode)
   .addNode("rag_node", ragNode)
   .addNode("handoff_node", handoffNode)
+  .addNode("greeting_node", greetingNode)
   .addNode("sync_node", syncNode)
   // Entrada
   .addEdge(START, "router_node")
@@ -43,6 +47,7 @@ const graphBuilder = new StateGraph(OmniState)
     status_node: "status_node",
     rag_node: "rag_node",
     handoff_node: "handoff_node",
+    greeting_node: "greeting_node",
     sync_node: "sync_node",
   })
   .addConditionalEdges("triage_node", routeByCurrentNode, {
@@ -58,6 +63,7 @@ const graphBuilder = new StateGraph(OmniState)
     sync_node: "sync_node",
   })
   // Arestas fixas
+  .addEdge("greeting_node", "sync_node")
   .addEdge("handoff_node", "sync_node")
   .addEdge("sync_node", END);
 

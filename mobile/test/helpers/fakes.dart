@@ -1,5 +1,7 @@
+import 'dart:async';
 import 'package:mobile/shared/network/api_client.dart';
 import 'package:mobile/shared/network/token_storage.dart';
+import 'package:mobile/shared/network/websocket_client.dart';
 
 final class ApiCall {
   final String method;
@@ -29,13 +31,23 @@ class FakeApiClient implements ApiClient {
   @override
   Future<Map<String, dynamic>> getJson(String path) async {
     calls.add(ApiCall('GET', path));
-    return jsonResponses['GET $path'] ?? <String, dynamic>{};
+    final response = jsonResponses['GET $path'];
+    if (response == null) {
+      throw Exception(
+        'FakeApiClient: GET $path nao configurado. Adicione-o ao fake para evitar TypeError.',
+      );
+    }
+    return response;
   }
 
   @override
   Future<List<dynamic>> getList(String path) async {
     calls.add(ApiCall('GET', path));
-    return listResponses['GET $path'] ?? <dynamic>[];
+    final response = listResponses['GET $path'];
+    if (response == null) {
+      throw Exception('FakeApiClient: GET $path (list) nao configurado.');
+    }
+    return response;
   }
 
   @override
@@ -44,7 +56,11 @@ class FakeApiClient implements ApiClient {
     Map<String, dynamic>? data,
   }) async {
     calls.add(ApiCall('POST', path, data));
-    return jsonResponses['POST $path'] ?? <String, dynamic>{};
+    final response = jsonResponses['POST $path'];
+    if (response == null) {
+      throw Exception('FakeApiClient: POST $path nao configurado.');
+    }
+    return response;
   }
 
   @override
@@ -67,7 +83,11 @@ class FakeApiClient implements ApiClient {
     Map<String, dynamic>? data,
   }) async {
     calls.add(ApiCall('PATCH', path, data));
-    return jsonResponses['PATCH $path'] ?? <String, dynamic>{};
+    final response = jsonResponses['PATCH $path'];
+    if (response == null) {
+      throw Exception('FakeApiClient: PATCH $path nao configurado.');
+    }
+    return response;
   }
 
   @override
@@ -127,4 +147,28 @@ final class FakeTokenStorage implements TokenStorage {
   Future<void> clearToken() async {
     token = null;
   }
+}
+
+class FakeWebSocketClient implements WebSocketClient {
+  final _controller = StreamController<WebSocketEvent>.broadcast();
+
+  @override
+  Stream<WebSocketEvent> get events => _controller.stream;
+
+  @override
+  bool get isConnected => false;
+
+  @override
+  void connect() {}
+
+  @override
+  void disconnect() {}
+
+  @override
+  void joinChat(String whatsappNumber) {}
+
+  @override
+  void leaveChat(String whatsappNumber) {}
+
+  void emit(WebSocketEvent event) => _controller.add(event);
 }

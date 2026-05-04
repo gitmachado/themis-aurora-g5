@@ -23,21 +23,21 @@ class AppCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return InkWell(
       onTap: onTap,
-      borderRadius: BorderRadius.circular(borderRadius ?? 16),
+      borderRadius: BorderRadius.circular(borderRadius ?? 20),
       child: Container(
         padding: padding ?? const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: color ?? AppColors.white,
-          borderRadius: BorderRadius.circular(borderRadius ?? 16),
+          color: color ?? AppColors.surface,
+          borderRadius: BorderRadius.circular(borderRadius ?? 20),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withValues(alpha: 0.05),
-              blurRadius: 10,
-              offset: const Offset(0, 4),
+              color: Colors.black.withValues(alpha: 0.03),
+              blurRadius: 2,
+              offset: const Offset(0, 1),
             ),
           ],
           border: hasBorder
-              ? Border.all(color: AppColors.border, width: 1)
+              ? Border.all(color: AppColors.line, width: 1)
               : null,
         ),
         child: child,

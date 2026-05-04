@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import '../../features/design_system/presentation/screens/design_system_screen.dart';
 import '../../features/auth/presentation/screens/login_screen.dart';
+import '../../features/auth/presentation/screens/splash_screen.dart';
+import '../../features/legal/presentation/screens/privacy_policy_screen.dart';
+import '../../features/legal/presentation/screens/terms_of_use_screen.dart';
 // Client
 import '../../features/client/procedures/presentation/screens/client_procedure_timeline_screen.dart';
 import '../../features/client/profile/presentation/screens/client_profile_screen.dart';
@@ -21,7 +24,8 @@ import '../../shared/widgets/layout/client_main_layout.dart';
 import '../../shared/widgets/layout/lawyer_main_layout.dart';
 
 final class AppRouter {
-  static const String initialRoute = '/login';
+  static const String initialRoute = '/splash';
+  static const String splashRoute = '/splash';
   static const String loginRoute = '/login';
   static const String clientDashboardRoute = '/client-dashboard';
   static const String lawyerDashboardRoute = '/lawyer-dashboard';
@@ -43,9 +47,16 @@ final class AppRouter {
   static const String chatMirrorRoute = '/chat-mirror';
   static const String chatsRoute = '/chats';
   static const String designSystemRoute = '/design-system';
+  static const String privacyPolicyRoute = '/privacy-policy';
+  static const String termsOfUseRoute = '/terms-of-use';
 
   static Route<dynamic> generateRoute(RouteSettings settings) {
     switch (settings.name) {
+      case splashRoute:
+        return MaterialPageRoute<void>(
+          builder: (_) => const SplashScreen(),
+          settings: settings,
+        );
       case loginRoute:
         return MaterialPageRoute<void>(
           builder: (_) => const LoginScreen(),
@@ -57,13 +68,13 @@ final class AppRouter {
           settings: settings,
         );
       case lawyerLeadDetailRoute:
-        final args = settings.arguments as Map<String, String>?;
+        final args = settings.arguments as Map<String, dynamic>?;
         return MaterialPageRoute<void>(
           builder: (_) => LawyerLeadDetailScreen(
-            leadId: args?['id'],
-            name: args?['name'] ?? '',
-            caseType: args?['caseType'] ?? '',
-            urgency: args?['urgency'] ?? '',
+            leadId: args?['id'] as String?,
+            name: args?['name'] as String? ?? '',
+            caseType: args?['caseType'] as String? ?? '',
+            urgency: args?['urgency'] as String? ?? '',
           ),
           settings: settings,
         );
@@ -186,6 +197,16 @@ final class AppRouter {
       case designSystemRoute:
         return MaterialPageRoute<void>(
           builder: (_) => const DesignSystemScreen(),
+          settings: settings,
+        );
+      case privacyPolicyRoute:
+        return MaterialPageRoute<void>(
+          builder: (_) => const PrivacyPolicyScreen(),
+          settings: settings,
+        );
+      case termsOfUseRoute:
+        return MaterialPageRoute<void>(
+          builder: (_) => const TermsOfUseScreen(),
           settings: settings,
         );
       default:
