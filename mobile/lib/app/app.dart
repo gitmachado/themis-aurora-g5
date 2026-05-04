@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
+import 'package:mobile/app/navigation_service.dart';
 import 'package:mobile/app/routes/app_router.dart';
 import 'package:mobile/app/theme/theme.dart';
 
@@ -22,9 +23,11 @@ class ThemisApp extends StatelessWidget {
         title: 'Themis',
         debugShowCheckedModeBanner: false,
         theme: AppTheme.theme,
+        navigatorKey: navigatorKey,
         initialRoute: AppRouter.initialRoute,
         onGenerateRoute: AppRouter.generateRoute,
       ),
     );
   }
 }
+
