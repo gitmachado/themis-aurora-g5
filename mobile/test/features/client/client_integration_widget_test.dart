@@ -5,6 +5,7 @@ import 'package:mobile/features/auth/domain/entities/account.dart';
 import 'package:mobile/features/auth/presentation/providers/auth_providers.dart';
 import 'package:mobile/features/client/chat/presentation/screens/client_chat_mirror_screen.dart';
 import 'package:mobile/features/client/files/presentation/screens/client_files_screen.dart';
+import 'package:mobile/features/client/procedures/presentation/screens/client_procedure_list_screen.dart';
 import 'package:mobile/features/client/profile/presentation/screens/client_profile_screen.dart';
 import 'package:mobile/features/lawyer/chat/domain/entities/chat_message.dart';
 import 'package:mobile/features/lawyer/chat/presentation/providers/chat_providers.dart';
@@ -46,6 +47,7 @@ void main() {
     await tester.pumpWidget(
       ProviderScope(
         overrides: [
+          currentAccountProvider.overrideWith((ref) async => _account),
           myDocumentsProvider.overrideWith(
             (ref) async => const [
               ProcessDocument(
@@ -75,6 +77,40 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('contrato.pdf'), findsOneWidget);
+  });
+
+  testWidgets('client process list hides processes from other clients', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          currentAccountProvider.overrideWith((ref) async => _account),
+          myProceduresProvider.overrideWith(
+            (ref) async => const [
+              LegalProcess(
+                id: 'process-1',
+                clientId: 'client-1',
+                title: 'Processo do cliente',
+                currentStatus: 'OPEN',
+              ),
+              LegalProcess(
+                id: 'process-2',
+                clientId: 'client-2',
+                title: 'Processo de outro cliente',
+                currentStatus: 'OPEN',
+              ),
+            ],
+          ),
+        ],
+        child: const MaterialApp(home: ClientProcedureListScreen()),
+      ),
+    );
+
+    await tester.pumpAndSettle();
+
+    expect(find.text('Processo do cliente'), findsOneWidget);
+    expect(find.text('Processo de outro cliente'), findsNothing);
   });
 
   testWidgets('client profile renders account data from account route', (

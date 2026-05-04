@@ -32,13 +32,19 @@ whatsappRouter.post("/webhook", async (req, res) => {
   try {
     const message =
       req.body?.entry?.[0]?.changes?.[0]?.value?.messages?.[0];
+    
+    if (message) {
+      console.log(`[Webhook] Mensagem recebida de ${message.from}: ${message.text?.body || "(sem texto)"}`);
+    }
+
     if (!message) return;
 
     const whatsappNumber: string = message.from;
     const type: string = message.type;
 
+    console.log(`[Webhook] Processando mensagem de ${whatsappNumber}, tipo: ${type}`);
+
     // Ignora mensagens não-texto (áudio, imagem, vídeo, etc.)
-    // TODO: Integrar com validateMessageType de ai/src/utils/message-validator.ts após conclusão da T19
     if (type !== "text" || !message.text?.body) {
       console.log(
         `[Webhook] Mensagem não-texto ignorada (${type}) de ${whatsappNumber}`
@@ -48,18 +54,54 @@ whatsappRouter.post("/webhook", async (req, res) => {
     }
 
     const textBody: string = message.text.body;
+    const messageId: string = message.id;
 
-    // Guardrail — bloqueia tentativas de prompt injection antes de invocar o grafo
+    // Sincroniza mensagem do cliente com o backend imediatamente
+    try {
+      console.log(`[Webhook] Sincronizando mensagem de ${whatsappNumber} no backend...`);
+      const { syncMessage } = await import("../graph/nodes/sync.js");
+      await syncMessage({
+        whatsappNumber,
+        content: textBody,
+        senderRole: "CLIENT",
+        messageType: "TEXT",
+        whatsappMessageId: messageId,
+      });
+      console.log(`[Webhook] Sincronização concluída para ${whatsappNumber}.`);
+    } catch (syncErr) {
+      console.error("[Webhook] Erro ao sincronizar mensagem do cliente:", syncErr);
+    }
+
+    // Guardrail — bloqueia tentativas de prompt injection
     if (containsPromptInjection(textBody)) {
       console.warn(`[GUARDRAIL] Injeção detectada de ${whatsappNumber}`);
       await sendWhatsAppMessage(whatsappNumber, DEFAULT_GUARDRAIL_RESPONSE);
       return;
     }
 
-    // Carrega config do escritório (tom, horários, mensagem fora-de-horário)
-    const config = await getBotConfig().catch(() => INITIAL_CONFIG);
+    // Carrega config do escritório
+    const config = await getBotConfig().catch((err) => {
+      console.warn(`[Webhook] Falha ao carregar config, usando padrão.`);
+      return INITIAL_CONFIG;
+    });
 
-    // Monta estado inicial da conversa
+    // Sincroniza o estado de pausa do banco de dados com a IA
+    const { getLeadByPhone } = await import("../utils/backend-client.js");
+    let isPausedInDB: boolean | null = null;
+    try {
+      const lead = await getLeadByPhone(whatsappNumber);
+      isPausedInDB = lead?.isAIPaused ?? false;
+    } catch (dbErr: any) {
+      console.error("[Webhook] Erro ao consultar estado de pausa no banco:", dbErr.message);
+    }
+
+    const graphConfig = { configurable: { thread_id: whatsappNumber } };
+    const currentState = await graph.getState(graphConfig);
+    const hasExistingState = currentState?.values && Object.keys(currentState.values).length > 0;
+
+    let finalNeedsHandoff = isPausedInDB ?? (hasExistingState ? currentState.values.needsHandoff : false);
+
+    // Monta estado inicial (caso seja a primeira mensagem)
     const initialState = {
       whatsappNumber,
       userType: "UNKNOWN" as const,
@@ -67,27 +109,55 @@ whatsappRouter.post("/webhook", async (req, res) => {
       leadId: null,
       messages: [new HumanMessage(textBody)],
       triage: INITIAL_TRIAGE,
-      currentNode: "router_node",
-      needsHandoff: false,
+      currentNode: "greeting_node",
+      needsHandoff: finalNeedsHandoff,
       handoffReason: null,
+      interactionContext: null,
       config,
     };
 
-    // Invoca o grafo — thread_id = whatsappNumber vincula ao checkpointer
-    const result = await graph.invoke(initialState, {
-      configurable: { thread_id: whatsappNumber },
-    });
+    console.log(`[Webhook] Invocando grafo para ${whatsappNumber}... (Handoff: ${finalNeedsHandoff})`);
+    const result = await graph.invoke(
+      hasExistingState ? { messages: [new HumanMessage(textBody)], needsHandoff: finalNeedsHandoff } : initialState,
+      graphConfig
+    );
+    console.log(`[Webhook] Grafo finalizado para ${whatsappNumber}.`);
 
     // Envia resposta do bot ao cliente
-    const botMessage = result.messages.at(-1);
-    if (botMessage) {
-      const responseText = String(botMessage.content);
-      await sendWhatsAppMessage(whatsappNumber, responseText);
-      console.log(
-        `[Webhook] Resposta para ${whatsappNumber}: ${responseText.slice(0, 100)}`
-      );
+    const botMessages = result.messages || [];
+    const lastMessage = botMessages.at(-1);
+
+    if (lastMessage && lastMessage.content) {
+      const isAI = (lastMessage as any)._getType?.() === 'ai' || 
+                   (lastMessage as any).type === 'ai';
+      
+      if (isAI) {
+        console.log(`[Webhook] Tentando enviar resposta WhatsApp para ${whatsappNumber}...`);
+        await sendWhatsAppMessage(whatsappNumber, String(lastMessage.content));
+        console.log(`[Webhook] Resposta enviada com sucesso para ${whatsappNumber}: ${String(lastMessage.content).substring(0, 50)}...`);
+      } else {
+        console.log(`[Webhook] Última mensagem não é AI (${(lastMessage as any).type}), pulando envio.`);
+      }
+    } else {
+      console.log(`[Webhook] Grafo não retornou mensagens para enviar.`);
     }
   } catch (err) {
-    console.error("[Webhook] Erro ao processar mensagem:", err);
+    console.error("[Webhook] Erro CRÍTICO ao processar mensagem:", err);
+    try {
+      const message = req.body?.entry?.[0]?.changes?.[0]?.value?.messages?.[0];
+      if (message?.from) {
+        const fallbackMsg = "Desculpe, nosso sistema de atendimento automático passou por uma instabilidade momentânea. 🛠️\n\nJá notifiquei nossa equipe e um advogado especialista entrará em contato com você o quanto antes por aqui!";
+        await sendWhatsAppMessage(message.from, fallbackMsg);
+        
+        const { notifyLawyer } = await import("../utils/backend-client.js");
+        await notifyLawyer({
+          type: "EMERGENCY_HANDOFF",
+          message: `ERRO CRÍTICO NA IA: O bot travou ao processar mensagem de ${message.from}. Erro: ${err instanceof Error ? err.message : String(err)}`,
+          whatsappNumber: message.from
+        }).catch(() => {});
+      }
+    } catch (fallbackErr) {
+      console.error("[Webhook] Falha ao enviar feedback de erro:", fallbackErr);
+    }
   }
 });

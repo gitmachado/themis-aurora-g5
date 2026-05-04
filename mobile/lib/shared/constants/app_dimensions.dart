@@ -19,11 +19,11 @@ class AppDimensions {
   static const double contentPadding = 16.0;
 
   // Border Radius
-  static const double radiusS = 4.0;
-  static const double radiusM = 8.0;
-  static const double radiusL = 12.0;
-  static const double radiusXL = 16.0;
-  static const double radiusXXL = 24.0;
+  static const double radiusS = 10.0;
+  static const double radiusM = 14.0;
+  static const double radiusL = 20.0;
+  static const double radiusXL = 26.0;
+  static const double radiusXXL = 34.0;
   static const double radiusCircular = 100.0;
 
   // Icon Sizes
@@ -38,7 +38,6 @@ class AppDimensions {
   static const double inputHeight = 56.0;
 
   static double bottomPadding(BuildContext context) {
-    // 50.0 (Barra + Margens) + Área dinâmica do sistema
-    return 50.0 + MediaQuery.of(context).padding.bottom;
+    return 88.0 + MediaQuery.of(context).padding.bottom;
   }
 }

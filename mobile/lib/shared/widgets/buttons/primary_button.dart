@@ -9,6 +9,9 @@ class PrimaryButton extends StatelessWidget {
   final double? width;
   final double height;
   final Color? backgroundColor;
+  final Color? foregroundColor;
+  final Color? iconColor;
+  final double? fontSize;
 
   const PrimaryButton({
     super.key,
@@ -19,6 +22,9 @@ class PrimaryButton extends StatelessWidget {
     this.width,
     this.height = 56,
     this.backgroundColor,
+    this.foregroundColor,
+    this.iconColor,
+    this.fontSize,
   });
 
   @override
@@ -29,10 +35,10 @@ class PrimaryButton extends StatelessWidget {
       child: ElevatedButton(
         onPressed: isLoading ? null : onPressed,
         style: ElevatedButton.styleFrom(
-          backgroundColor: backgroundColor ?? AppColors.primary,
-          foregroundColor: AppColors.white,
+          backgroundColor: backgroundColor ?? AppColors.ink,
+          foregroundColor: foregroundColor ?? AppColors.white,
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
+            borderRadius: BorderRadius.circular(999),
           ),
           elevation: 0,
         ),
@@ -49,14 +55,14 @@ class PrimaryButton extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   if (icon != null) ...[
-                    Icon(icon, size: 20),
+                    Icon(icon, size: 20, color: iconColor),
                     const SizedBox(width: 8),
                   ],
                   Text(
                     label,
-                    style: const TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w600,
+                    style: TextStyle(
+                      fontSize: fontSize ?? 16,
+                      fontWeight: FontWeight.w700,
                     ),
                   ),
                 ],

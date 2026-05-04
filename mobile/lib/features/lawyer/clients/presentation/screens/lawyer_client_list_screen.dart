@@ -37,18 +37,28 @@ class _LawyerClientListScreenState
       body: Column(
         children: [
           Container(
-            color: AppColors.white,
+            color: AppColors.background,
             padding: const EdgeInsets.fromLTRB(20, 0, 20, 16),
             child: TextField(
               onChanged: (value) => setState(() => _searchQuery = value),
+              style: AppTextStyles.body.copyWith(
+                fontSize: 15.5,
+                fontWeight: FontWeight.w600,
+                color: AppColors.ink,
+              ),
               decoration: InputDecoration(
                 hintText: 'Buscar por nome ou CPF...',
+                hintStyle: AppTextStyles.body.copyWith(
+                  color: AppColors.ink4,
+                  fontSize: 15.5,
+                  fontWeight: FontWeight.w500,
+                ),
                 prefixIcon: const Icon(
                   Icons.search,
                   color: AppColors.textCaption,
                 ),
                 filled: true,
-                fillColor: AppColors.background,
+                fillColor: AppColors.surface2,
                 contentPadding: const EdgeInsets.symmetric(vertical: 0),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
@@ -61,14 +71,13 @@ class _LawyerClientListScreenState
                 focusedBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
                   borderSide: const BorderSide(
-                    color: AppColors.primary,
+                    color: AppColors.yellow,
                     width: 1.5,
                   ),
                 ),
               ),
             ),
           ),
-          Container(height: 1, color: AppColors.divider.withValues(alpha: 0.7)),
           const SizedBox(height: 16),
           Expanded(
             child: clients.when(
@@ -84,11 +93,14 @@ class _LawyerClientListScreenState
 
   Widget _buildClientList(List<LawyerClient> clients) {
     final query = _searchQuery.toLowerCase();
-    final filtered = clients.where((client) {
-      return client.name.toLowerCase().contains(query) ||
-          (client.cpf ?? '').contains(_searchQuery) ||
-          client.whatsappNumber.contains(_searchQuery);
-    }).toList();
+    final filtered =
+        clients.where((client) {
+          return client.name.toLowerCase().contains(query) ||
+              (client.cpf ?? '').contains(_searchQuery) ||
+              client.whatsappNumber.contains(_searchQuery);
+        }).toList()..sort(
+          (a, b) => a.name.toLowerCase().compareTo(b.name.toLowerCase()),
+        );
 
     if (filtered.isEmpty) {
       return Center(
@@ -99,39 +111,69 @@ class _LawyerClientListScreenState
       );
     }
 
+    final grouped = <String, List<LawyerClient>>{};
+    for (final client in filtered) {
+      final initial = _clientInitial(client);
+      grouped.putIfAbsent(initial, () => []).add(client);
+    }
+    final groups = grouped.entries.toList()
+      ..sort((a, b) => a.key.compareTo(b.key));
+
     return RefreshIndicator(
       onRefresh: () => ref.refresh(myLawyerClientsProvider.future),
-      child: ListView.builder(
+      child: ListView(
         padding: EdgeInsets.fromLTRB(
           16,
           0,
           16,
           AppDimensions.bottomPadding(context),
         ),
-        itemCount: filtered.length,
-        itemBuilder: (context, index) => _buildClientCard(filtered[index]),
+        children: [
+          for (final group in groups) ...[
+            _buildLetterHeader(group.key),
+            for (final client in group.value) _buildClientCard(client),
+            const SizedBox(height: 8),
+          ],
+        ],
+      ),
+    );
+  }
+
+  Widget _buildLetterHeader(String letter) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(4, 10, 4, 8),
+      child: Text(
+        letter,
+        style: AppTextStyles.h1.copyWith(
+          fontSize: 22,
+          fontWeight: FontWeight.w900,
+          color: AppColors.ink,
+        ),
       ),
     );
   }
 
   Widget _buildClientCard(LawyerClient client) {
+    final initial = _clientInitial(client);
+
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
       decoration: BoxDecoration(
-        color: AppColors.white,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: AppColors.border),
+        color: AppColors.surface,
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: AppColors.line),
       ),
       child: ListTile(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
         contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
         leading: CircleAvatar(
           radius: 24,
-          backgroundColor: AppColors.primary.withValues(alpha: 0.1),
+          backgroundColor: AppColors.surface2,
           child: Text(
-            client.name[0].toUpperCase(),
+            initial,
             style: const TextStyle(
               fontWeight: FontWeight.bold,
-              color: AppColors.primary,
+              color: AppColors.ink,
             ),
           ),
         ),
@@ -156,7 +198,7 @@ class _LawyerClientListScreenState
           children: [
             _buildActionIcon(
               Icons.phone_rounded,
-              AppColors.primary,
+              AppColors.ink,
               client.whatsappNumber.isEmpty
                   ? null
                   : () => _callClient(client.whatsappNumber),
@@ -241,5 +283,12 @@ class _LawyerClientListScreenState
     if (await canLaunchUrl(uri)) {
       await launchUrl(uri);
     }
+  }
+
+  String _clientInitial(LawyerClient client) {
+    final cleanName = client.name.trim();
+    if (cleanName.isEmpty) return '#';
+    final first = cleanName.characters.first.toUpperCase();
+    return RegExp(r'[A-Z]').hasMatch(first) ? first : '#';
   }
 }

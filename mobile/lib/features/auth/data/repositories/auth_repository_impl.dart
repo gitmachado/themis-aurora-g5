@@ -1,7 +1,9 @@
 import 'package:fpdart/fpdart.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 import 'package:mobile/shared/errors/failures.dart';
 import 'package:mobile/shared/errors/repository_guard.dart';
 
+import '../../../../shared/constants/app_constants.dart';
 import '../../../../shared/network/token_storage.dart';
 import '../../domain/entities/account.dart';
 import '../../domain/entities/auth_session.dart';
@@ -12,7 +14,7 @@ final class AuthRepositoryImpl implements AuthRepository {
   final AuthRemoteDataSource _remoteDataSource;
   final TokenStorage _tokenStorage;
 
-  const AuthRepositoryImpl({
+  AuthRepositoryImpl({
     required AuthRemoteDataSource remoteDataSource,
     required TokenStorage tokenStorage,
   }) : _remoteDataSource = remoteDataSource,
@@ -28,6 +30,44 @@ final class AuthRepositoryImpl implements AuthRepository {
         email: email,
         password: password,
       );
+      await _tokenStorage.saveToken(session.token);
+
+      final account = await _remoteDataSource.getAccount();
+      return session.copyWith(
+        userId: account.id,
+        role: account.role,
+        account: account,
+      );
+    });
+  }
+
+  bool _googleSignInInitialized = false;
+
+  Future<void> _ensureGoogleSignInInitialized() async {
+    if (!_googleSignInInitialized) {
+      await GoogleSignIn.instance.initialize(
+        serverClientId: AppConstants.googleClientId,
+      );
+      _googleSignInInitialized = true;
+    }
+  }
+
+  @override
+  Future<Either<Failure, AuthSession>> signInWithGoogle() {
+    return guardRepository(() async {
+      await _ensureGoogleSignInInitialized();
+      final googleSignIn = GoogleSignIn.instance;
+
+      final googleUser = await googleSignIn.authenticate();
+
+      final googleAuth = googleUser.authentication;
+      final idToken = googleAuth.idToken;
+
+      if (idToken == null) {
+        throw const ServerFailure('Falha ao obter token do Google');
+      }
+
+      final session = await _remoteDataSource.googleSignIn(idToken);
       await _tokenStorage.saveToken(session.token);
 
       final account = await _remoteDataSource.getAccount();
@@ -86,6 +126,10 @@ final class AuthRepositoryImpl implements AuthRepository {
 
   @override
   Future<Either<Failure, Unit>> logout() {
-    return guardRepositoryUnit(_tokenStorage.clearToken);
+    return guardRepositoryUnit(() async {
+      await _tokenStorage.clearToken();
+      await _ensureGoogleSignInInitialized();
+      await GoogleSignIn.instance.signOut();
+    });
   }
 }

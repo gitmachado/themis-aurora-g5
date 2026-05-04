@@ -20,10 +20,7 @@ class NicheChart extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            'Casos por Nicho',
-            style: AppTextStyles.h2.copyWith(fontSize: 16),
-          ),
+          Text('Distribuição por nicho', style: AppTextStyles.cap),
           const SizedBox(height: 24),
           if (data.isEmpty)
             Text('Nenhum trâmite encontrado', style: AppTextStyles.caption)
@@ -83,11 +80,11 @@ class NicheChart extends StatelessWidget {
     if (total == 0) return const [];
 
     final colors = [
-      AppColors.primary,
+      AppColors.yellow,
+      AppColors.ink,
+      AppColors.yellow2,
+      AppColors.surface3,
       AppColors.success,
-      AppColors.secondary,
-      AppColors.warning,
-      AppColors.error,
     ];
 
     final entries = counts.entries.toList()
@@ -129,7 +126,8 @@ class NicheChart extends StatelessWidget {
           Text(
             '${(item.percentage * 100).round()}%',
             style: AppTextStyles.caption.copyWith(
-              fontWeight: FontWeight.bold,
+              fontSize: 14,
+              fontWeight: FontWeight.w800,
               color: AppColors.textPrimary,
             ),
           ),
@@ -175,7 +173,7 @@ class _DonutChartPainter extends CustomPainter {
         ..color = item.color
         ..style = PaintingStyle.stroke
         ..strokeWidth = strokeWidth
-        ..strokeCap = StrokeCap.round;
+        ..strokeCap = StrokeCap.butt;
 
       canvas.drawArc(
         rect,

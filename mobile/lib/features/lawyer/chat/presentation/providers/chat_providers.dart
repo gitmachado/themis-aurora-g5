@@ -1,5 +1,7 @@
+import 'dart:async';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:mobile/shared/errors/either_failure_extensions.dart';
+import '../../../../../../shared/network/websocket_client.dart';
+import '../../data/models/chat_message_model.dart';
 
 import '../../../../../../shared/network/api_client.dart';
 import '../../data/datasources/chat_remote_data_source.dart';
@@ -21,11 +23,145 @@ final getChatHistoryByWhatsappUseCaseProvider =
       return GetChatHistoryByWhatsappUseCase(ref.watch(chatRepositoryProvider));
     });
 
+final sendMessageUseCaseProvider = Provider<SendMessageUseCase>((ref) {
+  return SendMessageUseCase(ref.watch(chatRepositoryProvider));
+});
+
+final resumeAIUseCaseProvider = Provider<ResumeAIUseCase>((ref) {
+  return ResumeAIUseCase(ref.watch(chatRepositoryProvider));
+});
+
+final handoffToHumanUseCaseProvider = Provider((ref) {
+  return HandoffToHumanUseCase(ref.watch(chatRepositoryProvider));
+});
+
+final getLeadByPhoneUseCaseProvider = Provider((ref) {
+  return GetLeadByPhoneUseCase(ref.watch(chatRepositoryProvider));
+});
+
+final assignLeadUseCaseProvider = Provider(
+  (ref) => AssignLeadUseCase(ref.watch(chatRepositoryProvider)),
+);
+final releaseLeadUseCaseProvider = Provider(
+  (ref) => ReleaseLeadUseCase(ref.watch(chatRepositoryProvider)),
+);
+
 final chatHistoryProvider = FutureProvider.family<List<ChatMessage>, String>((
   ref,
   whatsappNumber,
 ) async {
-  return (await ref.watch(getChatHistoryByWhatsappUseCaseProvider)(
+  final result = await ref.watch(getChatHistoryByWhatsappUseCaseProvider)(
     whatsappNumber,
-  )).getOrThrow();
+  );
+
+  return result.fold((failure) => throw failure, (messages) => messages);
 });
+
+class ChatLockState {
+  final String? lawyerId;
+  final String? lawyerName;
+  final bool isLocked;
+
+  const ChatLockState({this.lawyerId, this.lawyerName, this.isLocked = false});
+
+  factory ChatLockState.initial() => const ChatLockState();
+}
+
+final chatLockProvider = StateProvider.family<ChatLockState, String>((
+  ref,
+  whatsappNumber,
+) {
+  return ChatLockState.initial();
+});
+
+class LiveChatNotifier extends FamilyAsyncNotifier<List<ChatMessage>, String> {
+  StreamSubscription? _subscription;
+
+  @override
+  Future<List<ChatMessage>> build(String arg) async {
+    final wsClient = ref.watch(webSocketClientProvider);
+
+    // Join room for this chat
+    wsClient.joinChat(arg);
+
+    _listenToEvents();
+
+    ref.onDispose(() {
+      wsClient.leaveChat(arg);
+      _subscription?.cancel();
+    });
+
+    return ref.watch(chatHistoryProvider(arg).future);
+  }
+
+  void _listenToEvents() {
+    _subscription?.cancel();
+    _subscription = ref.watch(webSocketClientProvider).events.listen((event) {
+      if (event.type == 'message:new' && event.data['whatsappNumber'] == arg) {
+        final message = ChatMessageModel.fromJson(event.data);
+        state = AsyncData([...state.value ?? [], message]);
+      } else if (event.type == 'lead:locked' &&
+          event.data['whatsappNumber'] == arg) {
+        final data = event.data;
+        ref.read(chatLockProvider(arg).notifier).state = ChatLockState(
+          lawyerId: data['lawyerId'],
+          lawyerName: data['lawyerName'],
+          isLocked: true,
+        );
+      } else if (event.type == 'lead:unlocked' &&
+          event.data['whatsappNumber'] == arg) {
+        ref.read(chatLockProvider(arg).notifier).state =
+            ChatLockState.initial();
+      } else if (event.type == 'connected') {
+        ref.invalidate(chatHistoryProvider(arg));
+      }
+    });
+  }
+
+  Future<void> sendMessage(String content) async {
+    final whatsappNumber = arg;
+    final result = await ref.read(sendMessageUseCaseProvider)(
+      whatsappNumber,
+      content,
+    );
+
+    result.fold(
+      (failure) => null, // Handle error
+      (message) {
+        // Message will also come via WebSocket, but we can optimistically update here
+        // or just wait for the WS event. Let's rely on WS to avoid duplicates.
+      },
+    );
+  }
+
+  Future<void> resumeAI() async {
+    final whatsappNumber = arg;
+    await ref.read(resumeAIUseCaseProvider)(whatsappNumber);
+  }
+
+  Future<void> handoffToHuman() async {
+    final whatsappNumber = arg;
+    await ref.read(handoffToHumanUseCaseProvider)(whatsappNumber);
+  }
+
+  Future<void> assignToMe(String leadId) async {
+    await ref.read(assignLeadUseCaseProvider)(leadId);
+  }
+
+  Future<void> releaseLead(String leadId) async {
+    await ref.read(releaseLeadUseCaseProvider)(leadId);
+  }
+
+  Future<Map<String, dynamic>> getLeadInfo() async {
+    final whatsappNumber = arg;
+    final result = await ref
+        .read(getLeadByPhoneUseCaseProvider)
+        .call(whatsappNumber);
+    return result.fold((_) => {}, (data) => data);
+  }
+}
+
+final liveChatProvider =
+    AsyncNotifierProvider.family<LiveChatNotifier, List<ChatMessage>, String>(
+      LiveChatNotifier.new,
+    );

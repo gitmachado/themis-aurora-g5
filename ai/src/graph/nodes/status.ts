@@ -1,7 +1,8 @@
 import { AIMessage } from "@langchain/core/messages";
+import { ChatOpenAI } from "@langchain/openai";
 import { OmniStateType } from "../state.js";
-
-// Removido axios e backend url para desacoplamento de infra
+import { getProcessesByPhone } from "../../utils/backend-client.js";
+import { SYSTEM_PROMPT, STATUS_HUMANIZER_PROMPT } from "../../config/prompts.js";
 
 const STATUS_LABELS: Record<string, string> = {
   OPEN: "Aberto",
@@ -11,59 +12,44 @@ const STATUS_LABELS: Record<string, string> = {
   ARCHIVED: "Arquivado",
 };
 
-const NUMS = ["1️⃣", "2️⃣", "3️⃣", "4️⃣", "5️⃣"];
-
 function formatDate(date: string | null): string {
   if (!date) return "—";
   return new Date(date).toLocaleDateString("pt-BR");
 }
 
-function formatSingle(p: any): string {
-  const status = STATUS_LABELS[p.currentStatus] ?? p.currentStatus;
-  const lines = [
-    `📋 ${p.title}${p.processNumber ? ` | Nº ${p.processNumber}` : ""}`,
-    `📊 Status: ${status}`,
-    `📅 Última movimentação: ${formatDate(p.lastMovementDate)}`,
-  ];
-  if (p.lastNote) lines.push(`💬 "${p.lastNote}"`);
-  return lines.join("\n");
-}
+async function humanizeResponse(processes: any[]): Promise<string> {
+  const model = new ChatOpenAI({
+    model: process.env.OPENAI_MODEL || "gpt-4o-mini",
+    temperature: 0.3,
+  });
 
-function formatList(processes: any[]): string {
-  const items = processes
-    .slice(0, 5)
-    .map((p, i) => {
-      const status = STATUS_LABELS[p.currentStatus] ?? p.currentStatus;
-      return `${NUMS[i]} ${p.title}${p.processNumber ? ` (Nº ${p.processNumber})` : ""} — ${status}`;
-    })
-    .join("\n");
-  return `Você tem ${processes.length} processo(s):\n\n${items}\n\nQual deseja consultar? (Digite o número)`;
-}
+  const dataSummary = processes.map(p => ({
+    titulo: p.title,
+    numero: p.processNumber || "Não informado",
+    status: STATUS_LABELS[p.currentStatus] ?? p.currentStatus,
+    ultimaMovimentacao: formatDate(p.lastMovementDate),
+    ultimaNota: p.lastNote || "Nenhuma observação"
+  }));
 
-async function fetchProcesses(whatsappNumber: string): Promise<any[]> {
-  // MOCK: Para independência, retornando mock em vez da chamada Axios
-  console.log(`[Status Node] Mocking fetchProcesses for ${whatsappNumber}`);
-  return [
-    {
-      id: "mock-1",
-      title: "Ação Trabalhista",
-      processNumber: "1234567-89.2024.5.02.0001",
-      currentStatus: "UNDER_ANALYSIS",
-      lastMovementDate: new Date().toISOString(),
-      lastNote: "Aguardando despacho do juiz",
-    }
-  ];
+  const prompt = STATUS_HUMANIZER_PROMPT.replace("{processData}", JSON.stringify(dataSummary, null, 2));
+
+  const response = await model.invoke([
+    { role: "system", content: SYSTEM_PROMPT },
+    { role: "user", content: prompt }
+  ]);
+
+  return String(response.content);
 }
 
 export async function statusNode(
   state: OmniStateType
 ): Promise<Partial<OmniStateType>> {
-  const { whatsappNumber, messages } = state;
+  const { whatsappNumber, messages, interactionContext } = state;
   const userInput = String(messages.at(-1)?.content ?? "").trim();
 
   let processes: any[];
   try {
-    processes = await fetchProcesses(whatsappNumber);
+    processes = await getProcessesByPhone(whatsappNumber);
   } catch (err) {
     console.error("[Status Node] Erro ao buscar processos:", err);
     return {
@@ -74,36 +60,24 @@ export async function statusNode(
     };
   }
 
-  // Usuário escolheu um número da lista anterior
+  // Se o usuário está em contexto de seleção e digitou um número
   const choice = parseInt(userInput, 10);
-  if (!isNaN(choice) && choice >= 1 && choice <= processes.length) {
+  if (interactionContext === "SELECTING_PROCESS" && !isNaN(choice) && choice >= 1 && choice <= processes.length) {
+    const selected = processes[choice - 1];
+    const humanResponse = await humanizeResponse([selected]);
     return {
       currentNode: "sync_node",
-      messages: [new AIMessage(formatSingle(processes[choice - 1]))],
+      interactionContext: null,
+      messages: [new AIMessage(humanResponse)],
     };
   }
 
-  if (processes.length === 0) {
-    return {
-      currentNode: "sync_node",
-      messages: [
-        new AIMessage(
-          "Você não tem processos abertos no nosso escritório.\nQuer abrir um novo caso? Posso ajudar com a triagem! 😊"
-        ),
-      ],
-    };
-  }
-
-  if (processes.length === 1) {
-    return {
-      currentNode: "sync_node",
-      messages: [new AIMessage(formatSingle(processes[0]))],
-    };
-  }
-
-  // Múltiplos processos — lista numerada, aguarda escolha
+  // Resposta humanizada para todos os outros casos (0, 1 ou múltiplos)
+  const humanResponse = await humanizeResponse(processes);
+  
   return {
     currentNode: "sync_node",
-    messages: [new AIMessage(formatList(processes))],
+    interactionContext: processes.length > 1 ? "SELECTING_PROCESS" : null,
+    messages: [new AIMessage(humanResponse)],
   };
 }

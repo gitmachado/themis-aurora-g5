@@ -21,12 +21,12 @@ class HeroUpdateCard extends StatelessWidget {
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
         color: AppColors.primary,
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
-            color: AppColors.primary.withValues(alpha: 0.3),
-            blurRadius: 15,
-            offset: const Offset(0, 8),
+            color: Colors.black.withValues(alpha: 0.08),
+            blurRadius: 36,
+            offset: const Offset(0, 12),
           ),
         ],
       ),
@@ -37,14 +37,14 @@ class HeroUpdateCard extends StatelessWidget {
             children: [
               const Icon(
                 Icons.error_outline_rounded,
-                color: AppColors.warning,
+                color: AppColors.yellow,
                 size: 20,
               ),
               const SizedBox(width: 8),
               Text(
                 'Atualização no seu processo',
                 style: AppTextStyles.caption.copyWith(
-                  color: AppColors.warning,
+                  color: AppColors.yellow,
                   fontWeight: FontWeight.bold,
                 ),
               ),
@@ -70,13 +70,13 @@ class HeroUpdateCard extends StatelessWidget {
                   backgroundColor: AppColors.white,
                   padding: const EdgeInsets.symmetric(vertical: 12),
                   shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(8),
+                    borderRadius: BorderRadius.circular(999),
                   ),
                 ),
                 child: const Text(
                   'Ver Linha do Tempo',
                   style: TextStyle(
-                    color: AppColors.primary,
+                    color: AppColors.ink,
                     fontWeight: FontWeight.bold,
                   ),
                 ),

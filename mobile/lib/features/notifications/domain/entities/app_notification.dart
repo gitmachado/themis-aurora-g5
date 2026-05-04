@@ -7,6 +7,7 @@ class AppNotification extends Equatable {
   final String title;
   final String body;
   final bool isRead;
+  final Map<String, dynamic>? extraData;
   final DateTime? createdAt;
 
   const AppNotification({
@@ -16,9 +17,19 @@ class AppNotification extends Equatable {
     required this.title,
     required this.body,
     required this.isRead,
+    this.extraData,
     this.createdAt,
   });
 
   @override
-  List<Object?> get props => [id, userId, type, title, body, isRead, createdAt];
+  List<Object?> get props => [
+    id,
+    userId,
+    type,
+    title,
+    body,
+    isRead,
+    extraData,
+    createdAt,
+  ];
 }

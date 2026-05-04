@@ -25,7 +25,7 @@ class LawyerFileReviewScreen extends ConsumerWidget {
 
     return Scaffold(
       backgroundColor: AppColors.background,
-      appBar: const CustomAppBar(title: 'Arquivo', showBackButton: true),
+      appBar: const CustomAppBar(title: 'Documento', showBackButton: true),
       body: document == null
           ? Center(
               child: Padding(
@@ -76,12 +76,12 @@ class LawyerFileReviewScreen extends ConsumerWidget {
                   Container(
                     padding: const EdgeInsets.all(12),
                     decoration: BoxDecoration(
-                      color: AppColors.primary.withValues(alpha: 0.1),
+                      color: AppColors.yellowSoft,
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: const Icon(
                       Icons.description_outlined,
-                      color: AppColors.primary,
+                      color: AppColors.ink,
                     ),
                   ),
                   const SizedBox(width: 16),
@@ -113,10 +113,10 @@ class LawyerFileReviewScreen extends ConsumerWidget {
             style: TextStyle(color: Colors.white),
           ),
           style: ElevatedButton.styleFrom(
-            backgroundColor: AppColors.primary,
+            backgroundColor: AppColors.ink,
             padding: const EdgeInsets.symmetric(vertical: 16),
             shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(12),
+              borderRadius: BorderRadius.circular(999),
             ),
           ),
         ),
@@ -147,13 +147,18 @@ class LawyerFileReviewScreen extends ConsumerWidget {
     WidgetRef ref,
     ProcessDocument document,
   ) async {
-    final uri = Uri.parse(
-      await ref.read(apiClientProvider).getDocumentAccessUrl(document.id),
-    );
-
-    if (await canLaunchUrl(uri)) {
-      await launchUrl(uri, mode: LaunchMode.externalApplication);
-      return;
+    try {
+      final url = await ref
+          .read(apiClientProvider)
+          .getDocumentAccessUrl(document.id);
+      final uri = Uri.parse(Uri.encodeFull(url));
+      final launched = await launchUrl(
+        uri,
+        mode: LaunchMode.externalApplication,
+      );
+      if (launched) return;
+    } catch (_) {
+      // fall through to error snackbar
     }
 
     if (!context.mounted) return;

@@ -5,7 +5,7 @@ status: open
 last_updated_at: 2026-04-19
 ---
 
-> Atualizacao 2026-04-28: a decisao de storage local descrita nesta spec foi superada pela ADR 0008. O deploy publico agora deve usar Supabase Storage privado para binarios de documentos, mantendo metadados e ownership no backend/PostgreSQL.
+> Atualizacao 2026-05-02: a ADR 0009 voltou a definir storage local persistente para binarios de documentos e fotos de perfil, mantendo metadados e ownership no backend/PostgreSQL.
 
 # 1. Objetivo
 

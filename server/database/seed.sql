@@ -1,3 +1,4 @@
+SET client_encoding = 'UTF8';
 -- Seed Data for OmniConnect MVP
 
 -- Insert initial configuration
@@ -8,26 +9,24 @@ ON CONFLICT (id) DO NOTHING;
 -- Test users password: Omni@123456
 
 -- Insert Lawyer (User)
-INSERT INTO users (id, name, whatsapp_number, cpf, email, supabase_user_id, role, password_hash)
-VALUES ('a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11', 'Dr. Thigs Advogado', '5511999999999', '12345678901', 'mauricio@adv.com.br', NULL, 'LAWYER', '$2b$10$cRgWfrw64noRMgk7mwJQcu6jlljE8YPirk0NJ6AuDV3Q7.XfPCUku')
+INSERT INTO users (id, name, whatsapp_number, cpf, email, role, password_hash)
+VALUES ('a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11', 'Dr. Maurício', '5511999999999', '12345678901', 'mauriciojesus.dev@gmail.com', 'LAWYER', '$2b$10$cRgWfrw64noRMgk7mwJQcu6jlljE8YPirk0NJ6AuDV3Q7.XfPCUku')
 ON CONFLICT (id) DO UPDATE SET
     name = EXCLUDED.name,
     whatsapp_number = EXCLUDED.whatsapp_number,
     cpf = EXCLUDED.cpf,
     email = EXCLUDED.email,
-    supabase_user_id = EXCLUDED.supabase_user_id,
     role = EXCLUDED.role,
     password_hash = EXCLUDED.password_hash;
 
 -- Insert Client (User)
-INSERT INTO users (id, name, whatsapp_number, cpf, email, supabase_user_id, role, password_hash)
-VALUES ('b1f9e8d7-c6b5-a4b3-92a1-0f9e8d7c6b5a', 'João Cliente Exemplo', '5511888888888', '98765432100', 'joao@cliente.com', NULL, 'CLIENT', '$2b$10$cRgWfrw64noRMgk7mwJQcu6jlljE8YPirk0NJ6AuDV3Q7.XfPCUku')
+INSERT INTO users (id, name, whatsapp_number, cpf, email, role, password_hash)
+VALUES ('b1f9e8d7-c6b5-a4b3-92a1-0f9e8d7c6b5a', 'João Cliente Exemplo', '5511888888888', '98765432100', 'joao@cliente.com', 'CLIENT', '$2b$10$cRgWfrw64noRMgk7mwJQcu6jlljE8YPirk0NJ6AuDV3Q7.XfPCUku')
 ON CONFLICT (id) DO UPDATE SET
     name = EXCLUDED.name,
     whatsapp_number = EXCLUDED.whatsapp_number,
     cpf = EXCLUDED.cpf,
     email = EXCLUDED.email,
-    supabase_user_id = EXCLUDED.supabase_user_id,
     role = EXCLUDED.role,
     password_hash = EXCLUDED.password_hash;
 

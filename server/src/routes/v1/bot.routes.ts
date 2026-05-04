@@ -7,6 +7,7 @@ import {
   LegalProcessRepository,
   NotificationRepository,
   TimelineEventRepository,
+  LeadRepository,
 } from '@repositories';
 import { ConfigurationRepository } from '../../repositories/implementations/configuration.repository';
 import { TimelineService } from '../../services/implementations/timeline.service';
@@ -20,6 +21,7 @@ const legalProcessRepository = new LegalProcessRepository();
 const timelineRepository = new TimelineEventRepository();
 const notificationRepository = new NotificationRepository();
 const configurationRepository = new ConfigurationRepository();
+const leadRepository = new LeadRepository();
 
 // Services
 const userService = new UserService(userRepository);
@@ -37,6 +39,7 @@ const controller = new BotController(
   legalProcessService,
   configurationService,
   notificationService,
+  leadRepository,
 );
 
 // ────────────────────────────────────────────────────
@@ -70,6 +73,63 @@ const controller = new BotController(
  *                 name: { type: string }
  */
 router.get('/users/by-phone/:whatsappNumber', apiKeyMiddleware, controller.getUserByPhone);
+
+/**
+ * @openapi
+ * /bot/users/by-cpf/{cpf}:
+ *   get:
+ *     summary: Verifica se um CPF pertence a um usuário cadastrado
+ *     tags: [Bot Integration]
+ *     security:
+ *       - apiKeyAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: cpf
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Resultado da busca
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 exists: { type: boolean }
+ *                 userId: { type: string }
+ *                 name: { type: string }
+ */
+router.get('/users/by-cpf/:cpf', apiKeyMiddleware, controller.getUserByCpf);
+
+/**
+ * @openapi
+ * /bot/leads/by-phone/{whatsappNumber}:
+ *   get:
+ *     summary: Verifica se um número de WhatsApp tem lead pendente
+ *     tags: [Bot Integration]
+ *     security:
+ *       - apiKeyAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: whatsappNumber
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Resultado da busca de lead
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 exists: { type: boolean }
+ *                 id: { type: string }
+ *                 status: { type: string }
+ *                 name: { type: string }
+ */
+router.get('/leads/by-phone/:whatsappNumber', apiKeyMiddleware, controller.getLeadByPhone);
 
 /**
  * @openapi
@@ -165,5 +225,27 @@ router.get('/configurations', apiKeyMiddleware, controller.getConfiguration);
  *               $ref: '#/components/schemas/Error'
  */
 router.post('/notifications', apiKeyMiddleware, controller.createBotNotification);
+
+/**
+ * @openapi
+ * /bot/handoff/start:
+ *   post:
+ *     summary: Inicia o handoff no banco de dados (AI para Humano)
+ *     tags: [Bot Integration]
+ *     security:
+ *       - apiKeyAuth: []
+ */
+router.post('/handoff/start', apiKeyMiddleware, controller.startHandoff);
+
+/**
+ * @openapi
+ * /bot/handoff/resume:
+ *   post:
+ *     summary: Finaliza o handoff no banco de dados (Humano para AI)
+ *     tags: [Bot Integration]
+ *     security:
+ *       - apiKeyAuth: []
+ */
+router.post('/handoff/resume', apiKeyMiddleware, controller.resumeAI);
 
 export default router;

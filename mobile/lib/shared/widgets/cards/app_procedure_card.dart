@@ -41,10 +41,10 @@ class AppProcedureCard extends StatelessWidget {
                   width: 40,
                   height: 40,
                   decoration: BoxDecoration(
-                    color: AppColors.primary.withValues(alpha: 0.1),
-                    shape: BoxShape.circle,
+                    color: AppColors.surface2,
+                    borderRadius: BorderRadius.circular(10),
                   ),
-                  child: Icon(icon, color: AppColors.primary, size: 20),
+                  child: Icon(icon, color: AppColors.ink, size: 20),
                 ),
                 const SizedBox(width: 12),
               ],
@@ -104,7 +104,7 @@ class AppProcedureCard extends StatelessWidget {
                 Text(
                   '$progressPercentage%',
                   style: AppTextStyles.caption.copyWith(
-                    color: AppColors.primary,
+                    color: AppColors.ink,
                     fontWeight: FontWeight.bold,
                     fontSize: 11,
                   ),
@@ -116,9 +116,9 @@ class AppProcedureCard extends StatelessWidget {
               borderRadius: BorderRadius.circular(2),
               child: LinearProgressIndicator(
                 value: progressPercentage! / 100,
-                backgroundColor: AppColors.divider.withValues(alpha: 0.5),
+                backgroundColor: AppColors.surface2,
                 valueColor: const AlwaysStoppedAnimation<Color>(
-                  AppColors.primary,
+                  AppColors.yellow,
                 ),
                 minHeight: 4,
               ),

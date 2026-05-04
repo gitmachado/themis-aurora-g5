@@ -6,6 +6,7 @@ import '../../../helpers/fakes.dart';
 void main() {
   test('uses notification inbox routes for list and read actions', () async {
     final apiClient = FakeApiClient()
+      ..jsonResponses['PATCH /notifications/notification-1/read'] = {}
       ..listResponses['GET /notifications/my'] = [
         {
           'id': 'notification-1',

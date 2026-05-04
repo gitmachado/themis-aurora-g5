@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../constants/app_colors.dart';
 import '../../constants/app_text_styles.dart';
+import '../../utils/string_utils.dart';
 import '../app_app_bar_actions.dart';
 
 class AppDashboardHeader extends StatelessWidget {
@@ -34,59 +35,43 @@ class AppDashboardHeader extends StatelessWidget {
     final resolvedAvatarUrl = avatarUrl?.isNotEmpty == true ? avatarUrl : null;
 
     return Container(
-      decoration: BoxDecoration(
-        color: AppColors.white,
-        border: Border(
-          bottom: BorderSide(
-            color: AppColors.border.withValues(alpha: 0.7),
-            width: 1,
-          ),
-        ),
-      ),
+      color: AppColors.background,
       child: SafeArea(
         bottom: false,
         child: Padding(
-          padding: const EdgeInsets.fromLTRB(20, 12, 20, 16),
+          padding: const EdgeInsets.fromLTRB(22, 20, 22, 8),
           child: Row(
             children: [
               GestureDetector(
                 onTap: onProfileTap,
                 child: CircleAvatar(
-                  radius: 30,
-                  backgroundColor: AppColors.secondaryLight,
+                  radius: 20,
+                  backgroundColor: AppColors.yellow,
                   backgroundImage: resolvedAvatarUrl != null
                       ? NetworkImage(resolvedAvatarUrl)
                       : null,
                   child: resolvedAvatarUrl == null
                       ? Text(
-                          _getInitials(name),
+                          StringUtils.getInitials(name),
                           style: const TextStyle(
-                            color: AppColors.secondaryDark,
+                            color: AppColors.ink,
                             fontWeight: FontWeight.bold,
-                            fontSize: 20,
+                            fontSize: 14,
+                            fontFamily: AppTextStyles.monoFontFamily,
                           ),
                         )
                       : null,
                 ),
               ),
-              const SizedBox(width: 16),
+              const SizedBox(width: 12),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      greeting,
-                      style: AppTextStyles.caption.copyWith(
-                        fontSize: 14,
-                        color: AppColors.textCaption,
-                      ),
-                    ),
+                    Text(greeting, style: AppTextStyles.tiny),
                     Text(
                       name,
-                      style: AppTextStyles.h1.copyWith(
-                        fontSize: 22,
-                        color: AppColors.primary,
-                      ),
+                      style: AppTextStyles.h2.copyWith(fontSize: 15),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                     ),
@@ -115,17 +100,5 @@ class AppDashboardHeader extends StatelessWidget {
         ),
       ),
     );
-  }
-
-  String _getInitials(String name) {
-    if (name.isEmpty) return '';
-    final parts = name.trim().split(RegExp(r'\s+'));
-    if (parts.length > 1) {
-      return '${parts[0][0]}${parts[1][0]}'.toUpperCase();
-    }
-    if (parts[0].isNotEmpty) {
-      return parts[0][0].toUpperCase();
-    }
-    return '';
   }
 }

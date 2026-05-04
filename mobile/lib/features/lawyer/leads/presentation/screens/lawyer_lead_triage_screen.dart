@@ -11,6 +11,7 @@ import '../../../../../../shared/widgets/layout/custom_app_bar.dart';
 import '../widgets/lead_card.dart';
 import '../../../../../../shared/widgets/app_app_bar_actions.dart';
 import '../../../../../../shared/widgets/layout/loading_skeleton.dart';
+import '../../../../../../shared/widgets/themis/themis_widgets.dart';
 
 class LawyerLeadTriageScreen extends ConsumerStatefulWidget {
   const LawyerLeadTriageScreen({super.key});
@@ -23,10 +24,28 @@ class LawyerLeadTriageScreen extends ConsumerStatefulWidget {
 class _LawyerLeadTriageScreenState
     extends ConsumerState<LawyerLeadTriageScreen> {
   String _selectedFilter = 'Todos';
+  int _selectedTabIndex = 0;
+  final TextEditingController _searchController = TextEditingController();
+
+  bool get _isArchivedTab => _selectedTabIndex == 1;
+
+  @override
+  void initState() {
+    super.initState();
+    _searchController.addListener(() => setState(() {}));
+  }
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
-    final leads = ref.watch(pendingLeadsProvider);
+    final leads = ref.watch(
+      _isArchivedTab ? archivedLeadsProvider : pendingLeadsProvider,
+    );
 
     return Scaffold(
       backgroundColor: AppColors.background,
@@ -37,17 +56,91 @@ class _LawyerLeadTriageScreenState
       ),
       body: Column(
         children: [
-          Container(color: AppColors.white, child: _buildFilters()),
-          Container(height: 1, color: AppColors.divider.withValues(alpha: 0.7)),
-          const SizedBox(height: 16),
+          Container(
+            color: AppColors.background,
+            child: Column(
+              children: [_buildSearchField(), _buildTabs(), _buildFilters()],
+            ),
+          ),
           Expanded(
-            child: leads.when(
-              data: _buildLeadsList,
-              loading: _buildLoadingList,
-              error: (error, _) => _buildErrorState(error),
+            child: RefreshIndicator(
+              onRefresh: () async {
+                if (_isArchivedTab) {
+                  ref.invalidate(allLeadsProvider);
+                  await ref.read(allLeadsProvider.future);
+                } else {
+                  await ref.read(pendingLeadsProvider.notifier).refresh();
+                }
+              },
+              child: leads.when(
+                data: (items) =>
+                    _buildLeadsList(items, archived: _isArchivedTab),
+                loading: _buildLoadingList,
+                error: (error, _) => _buildErrorState(error),
+              ),
             ),
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildSearchField() {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(20, 0, 20, 16),
+      child: TextField(
+        controller: _searchController,
+        textInputAction: TextInputAction.search,
+        style: AppTextStyles.body.copyWith(
+          fontSize: 15.5,
+          fontWeight: FontWeight.w600,
+          color: AppColors.ink,
+        ),
+        decoration: InputDecoration(
+          hintText: 'Pesquisar por nome, WhatsApp ou caso',
+          hintStyle: AppTextStyles.body.copyWith(
+            color: AppColors.ink4,
+            fontSize: 15.5,
+            fontWeight: FontWeight.w500,
+          ),
+          prefixIcon: const Icon(Icons.search, color: AppColors.textCaption),
+          suffixIcon: _searchController.text.isEmpty
+              ? null
+              : IconButton(
+                  tooltip: 'Limpar pesquisa',
+                  icon: const Icon(Icons.close_rounded, size: 20),
+                  onPressed: () {
+                    _searchController.clear();
+                    setState(() {});
+                  },
+                ),
+          filled: true,
+          fillColor: AppColors.surface2,
+          contentPadding: const EdgeInsets.symmetric(vertical: 0),
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+            borderSide: BorderSide(color: AppColors.border),
+          ),
+          enabledBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+            borderSide: BorderSide(color: AppColors.border),
+          ),
+          focusedBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+            borderSide: const BorderSide(color: AppColors.yellow, width: 1.5),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildTabs() {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(20, 0, 20, 0),
+      child: ThemisSegmentedControl(
+        labels: const ['Novos', 'Arquivados'],
+        selectedIndex: _selectedTabIndex,
+        onChanged: (index) => setState(() => _selectedTabIndex = index),
       ),
     );
   }
@@ -56,7 +149,7 @@ class _LawyerLeadTriageScreenState
     final filters = ['Todos', 'Urgentes', 'Novos', 'Trabalhista', 'Cível'];
     return SingleChildScrollView(
       scrollDirection: Axis.horizontal,
-      padding: const EdgeInsets.fromLTRB(20, 0, 20, 16),
+      padding: const EdgeInsets.fromLTRB(20, 10, 20, 10),
       child: Row(
         children: filters.map((filter) {
           final isSelected = _selectedFilter == filter;
@@ -66,17 +159,17 @@ class _LawyerLeadTriageScreenState
               label: Text(filter),
               selected: isSelected,
               onSelected: (val) => setState(() => _selectedFilter = filter),
-              backgroundColor: AppColors.white,
-              selectedColor: AppColors.primary,
+              backgroundColor: AppColors.surface2,
+              selectedColor: AppColors.yellow,
               labelStyle: TextStyle(
-                color: isSelected ? AppColors.white : AppColors.textPrimary,
+                color: AppColors.textPrimary,
                 fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-                fontSize: 12,
+                fontSize: 13,
               ),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(20),
                 side: BorderSide(
-                  color: isSelected ? AppColors.primary : AppColors.border,
+                  color: isSelected ? AppColors.yellow : AppColors.border,
                 ),
               ),
               showCheckmark: false,
@@ -88,85 +181,119 @@ class _LawyerLeadTriageScreenState
     );
   }
 
-  Widget _buildLeadsList(List<Lead> leads) {
+  Widget _buildLeadsList(List<Lead> leads, {required bool archived}) {
+    final query = _searchController.text.trim().toLowerCase();
     final filteredLeads = leads.where((lead) {
-      if (_selectedFilter == 'Todos') return true;
-      if (_selectedFilter == 'Urgentes') return lead.urgencyLabel == 'Alta';
-      if (_selectedFilter == 'Novos') return lead.timeLabel.contains('min');
-      return lead.caseTypeLabel == _selectedFilter;
+      final matchesFilter = switch (_selectedFilter) {
+        'Todos' => true,
+        'Urgentes' => lead.urgencyLabel == 'Alta',
+        'Novos' => lead.timeLabel.contains('min'),
+        _ => lead.caseTypeLabel == _selectedFilter,
+      };
+      if (!matchesFilter) return false;
+      if (query.isEmpty) return true;
+
+      final searchable = [
+        lead.displayName,
+        lead.whatsappNumber,
+        lead.caseTypeLabel,
+        lead.caseDescription ?? '',
+        lead.urgencyLabel,
+      ].join(' ').toLowerCase();
+      return searchable.contains(query);
     }).toList();
 
     if (filteredLeads.isEmpty) {
-      return Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(
-              Icons.person_search_rounded,
-              size: 64,
-              color: AppColors.textCaption.withValues(alpha: 0.5),
-            ),
-            const SizedBox(height: 16),
-            Text(
-              'Nenhum lead encontrado',
-              style: AppTextStyles.h2.copyWith(color: AppColors.textCaption),
-            ),
-          ],
+      return SingleChildScrollView(
+        physics: const AlwaysScrollableScrollPhysics(),
+        child: Container(
+          height: MediaQuery.of(context).size.height * 0.6,
+          alignment: Alignment.center,
+          padding: const EdgeInsets.all(24),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(
+                archived
+                    ? Icons.inventory_2_outlined
+                    : Icons.person_search_rounded,
+                size: 64,
+                color: AppColors.textCaption.withValues(alpha: 0.5),
+              ),
+              const SizedBox(height: 16),
+              Text(
+                archived
+                    ? 'Nenhum lead arquivado encontrado'
+                    : 'Nenhum lead encontrado',
+                style: AppTextStyles.h2.copyWith(color: AppColors.textCaption),
+                textAlign: TextAlign.center,
+              ),
+            ],
+          ),
         ),
       );
     }
 
-    return ListView.separated(
-      padding: EdgeInsets.fromLTRB(
-        20,
-        0,
-        20,
-        AppDimensions.bottomPadding(context),
-      ),
-
-      itemCount: filteredLeads.length,
-      separatorBuilder: (_, _) => const SizedBox(height: 16),
-      itemBuilder: (context, index) {
-        final lead = filteredLeads[index];
-        return LeadCard(
-          name: lead.displayName,
-          caseType: lead.caseTypeLabel,
-          time: lead.timeLabel,
-          urgency: lead.urgencyLabel,
-          onTap: () {
-            Navigator.pushNamed(
-              context,
-              AppRouter.lawyerLeadDetailRoute,
-              arguments: {
-                'id': lead.id,
-                'name': lead.displayName,
-                'caseType': lead.caseTypeLabel,
-                'urgency': lead.urgencyLabel,
-              },
-            );
-          },
-          onAccept: () async {
-            await ref.read(leadActionsProvider).convert(lead.id);
-            if (!context.mounted) return;
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text(
-                  'Lead ${lead.displayName} convertido em cliente.',
-                ),
-              ),
-            );
-          },
-          onArchive: () async {
-            await ref
-                .read(leadActionsProvider)
-                .discard(lead.id, reason: 'Arquivado no app mobile');
-            if (!context.mounted) return;
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text('Lead ${lead.displayName} arquivado.')),
-            );
-          },
-        );
+    return RefreshIndicator(
+      onRefresh: () async {
+        ref.invalidate(pendingLeadsProvider);
+        ref.invalidate(allLeadsProvider);
+        await Future.delayed(const Duration(milliseconds: 500));
       },
+      color: AppColors.yellow,
+      child: ListView.separated(
+        padding: EdgeInsets.fromLTRB(
+          20,
+          0,
+          20,
+          AppDimensions.bottomPadding(context),
+        ),
+        itemCount: filteredLeads.length,
+        separatorBuilder: (_, _) => const SizedBox(height: 16),
+        itemBuilder: (context, index) {
+          final lead = filteredLeads[index];
+          return LeadCard(
+            name: lead.shortName,
+            caseType: lead.caseTypeLabel,
+            time: lead.timeLabel,
+            urgency: lead.urgencyLabel,
+            status: lead.status,
+            showArchiveAction: !archived && lead.status == 'PENDING',
+            showChatAction: !archived,
+            onTap: () {
+              Navigator.pushNamed(
+                context,
+                AppRouter.lawyerLeadDetailRoute,
+                arguments: {
+                  'id': lead.id,
+                  'name': lead.displayName,
+                  'caseType': lead.caseTypeLabel,
+                  'urgency': lead.urgencyLabel,
+                },
+              );
+            },
+            onAccept: () {
+              Navigator.pushNamed(
+                context,
+                AppRouter.lawyerChatHandoffRoute,
+                arguments: {
+                  'clientName': lead.displayName,
+                  'whatsappNumber': lead.whatsappNumber,
+                },
+              );
+            },
+            onArchive: () async {
+              await ref
+                  .read(leadActionsProvider)
+                  .discard(lead.id, reason: 'Arquivado no app mobile');
+              if (!context.mounted) return;
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(content: Text('Lead ${lead.displayName} arquivado.')),
+              );
+            },
+          );
+        },
+      ),
     );
   }
 
@@ -186,8 +313,11 @@ class _LawyerLeadTriageScreenState
   }
 
   Widget _buildErrorState(Object error) {
-    return Center(
-      child: Padding(
+    return SingleChildScrollView(
+      physics: const AlwaysScrollableScrollPhysics(),
+      child: Container(
+        height: MediaQuery.of(context).size.height * 0.6,
+        alignment: Alignment.center,
         padding: const EdgeInsets.all(24),
         child: Text(
           error.toString(),

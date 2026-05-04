@@ -18,25 +18,31 @@ void main() {
       'createdAt': '2026-04-24T12:00:00.000Z',
     };
     final apiClient = FakeApiClient()
+      ..listResponses['GET /leads/pending'] = [lead]
       ..listResponses['GET /leads'] = [lead]
+      ..listResponses['GET /leads?status=DISCARDED'] = [
+        {...lead, 'id': 'lead-archived', 'status': 'DISCARDED'},
+      ]
       ..jsonResponses['GET /leads/lead-1'] = lead
-      ..jsonResponses['PATCH /leads/lead-1/convert'] = {'id': 'user-1'}
-      ..jsonResponses['PATCH /leads/lead-1/discard'] = lead;
+      ..jsonResponses['PATCH /leads/lead-1/convert'] = {'id': 'user-1'};
     final dataSource = LeadRemoteDataSource(apiClient);
 
     final leads = await dataSource.getPending();
+    final allLeads = await dataSource.getAllLeads();
+    final archivedLeads = await dataSource.getByStatus('DISCARDED');
     final detail = await dataSource.getById('lead-1');
     await dataSource.convert('lead-1');
-    await dataSource.discard('lead-1', reason: 'Sem aderencia');
 
     expect(leads.single.id, 'lead-1');
+    expect(allLeads.single.id, 'lead-1');
+    expect(archivedLeads.single.status, 'DISCARDED');
     expect(detail.name, 'Carla Menezes');
     expect(apiClient.calls.map((call) => '${call.method} ${call.path}'), [
+      'GET /leads/pending',
       'GET /leads',
+      'GET /leads?status=DISCARDED',
       'GET /leads/lead-1',
       'PATCH /leads/lead-1/convert',
-      'PATCH /leads/lead-1/discard',
     ]);
-    expect(apiClient.calls.last.data, {'reason': 'Sem aderencia'});
   });
 }

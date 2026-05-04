@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import '../../../../features/client/home/presentation/screens/client_home_screen.dart';
 import '../../../../features/client/procedures/presentation/screens/client_procedure_list_screen.dart';
 import '../../../../features/client/files/presentation/screens/client_files_screen.dart';
-import '../../../../features/client/chat/presentation/screens/client_chats_screen.dart';
+import '../../../../features/client/chat/presentation/screens/client_chat_mirror_screen.dart';
 import '../../../../features/client/profile/presentation/screens/client_profile_screen.dart';
 import 'app_bottom_nav_bar.dart';
 
@@ -22,7 +22,7 @@ class _ClientMainLayoutState extends State<ClientMainLayout> {
     ClientHomeScreen(),
     ClientProcedureListScreen(),
     ClientFilesScreen(),
-    ClientChatsScreen(),
+    ClientChatMirrorScreen(showBackButton: false),
     ClientProfileScreen(),
   ];
 
@@ -51,51 +51,12 @@ class _ClientMainLayoutState extends State<ClientMainLayout> {
         }
       },
       child: Scaffold(
-        extendBody: true,
-        body: LayoutBuilder(
-          builder: (context, constraints) {
-            final double height = constraints.maxHeight;
-            // Meio termo: começa aos 180px e termina aos 60px
-            final double stopStart = (height - 180) / height;
-            final double stopEnd = (height - 60) / height;
-
-            return ShaderMask(
-              shaderCallback: (Rect bounds) {
-                return LinearGradient(
-                  begin: Alignment.topCenter,
-                  end: Alignment.bottomCenter,
-                  colors: const [Colors.black, Colors.transparent],
-                  stops: [stopStart, stopEnd],
-                ).createShader(bounds);
-              },
-              blendMode: BlendMode.dstIn,
-              child: IndexedStack(index: _currentIndex, children: _screens),
-            );
-          },
-        ),
-        bottomNavigationBar: Container(
-          padding: const EdgeInsets.only(top: 16),
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              begin: Alignment.topCenter,
-              end: Alignment.bottomCenter,
-              colors: [
-                Theme.of(
-                  context,
-                ).scaffoldBackgroundColor.withValues(alpha: 0.0),
-                Theme.of(
-                  context,
-                ).scaffoldBackgroundColor.withValues(alpha: 0.95),
-                Theme.of(context).scaffoldBackgroundColor,
-              ],
-              stops: const [0.0, 0.4, 1.0],
-            ),
-          ),
-          child: SafeArea(
-            child: AppBottomNavigationBar(
-              currentIndex: _currentIndex,
-              onTap: _onTabTapped,
-            ),
+        body: IndexedStack(index: _currentIndex, children: _screens),
+        bottomNavigationBar: SafeArea(
+          top: false,
+          child: AppBottomNavigationBar(
+            currentIndex: _currentIndex,
+            onTap: _onTabTapped,
           ),
         ),
       ),

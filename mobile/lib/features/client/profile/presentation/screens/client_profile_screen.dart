@@ -18,6 +18,7 @@ class ClientProfileScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final account = ref.watch(currentAccountProvider);
+    final cachedAccount = account.valueOrNull;
 
     return Scaffold(
       backgroundColor: AppColors.background,
@@ -26,28 +27,31 @@ class ClientProfileScreen extends ConsumerWidget {
         showBackButton: true,
         actions: [AppAppBarActions(showChat: false)],
       ),
-      body: account.when(
-        data: (account) => _buildContent(context, ref, account),
-        loading: () => const Padding(
-          padding: EdgeInsets.all(24),
-          child: LoadingSkeleton(height: 260, borderRadius: 16),
-        ),
-        error: (error, _) => Center(
-          child: Padding(
-            padding: const EdgeInsets.all(24),
-            child: Text(
-              error.toString(),
-              textAlign: TextAlign.center,
-              style: AppTextStyles.body.copyWith(color: AppColors.error),
+      body: cachedAccount != null
+          ? _buildContent(context, ref, cachedAccount)
+          : account.when(
+              data: (account) => _buildContent(context, ref, account),
+              loading: () => const Padding(
+                padding: EdgeInsets.all(24),
+                child: LoadingSkeleton(height: 260, borderRadius: 16),
+              ),
+              error: (error, _) => Center(
+                child: Padding(
+                  padding: const EdgeInsets.all(24),
+                  child: Text(
+                    error.toString(),
+                    textAlign: TextAlign.center,
+                    style: AppTextStyles.body.copyWith(color: AppColors.error),
+                  ),
+                ),
+              ),
             ),
-          ),
-        ),
-      ),
     );
   }
 
   Widget _buildContent(BuildContext context, WidgetRef ref, Account account) {
     return SingleChildScrollView(
+      key: const PageStorageKey<String>('client-profile-scroll'),
       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
       child: Column(
         children: [
@@ -130,7 +134,7 @@ class ClientProfileScreen extends ConsumerWidget {
                     height: 80,
                     decoration: const BoxDecoration(
                       gradient: LinearGradient(
-                        colors: [AppColors.primary, AppColors.secondary],
+                        colors: [AppColors.ink, AppColors.yellow],
                         begin: Alignment.topLeft,
                         end: Alignment.bottomRight,
                       ),
@@ -154,7 +158,7 @@ class ClientProfileScreen extends ConsumerWidget {
                         ),
                         child: CircleAvatar(
                           radius: 40,
-                          backgroundColor: AppColors.primary,
+                          backgroundColor: AppColors.yellow,
                           backgroundImage:
                               avatarUrl != null && avatarUrl.isNotEmpty
                               ? NetworkImage(avatarUrl)
@@ -163,7 +167,7 @@ class ClientProfileScreen extends ConsumerWidget {
                               ? Text(
                                   initial,
                                   style: const TextStyle(
-                                    color: Colors.white,
+                                    color: AppColors.ink,
                                     fontSize: 28,
                                     fontWeight: FontWeight.bold,
                                   ),
@@ -187,8 +191,8 @@ class ClientProfileScreen extends ConsumerWidget {
                         icon: const Icon(Icons.photo_camera_outlined, size: 18),
                         onPressed: () => _pickAndUploadAvatar(context, ref),
                         style: IconButton.styleFrom(
-                          backgroundColor: AppColors.secondary,
-                          foregroundColor: AppColors.primary,
+                          backgroundColor: AppColors.ink,
+                          foregroundColor: AppColors.yellow,
                         ),
                       ),
                     ),
@@ -203,13 +207,13 @@ class ClientProfileScreen extends ConsumerWidget {
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
             decoration: BoxDecoration(
-              color: AppColors.primary.withValues(alpha: 0.1),
+              color: AppColors.yellowSoft,
               borderRadius: BorderRadius.circular(20),
             ),
             child: Text(
               'Conta de cliente',
               style: AppTextStyles.caption.copyWith(
-                color: AppColors.primary,
+                color: AppColors.yellowDeep,
                 fontWeight: FontWeight.bold,
               ),
             ),
@@ -311,10 +315,10 @@ class ClientProfileScreen extends ConsumerWidget {
       leading: Container(
         padding: const EdgeInsets.all(8),
         decoration: BoxDecoration(
-          color: AppColors.primary.withValues(alpha: 0.05),
+          color: AppColors.surface2,
           borderRadius: BorderRadius.circular(10),
         ),
-        child: Icon(icon, color: AppColors.primary, size: 20),
+        child: Icon(icon, color: AppColors.ink, size: 20),
       ),
       title: Text(
         label,
@@ -339,7 +343,7 @@ class ClientProfileScreen extends ConsumerWidget {
         title,
         style: const TextStyle(fontWeight: FontWeight.w500, fontSize: 14),
       ),
-      activeThumbColor: AppColors.primary,
+      activeThumbColor: AppColors.ink,
     );
   }
 
@@ -353,13 +357,12 @@ class ClientProfileScreen extends ConsumerWidget {
       leading: Container(
         padding: const EdgeInsets.all(8),
         decoration: BoxDecoration(
-          color: (isDestructive ? AppColors.error : AppColors.primary)
-              .withValues(alpha: 0.05),
+          color: isDestructive ? AppColors.errorBackground : AppColors.surface2,
           borderRadius: BorderRadius.circular(10),
         ),
         child: Icon(
           icon,
-          color: isDestructive ? AppColors.error : AppColors.primary,
+          color: isDestructive ? AppColors.error : AppColors.ink,
           size: 20,
         ),
       ),
@@ -389,12 +392,27 @@ class ClientProfileScreen extends ConsumerWidget {
   ) async {
     final updated = Map<String, bool>.from(account.notificationPreferences)
       ..[key] = value;
+    final optimisticAccount = Account(
+      id: account.id,
+      name: account.name,
+      whatsappNumber: account.whatsappNumber,
+      role: account.role,
+      cpf: account.cpf,
+      email: account.email,
+      avatarUrl: account.avatarUrl,
+      notificationPreferences: updated,
+    );
+
+    ref
+        .read(authControllerProvider.notifier)
+        .updateSessionAccount(optimisticAccount);
 
     try {
       await ref
           .read(accountActionsProvider)
           .updateNotificationPreferences(updated);
     } catch (error) {
+      ref.read(authControllerProvider.notifier).updateSessionAccount(account);
       if (!context.mounted) return;
       ScaffoldMessenger.of(
         context,

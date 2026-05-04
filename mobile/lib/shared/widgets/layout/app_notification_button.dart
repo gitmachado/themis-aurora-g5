@@ -18,29 +18,34 @@ class AppNotificationButton extends StatelessWidget {
     return Stack(
       alignment: Alignment.center,
       children: [
-        IconButton(
-          icon: Icon(
-            Icons.notifications_none_rounded,
-            size: size,
-            color: AppColors.primary,
+        SizedBox(
+          width: 40,
+          height: 40,
+          child: IconButton(
+            icon: Icon(
+              Icons.notifications_none_rounded,
+              size: size,
+              color: AppColors.ink2,
+            ),
+            onPressed: onTap,
+            padding: EdgeInsets.zero,
           ),
-          onPressed: onTap,
         ),
         if (notificationCount > 0)
           Positioned(
-            right: 8,
-            top: 8,
+            right: 0,
+            top: 0,
             child: Container(
               padding: const EdgeInsets.all(2),
               decoration: const BoxDecoration(
-                color: AppColors.error,
+                color: AppColors.yellow,
                 shape: BoxShape.circle,
               ),
               constraints: const BoxConstraints(minWidth: 14, minHeight: 14),
               child: Text(
                 notificationCount > 9 ? '+9' : notificationCount.toString(),
                 style: const TextStyle(
-                  color: Colors.white,
+                  color: AppColors.ink,
                   fontSize: 8,
                   fontWeight: FontWeight.bold,
                 ),

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../constants/app_colors.dart';
+import '../../constants/app_text_styles.dart';
 
 class AppSearchInput extends StatelessWidget {
   final String hintText;
@@ -16,36 +17,34 @@ class AppSearchInput extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      height: 52,
+      height: 44,
       decoration: BoxDecoration(
-        color: AppColors.white,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: AppColors.border),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.02),
-            blurRadius: 8,
-            offset: const Offset(0, 2),
-          ),
-        ],
+        color: AppColors.surface2,
+        borderRadius: BorderRadius.circular(14),
       ),
       child: TextField(
         onChanged: onChanged,
+        style: AppTextStyles.body.copyWith(
+          fontSize: 15.5,
+          fontWeight: FontWeight.w600,
+          color: AppColors.ink,
+        ),
         decoration: InputDecoration(
           hintText: hintText,
-          hintStyle: const TextStyle(
-            color: AppColors.textCaption,
-            fontSize: 14,
+          hintStyle: AppTextStyles.body.copyWith(
+            color: AppColors.ink4,
+            fontSize: 15.5,
+            fontWeight: FontWeight.w500,
           ),
-          prefixIcon: const Icon(Icons.search, color: AppColors.textCaption),
+          prefixIcon: const Icon(Icons.search, color: AppColors.ink4, size: 20),
           suffixIcon: onFilterTap != null
               ? IconButton(
-                  icon: const Icon(Icons.tune, color: AppColors.primary),
+                  icon: const Icon(Icons.tune, color: AppColors.ink),
                   onPressed: onFilterTap,
                 )
               : null,
           border: InputBorder.none,
-          contentPadding: const EdgeInsets.symmetric(vertical: 15),
+          contentPadding: const EdgeInsets.symmetric(vertical: 11),
         ),
       ),
     );

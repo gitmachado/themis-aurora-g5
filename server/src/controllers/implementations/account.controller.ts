@@ -146,7 +146,6 @@ export class AccountController {
       whatsappNumber: user.whatsappNumber,
       cpf: user.cpf,
       email: user.email,
-      supabaseUserId: user.supabaseUserId,
       avatarUrl,
       role: user.role,
       notificationPreferences: user.notificationPreferences,
