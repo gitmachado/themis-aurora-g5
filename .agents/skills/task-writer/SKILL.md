@@ -1,11 +1,11 @@
 ---
 name: task-writer
-description: Criar e refinar tasks/issues no Linear seguindo as melhores práticas do OmniConnect. Use sempre que o usuário pedir para criar uma nova task, refinar uma existente, padronizar tarefas do backlog, ou transformar um requisito do PRD em uma issue acionável no Linear. Também use quando o usuário mencionar "criar issue", "escrever task", "padronizar tasks", ou "melhorar descrição de ticket".
+description: Criar e refinar tasks/issues no Linear seguindo as melhores práticas do Themis. Use sempre que o usuário pedir para criar uma nova task, refinar uma existente, padronizar tarefas do backlog, ou transformar um requisito do PRD em uma issue acionável no Linear. Também use quando o usuário mencionar "criar issue", "escrever task", "padronizar tasks", ou "melhorar descrição de ticket".
 ---
 
 # Task Writer — Criação e Refinamento de Issues no Linear
 
-Skill para criar e refinar issues no Linear do projeto OmniConnect, garantindo
+Skill para criar e refinar issues no Linear do projeto Themis, garantindo
 que cada task seja clara, acionável, rastreável e alinhada com a documentação do
 repositório.
 
@@ -101,7 +101,7 @@ relevantes.]
    - Áreas válidas: `[BE]`, `[FE-Core]`, `[FE-Feature]`, `[Infra]`, `[DevOps]`,
      `[AI]`, `[Docs]`, `[QA]`
 
-5. Crie a issue no Linear via `save_issue` com team `OmniConnect-G5`.
+5. Crie a issue no Linear via `save_issue` com team `Themis-G5`.
 
 ### Refinar uma task existente
 

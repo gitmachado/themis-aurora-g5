@@ -1,5 +1,5 @@
 import { AIMessage } from "@langchain/core/messages";
-import { OmniStateType } from "../state.js";
+import { ThemisStateType } from "../state.js";
 import { notifyLawyer, startHandoff } from "../../utils/backend-client.js";
 import { HANDOFF_MESSAGE } from "../../config/prompts.js";
 
@@ -20,8 +20,8 @@ export function detectHandoffKeyword(message: string): boolean {
 }
 
 export async function handoffNode(
-  state: OmniStateType
-): Promise<Partial<OmniStateType>> {
+  state: ThemisStateType
+): Promise<Partial<ThemisStateType>> {
   const { whatsappNumber, handoffReason, triage } = state;
 
   // 1. APENAS NOTIFICA (Handoff Passivo)

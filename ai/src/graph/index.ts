@@ -1,6 +1,6 @@
 import { StateGraph, START, END } from "@langchain/langgraph";
 import { AIMessage } from "@langchain/core/messages";
-import { OmniState, OmniStateType } from "./state.js";
+import { ThemisState, ThemisStateType } from "./state.js";
 import { checkpointer } from "../config/checkpointer.js";
 import { routerNode } from "./nodes/router.js";
 import { triageNode } from "./nodes/triage.js";
@@ -11,7 +11,7 @@ import { greetingNode } from "./nodes/greeting.js";
 import { syncMessage } from "./nodes/sync.js";
 
 // Wrapper do syncMessage (utilitário) para interface de nó LangGraph
-async function syncNode(state: OmniStateType): Promise<Partial<OmniStateType>> {
+async function syncNode(state: ThemisStateType): Promise<Partial<ThemisStateType>> {
   const lastMsg = state.messages.at(-1);
   // Sincroniza apenas se for uma mensagem da IA (BOT). 
   // Mensagens do CLIENTE agora são sincronizadas pelo Webhook para garantir tempo real.
@@ -28,10 +28,10 @@ async function syncNode(state: OmniStateType): Promise<Partial<OmniStateType>> {
 }
 
 // Função de roteamento: lê o próximo nó a partir do state
-const routeByCurrentNode = (state: OmniStateType): string => state.currentNode;
+const routeByCurrentNode = (state: ThemisStateType): string => state.currentNode;
 
 // Encadeamento para inferência correta dos tipos de nó no TypeScript
-const graphBuilder = new StateGraph(OmniState)
+const graphBuilder = new StateGraph(ThemisState)
   .addNode("router_node", routerNode)
   .addNode("triage_node", triageNode)
   .addNode("status_node", statusNode)

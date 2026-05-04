@@ -2,7 +2,7 @@
 
 ## Objetivo
 
-Documentar o deploy publico minimo do OmniConnect no recorte aprovado para o ticket `G5-7`: uma unica VM/VPS Linux com Docker, proxy HTTPS na borda, backend em container, PostgreSQL na mesma VM sem exposicao publica e documentos persistidos em volume local.
+Documentar o deploy publico minimo do Themis no recorte aprovado para o ticket `G5-7`: uma unica VM/VPS Linux com Docker, proxy HTTPS na borda, backend em container, PostgreSQL na mesma VM sem exposicao publica e documentos persistidos em volume local.
 
 ## Topologia aprovada
 

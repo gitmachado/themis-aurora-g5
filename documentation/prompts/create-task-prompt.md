@@ -1,5 +1,5 @@
 ---
-description: Criar ou refinar issues no Linear seguindo o padrao de qualidade do OmniConnect.
+description: Criar ou refinar issues no Linear seguindo o padrao de qualidade do Themis.
 ---
 
 # Prompt: Criar ou Refinar Task no Linear

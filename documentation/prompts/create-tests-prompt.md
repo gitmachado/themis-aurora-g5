@@ -7,7 +7,7 @@ description: Criar e ajustar testes unitarios e de integracao para o projeto.
 ## Objetivo
 
 Adicionar ou ajustar testes unitarios e de integracao para garantir confiabilidade
-nas entregas do OmniConnect.
+nas entregas do Themis.
 
 ## Quando usar
 

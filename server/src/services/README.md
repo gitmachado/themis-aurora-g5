@@ -1,6 +1,6 @@
 # Camada de Serviços (Regras de Negócio)
 
-Esta camada é responsável por centralizar a lógica de negócio do OmniConnect, orquestrar os repositórios de dados e disparar efeitos colaterais (notificações, registro de timeline, etc.).
+Esta camada é responsável por centralizar a lógica de negócio do Themis, orquestrar os repositórios de dados e disparar efeitos colaterais (notificações, registro de timeline, etc.).
 
 ## 📂 Estrutura de Pastas
 

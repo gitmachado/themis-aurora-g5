@@ -1,6 +1,6 @@
-# Tutorial: Rodando o Backend do OmniConnect
+# Tutorial: Rodando o Backend do Themis
 
-Este guia explica como configurar e rodar o ecossistema de backend do OmniConnect Aurora G5, que inclui o servidor principal (Node.js/Express), o serviço de IA e o banco de dados PostgreSQL com suporte a vetores (pgvector).
+Este guia explica como configurar e rodar o ecossistema de backend do Themis Aurora G5, que inclui o servidor principal (Node.js/Express), o serviço de IA e o banco de dados PostgreSQL com suporte a vetores (pgvector).
 
 ## 🚀 Método Recomendado: Docker (Fácil e Rápido)
 
@@ -47,7 +47,7 @@ Use este método se quiser rodar o Node.js diretamente na sua máquina sem conta
 
 ### 2. Configuração do Banco de Dados
 Se não estiver usando o Docker para o banco, você precisará:
-1.  Criar um banco chamado `omniconnect_db`.
+1.  Criar um banco chamado `Themis_db`.
 2.  Habilitar as extensões `uuid-ossp` e `vector`.
 3.  Rodar os scripts em `server/database/schema.sql` e `server/database/seed.sql`.
 

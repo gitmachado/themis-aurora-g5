@@ -1,16 +1,16 @@
 import { ChatOpenAI } from "@langchain/openai";
 import { ToolMessage } from "@langchain/core/messages";
-import { OmniStateType } from "../state.js";
+import { ThemisStateType } from "../state.js";
 import { SYSTEM_PROMPT } from "../../config/prompts.js";
 import { PGVectorStore } from "@langchain/community/vectorstores/pgvector";
 import { OpenAIEmbeddings } from "@langchain/openai";
 import { tools, toolsByName } from "../../tools/index.js";
 
-const DATABASE_URL = process.env.DATABASE_URL || "postgresql://postgres:postgres@localhost:5433/omniconnect_db";
+const DATABASE_URL = process.env.DATABASE_URL || "postgresql://postgres:postgres@localhost:5433/themis_db";
 
 export async function routerNode(
-  state: OmniStateType
-): Promise<Partial<OmniStateType>> {
+  state: ThemisStateType
+): Promise<Partial<ThemisStateType>> {
   const { whatsappNumber, messages, needsHandoff, triage } = state;
 
   // 1. Blindagem de Handoff

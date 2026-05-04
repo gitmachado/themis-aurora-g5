@@ -1,10 +1,10 @@
 import { ChatOpenAI, OpenAIEmbeddings } from "@langchain/openai";
 import { AIMessage } from "@langchain/core/messages";
 import { PGVectorStore } from "@langchain/community/vectorstores/pgvector";
-import { OmniStateType } from "../state.js";
+import { ThemisStateType } from "../state.js";
 import { SYSTEM_PROMPT, RAG_PROMPT } from "../../config/prompts.js";
 
-const DATABASE_URL = process.env.DATABASE_URL || "postgresql://postgres:postgres@localhost:5433/omniconnect_db";
+const DATABASE_URL = process.env.DATABASE_URL || "postgresql://postgres:postgres@localhost:5433/themis_db";
 
 // Indicadores determinísticos de que o LLM não encontrou resposta na base
 const HANDOFF_INDICATORS = [
@@ -21,8 +21,8 @@ function containsHandoffIndicator(text: string): boolean {
 }
 
 export async function ragNode(
-  state: OmniStateType
-): Promise<Partial<OmniStateType>> {
+  state: ThemisStateType
+): Promise<Partial<ThemisStateType>> {
   const { messages } = state;
   const lastMessage = messages.at(-1);
   const query = String(lastMessage?.content ?? "").trim();

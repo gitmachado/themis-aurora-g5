@@ -1,9 +1,9 @@
 ---
-description: "Padrão de uso do Git e criação de commits no projeto OmniConnect."
+description: "Padrão de uso do Git e criação de commits no projeto Themis."
 ---
 # Workflow de Controle de Versão (Git e Commits)
 
-Este documento define as regras fundamentais do Grupo 5 para gerenciamento do código-fonte e histórico do **OmniConnect**.
+Este documento define as regras fundamentais do Grupo 5 para gerenciamento do código-fonte e histórico do **Themis**.
 
 ## 📌 Regras de Branches (Ramificações)
 1. **`main`**: É a branch de **Produção**. **NUNCA FAÇA COMMIT DIRETO NA MAIN.**

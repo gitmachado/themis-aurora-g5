@@ -1,11 +1,11 @@
-# Arquitetura OmniConnect
+# Arquitetura Themis
 
 ## 1. Visão Geral
 
-O OmniConnect segue uma arquitetura **monorepo** com três camadas principais:
+O Themis segue uma arquitetura **monorepo** com três camadas principais:
 
 ```
-omniconnect-aurora-g5/
+Themis-aurora-g5/
 ├── mobile/          # App Flutter Único (Perfis Cliente e Advogado)
 ├── server/          # API Node.js + TypeScript (sem ORM)
 └── documentation/   # PRD, specs, decisões, arquitetura

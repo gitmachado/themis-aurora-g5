@@ -1,6 +1,6 @@
 # Mobile
 
-Base Flutter inicial do OmniConnect para o ticket `G5-5`.
+Base Flutter inicial do Themis para o ticket `G5-5`.
 
 ## Escopo atual
 

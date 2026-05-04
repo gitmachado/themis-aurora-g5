@@ -1,4 +1,4 @@
-# Roadmap de Implementação — Frontend Flutter OmniConnect
+# Roadmap de Implementação — Frontend Flutter Themis
 
 > **Objetivo:** Guia definitivo para o time de frontend, cobrindo a ordem lógica de implementação desde a conclusão das telas até o app funcionando com integração real com o backend.
 
@@ -156,7 +156,7 @@ class AppConstants {
 > ⚠️ **Aguarda a branch das telas.** O tema deve refletir as decisões finais de design do Pencil.
 
 O arquivo atual retorna apenas `ThemeData(useMaterial3: true)`. Precisa ser expandido com:
-- Paleta de cores do OmniConnect (primária, secundária, erro, superfície)
+- Paleta de cores do Themis (primária, secundária, erro, superfície)
 - `TextTheme` com as fontes definidas no Pencil
 - `AppBarTheme`, `CardTheme`, `InputDecorationTheme`
 - Tokens de espaçamento (via extensão ou constantes)

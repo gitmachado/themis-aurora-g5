@@ -8,7 +8,7 @@ import pool from '../config/database';
 dotenv.config({ path: path.join(__dirname, '../../.env') });
 
 async function ensureDatabaseExists() {
-  const dbName = process.env.DB_NAME || 'omniconnect_db';
+  const dbName = process.env.DB_NAME || 'themis_db';
   
   // Conectamos ao banco padrão 'postgres' para poder criar o nosso banco
   const client = new Client({

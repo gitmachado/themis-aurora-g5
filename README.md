@@ -1,6 +1,6 @@
-## OmniConnect
+## Themis
 
-Bem-vindo ao repositorio do **OmniConnect**, plataforma desenvolvida pelo **Grupo 5** para o **Desafio Final da Turma Aurora (Selene) - Ciclo I**.
+Bem-vindo ao repositorio do **Themis**, plataforma desenvolvida pelo **Grupo 5** para o **Desafio Final da Turma Aurora (Selene) - Ciclo I**.
 
 Uma plataforma de **gestao inteligente de atendimento juridico**, onde clientes de escritorios de advocacia iniciam o contato via **WhatsApp com um chatbot de IA**, e os usuarios utilizam um **unico app Flutter** com perfis distintos para acompanhar o ciclo de vida do caso.
 
@@ -8,7 +8,7 @@ Uma plataforma de **gestao inteligente de atendimento juridico**, onde clientes 
 
 Muitas empresas de servicos, especialmente **escritorios de advocacia**, enfrentam friccao no atendimento inicial de clientes e falta de visibilidade sobre o andamento de processos consultados informalmente via chat.
 
-O **OmniConnect** resolve isso eliminando a barreira inicial: o cliente inicia o atendimento via **WhatsApp**, onde um **chatbot alimentado por IA (RAG via LangChain)** interage e extrai os dados relevantes. Essas interacoes sao sincronizadas em tempo real com uma aplicacao central em **Flutter**, que oferece dashboards especificos para o cliente e para o advogado.
+O **Themis** resolve isso eliminando a barreira inicial: o cliente inicia o atendimento via **WhatsApp**, onde um **chatbot alimentado por IA (RAG via LangChain)** interage e extrai os dados relevantes. Essas interacoes sao sincronizadas em tempo real com uma aplicacao central em **Flutter**, que oferece dashboards especificos para o cliente e para o advogado.
 
 ## Fluxo Local Recomendado
 

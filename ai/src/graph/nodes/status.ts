@@ -1,6 +1,6 @@
 import { AIMessage } from "@langchain/core/messages";
 import { ChatOpenAI } from "@langchain/openai";
-import { OmniStateType } from "../state.js";
+import { ThemisStateType } from "../state.js";
 import { getProcessesByPhone } from "../../utils/backend-client.js";
 import { SYSTEM_PROMPT, STATUS_HUMANIZER_PROMPT } from "../../config/prompts.js";
 
@@ -42,8 +42,8 @@ async function humanizeResponse(processes: any[]): Promise<string> {
 }
 
 export async function statusNode(
-  state: OmniStateType
-): Promise<Partial<OmniStateType>> {
+  state: ThemisStateType
+): Promise<Partial<ThemisStateType>> {
   const { whatsappNumber, messages, interactionContext } = state;
   const userInput = String(messages.at(-1)?.content ?? "").trim();
 

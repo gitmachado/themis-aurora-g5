@@ -1,6 +1,6 @@
 # Especificação Técnica: Sistema de Segurança Backend
 
-Este documento detalha os mecanismos de proteção, autenticação e autorização implementados no servidor OmniConnect.
+Este documento detalha os mecanismos de proteção, autenticação e autorização implementados no servidor Themis.
 
 ## 1. Autenticação (JWT)
 

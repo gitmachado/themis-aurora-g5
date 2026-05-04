@@ -1,6 +1,6 @@
 # Prompts do Projeto
 
-Esta pasta foi simplificada para refletir o fluxo real do OmniConnect.
+Esta pasta foi simplificada para refletir o fluxo real do Themis.
 
 ## Fluxo recomendado
 

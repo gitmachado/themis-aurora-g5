@@ -1,17 +1,17 @@
 ---
-name: flutter-omni-standard
-description: Standard guidelines for Flutter development in the OmniConnect project. Use this skill whenever initiating UI tasks, creating widgets, or implementing Flutter features. It ensures visual, structural, and technical consistency by integrating prototypes, design guides, and existing patterns.
+name: flutter-themis-standard
+description: Standard guidelines for Flutter development in the Themis project. Use this skill whenever initiating UI tasks, creating widgets, or implementing Flutter features. It ensures visual, structural, and technical consistency by integrating prototypes, design guides, and existing patterns.
 ---
 
-# Flutter OmniConnect Development Standard
+# Flutter Themis Development Standard
 
-This skill defines the technical and architectural standards for Flutter development within the OmniConnect project. Adherence to these guidelines is mandatory to ensure a cohesive identity, optimal performance, and maintainable code.
+This skill defines the technical and architectural standards for Flutter development within the Themis project. Adherence to these guidelines is mandatory to ensure a cohesive identity, optimal performance, and maintainable code.
 
 ## Core Workflow
 
 1.  **Contextual Research**: Before implementation, examine existing patterns in `lib/shared/widgets/` and previously implemented screens in `lib/features/`.
 2.  **Focus Shift to Logic (Post-UI Baseline)**: The static UI baseline is already consolidated. Your primary responsibility now is to connect screens using **Riverpod Providers** and implement Clean Architecture's Data/Domain layers to consume the hardened Backend.
-3.  **Layout Refinements**: If constructing UI, use the `flutter-building-layouts` skill. Enforce the Omni UI standard:
+3.  **Layout Refinements**: If constructing UI, use the `flutter-building-layouts` skill. Enforce the Themis UI standard:
     - **No Bleeding**: Always respect `SafeArea`. The `AppBottomNavigationBar` and `SystemUiOverlayStyle` must create a clean edge-to-edge experience without dark native bars intersecting the app.
     - **Clean Aesthetics**: Use white backgrounds for headers (AppBars), semantic consistency, and avoid excessive `Dividers`. Use margins and spacing hierarchically.
 

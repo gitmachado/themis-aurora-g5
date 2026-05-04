@@ -133,7 +133,7 @@ export class LeadService implements ILeadService {
 
     await this.notificationService.sendPush(
       user.id,
-      'Seu acesso ao OmniConnect',
+      'Seu acesso ao Themis',
       `Bem-vindo! Baixe nosso app e use a senha temporária: ${tempPassword}`
     );
 

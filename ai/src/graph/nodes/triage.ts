@@ -1,7 +1,7 @@
 import { z } from "zod";
 import { ChatOpenAI } from "@langchain/openai";
 import { AIMessage } from "@langchain/core/messages";
-import { OmniStateType, TriageData, TriageStep } from "../state.js";
+import { ThemisStateType, TriageData, TriageStep } from "../state.js";
 import { SYSTEM_PROMPT, TRIAGE_PROMPT } from "../../config/prompts.js";
 import {
   isValidCPF,
@@ -71,8 +71,8 @@ function isFullName(name: string | null | undefined): boolean {
 }
 
 export async function triageNode(
-  state: OmniStateType
-): Promise<Partial<OmniStateType>> {
+  state: ThemisStateType
+): Promise<Partial<ThemisStateType>> {
   const { whatsappNumber, messages, triage } = state;
   const userInput = String(messages.at(-1)?.content ?? "").trim();
   let step: TriageStep = triage.currentStep;

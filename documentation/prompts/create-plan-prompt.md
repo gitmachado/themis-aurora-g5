@@ -7,7 +7,7 @@ description: Quebrar uma spec em fases e tarefas executaveis antes da implementa
 ## Objetivo
 
 Transformar uma spec em um plano de execucao simples, rastreavel e aderente ao
-fluxo do OmniConnect.
+fluxo do Themis.
 
 ## Entrada
 

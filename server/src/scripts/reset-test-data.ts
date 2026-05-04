@@ -7,7 +7,7 @@ dotenv.config({ path: path.join(__dirname, '../../.env') });
 
 async function reset() {
   // Tenta usar a DATABASE_URL do .env da IA se existir, ou localhost:5433 que é o padrão local observado
-  const connectionString = process.env.DATABASE_URL || 'postgresql://postgres:postgres@localhost:5433/omniconnect_db';
+  const connectionString = process.env.DATABASE_URL || 'postgresql://postgres:postgres@localhost:5433/themis_db';
   
   const client = new Client({
     connectionString

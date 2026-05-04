@@ -6,7 +6,7 @@ import path from "path";
 
 const DATABASE_URL =
   process.env.DATABASE_URL ||
-  "postgresql://postgres:postgres@localhost:5433/omniconnect_db";
+  "postgresql://postgres:postgres@localhost:5433/themis_db";
 
 async function indexPDF(filePath: string): Promise<void> {
   console.log(`\n[indexer] Iniciando indexação: ${filePath}`);

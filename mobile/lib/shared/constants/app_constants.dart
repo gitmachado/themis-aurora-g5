@@ -2,12 +2,12 @@ final class AppConstants {
   const AppConstants._();
 
   static const String apiBaseUrl = String.fromEnvironment(
-    'OMNICONNECT_API_BASE_URL',
-    defaultValue: 'http://10.0.2.2:3000/api/v1',
+    'THEMIS_API_BASE_URL',
+    defaultValue: 'http://localhost:3000/api/v1',
   );
 
   static const String googleClientId = String.fromEnvironment(
-    'OMNICONNECT_GOOGLE_CLIENT_ID',
+    'THEMIS_GOOGLE_CLIENT_ID',
     defaultValue:
         '713885920352-n4ahv30vrjtp1548g2u9os3ui1t8lbci.apps.googleusercontent.com',
   );

@@ -1,7 +1,7 @@
 services:
   postgres:
     image: pgvector/pgvector:pg17
-    container_name: omniconnect-postgres
+    container_name: themis-postgres
     env_file:
       - ./server/.env
     ports:
@@ -21,7 +21,7 @@ services:
     build:
       context: ./server
       dockerfile: Dockerfile
-    container_name: omniconnect-server
+    container_name: themis-server
     depends_on:
       postgres:
         condition: service_healthy
@@ -44,7 +44,7 @@ services:
       context: ./ai
       dockerfile: Dockerfile
       target: builder
-    container_name: omniconnect-ai
+    container_name: themis-ai
     depends_on:
       postgres:
         condition: service_healthy
@@ -53,7 +53,7 @@ services:
     env_file:
       - ./ai/.env
     environment:
-      - DATABASE_URL=postgresql://postgres:postgres@postgres:5432/omniconnect_db
+      - DATABASE_URL=postgresql://postgres:postgres@postgres:5432/themis_db
       - BACKEND_API_URL=http://server:3000
     ports:
       - "3005:3005"

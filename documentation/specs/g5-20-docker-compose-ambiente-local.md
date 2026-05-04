@@ -7,7 +7,7 @@ last_updated_at: 2026-04-13
 
 # 1. Objetivo
 
-Padronizar o ambiente local de desenvolvimento do OmniConnect com Docker Compose, removendo a dependencia de instalacao manual de PostgreSQL e permitindo subir o backend Node.js com a mesma configuracao basica para todo o time.
+Padronizar o ambiente local de desenvolvimento do Themis com Docker Compose, removendo a dependencia de instalacao manual de PostgreSQL e permitindo subir o backend Node.js com a mesma configuracao basica para todo o time.
 
 # 2. Escopo
 

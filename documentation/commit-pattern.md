@@ -1,6 +1,6 @@
 # Padrão de Commit
 
-O projeto OmniConnect segue o padrão **Conventional Commits** e exige que todas as mensagens de commit estejam em **Português (Brasil)**.
+O projeto Themis segue o padrão **Conventional Commits** e exige que todas as mensagens de commit estejam em **Português (Brasil)**.
 
 ### Formato Base:
 

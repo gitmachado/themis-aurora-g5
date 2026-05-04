@@ -7,7 +7,7 @@ description: Criar ou refinar uma spec tecnica objetiva a partir do PRD e da est
 ## Objetivo
 
 Traduzir um requisito de produto em uma especificacao tecnica executavel dentro
-do fluxo do OmniConnect, ou refinar uma spec existente para que ela volte a
+do fluxo do Themis, ou refinar uma spec existente para que ela volte a
 ficar coerente com o PRD, com a codebase e com o caminho real de implementacao.
 
 ## Quando usar

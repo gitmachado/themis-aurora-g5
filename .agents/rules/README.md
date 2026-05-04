@@ -1,6 +1,6 @@
 # Regras de Atuação dos Agentes (AI Rules)
 
-Este diretório contém os comportamentos esperados e as diretrizes de código para todos os agentes de IA que atuarem no projeto **OmniConnect**.
+Este diretório contém os comportamentos esperados e as diretrizes de código para todos os agentes de IA que atuarem no projeto **Themis**.
 
 ## 🔴 Regra Global (Prioritária)
 **Sempre responda da forma mais prática possível, diminuindo a leitura do usuário apenas com o que é objetivo e mais importante.**

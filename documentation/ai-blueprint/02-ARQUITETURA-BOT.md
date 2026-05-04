@@ -66,7 +66,7 @@ O estado é o "cérebro" da conversa. Cada thread (número de WhatsApp) mantém 
 ```typescript
 import { Annotation } from "@langchain/langgraph";
 
-const OmniState = Annotation.Root({
+const ThemisState = Annotation.Root({
   // Identidade
   whatsappNumber: Annotation<string>,
   userType: Annotation<"UNKNOWN" | "LEAD" | "CLIENT">,
@@ -197,7 +197,7 @@ Seguindo as boas práticas do nosso resumo: nomes em `snake_case`, schemas via Z
 - **Otimização**: `trim` nas últimas 20 mensagens para economia de tokens
 
 ### Longo Prazo (entre conversas)
-- **Store com namespace**: `["omniconnect", whatsappNumber]`
+- **Store com namespace**: `["Themis", whatsappNumber]`
 - **Conteúdo**: Preferências do cliente, histórico de interações resumido
 - **Tipo**: Semântica (para personalização futura)
 
