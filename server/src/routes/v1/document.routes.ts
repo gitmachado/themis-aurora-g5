@@ -2,7 +2,8 @@ import { Router } from 'express';
 import multer from 'multer';
 import { DocumentController } from '../../controllers/implementations/document.controller';
 import { DocumentService, LegalProcessService, TimelineService, NotificationService } from '@services';
-import { DocumentRepository, LegalProcessRepository, TimelineEventRepository, NotificationRepository } from '@repositories';
+import { DocumentRepository, LegalProcessRepository, TimelineEventRepository, NotificationRepository, UserRepository } from '@repositories';
+import { PushNotificationService } from '../../services/notifications/push_notification_service';
 import { createStorageProvider } from '../../utils/storage/storage-provider.factory';
 import { ensureDirectory, getTempDir } from '../../utils/storage/storage-paths';
 import { authMiddleware } from '../../middlewares/implementations/authMiddleware';
@@ -17,7 +18,9 @@ const legalProcessRepository = new LegalProcessRepository();
 const timelineRepository = new TimelineEventRepository();
 const timelineService = new TimelineService(timelineRepository);
 const notificationRepository = new NotificationRepository();
-const notificationService = new NotificationService(notificationRepository);
+const userRepository = new UserRepository();
+const pushNotificationService = new PushNotificationService();
+const notificationService = new NotificationService(notificationRepository, userRepository, pushNotificationService);
 const legalProcessService = new LegalProcessService(
   legalProcessRepository,
   timelineService,
