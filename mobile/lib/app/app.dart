@@ -4,8 +4,8 @@ import 'package:flutter/services.dart';
 import 'package:mobile/app/routes/app_router.dart';
 import 'package:mobile/app/theme/theme.dart';
 
-class OmniConnectApp extends StatelessWidget {
-  const OmniConnectApp({super.key});
+class ThemisApp extends StatelessWidget {
+  const ThemisApp({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -13,12 +13,13 @@ class OmniConnectApp extends StatelessWidget {
       value: const SystemUiOverlayStyle(
         statusBarColor: Colors.transparent,
         statusBarIconBrightness: Brightness.dark,
+        statusBarBrightness: Brightness.light,
         systemNavigationBarColor: Color(0xFFF8F9FA),
         systemNavigationBarIconBrightness: Brightness.dark,
         systemNavigationBarDividerColor: Colors.transparent,
       ),
       child: MaterialApp(
-        title: 'OmniConnect',
+        title: 'Themis',
         debugShowCheckedModeBanner: false,
         theme: AppTheme.theme,
         initialRoute: AppRouter.initialRoute,

@@ -21,5 +21,5 @@ void main() {
   // Garante o modo edge-to-edge no Android
   SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
 
-  runApp(const ProviderScope(child: OmniConnectApp()));
+  runApp(const ProviderScope(child: ThemisApp()));
 }

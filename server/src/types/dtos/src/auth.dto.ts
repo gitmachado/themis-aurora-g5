@@ -14,8 +14,7 @@ export interface RegisterDTO {
 }
 
 export interface AuthResponseDTO {
-  token: string | null;
+  token: string;
   userId: string;
   role: UserRole;
-  requiresEmailConfirmation?: boolean;
 }

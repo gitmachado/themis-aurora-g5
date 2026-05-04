@@ -17,4 +17,41 @@ final class ChatRemoteDataSource {
         )
         .toList();
   }
+
+  Future<ChatMessageModel> sendMessage(
+    String whatsappNumber,
+    String content,
+  ) async {
+    final json = await _apiClient.postJson(
+      '/messages/send',
+      data: {'whatsappNumber': whatsappNumber, 'content': content},
+    );
+    return ChatMessageModel.fromJson(json);
+  }
+
+  Future<void> resumeAI(String whatsappNumber) async {
+    await _apiClient.postJson(
+      '/leads/handoff-return',
+      data: {'whatsappNumber': whatsappNumber},
+    );
+  }
+
+  Future<void> handoffToHuman(String whatsappNumber) async {
+    await _apiClient.postJson(
+      '/leads/handoff-start',
+      data: {'whatsappNumber': whatsappNumber},
+    );
+  }
+
+  Future<Map<String, dynamic>> getLeadByPhone(String phone) async {
+    return await _apiClient.getJson('/leads/whatsapp/$phone');
+  }
+
+  Future<void> assignLead(String leadId) async {
+    await _apiClient.postJson('/leads/$leadId/assign');
+  }
+
+  Future<void> releaseLead(String leadId) async {
+    await _apiClient.postJson('/leads/$leadId/release');
+  }
 }

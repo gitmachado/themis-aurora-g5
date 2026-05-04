@@ -55,57 +55,19 @@ class LawyerMainLayoutState extends State<LawyerMainLayout> {
         }
       },
       child: Scaffold(
-        extendBody: true,
-        body: LayoutBuilder(
-          builder: (context, constraints) {
-            final double height = constraints.maxHeight;
-            final double stopStart = (height - 180) / height;
-            final double stopEnd = (height - 60) / height;
-
-            return ShaderMask(
-              shaderCallback: (Rect bounds) {
-                return LinearGradient(
-                  begin: Alignment.topCenter,
-                  end: Alignment.bottomCenter,
-                  colors: const [Colors.black, Colors.transparent],
-                  stops: [stopStart, stopEnd],
-                ).createShader(bounds);
-              },
-              blendMode: BlendMode.dstIn,
-              child: IndexedStack(index: currentIndex, children: _screens),
-            );
-          },
-        ),
-        bottomNavigationBar: Container(
-          padding: const EdgeInsets.only(top: 16),
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              begin: Alignment.topCenter,
-              end: Alignment.bottomCenter,
-              colors: [
-                Theme.of(
-                  context,
-                ).scaffoldBackgroundColor.withValues(alpha: 0.0),
-                Theme.of(
-                  context,
-                ).scaffoldBackgroundColor.withValues(alpha: 0.95),
-                Theme.of(context).scaffoldBackgroundColor,
-              ],
-              stops: const [0.0, 0.4, 1.0],
-            ),
-          ),
-          child: SafeArea(
-            child: AppBottomNavigationBar(
-              currentIndex: currentIndex,
-              onTap: _onTabTapped,
-              items: const [
-                NavItem(icon: Icons.grid_view_rounded, label: 'Início'),
-                NavItem(icon: Icons.people_alt_rounded, label: 'Leads'),
-                NavItem(icon: Icons.business_center_rounded, label: 'Trâmites'),
-                NavItem(icon: Icons.person_search_rounded, label: 'Clientes'),
-                NavItem(icon: Icons.person_rounded, label: 'Perfil'),
-              ],
-            ),
+        body: IndexedStack(index: currentIndex, children: _screens),
+        bottomNavigationBar: SafeArea(
+          top: false,
+          child: AppBottomNavigationBar(
+            currentIndex: currentIndex,
+            onTap: _onTabTapped,
+            items: const [
+              NavItem(icon: Icons.grid_view_rounded, label: 'Painel'),
+              NavItem(icon: Icons.people_alt_rounded, label: 'Leads'),
+              NavItem(icon: Icons.folder_rounded, label: 'Processos'),
+              NavItem(icon: Icons.business_center_rounded, label: 'Clientes'),
+              NavItem(icon: Icons.person_rounded, label: 'Perfil'),
+            ],
           ),
         ),
       ),

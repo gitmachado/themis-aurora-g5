@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../../../app/routes/app_router.dart';
+import '../../../../../../features/lawyer/leads/presentation/providers/lead_providers.dart';
 import '../../../../../../features/lawyer/clients/domain/entities/lawyer_client.dart';
 import '../../../../../../features/lawyer/clients/presentation/providers/lawyer_client_providers.dart';
 import '../../../../../../features/notifications/presentation/providers/notification_providers.dart';
@@ -9,40 +11,112 @@ import '../../../../../../shared/constants/app_colors.dart';
 import '../../../../../../shared/constants/app_text_styles.dart';
 import '../../../../../../shared/widgets/layout/custom_app_bar.dart';
 import '../../../../../../shared/widgets/layout/loading_skeleton.dart';
+import '../../../../../../shared/utils/string_utils.dart';
+import '../../../../../../shared/utils/api_formatters.dart';
+import '../providers/chat_providers.dart';
 
 class LawyerChatListScreen extends ConsumerWidget {
   const LawyerChatListScreen({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final clients = ref.watch(myLawyerClientsProvider);
+    final clientsAsync = ref.watch(myLawyerClientsProvider);
+    final allLeadsAsync = ref.watch(allLeadsProvider);
     final notifications =
         ref.watch(myNotificationsProvider).valueOrNull ?? const [];
-    final handoffCount = notifications
-        .where((notification) => notification.type == 'HUMAN_SUPPORT')
-        .length;
 
-    return Scaffold(
-      backgroundColor: AppColors.background,
-      appBar: const CustomAppBar(
-        title: 'Mensagens e Handoffs',
-        showBackButton: true,
-      ),
-      body: Column(
-        children: [
-          _buildSummary(handoffCount),
-          Expanded(
-            child: clients.when(
-              data: (items) => _buildClientList(context, items),
-              loading: _buildLoadingList,
-              error: (error, _) => _buildErrorState(error),
-            ),
+    // Extract handoffs and convert to "display items"
+    final handoffs = notifications
+        .where((n) => n.type == 'HUMAN_SUPPORT')
+        .map(
+          (n) => LawyerClient(
+            id: n.extraData?['leadId'] ?? n.id,
+            name: n.extraData?['clientName'] ?? n.title,
+            whatsappNumber: n.extraData?['whatsappNumber'] ?? '',
+            lastMessage: n.body,
+            lastMessageAt: n.createdAt,
           ),
-        ],
+        )
+        .toList();
+
+    return AnnotatedRegion<SystemUiOverlayStyle>(
+      value: const SystemUiOverlayStyle(
+        systemNavigationBarColor: Colors.white,
+        systemNavigationBarIconBrightness: Brightness.dark,
+        statusBarColor: Colors.transparent,
+        statusBarIconBrightness: Brightness.dark,
       ),
-      bottomNavigationBar: Container(
-        height: MediaQuery.of(context).padding.bottom,
-        color: AppColors.white,
+      child: Scaffold(
+        backgroundColor: AppColors.background,
+        appBar: const CustomAppBar(
+          title: 'Mensagens',
+          showBackButton: true,
+          backgroundColor: Colors.white,
+        ),
+        body: Column(
+          children: [
+            _buildSummary(handoffs.length),
+            Expanded(
+              child: clientsAsync.when(
+                data: (clients) => allLeadsAsync.when(
+                  data: (leads) {
+                    // Merge and unique by whatsappNumber
+                    final Map<String, LawyerClient> unified = {};
+
+                    // 1. All Leads
+                    for (var l in leads) {
+                      if (l.whatsappNumber.isNotEmpty) {
+                        unified[l.whatsappNumber] = LawyerClient(
+                          id: l.id,
+                          name: l.name ?? 'Lead sem nome',
+                          whatsappNumber: l.whatsappNumber,
+                        );
+                      }
+                    }
+
+                    // 2. Clients
+                    for (var c in clients) {
+                      if (c.whatsappNumber.isNotEmpty) {
+                        // Preserve existing lastMessage/At if it's from a lead or handoff
+                        final existing = unified[c.whatsappNumber];
+                        unified[c.whatsappNumber] = LawyerClient(
+                          id: c.id,
+                          name: c.name,
+                          whatsappNumber: c.whatsappNumber,
+                          cpf: c.cpf,
+                          email: c.email,
+                          lastMessage: existing?.lastMessage,
+                          lastMessageAt: existing?.lastMessageAt,
+                        );
+                      }
+                    }
+
+                    // 3. Handoffs
+                    for (var h in handoffs) {
+                      if (h.whatsappNumber.isNotEmpty) {
+                        unified[h.whatsappNumber] = h;
+                      }
+                    }
+
+                    final unifiedList = unified.values.toList();
+                    // Sort by name for now
+                    unifiedList.sort((a, b) => a.name.compareTo(b.name));
+
+                    return _buildClientList(context, unifiedList);
+                  },
+                  loading: _buildLoadingList,
+                  error: (error, _) => _buildErrorState(error),
+                ),
+                loading: _buildLoadingList,
+                error: (error, _) => _buildErrorState(error),
+              ),
+            ),
+          ],
+        ),
+        bottomNavigationBar: Container(
+          height: MediaQuery.of(context).padding.bottom,
+          color: AppColors.white,
+        ),
       ),
     );
   }
@@ -50,30 +124,29 @@ class LawyerChatListScreen extends ConsumerWidget {
   Widget _buildSummary(int handoffCount) {
     return Container(
       width: double.infinity,
-      margin: const EdgeInsets.fromLTRB(20, 16, 20, 12),
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: handoffCount > 0 ? AppColors.warningOverlay : AppColors.white,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(
-          color: handoffCount > 0 ? AppColors.warning : AppColors.divider,
-        ),
-      ),
+      margin: const EdgeInsets.fromLTRB(36, 16, 20, 8),
+      padding: const EdgeInsets.symmetric(vertical: 8),
       child: Row(
+        mainAxisAlignment: MainAxisAlignment.start,
         children: [
           Icon(
             handoffCount > 0
                 ? Icons.support_agent_rounded
-                : Icons.chat_bubble_outline_rounded,
-            color: handoffCount > 0 ? AppColors.warning : AppColors.primary,
+                : Icons.chat_bubble_rounded,
+            color: handoffCount > 0
+                ? AppColors.warning
+                : const Color(0xFF25D366), // WhatsApp Green
+            size: 20,
           ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Text(
-              handoffCount > 0
-                  ? '$handoffCount handoff(s) nas notificações'
-                  : 'Histórico por WhatsApp dos clientes',
-              style: const TextStyle(fontWeight: FontWeight.bold),
+          const SizedBox(width: 10),
+          Text(
+            handoffCount > 0
+                ? '$handoffCount handoff(s) nas notificações'
+                : 'Conversas do WhatsApp',
+            style: const TextStyle(
+              fontWeight: FontWeight.w700,
+              fontSize: 14,
+              color: AppColors.textPrimary,
             ),
           ),
         ],
@@ -104,6 +177,9 @@ class LawyerChatListScreen extends ConsumerWidget {
             border: Border.all(color: AppColors.divider),
           ),
           child: ListTile(
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(16),
+            ),
             contentPadding: const EdgeInsets.all(16),
             leading: CircleAvatar(
               radius: 24,
@@ -116,15 +192,21 @@ class LawyerChatListScreen extends ConsumerWidget {
                 ),
               ),
             ),
-            title: Text(
-              client.name,
-              style: const TextStyle(fontWeight: FontWeight.bold),
+            title: Row(
+              children: [
+                Expanded(
+                  child: Text(
+                    StringUtils.formatFirstAndLastName(client.name),
+                    style: const TextStyle(fontWeight: FontWeight.bold),
+                  ),
+                ),
+                _ChatPreviewTime(whatsappNumber: client.whatsappNumber),
+              ],
             ),
-            subtitle: Text(
-              client.whatsappNumber.isEmpty
-                  ? 'WhatsApp nao informado'
-                  : client.whatsappNumber,
-              style: AppTextStyles.caption,
+            subtitle: _ChatPreviewMessage(
+              whatsappNumber: client.whatsappNumber,
+              fallbackLastMessage: client.lastMessage,
+              fallbackLastMessageAt: client.lastMessageAt,
             ),
             trailing: const Icon(Icons.chevron_right_rounded),
             onTap: client.whatsappNumber.isEmpty
@@ -144,23 +226,123 @@ class LawyerChatListScreen extends ConsumerWidget {
   }
 
   Widget _buildLoadingList() {
-    return ListView.separated(
-      padding: const EdgeInsets.symmetric(horizontal: 20),
-      itemCount: 4,
-      separatorBuilder: (_, _) => const SizedBox(height: 12),
-      itemBuilder: (_, _) =>
-          const LoadingSkeleton(height: 82, borderRadius: 16),
+    return ListView.builder(
+      itemCount: 10,
+      padding: const EdgeInsets.all(16),
+      itemBuilder: (context, index) => const Padding(
+        padding: EdgeInsets.only(bottom: 16),
+        child: LoadingSkeleton(height: 80, borderRadius: 12),
+      ),
     );
   }
 
   Widget _buildErrorState(Object error) {
     return Center(
       child: Padding(
-        padding: const EdgeInsets.all(24),
-        child: Text(
-          error.toString(),
-          textAlign: TextAlign.center,
-          style: AppTextStyles.body.copyWith(color: AppColors.error),
+        padding: const EdgeInsets.all(32),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const Icon(Icons.error_outline, size: 48, color: Colors.red),
+            const SizedBox(height: 16),
+            Text('Erro ao carregar mensagens', style: AppTextStyles.h2),
+            const SizedBox(height: 8),
+            Text(
+              error.toString(),
+              textAlign: TextAlign.center,
+              style: AppTextStyles.body,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _ChatPreviewTime extends ConsumerWidget {
+  final String whatsappNumber;
+
+  const _ChatPreviewTime({required this.whatsappNumber});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    if (whatsappNumber.isEmpty) return const SizedBox.shrink();
+
+    final history = ref.watch(chatHistoryProvider(whatsappNumber));
+
+    return history.maybeWhen(
+      data: (messages) {
+        if (messages.isEmpty) return const SizedBox.shrink();
+        final lastMessage = messages.last;
+        return Text(
+          formatTime(lastMessage.createdAt),
+          style: AppTextStyles.caption.copyWith(
+            color: AppColors.textCaption,
+            fontSize: 11,
+          ),
+        );
+      },
+      orElse: () => const SizedBox.shrink(),
+    );
+  }
+}
+
+class _ChatPreviewMessage extends ConsumerWidget {
+  final String whatsappNumber;
+  final String? fallbackLastMessage;
+  final DateTime? fallbackLastMessageAt;
+
+  const _ChatPreviewMessage({
+    required this.whatsappNumber,
+    this.fallbackLastMessage,
+    this.fallbackLastMessageAt,
+  });
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          whatsappNumber.isEmpty ? 'WhatsApp nao informado' : whatsappNumber,
+          style: AppTextStyles.caption.copyWith(color: AppColors.textCaption),
+        ),
+        if (whatsappNumber.isNotEmpty)
+          Consumer(
+            builder: (context, ref, child) {
+              final history = ref.watch(chatHistoryProvider(whatsappNumber));
+              return history.maybeWhen(
+                data: (messages) {
+                  if (messages.isEmpty) {
+                    // If no real messages, show fallback if it exists (handoff event)
+                    if (fallbackLastMessage != null) {
+                      return _buildMessageLine(fallbackLastMessage!);
+                    }
+                    return const SizedBox.shrink();
+                  }
+                  final lastMsg = messages.last;
+                  return _buildMessageLine(lastMsg.content);
+                },
+                orElse: () => fallbackLastMessage != null
+                    ? _buildMessageLine(fallbackLastMessage!)
+                    : const SizedBox.shrink(),
+              );
+            },
+          ),
+      ],
+    );
+  }
+
+  Widget _buildMessageLine(String content) {
+    return Padding(
+      padding: const EdgeInsets.only(top: 4),
+      child: Text(
+        content,
+        maxLines: 1,
+        overflow: TextOverflow.ellipsis,
+        style: AppTextStyles.caption.copyWith(
+          color: AppColors.ink.withValues(alpha: 0.6),
+          fontSize: 13,
         ),
       ),
     );

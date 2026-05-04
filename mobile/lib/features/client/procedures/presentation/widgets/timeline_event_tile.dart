@@ -41,18 +41,19 @@ class TimelineEventTile extends StatelessWidget {
                   decoration: BoxDecoration(
                     color:
                         iconBackgroundColor ??
-                        (isFirst
-                            ? AppColors.primaryOverlay
-                            : AppColors.background),
+                        (isFirst ? AppColors.yellow : AppColors.background),
                     shape: BoxShape.circle,
-                    border: !isFirst && iconBackgroundColor == null
-                        ? Border.all(color: AppColors.divider, width: 2)
+                    border: iconBackgroundColor == null
+                        ? Border.all(
+                            color: isFirst ? AppColors.ink : AppColors.divider,
+                            width: isFirst ? 2.5 : 2,
+                          )
                         : null,
                   ),
                   child: Icon(
                     icon ?? (isFirst ? Icons.check : Icons.circle),
                     size: 16,
-                    color: isFirst ? AppColors.primary : AppColors.divider,
+                    color: isFirst ? AppColors.ink : AppColors.divider,
                   ),
                 ),
                 if (!isLast)
@@ -99,7 +100,7 @@ class TimelineEventTile extends StatelessWidget {
                       'Responsável: $responsible',
                       style: AppTextStyles.caption.copyWith(
                         fontSize: 11,
-                        color: AppColors.primary.withValues(alpha: 0.8),
+                        color: AppColors.ink3,
                         fontWeight: FontWeight.w500,
                       ),
                     ),
@@ -111,7 +112,7 @@ class TimelineEventTile extends StatelessWidget {
                       padding: const EdgeInsets.all(12),
                       decoration: BoxDecoration(
                         color: AppColors.surface,
-                        borderRadius: BorderRadius.circular(12),
+                        borderRadius: BorderRadius.circular(14),
                         border: Border.all(color: AppColors.border),
                         boxShadow: [
                           BoxShadow(

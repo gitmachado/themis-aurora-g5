@@ -1,10 +1,10 @@
 # ADR 0006: Hospedagem do MVP publico em VM unica
 
 ## Status
-Aceito, parcialmente superado pela ADR 0008 para storage de documentos
+Aceito, atualizado pela ADR 0009 para manter auth e storage locais
 
 ## Nota de atualizacao
-Em 2026-04-28, a ADR 0008 substituiu a decisao de manter documentos em volume local no deploy publico. A topologia de VM unica, proxy HTTPS, backend em container e PostgreSQL sem exposicao publica continua valida; apenas o armazenamento de binarios passa a usar Supabase Storage privado.
+Em 2026-05-02, a ADR 0009 substituiu as decisoes de usar Supabase Auth e Supabase Storage. A topologia de VM unica, proxy HTTPS, backend em container, PostgreSQL sem exposicao publica e volume local persistente para uploads volta a ser a decisao ativa para o MVP.
 
 ## Contexto
 O OmniConnect precisa publicar o backend `server/` em ambiente acessivel pela internet para suportar o app Flutter e as futuras integracoes externas previstas no PRD. O repositorio ja trabalha com Docker, PostgreSQL e storage local de documentos, mas ainda nao possui pipeline CI/CD, storage remoto, reverse proxy versionado ou estrategia de hospedagem horizontal.

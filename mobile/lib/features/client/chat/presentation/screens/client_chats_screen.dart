@@ -23,7 +23,7 @@ class ClientChatsScreen extends ConsumerWidget {
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: CustomAppBar(
-        title: 'Mensagens',
+        title: 'Chat',
         showBackButton: false,
         actions: [AppAppBarActions(showChat: false)],
       ),
@@ -52,7 +52,7 @@ class ClientChatsScreen extends ConsumerWidget {
                 ),
                 children: [
                   ChatListTile(
-                    title: 'Historico do WhatsApp',
+                    title: 'Histórico do WhatsApp',
                     subtitle: last.content,
                     time: formatRelativeDate(last.createdAt),
                     unreadCount: 0,

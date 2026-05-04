@@ -3,6 +3,7 @@ import { INotificationRepository } from '../../repositories/interfaces/notificat
 import type { Notification } from '@models';
 import type { CreateNotificationDTO } from '@dtos';
 import { NotFoundError } from './errors';
+import { eventBus } from '../communication/InternalEventBus';
 
 export class NotificationService implements INotificationService {
   constructor(private readonly notificationRepository: INotificationRepository) {}
@@ -16,6 +17,9 @@ export class NotificationService implements INotificationService {
       type: (dto as any).type || 'SYSTEM',
       extraData: (dto as any).extraData || null,
     });
+
+    // Notify via Socket.io
+    eventBus.emitNotification(dto.userId, notification);
 
     // Integrated Push Trigger
     await this.sendPush(dto.userId, dto.title, dto.body);

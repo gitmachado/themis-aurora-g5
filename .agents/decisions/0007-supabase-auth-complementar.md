@@ -1,7 +1,14 @@
 # ADR 0007: Supabase Auth complementar para ativacao de contas
 
 ## Status
-Aceito
+Superada pela ADR 0009
+
+## Nota de superacao
+
+Em 2026-05-02, o MVP voltou a usar autenticacao 100% local no backend: email,
+`password_hash` com bcrypt e JWT proprio. Cadastro nao exige confirmacao de
+email, conversao de lead usa senha temporaria local e `users.supabase_user_id`
+foi removido do modelo ativo.
 
 ## Contexto
 

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:file_picker/file_picker.dart';
+import 'package:image_cropper/image_cropper.dart';
 
 import '../../../../../../features/auth/domain/entities/account.dart';
 import '../../../../../../features/auth/presentation/providers/auth_providers.dart';
@@ -11,47 +12,61 @@ import '../../../../../../shared/widgets/app_app_bar_actions.dart';
 import '../../../../../../shared/widgets/cards/app_card.dart';
 import '../../../../../../shared/widgets/layout/custom_app_bar.dart';
 import '../../../../../../shared/widgets/layout/loading_skeleton.dart';
+import '../../../../../../shared/utils/string_utils.dart';
 
-class LawyerProfileScreen extends ConsumerWidget {
+class LawyerProfileScreen extends ConsumerStatefulWidget {
   const LawyerProfileScreen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<LawyerProfileScreen> createState() =>
+      _LawyerProfileScreenState();
+}
+
+class _LawyerProfileScreenState extends ConsumerState<LawyerProfileScreen> {
+  bool _isUploading = false;
+
+  @override
+  Widget build(BuildContext context) {
     final account = ref.watch(currentAccountProvider);
+    final cachedAccount = account.valueOrNull;
 
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: CustomAppBar(
         title: 'Perfil',
-        showBackButton: true,
+        showBackButton: false,
+        showDivider: false,
         actions: [AppAppBarActions()],
       ),
-      body: account.when(
-        data: (account) => _buildContent(context, ref, account),
-        loading: () => const Padding(
-          padding: EdgeInsets.all(24),
-          child: LoadingSkeleton(height: 260, borderRadius: 16),
-        ),
-        error: (error, _) => Center(
-          child: Padding(
-            padding: const EdgeInsets.all(24),
-            child: Text(
-              error.toString(),
-              textAlign: TextAlign.center,
-              style: AppTextStyles.body.copyWith(color: AppColors.error),
+      body: cachedAccount != null
+          ? _buildContent(context, cachedAccount)
+          : account.when(
+              data: (account) => _buildContent(context, account),
+              loading: () => const Padding(
+                padding: EdgeInsets.all(24),
+                child: LoadingSkeleton(height: 260, borderRadius: 16),
+              ),
+              error: (error, _) => Center(
+                child: Padding(
+                  padding: const EdgeInsets.all(24),
+                  child: Text(
+                    error.toString(),
+                    textAlign: TextAlign.center,
+                    style: AppTextStyles.body.copyWith(color: AppColors.error),
+                  ),
+                ),
+              ),
             ),
-          ),
-        ),
-      ),
     );
   }
 
-  Widget _buildContent(BuildContext context, WidgetRef ref, Account account) {
+  Widget _buildContent(BuildContext context, Account account) {
     return SingleChildScrollView(
+      key: const PageStorageKey<String>('lawyer-profile-scroll'),
       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
       child: Column(
         children: [
-          _buildProfileHeader(context, ref, account),
+          _buildProfileHeader(context, account),
           const SizedBox(height: 24),
           _buildSection(
             title: 'Dados da Conta',
@@ -96,7 +111,7 @@ class LawyerProfileScreen extends ConsumerWidget {
             ],
           ),
           const SizedBox(height: 20),
-          _buildPreferenceSection(context, ref, account),
+          _buildPreferenceSection(context, account),
           const SizedBox(height: 20),
           _buildSection(
             title: 'Conta',
@@ -104,7 +119,7 @@ class LawyerProfileScreen extends ConsumerWidget {
               _buildActionTile(
                 Icons.logout_rounded,
                 'Sair da Conta',
-                () => _showLogoutDialog(context, ref),
+                () => _showLogoutDialog(context),
                 isDestructive: true,
               ),
             ],
@@ -115,12 +130,8 @@ class LawyerProfileScreen extends ConsumerWidget {
     );
   }
 
-  Widget _buildProfileHeader(
-    BuildContext context,
-    WidgetRef ref,
-    Account account,
-  ) {
-    final initial = account.name.isEmpty ? '?' : account.name[0].toUpperCase();
+  Widget _buildProfileHeader(BuildContext context, Account account) {
+    final initial = StringUtils.getInitials(account.name);
     final avatarUrl = account.avatarUrl;
 
     return AppCard(
@@ -141,7 +152,7 @@ class LawyerProfileScreen extends ConsumerWidget {
                     height: 80,
                     decoration: const BoxDecoration(
                       gradient: LinearGradient(
-                        colors: [AppColors.primary, AppColors.secondary],
+                        colors: [AppColors.ink, AppColors.yellow],
                         begin: Alignment.topLeft,
                         end: Alignment.bottomRight,
                       ),
@@ -156,30 +167,52 @@ class LawyerProfileScreen extends ConsumerWidget {
                   child: Tooltip(
                     message: 'Alterar foto',
                     child: GestureDetector(
-                      onTap: () => _pickAndUploadAvatar(context, ref),
+                      onTap: _isUploading
+                          ? null
+                          : () => _pickAndUploadAvatar(context),
                       child: Container(
                         padding: const EdgeInsets.all(4),
                         decoration: const BoxDecoration(
                           color: AppColors.white,
                           shape: BoxShape.circle,
                         ),
-                        child: CircleAvatar(
-                          radius: 40,
-                          backgroundColor: AppColors.primary,
-                          backgroundImage:
-                              avatarUrl != null && avatarUrl.isNotEmpty
-                              ? NetworkImage(avatarUrl)
-                              : null,
-                          child: avatarUrl == null || avatarUrl.isEmpty
-                              ? Text(
-                                  initial,
-                                  style: const TextStyle(
-                                    color: Colors.white,
-                                    fontSize: 28,
-                                    fontWeight: FontWeight.bold,
+                        child: Stack(
+                          alignment: Alignment.center,
+                          children: [
+                            CircleAvatar(
+                              radius: 40,
+                              backgroundColor: AppColors.yellow,
+                              backgroundImage:
+                                  avatarUrl != null && avatarUrl.isNotEmpty
+                                  ? NetworkImage(avatarUrl)
+                                  : null,
+                              child: avatarUrl == null || avatarUrl.isEmpty
+                                  ? Text(
+                                      initial,
+                                      style: const TextStyle(
+                                        color: AppColors.ink,
+                                        fontSize: 28,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    )
+                                  : null,
+                            ),
+                            if (_isUploading)
+                              Container(
+                                width: 80,
+                                height: 80,
+                                decoration: BoxDecoration(
+                                  color: Colors.black.withValues(alpha: 0.3),
+                                  shape: BoxShape.circle,
+                                ),
+                                child: const Center(
+                                  child: CircularProgressIndicator(
+                                    color: AppColors.yellow,
+                                    strokeWidth: 3,
                                   ),
-                                )
-                              : null,
+                                ),
+                              ),
+                          ],
                         ),
                       ),
                     ),
@@ -196,10 +229,12 @@ class LawyerProfileScreen extends ConsumerWidget {
                         padding: EdgeInsets.zero,
                         tooltip: 'Alterar foto',
                         icon: const Icon(Icons.photo_camera_outlined, size: 18),
-                        onPressed: () => _pickAndUploadAvatar(context, ref),
+                        onPressed: _isUploading
+                            ? null
+                            : () => _pickAndUploadAvatar(context),
                         style: IconButton.styleFrom(
-                          backgroundColor: AppColors.secondary,
-                          foregroundColor: AppColors.primary,
+                          backgroundColor: AppColors.ink,
+                          foregroundColor: AppColors.yellow,
                         ),
                       ),
                     ),
@@ -214,7 +249,7 @@ class LawyerProfileScreen extends ConsumerWidget {
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
             decoration: BoxDecoration(
-              color: AppColors.primary.withValues(alpha: 0.1),
+              color: AppColors.yellowSoft,
               borderRadius: BorderRadius.circular(20),
             ),
             child: Text(
@@ -222,7 +257,7 @@ class LawyerProfileScreen extends ConsumerWidget {
                   ? account.email!
                   : 'Conta de advogado',
               style: AppTextStyles.caption.copyWith(
-                color: AppColors.primary,
+                color: AppColors.yellowDeep,
                 fontWeight: FontWeight.bold,
               ),
             ),
@@ -233,7 +268,7 @@ class LawyerProfileScreen extends ConsumerWidget {
     );
   }
 
-  Future<void> _pickAndUploadAvatar(BuildContext context, WidgetRef ref) async {
+  Future<void> _pickAndUploadAvatar(BuildContext context) async {
     final result = await FilePicker.pickFiles(
       type: FileType.custom,
       allowedExtensions: const ['png', 'jpg', 'jpeg', 'heic', 'heif'],
@@ -242,10 +277,14 @@ class LawyerProfileScreen extends ConsumerWidget {
     final file = result?.files.single;
     if (file == null || file.path == null) return;
 
+    final croppedFile = await _cropImage(file.path!);
+    if (croppedFile == null) return;
+
+    setState(() => _isUploading = true);
     try {
       await ref
           .read(accountActionsProvider)
-          .uploadAvatar(filePath: file.path!, fileName: file.name);
+          .uploadAvatar(filePath: croppedFile.path, fileName: file.name);
       if (!context.mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Foto de perfil atualizada.')),
@@ -255,14 +294,36 @@ class LawyerProfileScreen extends ConsumerWidget {
       ScaffoldMessenger.of(
         context,
       ).showSnackBar(SnackBar(content: Text(error.toString())));
+    } finally {
+      if (mounted) setState(() => _isUploading = false);
     }
   }
 
-  Widget _buildPreferenceSection(
-    BuildContext context,
-    WidgetRef ref,
-    Account account,
-  ) {
+  Future<CroppedFile?> _cropImage(String path) async {
+    return await ImageCropper().cropImage(
+      sourcePath: path,
+      aspectRatio: const CropAspectRatio(ratioX: 1, ratioY: 1),
+      uiSettings: [
+        AndroidUiSettings(
+          toolbarTitle: 'Ajustar imagem',
+          toolbarColor: AppColors.background,
+          toolbarWidgetColor: AppColors.ink,
+          activeControlsWidgetColor: AppColors.yellow,
+          statusBarLight: true,
+          initAspectRatio: CropAspectRatioPreset.square,
+          lockAspectRatio: true,
+          hideBottomControls: true,
+        ),
+        IOSUiSettings(
+          title: 'Ajustar imagem',
+          aspectRatioLockEnabled: true,
+          resetAspectRatioEnabled: false,
+        ),
+      ],
+    );
+  }
+
+  Widget _buildPreferenceSection(BuildContext context, Account account) {
     final preferences = account.notificationPreferences;
 
     return _buildSection(
@@ -272,19 +333,19 @@ class LawyerProfileScreen extends ConsumerWidget {
           title: 'Leads',
           value: preferences['leads'] ?? true,
           onChanged: (value) =>
-              _updatePreference(context, ref, account, 'leads', value),
+              _updatePreference(context, account, 'leads', value),
         ),
         _buildPreferenceTile(
           title: 'Trâmites',
           value: preferences['processUpdates'] ?? true,
           onChanged: (value) =>
-              _updatePreference(context, ref, account, 'processUpdates', value),
+              _updatePreference(context, account, 'processUpdates', value),
         ),
         _buildPreferenceTile(
           title: 'Arquivos',
           value: preferences['documents'] ?? true,
           onChanged: (value) =>
-              _updatePreference(context, ref, account, 'documents', value),
+              _updatePreference(context, account, 'documents', value),
         ),
       ],
     );
@@ -324,10 +385,10 @@ class LawyerProfileScreen extends ConsumerWidget {
       leading: Container(
         padding: const EdgeInsets.all(8),
         decoration: BoxDecoration(
-          color: AppColors.primary.withValues(alpha: 0.05),
+          color: AppColors.surface2,
           borderRadius: BorderRadius.circular(10),
         ),
-        child: Icon(icon, color: AppColors.primary, size: 20),
+        child: Icon(icon, color: AppColors.ink, size: 20),
       ),
       title: Text(
         label,
@@ -352,7 +413,7 @@ class LawyerProfileScreen extends ConsumerWidget {
         title,
         style: const TextStyle(fontWeight: FontWeight.w500, fontSize: 14),
       ),
-      activeThumbColor: AppColors.primary,
+      activeThumbColor: AppColors.ink,
     );
   }
 
@@ -366,13 +427,12 @@ class LawyerProfileScreen extends ConsumerWidget {
       leading: Container(
         padding: const EdgeInsets.all(8),
         decoration: BoxDecoration(
-          color: (isDestructive ? AppColors.error : AppColors.primary)
-              .withValues(alpha: 0.05),
+          color: isDestructive ? AppColors.errorBackground : AppColors.surface2,
           borderRadius: BorderRadius.circular(10),
         ),
         child: Icon(
           icon,
-          color: isDestructive ? AppColors.error : AppColors.primary,
+          color: isDestructive ? AppColors.error : AppColors.ink,
           size: 20,
         ),
       ),
@@ -395,19 +455,33 @@ class LawyerProfileScreen extends ConsumerWidget {
 
   Future<void> _updatePreference(
     BuildContext context,
-    WidgetRef ref,
     Account account,
     String key,
     bool value,
   ) async {
     final updated = Map<String, bool>.from(account.notificationPreferences)
       ..[key] = value;
+    final optimisticAccount = Account(
+      id: account.id,
+      name: account.name,
+      whatsappNumber: account.whatsappNumber,
+      role: account.role,
+      cpf: account.cpf,
+      email: account.email,
+      avatarUrl: account.avatarUrl,
+      notificationPreferences: updated,
+    );
+
+    ref
+        .read(authControllerProvider.notifier)
+        .updateSessionAccount(optimisticAccount);
 
     try {
       await ref
           .read(accountActionsProvider)
           .updateNotificationPreferences(updated);
     } catch (error) {
+      ref.read(authControllerProvider.notifier).updateSessionAccount(account);
       if (!context.mounted) return;
       ScaffoldMessenger.of(
         context,
@@ -415,7 +489,7 @@ class LawyerProfileScreen extends ConsumerWidget {
     }
   }
 
-  void _showLogoutDialog(BuildContext context, WidgetRef ref) {
+  void _showLogoutDialog(BuildContext context) {
     showDialog<void>(
       context: context,
       builder: (dialogContext) => AlertDialog(

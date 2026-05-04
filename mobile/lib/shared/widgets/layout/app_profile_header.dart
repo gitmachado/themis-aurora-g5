@@ -25,7 +25,7 @@ class AppProfileHeader extends StatelessWidget {
         children: [
           CircleAvatar(
             radius: 20,
-            backgroundColor: AppColors.secondaryLight,
+            backgroundColor: AppColors.yellow,
             backgroundImage: avatarUrl != null
                 ? NetworkImage(avatarUrl!)
                 : null,
@@ -33,9 +33,10 @@ class AppProfileHeader extends StatelessWidget {
                 ? Text(
                     _getInitials(name),
                     style: const TextStyle(
-                      color: AppColors.secondaryDark,
+                      color: AppColors.ink,
                       fontWeight: FontWeight.bold,
                       fontSize: 14,
+                      fontFamily: AppTextStyles.monoFontFamily,
                     ),
                   )
                 : null,

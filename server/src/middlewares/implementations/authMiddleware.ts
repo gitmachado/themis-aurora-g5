@@ -50,6 +50,8 @@ export const authMiddleware = (
       id: decoded.sub,
       role: decoded.role,
     };
+    
+    console.log(`[Auth] ${req.method} ${req.path} - User: ${decoded.sub} (${decoded.role})`);
 
     return next();
   } catch (err) {

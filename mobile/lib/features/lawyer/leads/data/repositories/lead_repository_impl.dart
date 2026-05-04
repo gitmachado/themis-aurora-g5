@@ -17,6 +17,16 @@ final class LeadRepositoryImpl implements LeadRepository {
   }
 
   @override
+  Future<Either<Failure, List<Lead>>> getAllLeads() {
+    return guardRepository(_remoteDataSource.getAllLeads);
+  }
+
+  @override
+  Future<Either<Failure, List<Lead>>> getByStatus(String status) {
+    return guardRepository(() => _remoteDataSource.getByStatus(status));
+  }
+
+  @override
   Future<Either<Failure, Lead>> getById(String id) {
     return guardRepository(() => _remoteDataSource.getById(id));
   }
@@ -31,5 +41,15 @@ final class LeadRepositoryImpl implements LeadRepository {
     return guardRepositoryUnit(
       () => _remoteDataSource.discard(id, reason: reason),
     );
+  }
+
+  @override
+  Future<Either<Failure, Lead>> update(String id, Map<String, dynamic> data) {
+    return guardRepository(() => _remoteDataSource.update(id, data));
+  }
+
+  @override
+  Future<Either<Failure, Unit>> deleteLead(String id) {
+    return guardRepositoryUnit(() => _remoteDataSource.deleteLead(id));
   }
 }

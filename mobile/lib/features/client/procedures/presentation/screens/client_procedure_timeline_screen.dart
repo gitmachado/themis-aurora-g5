@@ -45,7 +45,7 @@ class _ClientProcedureTimelineScreenState
     final documents = ref.watch(procedureDocumentsProvider(processId));
 
     return DefaultTabController(
-      length: 4,
+      length: 3,
       child: Scaffold(
         backgroundColor: AppColors.background,
         appBar: CustomAppBar(
@@ -103,19 +103,7 @@ class _ClientProcedureTimelineScreenState
               },
             ),
           ],
-          bottom: const TabBar(
-            labelColor: AppColors.primary,
-            unselectedLabelColor: AppColors.textCaption,
-            indicatorColor: AppColors.primary,
-            indicatorWeight: 3,
-            labelStyle: TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
-            tabs: [
-              Tab(text: 'Timeline'),
-              Tab(text: 'IA Resumo'),
-              Tab(text: 'Arquivos'),
-              Tab(text: 'Chat'),
-            ],
-          ),
+          bottom: _buildDetailTabs(),
         ),
         body: TabBarView(
           children: [
@@ -134,7 +122,6 @@ class _ClientProcedureTimelineScreenState
               loading: () => _buildLoadingTab(),
               error: (error, _) => _buildErrorTab(error),
             ),
-            _buildChatTab(),
           ],
         ),
         bottomNavigationBar: _buildActionFooter(context),
@@ -147,33 +134,85 @@ class _ClientProcedureTimelineScreenState
       return _buildEmptyTab('Nenhum evento de timeline encontrado');
     }
 
+    final sortedEvents = [...events]
+      ..sort((a, b) {
+        final aDate = a.createdAt ?? DateTime.fromMillisecondsSinceEpoch(0);
+        final bDate = b.createdAt ?? DateTime.fromMillisecondsSinceEpoch(0);
+        return bDate.compareTo(aDate);
+      });
+
     return SingleChildScrollView(
       padding: const EdgeInsets.all(20),
-      child: Container(
-        padding: const EdgeInsets.all(24),
-        decoration: BoxDecoration(
-          color: AppColors.white,
-          borderRadius: BorderRadius.circular(16),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withValues(alpha: 0.03),
-              blurRadius: 10,
-              offset: const Offset(0, 4),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          _buildTimelineLegend('Atual'),
+          const SizedBox(height: 14),
+          for (var index = 0; index < sortedEvents.length; index++)
+            TimelineEventTile(
+              isFirst: index == 0,
+              isLast: index == sortedEvents.length - 1,
+              title: _timelineTitle(sortedEvents[index].type),
+              date: formatRelativeDate(sortedEvents[index].createdAt),
+              description: sortedEvents[index].content,
             ),
-          ],
+          _buildTimelineLegend('Antigo'),
+        ],
+      ),
+    );
+  }
+
+  PreferredSizeWidget _buildDetailTabs() {
+    return PreferredSize(
+      preferredSize: const Size.fromHeight(68),
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(20, 12, 20, 12),
+        child: Container(
+          height: 44,
+          padding: const EdgeInsets.all(4),
+          decoration: BoxDecoration(
+            color: AppColors.surface2,
+            borderRadius: BorderRadius.circular(14),
+          ),
+          child: TabBar(
+            dividerColor: Colors.transparent,
+            indicatorSize: TabBarIndicatorSize.tab,
+            indicator: BoxDecoration(
+              color: AppColors.surface,
+              borderRadius: BorderRadius.circular(11),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.04),
+                  blurRadius: 2,
+                  offset: const Offset(0, 1),
+                ),
+              ],
+            ),
+            labelColor: AppColors.ink,
+            unselectedLabelColor: AppColors.ink3,
+            labelStyle: AppTextStyles.caption.copyWith(
+              fontWeight: FontWeight.w800,
+            ),
+            unselectedLabelStyle: AppTextStyles.caption.copyWith(
+              fontWeight: FontWeight.w700,
+            ),
+            tabs: const [
+              SizedBox(height: 36, child: Center(child: Text('Andamentos'))),
+              SizedBox(height: 36, child: Center(child: Text('Resumo'))),
+              SizedBox(height: 36, child: Center(child: Text('Documentos'))),
+            ],
+          ),
         ),
-        child: Column(
-          children: [
-            for (var index = 0; index < events.length; index++)
-              TimelineEventTile(
-                isFirst: index == 0,
-                isLast: index == events.length - 1,
-                title: _timelineTitle(events[index].type),
-                date: formatRelativeDate(events[index].createdAt),
-                description: events[index].content,
-              ),
-          ],
-        ),
+      ),
+    );
+  }
+
+  Widget _buildTimelineLegend(String label) {
+    return Text(
+      label,
+      style: AppTextStyles.cap.copyWith(
+        color: AppColors.ink,
+        fontWeight: FontWeight.w800,
       ),
     );
   }
@@ -189,8 +228,6 @@ class _ClientProcedureTimelineScreenState
               process.lastMovementDate ?? process.updatedAt,
             ),
             onAiAnalysisTap: () {},
-            onChatMirrorTap: () =>
-                DefaultTabController.of(context).animateTo(3),
           ),
           const SizedBox(height: 16),
           Container(
@@ -212,22 +249,37 @@ class _ClientProcedureTimelineScreenState
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const LabeledField(
-                  label: 'DESCRIÇÃO DO CASO',
-                  isDescription: true,
-                  value: '',
-                ),
-                if (process.description != null &&
-                    process.description!.isNotEmpty)
-                  Text(
-                    process.description!,
-                    style: AppTextStyles.body.copyWith(height: 1.5),
-                  )
-                else
-                  Text(
-                    'Descricao ainda nao cadastrada.',
-                    style: AppTextStyles.caption,
+                Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.all(20),
+                  decoration: BoxDecoration(
+                    color: AppColors.ink,
+                    borderRadius: BorderRadius.circular(16),
                   ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'DESCRIÇÃO DO CASO',
+                        style: AppTextStyles.cap.copyWith(
+                          color: AppColors.white.withValues(alpha: 0.72),
+                        ),
+                      ),
+                      const SizedBox(height: 12),
+                      Text(
+                        process.description != null &&
+                                process.description!.isNotEmpty
+                            ? process.description!
+                            : 'Descricao ainda nao cadastrada.',
+                        style: AppTextStyles.body.copyWith(
+                          color: AppColors.white,
+                          fontSize: 16,
+                          height: 1.5,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
                 const SizedBox(height: 24),
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -331,16 +383,16 @@ class _ClientProcedureTimelineScreenState
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       decoration: BoxDecoration(
-        color: isSelected ? AppColors.primary : AppColors.white,
+        color: isSelected ? AppColors.yellow : AppColors.surface2,
         borderRadius: BorderRadius.circular(20),
         border: Border.all(
-          color: isSelected ? AppColors.primary : const Color(0xFFE5E7EB),
+          color: isSelected ? AppColors.yellow : AppColors.line,
         ),
       ),
       child: Text(
         label,
         style: TextStyle(
-          color: isSelected ? Colors.white : const Color(0xFF666666),
+          color: AppColors.textPrimary,
           fontSize: 12,
           fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
         ),
@@ -348,36 +400,10 @@ class _ClientProcedureTimelineScreenState
     );
   }
 
-  Widget _buildChatTab() {
-    return const Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(
-            Icons.chat_bubble_outline_rounded,
-            size: 48,
-            color: AppColors.textCaption,
-          ),
-          SizedBox(height: 16),
-          Text('Histórico de Conversas', style: AppTextStyles.h2),
-          SizedBox(height: 8),
-          Padding(
-            padding: EdgeInsets.symmetric(horizontal: 40),
-            child: Text(
-              'Aqui você verá o espelhamento das conversas com nosso assistente e advogados.',
-              textAlign: TextAlign.center,
-              style: AppTextStyles.caption,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
   Widget _buildActionFooter(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-        color: AppColors.white,
+        color: AppColors.background,
         border: Border(
           top: BorderSide(color: AppColors.divider.withValues(alpha: 0.5)),
         ),

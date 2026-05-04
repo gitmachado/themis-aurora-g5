@@ -10,6 +10,8 @@ abstract interface class AuthRepository {
     required String password,
   });
 
+  Future<Either<Failure, AuthSession>> signInWithGoogle();
+
   Future<Either<Failure, AuthSession?>> restoreSession();
 
   Future<Either<Failure, Account>> getAccount();

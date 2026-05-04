@@ -5,7 +5,7 @@ import { dbAll, dbGet, dbRun } from '../../config/database';
 export class UserRepository implements IUserRepository {
   private readonly userSelect = `
     id, name, whatsapp_number as "whatsappNumber", cpf, email,
-    supabase_user_id as "supabaseUserId", avatar_url as "avatarUrl", role,
+    avatar_url as "avatarUrl", role,
     password_hash as "passwordHash", fcm_token as "fcmToken", 
     notification_preferences as "notificationPreferences", 
     created_at as "createdAt", updated_at as "updatedAt"
@@ -19,10 +19,30 @@ export class UserRepository implements IUserRepository {
   }
 
   async findByWhatsapp(whatsappNumber: string): Promise<User | null> {
-    return dbGet<User>(
-      `SELECT ${this.userSelect} FROM users WHERE whatsapp_number = $1`,
-      [whatsappNumber]
-    );
+    // 1. Busca exata (com ou sem sufixo @s.whatsapp.net)
+    const user = await dbGet<User>(`SELECT ${this.userSelect} FROM users WHERE whatsapp_number = $1`, [whatsappNumber]);
+    if (user) return user;
+
+    // 2. Busca normalizada (apenas dígitos)
+    const normalized = whatsappNumber.split('@')[0].replace(/\D/g, '');
+    if (!normalized) return null;
+
+    // Se o número tem o '9' do Brasil (13 dígitos com 55), tenta também sem o '9' e vice-versa
+    let alternative = '';
+    if (normalized.startsWith('55') && normalized.length === 13 && normalized[4] === '9') {
+      alternative = '55' + normalized.substring(2, 4) + normalized.substring(5); // Remove o 9
+    } else if (normalized.startsWith('55') && normalized.length === 12) {
+      alternative = '55' + normalized.substring(2, 4) + '9' + normalized.substring(4); // Adiciona o 9
+    }
+
+    return dbGet<User>(`
+      SELECT ${this.userSelect} 
+      FROM users 
+      WHERE regexp_replace(whatsapp_number, '\\D', '', 'g') = $1
+         OR ( $3 != '' AND regexp_replace(whatsapp_number, '\\D', '', 'g') = $3 )
+         OR whatsapp_number LIKE $2
+      LIMIT 1
+    `, [normalized, `%${normalized}%`, alternative]);
   }
 
   async findByCpf(cpf: string): Promise<User | null> {
@@ -36,13 +56,6 @@ export class UserRepository implements IUserRepository {
     return dbGet<User>(
       `SELECT ${this.userSelect} FROM users WHERE lower(email) = lower($1)`,
       [email]
-    );
-  }
-
-  async findBySupabaseUserId(supabaseUserId: string): Promise<User | null> {
-    return dbGet<User>(
-      `SELECT ${this.userSelect} FROM users WHERE supabase_user_id = $1`,
-      [supabaseUserId]
     );
   }
 
@@ -64,7 +77,6 @@ export class UserRepository implements IUserRepository {
         users.whatsapp_number as "whatsappNumber",
         users.cpf,
         users.email,
-        users.supabase_user_id as "supabaseUserId",
         users.avatar_url as "avatarUrl",
         users.role,
         users.password_hash as "passwordHash",
@@ -89,7 +101,6 @@ export class UserRepository implements IUserRepository {
         users.whatsapp_number as "whatsappNumber",
         users.cpf,
         users.email,
-        users.supabase_user_id as "supabaseUserId",
         users.avatar_url as "avatarUrl",
         users.role,
         users.password_hash as "passwordHash",
@@ -106,17 +117,22 @@ export class UserRepository implements IUserRepository {
     );
   }
 
+  async findAllLawyers(): Promise<User[]> {
+    return dbAll<User>(
+      `SELECT ${this.userSelect} FROM users WHERE role = 'LAWYER'`
+    );
+  }
+
   async create(user: Omit<User, 'id' | 'createdAt' | 'updatedAt'>): Promise<User> {
     return (await dbGet<User>(
-      `INSERT INTO users (name, whatsapp_number, cpf, email, supabase_user_id, avatar_url, role, password_hash, fcm_token, notification_preferences)
-       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
+      `INSERT INTO users (name, whatsapp_number, cpf, email, avatar_url, role, password_hash, fcm_token, notification_preferences)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
        RETURNING ${this.userSelect}`,
       [
         user.name,
         user.whatsappNumber,
         user.cpf,
         user.email,
-        user.supabaseUserId,
         user.avatarUrl,
         user.role,
         user.passwordHash,

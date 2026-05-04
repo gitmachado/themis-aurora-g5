@@ -51,11 +51,19 @@ class AppNotificationTile extends StatelessWidget {
         alignment: Alignment.centerRight,
       ),
       child: Container(
+        margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 4),
         decoration: BoxDecoration(
-          color: isRead ? Colors.transparent : AppColors.primaryOverlay,
-          border: const Border(bottom: BorderSide(color: AppColors.divider)),
+          color: isRead ? AppColors.surface : AppColors.yellowSoft,
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(
+            color: isRead ? AppColors.line : Colors.transparent,
+          ),
         ),
         child: ListTile(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20),
+          ),
+          contentPadding: const EdgeInsets.all(16),
           leading: CircleAvatar(
             backgroundColor: _getOverlayColor(type),
             child: Icon(_getIcon(type), color: _getIconColor(type), size: 20),
@@ -130,11 +138,11 @@ class AppNotificationTile extends StatelessWidget {
   Color _getIconColor(String type) {
     switch (type) {
       case 'lead':
-        return AppColors.primary;
+        return AppColors.ink;
       case 'file':
         return AppColors.warning;
       case 'procedure':
-        return const Color(0xFF673AB7);
+        return AppColors.info;
       case 'chat':
         return AppColors.success;
       case 'alert':
@@ -147,11 +155,11 @@ class AppNotificationTile extends StatelessWidget {
   Color _getOverlayColor(String type) {
     switch (type) {
       case 'lead':
-        return AppColors.primaryOverlay;
+        return AppColors.yellowSoft;
       case 'file':
         return AppColors.warningOverlay;
       case 'procedure':
-        return const Color(0xff673ab7).withValues(alpha: 0.1);
+        return AppColors.infoBackground;
       case 'chat':
         return AppColors.successOverlay;
       case 'alert':

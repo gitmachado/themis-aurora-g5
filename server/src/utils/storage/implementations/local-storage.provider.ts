@@ -17,7 +17,16 @@ export class LocalFileStorageProvider implements IStorageProvider {
     const filename = `${Date.now()}-${file.originalname.replace(/\s/g, '_')}`;
     const filePath = path.join(this.uploadDir, filename);
 
-    await fs.promises.rename(file.path, filePath);
+    try {
+      await fs.promises.rename(file.path, filePath);
+    } catch (err: any) {
+      if (err.code === 'EXDEV') {
+        await fs.promises.copyFile(file.path, filePath);
+        await fs.promises.unlink(file.path).catch(() => undefined);
+      } else {
+        throw err;
+      }
+    }
 
     // Returning relative path or URL - in a real app, this would be a URL
     return `/uploads/${filename}`;

@@ -19,6 +19,15 @@ final class AuthRemoteDataSource {
     return AuthSessionModel.fromJson(json);
   }
 
+  Future<AuthSessionModel> googleSignIn(String idToken) async {
+    final json = await _apiClient.postJson(
+      '/auth/google',
+      data: {'idToken': idToken},
+    );
+
+    return AuthSessionModel.fromJson(json);
+  }
+
   Future<AccountModel> getAccount() async {
     final json = await _apiClient.getJson('/account');
     return AccountModel.fromJson(_normalizeAccountJson(json));

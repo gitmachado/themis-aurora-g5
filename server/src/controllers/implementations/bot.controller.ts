@@ -5,6 +5,7 @@ import { IConfigurationService } from '../../services/interfaces/configuration.s
 import { INotificationService } from '@services';
 import { NotFoundError } from '../../services/implementations/errors';
 import type { LegalProcess, User } from '@models';
+import { ILeadRepository } from '@repositories';
 
 /**
  * Controller for bot-facing endpoints (API Key authentication).
@@ -16,6 +17,7 @@ export class BotController {
     private readonly legalProcessService: ILegalProcessService,
     private readonly configurationService: IConfigurationService,
     private readonly notificationService: INotificationService,
+    private readonly leadRepository: ILeadRepository,
   ) {}
 
   /**
@@ -39,6 +41,62 @@ export class BotController {
         exists: true,
         userId: user.id,
         name: user.name,
+      });
+    } catch (error) {
+      next(error);
+    }
+  };
+
+  /**
+   * B06 — GET /users/by-cpf/:cpf
+   * Checks if a CPF belongs to a registered user.
+   */
+  getUserByCpf: RequestHandler<{ cpf: string }> = async (
+    req: Request<{ cpf: string }>,
+    res: Response,
+    next: NextFunction
+  ) => {
+    try {
+      const { cpf } = req.params;
+      const user = await this.userService.getByCpf(cpf);
+
+      if (!user) {
+        return res.status(200).json({ exists: false });
+      }
+
+      return res.status(200).json({
+        exists: true,
+        userId: user.id,
+        name: user.name,
+      });
+    } catch (error) {
+      next(error);
+    }
+  };
+
+  /**
+   * B05 — GET /leads/by-phone/:whatsappNumber
+   * Checks if a WhatsApp number has a pending lead.
+   */
+  getLeadByPhone: RequestHandler<{ whatsappNumber: string }> = async (
+    req: Request<{ whatsappNumber: string }>,
+    res: Response,
+    next: NextFunction
+  ) => {
+    try {
+      const { whatsappNumber } = req.params;
+      const lead = await this.leadRepository.findByWhatsapp(whatsappNumber);
+
+      if (!lead) {
+        return res.status(200).json({ exists: false });
+      }
+
+      return res.status(200).json({
+        exists: true,
+        id: lead.id,
+        status: lead.status,
+        name: lead.name,
+        isAIPaused: lead.isAIPaused,
       });
     } catch (error) {
       next(error);
@@ -132,24 +190,77 @@ export class BotController {
 
       // Find the client by phone number to associate the notification
       const client = await this.userService.getByWhatsapp(whatsappNumber);
-      const clientName = client ? client.name : whatsappNumber;
+      const lead = await this.leadRepository.findByWhatsapp(whatsappNumber);
+      const clientName = client ? client.name : (lead ? lead.name : whatsappNumber);
+
+      const extraData: any = { 
+        whatsappNumber, 
+        notificationType: type, 
+        name: clientName 
+      };
+      if (lead) extraData.leadId = lead.id;
 
       // Find all lawyers to notify
-      // For now, we notify all lawyers by creating notifications.
-      // The notification service handles sending push via FCM.
-      const notification = await this.notificationService.send({
-        // In a multi-lawyer system, this should route to the appropriate lawyer.
-        // For MVP, we use a well-known lawyer ID from seed or the first lawyer.
-        userId: 'a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11', // seed lawyer ID
-        type: 'HUMAN_SUPPORT',
-        title: `Handoff: ${clientName}`,
-        body: message,
-        extraData: { whatsappNumber, notificationType: type },
-      });
+      const lawyers = await this.userService.getAllLawyers();
+      
+      // Determine the notification type based on whether the client already exists
+      const effectiveType = (client || (lead && lead.status === 'CONVERTED')) ? 'HUMAN_SUPPORT' : (type === 'NEW_LEAD' ? 'NEW_LEAD' : 'HUMAN_SUPPORT');
 
-      return res.status(201).json(notification);
+      const notifications = await Promise.all(lawyers.map(lawyer => 
+        this.notificationService.send({
+          userId: lawyer.id,
+          type: effectiveType,
+          title: effectiveType === 'NEW_LEAD' ? `Novo Lead: ${clientName}` : `Atenção: ${clientName}`,
+          body: message,
+          extraData,
+        })
+      ));
+
+      return res.status(201).json(notifications[0]);
+    } catch (error) {
+      next(error);
+    }
+  };
+  /**
+   * B07 — POST /handoff/start
+   * Notifies the backend to pause AI and switch to human support.
+   */
+  startHandoff: RequestHandler = async (
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ) => {
+    try {
+      const { whatsappNumber } = req.body;
+      const lead = await this.leadRepository.findByWhatsapp(whatsappNumber);
+      if (lead) {
+        await this.leadRepository.update(lead.id, { isAIPaused: true });
+      }
+      return res.status(200).json({ success: true });
+    } catch (error) {
+      next(error);
+    }
+  };
+
+  /**
+   * B08 — POST /handoff/resume
+   * Notifies the backend to resume AI support.
+   */
+  resumeAI: RequestHandler = async (
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ) => {
+    try {
+      const { whatsappNumber } = req.body;
+      const lead = await this.leadRepository.findByWhatsapp(whatsappNumber);
+      if (lead) {
+        await this.leadRepository.update(lead.id, { isAIPaused: false });
+      }
+      return res.status(200).json({ success: true });
     } catch (error) {
       next(error);
     }
   };
 }
+

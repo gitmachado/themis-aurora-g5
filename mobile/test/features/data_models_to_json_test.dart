@@ -69,19 +69,18 @@ void main() {
       containsPair('currentStatus', 'OPEN'),
     );
 
-    expect(
-      ProcessDocumentModel.fromJson({
-        'id': 'doc-1',
-        'legalProcessId': 'process-1',
-        'fileName': 'contrato.pdf',
-        'fileUrl': '/documents/view/contrato.pdf',
-        'sizeBytes': 1024,
-        'mimeType': 'application/pdf',
-        'sentById': 'account-1',
-        'createdAt': createdAt,
-      }).toJson(),
-      containsPair('fileName', 'contrato.pdf'),
-    );
+    final document = ProcessDocumentModel.fromJson({
+      'id': 'doc-1',
+      'legalProcessId': 'process-1',
+      'fileName': 'contrato.pdf',
+      'fileUrl': '/documents/view/contrato.pdf',
+      'sizeBytes': '1024',
+      'mimeType': 'application/pdf',
+      'sentById': 'account-1',
+      'createdAt': createdAt,
+    });
+    expect(document.sizeBytes, 1024);
+    expect(document.toJson(), containsPair('fileName', 'contrato.pdf'));
 
     expect(
       TimelineEventModel.fromJson({

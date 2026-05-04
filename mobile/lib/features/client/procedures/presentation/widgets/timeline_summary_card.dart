@@ -7,14 +7,12 @@ class TimelineSummaryCard extends StatelessWidget {
   final String status;
   final String lastMovement;
   final VoidCallback onAiAnalysisTap;
-  final VoidCallback onChatMirrorTap;
 
   const TimelineSummaryCard({
     super.key,
     required this.status,
     required this.lastMovement,
     required this.onAiAnalysisTap,
-    required this.onChatMirrorTap,
   });
 
   @override
@@ -92,21 +90,6 @@ class TimelineSummaryCard extends StatelessWidget {
                     ),
                   ),
                 ],
-              ),
-            ),
-          ),
-          const SizedBox(height: 12),
-          Center(
-            child: TextButton.icon(
-              onPressed: onChatMirrorTap,
-              icon: const Icon(
-                Icons.history_rounded,
-                color: Colors.white70,
-                size: AppDimensions.iconS,
-              ),
-              label: const Text(
-                'Acessar espelhamento do Chat',
-                style: TextStyle(color: Colors.white70, fontSize: 13),
               ),
             ),
           ),

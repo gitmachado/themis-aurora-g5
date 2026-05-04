@@ -1,32 +1,35 @@
 import '../../../../../shared/utils/api_formatters.dart';
+import '../../../../../shared/utils/string_utils.dart';
 import '../domain/entities/lead.dart';
 
 extension LeadDisplay on Lead {
   String get displayName =>
       (name == null || name!.isEmpty) ? 'Lead sem nome' : name!;
 
+  String get shortName => StringUtils.formatFirstAndLastName(displayName);
+
   String get caseTypeLabel => switch (caseType) {
     'Labor' => 'Trabalhista',
-    'Civil' => 'Civel',
-    'Family' => 'Familia',
+    'Civil' => 'Cível',
+    'Family' => 'Família',
     'Criminal' => 'Criminal',
-    'SocialSecurity' => 'Previdenciario',
-    _ => 'Juridico',
+    'SocialSecurity' => 'Previdenciário',
+    _ => 'Jurídico',
   };
 
   String get urgencyLabel => switch (urgency) {
     'High' => 'Alta',
-    'Medium' => 'Media',
+    'Medium' => 'Média',
     'Low' => 'Baixa',
-    _ => 'Media',
+    _ => 'Média',
   };
 
   String get availabilityLabel => switch (contactAvailability) {
-    'Morning' => 'Manha',
+    'Morning' => 'Manhã',
     'Afternoon' => 'Tarde',
     'Evening' => 'Noite',
     _ => '--',
   };
 
-  String get timeLabel => formatRelativeDate(createdAt);
+  String get timeLabel => formatFullDateTime(createdAt);
 }

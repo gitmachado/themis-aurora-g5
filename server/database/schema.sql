@@ -1,3 +1,4 @@
+SET client_encoding = 'UTF8';
 -- OmniConnect Database Schema
 -- Pattern: snake_case for tables/columns
 -- Architecture: ADR-0003 (No ORM)
@@ -24,7 +25,6 @@ CREATE TABLE IF NOT EXISTS users (
     whatsapp_number TEXT UNIQUE NOT NULL,
     cpf TEXT UNIQUE,
     email TEXT UNIQUE,
-    supabase_user_id TEXT,
     avatar_url TEXT,
     role TEXT NOT NULL CHECK (role IN ('LAWYER', 'CLIENT')),
     password_hash TEXT,
@@ -47,18 +47,16 @@ CREATE TABLE IF NOT EXISTS leads (
     contact_availability TEXT CHECK (contact_availability IN ('Morning', 'Afternoon', 'Evening')),
     status TEXT NOT NULL DEFAULT 'PENDING' CHECK (status IN ('PENDING', 'IN_CONTACT', 'CONVERTED', 'DISCARDED')),
     converted_user_id UUID REFERENCES users(id) ON DELETE SET NULL,
+    assigned_lawyer_id UUID REFERENCES users(id) ON DELETE SET NULL,
+    is_ai_paused BOOLEAN DEFAULT FALSE,
     lawyer_notes TEXT,
     discard_reason TEXT,
     created_at TIMESTAMPTZ DEFAULT NOW(),
     updated_at TIMESTAMPTZ DEFAULT NOW()
 );
 
-ALTER TABLE users ADD COLUMN IF NOT EXISTS supabase_user_id TEXT;
 ALTER TABLE users ADD COLUMN IF NOT EXISTS avatar_url TEXT;
 ALTER TABLE leads ADD COLUMN IF NOT EXISTS email TEXT;
-CREATE UNIQUE INDEX IF NOT EXISTS users_supabase_user_id_unique
-    ON users(supabase_user_id)
-    WHERE supabase_user_id IS NOT NULL;
 
 -- 4. Legal Processes
 CREATE TABLE IF NOT EXISTS legal_processes (
@@ -107,6 +105,7 @@ CREATE TABLE IF NOT EXISTS messages (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     lead_id UUID REFERENCES leads(id) ON DELETE SET NULL,
     user_id UUID REFERENCES users(id) ON DELETE SET NULL,
+    whatsapp_number TEXT,
     sender TEXT NOT NULL CHECK (sender IN ('BOT', 'CLIENT', 'LAWYER')),
     content TEXT NOT NULL,
     whatsapp_message_id TEXT UNIQUE,
@@ -162,7 +161,7 @@ CREATE TABLE IF NOT EXISTS knowledge_embeddings (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     content TEXT NOT NULL,
     metadata JSONB DEFAULT '{}',
-    embedding vector(768),
+    embedding vector(1536),
     created_at TIMESTAMPTZ DEFAULT NOW()
 );
 
