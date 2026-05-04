@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import { LeadController } from '../../controllers/implementations/lead.controller';
 import { LeadService, AuthService, NotificationService, LegalProcessService, TimelineService } from '@services';
+import { PushNotificationService } from '../../services/notifications/push_notification_service';
 import {
   LeadRepository,
   UserRepository,
@@ -20,7 +21,8 @@ const leadRepository = new LeadRepository();
 const userRepository = new UserRepository();
 const authService = new AuthService(userRepository);
 const notificationRepository = new NotificationRepository();
-const notificationService = new NotificationService(notificationRepository);
+const pushNotificationService = new PushNotificationService();
+const notificationService = new NotificationService(notificationRepository, userRepository, pushNotificationService);
 const legalProcessRepository = new LegalProcessRepository();
 const timelineRepository = new TimelineEventRepository();
 const timelineService = new TimelineService(timelineRepository);

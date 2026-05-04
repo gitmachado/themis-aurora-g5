@@ -1,13 +1,16 @@
 import { Router } from 'express';
 import { NotificationController } from '../../controllers/implementations/notification.controller';
 import { NotificationService } from '@services';
-import { NotificationRepository } from '@repositories';
+import { NotificationRepository, UserRepository } from '@repositories';
+import { PushNotificationService } from '../../services/notifications/push_notification_service';
 import { authMiddleware } from '../../middlewares/implementations/authMiddleware';
 
 const router = Router();
 
 const notificationRepository = new NotificationRepository();
-const notificationService = new NotificationService(notificationRepository);
+const userRepository = new UserRepository();
+const pushNotificationService = new PushNotificationService();
+const notificationService = new NotificationService(notificationRepository, userRepository, pushNotificationService);
 const controller = new NotificationController(notificationService);
 
 /**

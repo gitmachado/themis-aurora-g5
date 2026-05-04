@@ -1,12 +1,18 @@
 import { INotificationService } from '../interfaces/notification.service';
 import { INotificationRepository } from '../../repositories/interfaces/notification.repository';
+import { IUserRepository } from '../../repositories/interfaces/user.repository';
+import { PushNotificationService } from '../notifications/push_notification_service';
 import type { Notification } from '@models';
 import type { CreateNotificationDTO } from '@dtos';
 import { NotFoundError } from './errors';
 import { eventBus } from '../communication/InternalEventBus';
 
 export class NotificationService implements INotificationService {
-  constructor(private readonly notificationRepository: INotificationRepository) {}
+  constructor(
+    private readonly notificationRepository: INotificationRepository,
+    private readonly userRepository: IUserRepository,
+    private readonly pushNotificationService: PushNotificationService
+  ) {}
 
   async send(dto: CreateNotificationDTO): Promise<Notification> {
     const notification = await this.notificationRepository.create({
@@ -28,8 +34,20 @@ export class NotificationService implements INotificationService {
   }
 
   async sendPush(userId: string, title: string, body: string): Promise<void> {
-    // TODO: Integrate with FCM or target service provider
-    // Future: Use FCM SDK with user's fcmToken from userRepository
+    try {
+      const user = await this.userRepository.findById(userId);
+      if (!user || !user.fcmToken) {
+        return;
+      }
+
+      await this.pushNotificationService.sendPushNotification({
+        token: user.fcmToken,
+        title,
+        body,
+      });
+    } catch (error) {
+      console.error('[NotificationService] Error sending push notification:', error);
+    }
   }
 
   async getByUser(userId: string): Promise<Notification[]> {
