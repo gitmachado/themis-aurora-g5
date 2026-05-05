@@ -2,6 +2,14 @@ import 'dart:async';
 import 'package:mobile/shared/network/api_client.dart';
 import 'package:mobile/shared/network/token_storage.dart';
 import 'package:mobile/shared/network/websocket_client.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_core_platform_interface/test.dart';
+import 'package:flutter_test/flutter_test.dart';
+
+void setupFirebaseForTesting() {
+  TestWidgetsFlutterBinding.ensureInitialized();
+  setupFirebaseCoreMocks();
+}
 
 final class ApiCall {
   final String method;
@@ -86,6 +94,8 @@ class FakeApiClient implements ApiClient {
     calls.add(ApiCall('PATCH', path, data));
     final response = jsonResponses['PATCH $path'];
     if (response == null) {
+      // FCM token endpoint é opcional nos testes — ignora silenciosamente
+      if (path.contains('fcm-token')) return {};
       throw Exception('FakeApiClient: PATCH $path nao configurado.');
     }
     return response;
