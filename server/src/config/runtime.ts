@@ -1,0 +1,77 @@
+import dotenv from 'dotenv';
+import path from 'path';
+
+dotenv.config({ path: path.join(__dirname, '../../.env') });
+
+const DEFAULT_DEV_JWT_SECRET = 'development-only-secret-change-me';
+const DEFAULT_DEV_CORS_ORIGINS = [
+  'http://localhost:3000',
+  'http://127.0.0.1:3000',
+  'http://localhost:8080',
+  'http://127.0.0.1:8080',
+];
+
+const getOptionalEnv = (name: string): string | undefined => {
+  const value = process.env[name]?.trim();
+  if (!value || value.toLowerCase() === 'disabled') {
+    return undefined;
+  }
+  return value;
+};
+
+export const isProduction = (): boolean => process.env.NODE_ENV === 'production';
+
+export const getJwtSecret = (): string => {
+  const jwtSecret = getOptionalEnv('JWT_SECRET');
+  if (jwtSecret) {
+    return jwtSecret;
+  }
+
+  if (isProduction()) {
+    throw new Error('JWT_SECRET is required when NODE_ENV=production');
+  }
+
+  console.warn('WARNING: JWT_SECRET not configured. Falling back to a development-only secret.');
+  return DEFAULT_DEV_JWT_SECRET;
+};
+
+export const getBotApiKey = (): string | undefined => {
+  const botApiKey = getOptionalEnv('BOT_API_KEY');
+  if (botApiKey) {
+    return botApiKey;
+  }
+
+  if (isProduction()) {
+    throw new Error('BOT_API_KEY is required when NODE_ENV=production');
+  }
+
+  return undefined;
+};
+
+export const getAllowedCorsOrigins = (): string[] => {
+  const configuredOrigins = getOptionalEnv('CORS_ORIGIN')
+    ?.split(',')
+    .map((origin: string) => origin.trim())
+    .filter(Boolean);
+
+  if (configuredOrigins && configuredOrigins.length > 0) {
+    return configuredOrigins;
+  }
+
+  if (isProduction()) {
+    throw new Error('CORS_ORIGIN is required when NODE_ENV=production');
+  }
+
+  return DEFAULT_DEV_CORS_ORIGINS;
+};
+
+export const isSwaggerEnabled = (): boolean => !isProduction();
+
+export const validateRuntimeEnv = (): void => {
+  getJwtSecret();
+  getAllowedCorsOrigins();
+
+  if (isProduction()) {
+    getBotApiKey();
+  }
+};

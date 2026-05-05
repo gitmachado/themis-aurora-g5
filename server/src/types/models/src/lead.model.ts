@@ -9,6 +9,7 @@ export interface Lead {
   id: string;
   whatsappNumber: string;
   name: string | null;
+  email: string | null;
   cpf: string | null;
   caseType: CaseType | null;
   caseDescription: string | null;
@@ -16,8 +17,10 @@ export interface Lead {
   contactAvailability: ContactAvailability | null;
   status: LeadStatus;
   convertedUserId: string | null;
+  assignedLawyerId: string | null;
   lawyerNotes: string | null;
   discardReason: string | null;
-  createdAt: Date;
-  updatedAt: Date;
+  isAIPaused: boolean;
+  createdAt?: Date;
+  updatedAt?: Date;
 }

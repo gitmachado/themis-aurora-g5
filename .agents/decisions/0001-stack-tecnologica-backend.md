@@ -5,7 +5,7 @@ Decisão 0001: Definição da Stack Tecnológica do Backend
 - **Activated**: Aprovado e ativo em 07/04/2026.
 
 ### 3. Contexto
-- O projeto OmniConnect requer uma API robusta para gerenciar comunicações via WhatsApp, integração com IA (LangChain) e sincronização em tempo real com o frontend Flutter.
+- O projeto Themis requer uma API robusta para gerenciar comunicações via WhatsApp, integração com IA (LangChain) e sincronização em tempo real com o frontend Flutter.
 - Precisamos de um ambiente de desenvolvimento padronizado e fácil de escalar.
 - Alternativas consideradas: FastAPI (Python) vs Node.js.
 

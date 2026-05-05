@@ -4,7 +4,7 @@
 Aceito
 
 ## Contexto
-O OmniConnect lida com dados jurídicos sensíveis. Clientes não podem acessar processos de terceiros, e mesmo dentro da equipe jurídica, precisamos de uma camada de responsabilidade (Tutor) para evitar que advogados não envolvidos em um caso façam alterações críticas acidentalmente ou por má-fé.
+O Themis lida com dados jurídicos sensíveis. Clientes não podem acessar processos de terceiros, e mesmo dentro da equipe jurídica, precisamos de uma camada de responsabilidade (Tutor) para evitar que advogados não envolvidos em um caso façam alterações críticas acidentalmente ou por má-fé.
 
 Sem um ORM (Object-Relational Mapping), a validação de propriedade não acontece automaticamente no nível de query/repositório sem injeção de contexto de usuário em todas as camadas, o que aumentaria a complexidade do driver de banco de dados.
 

@@ -3,6 +3,7 @@ import { INotificationRepository } from '../../repositories/interfaces/notificat
 import type { Notification } from '@models';
 import type { CreateNotificationDTO } from '@dtos';
 import { NotFoundError } from './errors';
+import { eventBus } from '../communication/InternalEventBus';
 
 export class NotificationService implements INotificationService {
   constructor(private readonly notificationRepository: INotificationRepository) {}
@@ -16,6 +17,9 @@ export class NotificationService implements INotificationService {
       type: (dto as any).type || 'SYSTEM',
       extraData: (dto as any).extraData || null,
     });
+
+    // Notify via Socket.io
+    eventBus.emitNotification(dto.userId, notification);
 
     // Integrated Push Trigger
     await this.sendPush(dto.userId, dto.title, dto.body);
@@ -32,6 +36,10 @@ export class NotificationService implements INotificationService {
     return this.notificationRepository.findByUserId(userId);
   }
 
+  async getById(id: string): Promise<Notification | null> {
+    return this.notificationRepository.findById(id);
+  }
+
   async getUnread(userId: string): Promise<Notification[]> {
     return this.notificationRepository.findUnreadByUserId(userId);
   }
@@ -46,5 +54,18 @@ export class NotificationService implements INotificationService {
 
   async markAllAsRead(userId: string): Promise<void> {
     await this.notificationRepository.markAllAsRead(userId);
+  }
+
+  async delete(id: string): Promise<void> {
+    const notification = await this.notificationRepository.findById(id);
+    if (!notification) {
+      throw new NotFoundError('Notificação não encontrada');
+    }
+
+    await this.notificationRepository.delete(id);
+  }
+
+  async deleteMany(ids: string[], userId: string): Promise<void> {
+    await this.notificationRepository.deleteMany(ids, userId);
   }
 }

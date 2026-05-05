@@ -1,11 +1,25 @@
 import { Request, Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
 import { UnauthorizedError } from '../../services/implementations/errors';
+import { UserRole } from '@enums';
+import { getJwtSecret } from '../../config/runtime';
 
-export interface AuthRequest extends Request {
+export interface JWTPayload {
+  sub: string;
+  role: UserRole;
+  iat?: number;
+  exp?: number;
+}
+
+export interface AuthRequest<
+  P = any,
+  ResBody = any,
+  ReqBody = any,
+  Query = any
+> extends Request<P, ResBody, ReqBody, Query> {
   user?: {
     id: string;
-    role: string;
+    role: UserRole;
   };
 }
 
@@ -27,15 +41,17 @@ export const authMiddleware = (
   }
 
   const token = parts[1];
-  const secret = process.env.JWT_SECRET || 'super-secret-key-change-me';
+  const secret = getJwtSecret();
 
   try {
-    const decoded = jwt.verify(token, secret) as { sub: string; role: string };
+    const decoded = jwt.verify(token, secret) as JWTPayload;
     
     req.user = {
       id: decoded.sub,
       role: decoded.role,
     };
+    
+    console.log(`[Auth] ${req.method} ${req.path} - User: ${decoded.sub} (${decoded.role})`);
 
     return next();
   } catch (err) {

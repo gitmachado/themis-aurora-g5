@@ -1,5 +1,5 @@
 // ========================
-// OmniConnect Domain Enums
+// Themis Domain Enums
 // ========================
 
 /** Supported legal practice niches */
@@ -25,13 +25,22 @@ export type LegalProcessStatus =
   | 'ARCHIVED';
 
 /** System access roles */
-export type UserRole = 'LAWYER' | 'CLIENT';
+export type UserRole = 'LAWYER' | 'CLIENT' | 'LAWYER_ADMIN';
+
+/** Permissions configurable by the head lawyer for each team member */
+export type TeamPermissionKey =
+  | 'viewAllClients'
+  | 'convertLeads'
+  | 'manageDocuments'
+  | 'receiveSupportNotifications';
 
 /** Event types in a legal process timeline */
 export type TimelineEventType =
   | 'STATUS_UPDATE'
   | 'LAWYER_NOTE'
   | 'DOCUMENT_SENT'
+  | 'DOCUMENT_REQUESTED'
+  | 'EVENT_SCHEDULED'
   | 'PROCESS_CREATED';
 
 /** Contact availability reported by the lead */
@@ -42,6 +51,8 @@ export type NotificationType =
   | 'NEW_LEAD'
   | 'STATUS_CHANGED'
   | 'DOCUMENT_SENT'
+  | 'DOCUMENT_REQUESTED'
+  | 'NEW_NOTE'
   | 'HUMAN_SUPPORT';
 
 /** Who sent the message in the chat */

@@ -1,12 +1,12 @@
 ---
-description: Criar ou reescrever um PRD alinhado ao contexto real do OmniConnect.
+description: Criar ou reescrever um PRD alinhado ao contexto real do Themis.
 ---
 
 # Prompt: Criar PRD
 
 ## Objetivo
 
-Produzir um PRD claro, enxuto e utilizavel pelo time do OmniConnect, alinhado ao
+Produzir um PRD claro, enxuto e utilizavel pelo time do Themis, alinhado ao
 contexto do produto descrito em `README.md`, `documentation/requisitos.md` e
 demais documentos do repositorio.
 

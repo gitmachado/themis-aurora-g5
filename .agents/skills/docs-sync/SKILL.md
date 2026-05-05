@@ -5,7 +5,7 @@ description: Verificar e manter sincronizadas as duas bases de documentação do
 
 # Docs Sync — Sincronização `.agents/` ↔ `documentation/`
 
-O projeto OmniConnect mantém duas bases de documentação paralelas:
+O projeto Themis mantém duas bases de documentação paralelas:
 
 - **`documentation/`** — Consumida pela equipe humana e IAs em outros ambientes (Cursor, Windsurf, etc.). Contém o PRD, specs técnicas, prompts e arquitetura.
 - **`.agents/`** — Focada no Antigravity. Contém knowledge base, ADRs, workflows e skills para automação avançada.

@@ -1,13 +1,28 @@
 import { Router } from 'express';
 import { MessageController } from '../../controllers/implementations/message.controller';
+import { MessageService, UserService } from '@services';
+import { WhatsAppService } from '../../services/implementations/whatsapp.service';
+import { MessageRepository, UserRepository, LeadRepository } from '@repositories';
 import { authMiddleware } from '../../middlewares/implementations/authMiddleware';
 import { apiKeyMiddleware } from '../../middlewares/implementations/apiKeyMiddleware';
 import { validate } from '../../middlewares/implementations/validationMiddleware';
-
 import { syncMessageSchema } from '../../types/dtos/schemas';
 
 const router = Router();
-const controller = new MessageController();
+
+const messageRepository = new MessageRepository();
+const userRepository = new UserRepository();
+const userService = new UserService(userRepository);
+const leadRepository = new LeadRepository();
+const whatsappService = new WhatsAppService();
+const messageService = new MessageService(
+  messageRepository,
+  userRepository,
+  leadRepository,
+  whatsappService
+);
+
+const controller = new MessageController(messageService, userService);
 
 /**
  * @openapi
@@ -70,5 +85,6 @@ router.get('/:whatsappNumber', authMiddleware, controller.getByWhatsapp);
  *               $ref: '#/components/schemas/Error'
  */
 router.post('/sync', apiKeyMiddleware, validate(syncMessageSchema), controller.sync);
+router.post('/send', authMiddleware, controller.send);
 
 export default router;

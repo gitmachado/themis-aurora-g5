@@ -1,9 +1,9 @@
 ---
-description: "Padrão de uso do Git e criação de commits no projeto OmniConnect."
+description: "Padrão de uso do Git e criação de commits no projeto Themis."
 ---
 # Workflow de Controle de Versão (Git e Commits)
 
-Este documento define as regras fundamentais do Grupo 5 para gerenciamento do código-fonte e histórico do **OmniConnect**.
+Este documento define as regras fundamentais do Grupo 5 para gerenciamento do código-fonte e histórico do **Themis**.
 
 ## 📌 Regras de Branches (Ramificações)
 1. **`main`**: É a branch de **Produção**. **NUNCA FAÇA COMMIT DIRETO NA MAIN.**
@@ -66,6 +66,11 @@ Ao realizar commits na sua branch detalhada, utilize o padrão "Conventional Com
 3. Faça o commit padronizado: `git commit -m "feat: sua mensagem"`.
 4. Envie para o repositório remoto: `git push origin tipo/nome`.
 5. Abra um Pull Request (PR) caso aplicável para mergear na `development`.
+---
+
+## 🛡️ Segurança e Permissões (Regra para IA)
+> [!IMPORTANT]
+> O Agente/IA **NUNCA** deve realizar comandos de `git push`, `git push --force` ou criar Pull Requests sem a autorização **explícita e única** do usuário para aquela operação específica. Mesmo que uma permissão tenha sido dada anteriormente, novas alterações que exijam envio para o GitHub devem ser validadas novamente.
 
 ---
 

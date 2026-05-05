@@ -1,15 +1,40 @@
 import { Router } from 'express';
 import multer from 'multer';
-import path from 'path';
 import { DocumentController } from '../../controllers/implementations/document.controller';
+import { DocumentService, LegalProcessService, TimelineService, NotificationService } from '@services';
+import { DocumentRepository, LegalProcessRepository, TimelineEventRepository, NotificationRepository } from '@repositories';
+import { createStorageProvider } from '../../utils/storage/storage-provider.factory';
+import { ensureDirectory, getTempDir } from '../../utils/storage/storage-paths';
 import { authMiddleware } from '../../middlewares/implementations/authMiddleware';
 
 const router = Router();
-const controller = new DocumentController();
+
+// Wiring dependencies
+const documentRepository = new DocumentRepository();
+const documentService = new DocumentService(documentRepository);
+
+const legalProcessRepository = new LegalProcessRepository();
+const timelineRepository = new TimelineEventRepository();
+const timelineService = new TimelineService(timelineRepository);
+const notificationRepository = new NotificationRepository();
+const notificationService = new NotificationService(notificationRepository);
+const legalProcessService = new LegalProcessService(
+  legalProcessRepository,
+  timelineService,
+  notificationService
+);
+
+const storageProvider = createStorageProvider();
+
+const controller = new DocumentController(
+  documentService,
+  legalProcessService,
+  storageProvider
+);
 
 // Multer configuration for temporary storage
 const upload = multer({ 
-  dest: path.resolve(__dirname, '../../../../temp'),
+  dest: ensureDirectory(getTempDir()),
   limits: {
     fileSize: 10 * 1024 * 1024 // 10MB
   }
@@ -43,6 +68,8 @@ const upload = multer({
  *               $ref: '#/components/schemas/Document'
  */
 router.post('/upload', authMiddleware, upload.single('file'), controller.upload);
+
+router.get('/my', authMiddleware, controller.listMyDocuments);
 
 /**
  * @openapi
@@ -95,6 +122,36 @@ router.get('/view/:filename', authMiddleware, controller.viewFile);
  *                 $ref: '#/components/schemas/Document'
  */
 router.get('/process/:processId', authMiddleware, controller.listByProcess);
+
+/**
+ * @openapi
+ * /documents/{id}/access-url:
+ *   get:
+ *     summary: Gera uma URL temporária para abrir um documento privado
+ *     tags: [Documentos]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: URL temporária do arquivo
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 url:
+ *                   type: string
+ *       404:
+ *         description: Documento não encontrado
+ */
+router.get('/:id/access-url', authMiddleware, controller.getAccessUrl);
+router.get('/:id', authMiddleware, controller.getById);
 
 /**
  * @openapi

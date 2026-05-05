@@ -4,7 +4,7 @@
 Aceito
 
 ## Contexto
-O projeto OmniConnect exige alto controle sobre o SQL gerado para lidar com:
+O projeto Themis exige alto controle sobre o SQL gerado para lidar com:
 1.  **JSONB**: Armazenamento flexível de metadados e logs de eventos.
 2.  **Performance**: Evitar o overhead de abstrações de ORMs tradicionais.
 3.  **PGVector (AI/RAG)**: Integração facilitada com extensões de busca vetorial no futuro.

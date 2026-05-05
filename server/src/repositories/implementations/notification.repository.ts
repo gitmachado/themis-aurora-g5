@@ -43,4 +43,14 @@ export class NotificationRepository implements INotificationRepository {
   async markAllAsRead(userId: string): Promise<void> {
     await dbRun('UPDATE notifications SET is_read = TRUE WHERE user_id = $1', [userId]);
   }
+
+  async delete(id: string): Promise<void> {
+    await dbRun('DELETE FROM notifications WHERE id = $1', [id]);
+  }
+
+  async deleteMany(ids: string[], userId: string): Promise<void> {
+    if (ids.length === 0) return;
+    const placeholders = ids.map((_, i) => `$${i + 1}`).join(', ');
+    await dbRun(`DELETE FROM notifications WHERE id IN (${placeholders}) AND user_id = $${ids.length + 1}`, [...ids, userId]);
+  }
 }

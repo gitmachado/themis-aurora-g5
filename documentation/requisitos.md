@@ -1,4 +1,4 @@
-# Desafio Tech: Projeto "OmniConnect – Gestão Inteligente de Serviços"
+# Desafio Tech: Projeto "Themis – Gestão Inteligente de Serviços"
 
 📋 O Cenário
 - Fricção no Atendimento: Clientes preferem o WhatsApp para tirar dúvidas sobre seus processos ou iniciar consultas jurídicas, mas os dados se perdem em conversas informais.
@@ -47,8 +47,8 @@ Infraestrutura e Dados:
 👥 Formação dos Grupos (5 a 6 Integrantes)
 Sugestão de papéis para os alunos:
 - **Tech Lead / Backend**: Maurício (Responsável pela arquitetura da API e segurança).
-- **AI Specialist**: Douglas (Focado em LangChain, RAG e integração com LLM).
-- **Flutter Developer (Client-side)**: Lucas / Aline (UI/UX e consumo da API para o cliente).
+- **AI Specialist**: Douglas / Aline (Focado em LangChain, RAG e integração com LLM).
+- **Flutter Developer (Client-side)**: Lucas (UI/UX e consumo da API para o cliente).
 - **Flutter Developer (Provider-side)**: Alan (Dashboards e regras de negócio do fornecedor).
 - **DevOps & QA / Coringa**: Thiago (Firebase, notificações, deploy e suporte geral).
 

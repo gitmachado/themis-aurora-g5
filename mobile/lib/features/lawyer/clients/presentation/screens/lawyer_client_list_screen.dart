@@ -1,0 +1,308 @@
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:url_launcher/url_launcher.dart';
+import '../../../../../../app/routes/app_router.dart';
+import '../../../../../../features/lawyer/clients/domain/entities/lawyer_client.dart';
+import '../../../../../../features/lawyer/clients/presentation/providers/lawyer_client_providers.dart';
+import '../../../../../../shared/constants/app_colors.dart';
+import '../../../../../../shared/constants/app_text_styles.dart';
+import '../../../../../../shared/constants/app_dimensions.dart';
+import '../../../../../../shared/widgets/layout/loading_skeleton.dart';
+
+class LawyerClientListView extends ConsumerStatefulWidget {
+  const LawyerClientListView({super.key});
+
+  @override
+  ConsumerState<LawyerClientListView> createState() =>
+      _LawyerClientListViewState();
+}
+
+class _LawyerClientListViewState extends ConsumerState<LawyerClientListView>
+    with AutomaticKeepAliveClientMixin {
+  String _searchQuery = '';
+
+  @override
+  bool get wantKeepAlive => true;
+
+  @override
+  Widget build(BuildContext context) {
+    super.build(context);
+    final clients = ref.watch(myLawyerClientsProvider);
+
+    return Column(
+      children: [
+        Padding(
+          padding: const EdgeInsets.fromLTRB(20, 0, 20, 16),
+          child: TextField(
+            onChanged: (value) => setState(() => _searchQuery = value),
+            style: AppTextStyles.body.copyWith(
+              fontSize: 15.5,
+              fontWeight: FontWeight.w600,
+              color: AppColors.ink,
+            ),
+            decoration: InputDecoration(
+              hintText: 'Buscar por nome ou CPF...',
+              hintStyle: AppTextStyles.body.copyWith(
+                color: AppColors.ink4,
+                fontSize: 15.5,
+                fontWeight: FontWeight.w500,
+              ),
+              prefixIcon: const Icon(
+                Icons.search,
+                color: AppColors.textCaption,
+              ),
+              filled: true,
+              fillColor: AppColors.surface2,
+              contentPadding: const EdgeInsets.symmetric(vertical: 0),
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+                borderSide: BorderSide(color: AppColors.border),
+              ),
+              enabledBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+                borderSide: BorderSide(color: AppColors.border),
+              ),
+              focusedBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+                borderSide: const BorderSide(
+                  color: AppColors.yellow,
+                  width: 1.5,
+                ),
+              ),
+            ),
+          ),
+        ),
+        Expanded(
+          child: clients.when(
+            data: _buildClientList,
+            loading: _buildLoadingList,
+            error: (error, _) => _buildErrorState(error),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildClientList(List<LawyerClient> clients) {
+    final query = _searchQuery.toLowerCase();
+    final filtered =
+        clients.where((client) {
+          return client.name.toLowerCase().contains(query) ||
+              (client.cpf ?? '').contains(_searchQuery) ||
+              client.whatsappNumber.contains(_searchQuery);
+        }).toList()..sort(
+          (a, b) => a.name.toLowerCase().compareTo(b.name.toLowerCase()),
+        );
+
+    if (filtered.isEmpty) {
+      return _buildEmptyState();
+    }
+
+    final grouped = <String, List<LawyerClient>>{};
+    for (final client in filtered) {
+      final initial = _clientInitial(client);
+      grouped.putIfAbsent(initial, () => []).add(client);
+    }
+    final groups = grouped.entries.toList()
+      ..sort((a, b) => a.key.compareTo(b.key));
+
+    return RefreshIndicator(
+      onRefresh: () => ref.refresh(myLawyerClientsProvider.future),
+      child: ListView(
+        padding: EdgeInsets.fromLTRB(
+          16,
+          0,
+          16,
+          AppDimensions.bottomPadding(context),
+        ),
+        children: [
+          for (final group in groups) ...[
+            _buildLetterHeader(group.key),
+            for (final client in group.value) _buildClientCard(client),
+            const SizedBox(height: 8),
+          ],
+        ],
+      ),
+    );
+  }
+
+  Widget _buildEmptyState() {
+    return SingleChildScrollView(
+      physics: const AlwaysScrollableScrollPhysics(),
+      child: Container(
+        height: MediaQuery.of(context).size.height * 0.55,
+        alignment: Alignment.center,
+        padding: const EdgeInsets.all(24),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              Icons.people_outline_rounded,
+              size: 64,
+              color: AppColors.textCaption.withValues(alpha: 0.5),
+            ),
+            const SizedBox(height: 16),
+            Text(
+              'Nenhum cliente encontrado',
+              style: AppTextStyles.h2.copyWith(color: AppColors.textCaption),
+              textAlign: TextAlign.center,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildLetterHeader(String letter) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(4, 10, 4, 8),
+      child: Text(
+        letter,
+        style: AppTextStyles.h1.copyWith(
+          fontSize: 22,
+          fontWeight: FontWeight.w900,
+          color: AppColors.ink,
+        ),
+      ),
+    );
+  }
+
+  Widget _buildClientCard(LawyerClient client) {
+    final initial = _clientInitial(client);
+
+    return Container(
+      margin: const EdgeInsets.only(bottom: 12),
+      decoration: BoxDecoration(
+        color: AppColors.surface,
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: AppColors.line),
+      ),
+      child: ListTile(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        leading: CircleAvatar(
+          radius: 24,
+          backgroundColor: AppColors.surface2,
+          child: Text(
+            initial,
+            style: const TextStyle(
+              fontWeight: FontWeight.bold,
+              color: AppColors.ink,
+            ),
+          ),
+        ),
+        title: Text(
+          client.name,
+          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
+        ),
+        subtitle: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const SizedBox(height: 4),
+            Text(
+              client.cpf == null || client.cpf!.isEmpty
+                  ? 'WhatsApp: ${client.whatsappNumber}'
+                  : 'CPF: ${client.cpf}',
+              style: AppTextStyles.caption.copyWith(fontSize: 12),
+            ),
+          ],
+        ),
+        trailing: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            _buildActionIcon(
+              Icons.phone_rounded,
+              AppColors.ink,
+              client.whatsappNumber.isEmpty
+                  ? null
+                  : () => _callClient(client.whatsappNumber),
+            ),
+            const SizedBox(width: 8),
+            _buildActionIcon(
+              Icons.chat_bubble_rounded,
+              AppColors.success,
+              () => Navigator.pushNamed(
+                context,
+                AppRouter.lawyerChatHandoffRoute,
+                arguments: {
+                  'clientName': client.name,
+                  'whatsappNumber': client.whatsappNumber,
+                },
+              ),
+            ),
+          ],
+        ),
+        onTap: () => Navigator.pushNamed(
+          context,
+          '/lawyer-client-detail',
+          arguments: {
+            'id': client.id,
+            'name': client.name,
+            'cpf': client.cpf ?? '',
+            'phone': client.whatsappNumber,
+            'email': client.email,
+          },
+        ),
+      ),
+    );
+  }
+
+  Widget _buildLoadingList() {
+    return ListView.separated(
+      padding: EdgeInsets.fromLTRB(
+        16,
+        0,
+        16,
+        AppDimensions.bottomPadding(context),
+      ),
+      itemCount: 4,
+      separatorBuilder: (_, _) => const SizedBox(height: 12),
+      itemBuilder: (_, _) =>
+          const LoadingSkeleton(height: 82, borderRadius: 16),
+    );
+  }
+
+  Widget _buildErrorState(Object error) {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(24),
+        child: Text(
+          error.toString(),
+          textAlign: TextAlign.center,
+          style: AppTextStyles.body.copyWith(color: AppColors.error),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildActionIcon(IconData icon, Color color, VoidCallback? onTap) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(24),
+      child: SizedBox.square(
+        dimension: 48,
+        child: Container(
+          decoration: BoxDecoration(
+            color: color.withValues(alpha: 0.1),
+            shape: BoxShape.circle,
+          ),
+          child: Icon(icon, color: color, size: 18),
+        ),
+      ),
+    );
+  }
+
+  Future<void> _callClient(String whatsappNumber) async {
+    final uri = Uri.parse('tel:$whatsappNumber');
+    if (await canLaunchUrl(uri)) {
+      await launchUrl(uri);
+    }
+  }
+
+  String _clientInitial(LawyerClient client) {
+    final cleanName = client.name.trim();
+    if (cleanName.isEmpty) return '#';
+    final first = cleanName.characters.first.toUpperCase();
+    return RegExp(r'[A-Z]').hasMatch(first) ? first : '#';
+  }
+}

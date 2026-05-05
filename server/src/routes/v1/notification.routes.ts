@@ -1,9 +1,16 @@
 import { Router } from 'express';
 import { NotificationController } from '../../controllers/implementations/notification.controller';
+import { NotificationService } from '@services';
+import { NotificationRepository } from '@repositories';
 import { authMiddleware } from '../../middlewares/implementations/authMiddleware';
 
 const router = Router();
-const controller = new NotificationController();
+
+const notificationRepository = new NotificationRepository();
+const notificationService = new NotificationService(notificationRepository);
+const controller = new NotificationController(notificationService);
+
+router.delete('/bulk', authMiddleware, controller.deleteMany);
 
 /**
  * @openapi
@@ -74,5 +81,7 @@ router.post('/read-all', authMiddleware, controller.markAllAsRead);
  *               $ref: '#/components/schemas/Error'
  */
 router.patch('/:id/read', authMiddleware, controller.markAsRead);
+
+router.delete('/:id', authMiddleware, controller.delete);
 
 export default router;

@@ -113,11 +113,23 @@ Desktop.ini
 *.temp
 
 # Agent/AI tool configs (pessoais, não versionados)
+.agent
 .claude
 .codex
 .cursor
-.github
+.github/*
+!.github/workflows/
+!.github/workflows/**
 .opencode
 
 # .agents — versionar apenas conteúdo de projeto
-# (skills, knowledge, workflows, decisions e rules fazem parte do repo)
+# (skills, knowledge, workflows, decisions e rules fazem parte do repo)
+
+# Ferramentas locais e rascunhos
+scratch/
+
+server/uploads/*
+server/temp/*
+!server/uploads/.gitkeep
+!server/temp/.gitkeep
+html_to_flutter

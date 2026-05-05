@@ -1,5 +1,5 @@
 name: mobile
-description: "Base Flutter do app OmniConnect."
+description: "Base Flutter do app Themis."
 # The following line prevents the package from being accidentally published to
 # pub.dev using `flutter pub publish`. This is preferred for private packages.
 publish_to: 'none' # Remove this line if you wish to publish to pub.dev
@@ -34,6 +34,19 @@ dependencies:
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
   cupertino_icons: ^1.0.8
+  dio: ^5.9.2
+  fpdart: ^1.2.0
+  flutter_riverpod: ^2.6.1
+  flutter_secure_storage: ^10.0.0
+  equatable: ^2.0.8
+  file_picker: ^11.0.2
+  url_launcher: ^6.3.2
+  socket_io_client: ^3.1.2
+  google_sign_in: ^7.2.0
+  image_cropper: ^8.1.0
+  flutter_pdfview: ^1.4.4
+  path_provider: ^2.1.5
+  flutter_svg: ^2.2.4
 
 dev_dependencies:
   flutter_test:
@@ -45,6 +58,16 @@ dev_dependencies:
   # package. See that file for information about deactivating specific lint
   # rules and activating additional ones.
   flutter_lints: ^6.0.0
+  flutter_launcher_icons: ^0.13.1
+
+flutter_launcher_icons:
+  android: true
+  ios: true
+  image_path: "assets/AppIcon/android/playstore-icon.png"
+  adaptive_icon_background: "#FBFAF6"
+  adaptive_icon_foreground: "assets/AppIcon/foreground.png"
+  remove_alpha_ios: true
+  min_sdk_android: 21
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec

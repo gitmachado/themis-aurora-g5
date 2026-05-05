@@ -1,9 +1,11 @@
--- OmniConnect Database Schema
+SET client_encoding = 'UTF8';
+-- themis Database Schema
 -- Pattern: snake_case for tables/columns
 -- Architecture: ADR-0003 (No ORM)
 
 -- Extensions
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
+CREATE EXTENSION IF NOT EXISTS vector;
 
 -- 1. Configurations
 CREATE TABLE IF NOT EXISTS configurations (
@@ -23,10 +25,16 @@ CREATE TABLE IF NOT EXISTS users (
     whatsapp_number TEXT UNIQUE NOT NULL,
     cpf TEXT UNIQUE,
     email TEXT UNIQUE,
-    role TEXT NOT NULL CHECK (role IN ('LAWYER', 'CLIENT')),
+    avatar_url TEXT,
+    role TEXT NOT NULL CHECK (role IN ('LAWYER', 'CLIENT', 'LAWYER_ADMIN')),
     password_hash TEXT,
     fcm_token TEXT,
     notification_preferences JSONB DEFAULT '{}',
+    team_permissions JSONB NOT NULL DEFAULT '{}',
+    lawyer_admin_id UUID REFERENCES users(id) ON DELETE SET NULL,
+    oab_number TEXT,
+    specialty TEXT,
+    must_change_password BOOLEAN NOT NULL DEFAULT FALSE,
     created_at TIMESTAMPTZ DEFAULT NOW(),
     updated_at TIMESTAMPTZ DEFAULT NOW()
 );
@@ -36,6 +44,7 @@ CREATE TABLE IF NOT EXISTS leads (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     whatsapp_number TEXT NOT NULL,
     name TEXT,
+    email TEXT,
     cpf TEXT,
     case_type TEXT CHECK (case_type IN ('Labor', 'Civil', 'Family', 'Criminal', 'SocialSecurity')),
     case_description TEXT,
@@ -43,11 +52,16 @@ CREATE TABLE IF NOT EXISTS leads (
     contact_availability TEXT CHECK (contact_availability IN ('Morning', 'Afternoon', 'Evening')),
     status TEXT NOT NULL DEFAULT 'PENDING' CHECK (status IN ('PENDING', 'IN_CONTACT', 'CONVERTED', 'DISCARDED')),
     converted_user_id UUID REFERENCES users(id) ON DELETE SET NULL,
+    assigned_lawyer_id UUID REFERENCES users(id) ON DELETE SET NULL,
+    is_ai_paused BOOLEAN DEFAULT FALSE,
     lawyer_notes TEXT,
     discard_reason TEXT,
     created_at TIMESTAMPTZ DEFAULT NOW(),
     updated_at TIMESTAMPTZ DEFAULT NOW()
 );
+
+ALTER TABLE users ADD COLUMN IF NOT EXISTS avatar_url TEXT;
+ALTER TABLE leads ADD COLUMN IF NOT EXISTS email TEXT;
 
 -- 4. Legal Processes
 CREATE TABLE IF NOT EXISTS legal_processes (
@@ -69,7 +83,7 @@ CREATE TABLE IF NOT EXISTS legal_processes (
 CREATE TABLE IF NOT EXISTS timeline_events (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     legal_process_id UUID NOT NULL REFERENCES legal_processes(id) ON DELETE CASCADE,
-    type TEXT NOT NULL CHECK (type IN ('STATUS_UPDATE', 'LAWYER_NOTE', 'DOCUMENT_SENT', 'PROCESS_CREATED')),
+    type TEXT NOT NULL CHECK (type IN ('STATUS_UPDATE', 'LAWYER_NOTE', 'DOCUMENT_SENT', 'PROCESS_CREATED', 'DOCUMENT_REQUESTED', 'EVENT_SCHEDULED')),
     content TEXT NOT NULL,
     previous_status TEXT,
     metadata JSONB DEFAULT '{}',
@@ -96,6 +110,7 @@ CREATE TABLE IF NOT EXISTS messages (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     lead_id UUID REFERENCES leads(id) ON DELETE SET NULL,
     user_id UUID REFERENCES users(id) ON DELETE SET NULL,
+    whatsapp_number TEXT,
     sender TEXT NOT NULL CHECK (sender IN ('BOT', 'CLIENT', 'LAWYER')),
     content TEXT NOT NULL,
     whatsapp_message_id TEXT UNIQUE,
@@ -106,7 +121,7 @@ CREATE TABLE IF NOT EXISTS messages (
 CREATE TABLE IF NOT EXISTS notifications (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-    type TEXT NOT NULL CHECK (type IN ('NEW_LEAD', 'STATUS_CHANGED', 'DOCUMENT_SENT', 'HUMAN_SUPPORT')),
+    type TEXT NOT NULL CHECK (type IN ('NEW_LEAD', 'STATUS_CHANGED', 'DOCUMENT_SENT', 'HUMAN_SUPPORT', 'DOCUMENT_REQUESTED', 'NEW_NOTE')),
     title TEXT NOT NULL,
     body TEXT NOT NULL,
     is_read BOOLEAN DEFAULT FALSE,
@@ -145,3 +160,16 @@ CREATE TRIGGER update_documents_updated_at BEFORE UPDATE ON documents FOR EACH R
 
 DROP TRIGGER IF EXISTS update_notifications_updated_at ON notifications;
 CREATE TRIGGER update_notifications_updated_at BEFORE UPDATE ON notifications FOR EACH ROW EXECUTE PROCEDURE update_updated_at_column();
+
+-- 9. Knowledge Embeddings (RAG)
+CREATE TABLE IF NOT EXISTS knowledge_embeddings (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    content TEXT NOT NULL,
+    metadata JSONB DEFAULT '{}',
+    embedding vector(1536),
+    created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE INDEX IF NOT EXISTS idx_knowledge_embedding_hnsw
+ON knowledge_embeddings
+USING hnsw (embedding vector_cosine_ops);

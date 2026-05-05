@@ -1,0 +1,24 @@
+{
+  "skill_name": "flutter-themis-standard",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "Implement the Lawyer Dashboard screen (G5-22). Follow the Figma/Prototype design as a reference, but prioritize color and font standards from design-guide.md. Use skeletons for the loading state.",
+      "expected_output": "Folder structure lib/features/dashboard created, dashboard screen implemented with specific and shared widgets, following the design system.",
+      "files": [
+        "documentation/design-guide.md",
+        "documentation/prototype.pen",
+        "lib/shared/widgets/"
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "Create a process card widget for the global listing. The prototype shows a simple design, but I want a more premium look following the project's color palette and with accessibility support.",
+      "expected_output": "Premium card widget implemented with correct constraints, adequate touch targets, and Themis brand colors.",
+      "files": [
+        "documentation/design-guide.md",
+        "lib/shared/widgets/"
+      ]
+    }
+  ]
+}

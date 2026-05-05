@@ -20,11 +20,25 @@ export class DocumentRepository implements IDocumentRepository {
   }
 
   async findByFileName(fileName: string): Promise<Document | null> {
-    return dbGet<Document>(`SELECT ${this.selectFields} FROM documents WHERE file_name = $1`, [fileName]);
+    return dbGet<Document>(
+      `SELECT ${this.selectFields}
+       FROM documents
+       WHERE file_name = $1
+          OR file_url = $1
+          OR file_url = $2
+          OR file_url LIKE $3`,
+      [fileName, `/uploads/${fileName}`, `%/${fileName}`]
+    );
   }
 
   async findByLegalProcessId(legalProcessId: string): Promise<Document[]> {
-    return dbAll<Document>(`SELECT ${this.selectFields} FROM documents WHERE legal_process_id = $1`, [legalProcessId]);
+    return dbAll<Document>(
+      `SELECT ${this.selectFields}
+       FROM documents
+       WHERE legal_process_id = $1
+       ORDER BY created_at DESC`,
+      [legalProcessId]
+    );
   }
 
   async create(document: Omit<Document, 'id' | 'createdAt' | 'updatedAt'>): Promise<Document> {

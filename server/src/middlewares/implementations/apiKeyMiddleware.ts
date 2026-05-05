@@ -1,16 +1,16 @@
 import { Request, Response, NextFunction, RequestHandler } from 'express';
 import { UnauthorizedError } from '../../services/implementations/errors';
+import { getBotApiKey } from '../../config/runtime';
 
 /**
  * Middleware to validate API Key for bot/system integration
  */
 export const apiKeyMiddleware: RequestHandler = (req, res, next) => {
   const apiKey = req.headers['x-api-key'];
-  const validKey = process.env.BOT_API_KEY;
+  const validKey = getBotApiKey();
 
   if (!validKey) {
-    // If not configured, we allow (only for local dev if forgotten), 
-    // but in production this should be mandatory.
+    // In development we keep the local workflow flexible.
     console.warn('WARNING: BOT_API_KEY not configured in .env');
     return next();
   }

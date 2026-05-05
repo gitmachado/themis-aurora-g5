@@ -1,8 +1,8 @@
-# PRD - OmniConnect (Gestao Juridica Inteligente)
+# PRD - Themis (Gestao Juridica Inteligente)
 
 ## 1. Visao Geral
 
-O OmniConnect e um ecossistema de gestao juridica que une a agilidade da IA no WhatsApp com a organizacao de um app Flutter dedicado. Ele foca em eliminar o "ruido" na comunicacao entre advogado e cliente, automatizando tarefas repetitivas (triagem e consulta de status) e centralizando a troca de documentos e informacoes processuais.
+O Themis e um ecossistema de gestao juridica que une a agilidade da IA no WhatsApp com a organizacao de um app Flutter dedicado. Ele foca em eliminar o "ruido" na comunicacao entre advogado e cliente, automatizando tarefas repetitivas (triagem e consulta de status) e centralizando a troca de documentos e informacoes processuais.
 
 - **Publico-Alvo:** Escritorios de advocacia de medio porte e seus clientes.
 - **Diferencial Estrategico:** Resposta instantanea via RAG (IA) e transparencia total via Linha do Tempo no aplicativo.
@@ -61,7 +61,7 @@ O OmniConnect e um ecossistema de gestao juridica que une a agilidade da IA no W
 
 **Regras de Negocio:**
 
-- **Aba "Linha do Tempo":** Exibe cronologicamente as notas deixadas pelo advogado (Peticao protocolada, Audiencia marcada etc.).
+- **Abas do Processo:** "Timeline" (exibe cronologicamente as notas), "Resumo" (dados gerais do caso) e "Documentos" (arquivos anexados).
 - **Aba "Chat":** Espelhamento (somente leitura) da conversa tida com o bot no WhatsApp para referencia do cliente.
 - **Botao Duvida Rapida:** Redireciona para o WhatsApp do escritorio com o texto: `Ola, tenho uma duvida sobre meu processo [ID-CASO]`.
 

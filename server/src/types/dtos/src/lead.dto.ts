@@ -9,15 +9,18 @@ import type {
 export interface CreateLeadDTO {
   whatsappNumber: string;
   name?: string;
+  email?: string;
   cpf?: string;
   caseType?: CaseType;
   caseDescription?: string;
+  description?: string;
   urgency?: UrgencyLevel;
   contactAvailability?: ContactAvailability;
 }
 
 export interface UpdateLeadDTO {
   name?: string;
+  email?: string;
   cpf?: string;
   caseType?: CaseType;
   caseDescription?: string;
@@ -32,5 +35,6 @@ export interface UpdateLeadDTO {
 /** DTO for converting a Lead into a Client (User) */
 export interface ConvertLeadDTO {
   leadId: string;
+  lawyerId: string;
   temporaryPassword?: string;
 }

@@ -1,0 +1,124 @@
+// Script de teste E2E — Fluxo de Lead Novo (T25)
+// Uso: npm run test:e2e-lead
+// Requer: banco PostgreSQL + backend rodando
+import "dotenv/config";
+import { HumanMessage, AIMessage } from "@langchain/core/messages";
+import { graph } from "../graph/index.js";
+import { INITIAL_TRIAGE, INITIAL_CONFIG } from "../graph/state.js";
+import { setupCheckpointer } from "../config/checkpointer.js";
+import { validateMessageType } from "../utils/message-validator.js";
+
+const BASE_THREAD = `test-lead-${Date.now()}`;
+
+async function sendMessage(threadId: string, content: string, isFirst: boolean = false, type: string = "TEXT") {
+  // Validação de tipo de mensagem (Barreira de entrada)
+  const validation = validateMessageType(type);
+  if (!validation.isValid) {
+    console.log(`  [USER] (${type}) ${content || "(vazia)"}`);
+    console.log(`  [BOT]  ${validation.errorMessage}`);
+    return {
+      whatsappNumber: threadId,
+      userType: "UNKNOWN",
+      userId: null,
+      leadId: null,
+      messages: [new AIMessage(validation.errorMessage!)],
+      triage: INITIAL_TRIAGE,
+      currentNode: "barrier",
+      needsHandoff: false,
+      handoffReason: null,
+      config: INITIAL_CONFIG
+    } as any;
+  }
+
+  const input: any = {
+    messages: [new HumanMessage(content)],
+  };
+
+  if (isFirst) {
+    input.whatsappNumber = threadId;
+    input.userType = "UNKNOWN";
+    input.triage = INITIAL_TRIAGE;
+    input.config = INITIAL_CONFIG;
+  }
+
+  const result = await graph.invoke(
+    input,
+    { configurable: { thread_id: threadId } }
+  );
+  await new Promise(r => setTimeout(r, 3000)); // Delay para evitar 429 (Quota)
+  const last = result.messages.at(-1);
+  console.log(`  [USER] ${content || "(vazia)"}`);
+  console.log(`  [BOT]  ${String(last?.content ?? "(sem resposta)").slice(0, 200)}`);
+  console.log(`  [STATE] step=${result.triage?.currentStep ?? "?"} leadId=${result.leadId ?? "null"}`);
+  return result;
+}
+
+async function runHappyPath() {
+  console.log("\n========== CENÁRIO 1: Happy Path ==========");
+  const thread = `${BASE_THREAD}-happy`;
+  await sendMessage(thread, "Olá, preciso de ajuda", true);
+  await sendMessage(thread, "Maria da Silva Oliveira");
+  await sendMessage(thread, "529.982.247-25");
+  await sendMessage(thread, "Trabalhista");
+  await sendMessage(thread, "Fui demitida sem justa causa há 3 meses e não recebi verbas rescisórias.");
+  await sendMessage(thread, "Alta");
+  const final = await sendMessage(thread, "Tarde");
+  if (final.leadId) {
+    console.log(`  ✅ Lead criado com ID: ${final.leadId}`);
+  } else {
+    console.log("  ❌ ERRO: leadId não foi criado");
+  }
+}
+
+async function runInvalidCPF() {
+  console.log("\n========== CENÁRIO 2: CPF Inválido ==========");
+  const thread = `${BASE_THREAD}-cpf`;
+  await sendMessage(thread, "Carlos Teste", true);
+  const r1 = await sendMessage(thread, "000.000.000-00");
+  const r2 = await sendMessage(thread, "111.111.111-11");
+  await sendMessage(thread, "529.982.247-25");
+  if (r1.triage?.currentStep === "CPF" && r2.triage?.currentStep === "CPF") {
+    console.log("  ✅ Bot pediu CPF novamente após inválido");
+  } else {
+    console.log("  ❌ ERRO: bot avançou com CPF inválido");
+  }
+}
+
+async function runInvalidEnum() {
+  console.log("\n========== CENÁRIO 3: Enum Inválido ==========");
+  const thread = `${BASE_THREAD}-enum`;
+  await sendMessage(thread, "João Teste", true);
+  await sendMessage(thread, "529.982.247-25");
+  const r1 = await sendMessage(thread, "XYZ tipo qualquer");
+  await sendMessage(thread, "Cível");
+  if (r1.triage?.currentStep === "CASE_TYPE") {
+    console.log("  ✅ Bot manteve step CASE_TYPE após enum inválido");
+  } else {
+    console.log("  ❌ ERRO: bot avançou com enum inválido");
+  }
+}
+
+async function runEmptyMessage() {
+  console.log("\n========== CENÁRIO 4: Mensagem Vazia ==========");
+  const thread = `${BASE_THREAD}-empty`;
+  await sendMessage(thread, "Pedro Teste", true);
+  await sendMessage(thread, "");
+  const r = await sendMessage(thread, "529.982.247-25");
+  if (r.triage?.currentStep !== undefined) {
+    console.log("  ✅ Bot não crashou com mensagem vazia");
+  }
+}
+
+(async () => {
+  console.log("🚀 Iniciando testes E2E — Fluxo de Lead Novo (T25)");
+  await setupCheckpointer();
+  await runHappyPath();
+  await runInvalidCPF();
+  await runInvalidEnum();
+  await runEmptyMessage();
+  console.log("\n✅ T25 — Todos os cenários executados");
+  process.exit(0);
+})().catch((err) => {
+  console.error("❌ Erro nos testes:", err);
+  process.exit(1);
+});

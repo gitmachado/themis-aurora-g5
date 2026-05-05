@@ -1,5 +1,13 @@
 import { Router } from 'express';
 import { LeadController } from '../../controllers/implementations/lead.controller';
+import { LeadService, AuthService, NotificationService, LegalProcessService, TimelineService } from '@services';
+import {
+  LeadRepository,
+  UserRepository,
+  NotificationRepository,
+  LegalProcessRepository,
+  TimelineEventRepository,
+} from '@repositories';
 import { authMiddleware } from '../../middlewares/implementations/authMiddleware';
 import { roleMiddleware } from '../../middlewares/implementations/roleMiddleware';
 import { apiKeyMiddleware } from '../../middlewares/implementations/apiKeyMiddleware';
@@ -7,7 +15,29 @@ import { validate } from '../../middlewares/implementations/validationMiddleware
 import { createLeadSchema } from '../../types/dtos/schemas';
 
 const router = Router();
-const controller = new LeadController();
+
+const leadRepository = new LeadRepository();
+const userRepository = new UserRepository();
+const authService = new AuthService(userRepository);
+const notificationRepository = new NotificationRepository();
+const notificationService = new NotificationService(notificationRepository);
+const legalProcessRepository = new LegalProcessRepository();
+const timelineRepository = new TimelineEventRepository();
+const timelineService = new TimelineService(timelineRepository);
+const legalProcessService = new LegalProcessService(
+  legalProcessRepository,
+  timelineService,
+  notificationService
+);
+const leadService = new LeadService(
+  leadRepository,
+  userRepository,
+  authService,
+  notificationService,
+  legalProcessService
+);
+
+const controller = new LeadController(leadService);
 
 /**
  * @openapi
@@ -34,6 +64,8 @@ const controller = new LeadController();
  *               $ref: '#/components/schemas/Error'
  */
 router.get('/', authMiddleware, roleMiddleware(['LAWYER']), controller.listAll);
+
+router.get('/pending', authMiddleware, roleMiddleware(['LAWYER']), controller.listPending);
 
 /**
  * @openapi
@@ -126,6 +158,16 @@ router.post('/', apiKeyMiddleware, validate(createLeadSchema), controller.create
  *             schema:
  *               $ref: '#/components/schemas/Error'
  */
+router.delete('/:id', authMiddleware, roleMiddleware(['LAWYER']), controller.delete);
+router.patch('/:id', authMiddleware, roleMiddleware(['LAWYER']), controller.update);
 router.patch('/:id/convert', authMiddleware, roleMiddleware(['LAWYER']), controller.convert);
+
+router.patch('/:id/discard', authMiddleware, roleMiddleware(['LAWYER']), controller.discard);
+
+router.post('/handoff-return', authMiddleware, roleMiddleware(['LAWYER']), controller.resumeAI);
+router.get('/whatsapp/:whatsappNumber', controller.getByWhatsapp);
+router.post('/handoff-start', authMiddleware, roleMiddleware(['LAWYER']), controller.startHandoff);
+router.post('/:id/assign', authMiddleware, roleMiddleware(['LAWYER']), controller.assign);
+router.post('/:id/release', authMiddleware, roleMiddleware(['LAWYER']), controller.release);
 
 export default router;

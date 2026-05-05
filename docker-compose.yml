@@ -1,0 +1,70 @@
+services:
+  postgres:
+    image: pgvector/pgvector:pg17
+    container_name: themis-postgres
+    env_file:
+      - ./server/.env
+    ports:
+      - "5433:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./server/database/schema.sql:/docker-entrypoint-initdb.d/01-schema.sql:ro
+      - ./server/database/seed.sql:/docker-entrypoint-initdb.d/02-seed.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 5s
+
+  server:
+    build:
+      context: ./server
+      dockerfile: Dockerfile
+    container_name: themis-server
+    depends_on:
+      postgres:
+        condition: service_healthy
+    env_file:
+      - ./server/.env
+    environment:
+      DB_HOST: postgres
+      DB_PORT: 5432
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./server:/app
+      - server_node_modules:/app/node_modules
+      - ./server/uploads:/app/uploads
+      - server_temp:/app/temp
+    command: sh -c "npm run dev"
+
+  ai:
+    build:
+      context: ./ai
+      dockerfile: Dockerfile
+      target: builder
+    container_name: themis-ai
+    depends_on:
+      postgres:
+        condition: service_healthy
+      server:
+        condition: service_started
+    env_file:
+      - ./ai/.env
+    environment:
+      - DATABASE_URL=postgresql://postgres:postgres@postgres:5432/themis_db
+      - BACKEND_API_URL=http://server:3000
+    ports:
+      - "3005:3005"
+    volumes:
+      - ./ai:/app
+      - ai_node_modules:/app/node_modules
+    command: sh -c "npm run dev"
+
+volumes:
+  postgres_data:
+  server_node_modules:
+  server_uploads:
+  server_temp:
+  ai_node_modules:
