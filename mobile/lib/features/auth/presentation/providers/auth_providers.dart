@@ -16,7 +16,9 @@ final authRemoteDataSourceProvider = Provider<AuthRemoteDataSource>((ref) {
   return AuthRemoteDataSource(ref.watch(apiClientProvider));
 });
 
-final pushNotificationServiceProvider = Provider<PushNotificationService>((ref) {
+final pushNotificationServiceProvider = Provider<PushNotificationService>((
+  ref,
+) {
   return PushNotificationService(ref.watch(apiClientProvider));
 });
 
@@ -108,7 +110,7 @@ class AuthController extends StateNotifier<AsyncValue<AuthSession?>> {
         password: password,
       )).getOrThrow();
       state = AsyncData(session);
-      
+
       try {
         await _pushNotificationService.initializePushNotifications();
       } catch (e) {

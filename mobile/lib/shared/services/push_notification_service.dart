@@ -111,7 +111,9 @@ class PushNotificationService {
     // 7. App fechado tap — verifica se o app foi aberto por tap em notificação
     final initialMessage = await _firebaseMessaging.getInitialMessage();
     if (initialMessage != null) {
-      log('App opened from terminated state via notification: ${initialMessage.messageId}');
+      log(
+        'App opened from terminated state via notification: ${initialMessage.messageId}',
+      );
       // Adia a navegação para garantir que o widget tree já foi montado.
       Future.delayed(const Duration(milliseconds: 500), () {
         _handleNotificationNavigation(initialMessage);

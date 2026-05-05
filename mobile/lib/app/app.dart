@@ -30,4 +30,3 @@ class ThemisApp extends StatelessWidget {
     );
   }
 }
-
