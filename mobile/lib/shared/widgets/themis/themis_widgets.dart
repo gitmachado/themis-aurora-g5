@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 
+import 'package:flutter_svg/flutter_svg.dart';
 import '../../constants/app_colors.dart';
 import '../../constants/app_text_styles.dart';
+import '../../constants/app_assets.dart';
 
 class ThemisLogo extends StatelessWidget {
   final double size;
@@ -11,53 +13,12 @@ class ThemisLogo extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final markColor = dark ? AppColors.yellow : AppColors.ink;
-    final glyphColor = dark ? AppColors.ink : AppColors.yellow;
-
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Container(
-          width: size,
-          height: size,
-          alignment: Alignment.center,
-          decoration: BoxDecoration(
-            color: markColor,
-            borderRadius: BorderRadius.circular(size * 0.3),
-          ),
-          child: Text(
-            'θ',
-            style: TextStyle(
-              color: glyphColor,
-              fontFamily: AppTextStyles.fontFamily,
-              fontSize: size * 0.58,
-              fontWeight: FontWeight.w800,
-              height: 1,
-            ),
-          ),
-        ),
-        SizedBox(width: size * 0.25),
-        RichText(
-          text: TextSpan(
-            style: TextStyle(
-              color: dark ? AppColors.white : AppColors.ink,
-              fontFamily: AppTextStyles.fontFamily,
-              fontSize: size * 0.5,
-              fontWeight: FontWeight.w800,
-              height: 1,
-            ),
-            children: [
-              const TextSpan(text: 'Themis'),
-              TextSpan(
-                text: 'AI',
-                style: TextStyle(
-                  color: dark ? AppColors.yellow : AppColors.yellowDeep,
-                ),
-              ),
-            ],
-          ),
-        ),
-      ],
+    return SvgPicture.asset(
+      AppAssets.logo,
+      height: size,
+      colorFilter: dark
+          ? const ColorFilter.mode(AppColors.white, BlendMode.srcIn)
+          : null,
     );
   }
 }
@@ -212,73 +173,78 @@ class ThemisSegmentedControl extends StatelessWidget {
   final List<String> labels;
   final int selectedIndex;
   final ValueChanged<int> onChanged;
+  final TabController? controller;
 
   const ThemisSegmentedControl({
     super.key,
     required this.labels,
     required this.selectedIndex,
     required this.onChanged,
+    this.controller,
+    Animation<double>?
+    animation, // Mantido para compatibilidade, mas ignorado se houver controller
   });
 
   @override
   Widget build(BuildContext context) {
+    final effectiveController = controller ?? DefaultTabController.of(context);
+
     return Container(
+      height: 44,
       padding: const EdgeInsets.all(4),
       decoration: BoxDecoration(
         color: AppColors.surface2,
         borderRadius: BorderRadius.circular(14),
         border: Border.all(color: AppColors.border),
       ),
-      child: Row(
-        children: [
-          for (var index = 0; index < labels.length; index++)
-            Expanded(
-              child: GestureDetector(
-                behavior: HitTestBehavior.opaque,
-                onTap: () => onChanged(index),
-                child: Container(
-                  height: 36,
-                  alignment: Alignment.center,
-                  decoration: BoxDecoration(
-                    color: selectedIndex == index
-                        ? AppColors.surface
-                        : AppColors.surface.withValues(alpha: 0),
-                    borderRadius: BorderRadius.circular(11),
-                    boxShadow: selectedIndex == index
-                        ? [
-                            BoxShadow(
-                              color: Colors.black.withValues(alpha: 0.04),
-                              blurRadius: 2,
-                              offset: const Offset(0, 1),
-                            ),
-                          ]
-                        : null,
-                  ),
-                  child: Text(
-                    labels[index],
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: TextStyle(
-                      color: selectedIndex == index
-                          ? AppColors.ink
-                          : AppColors.ink3,
-                      fontSize: 14,
-                      fontWeight: selectedIndex == index
-                          ? FontWeight.w700
-                          : FontWeight.w600,
-                    ),
-                  ),
+      child: TabBar(
+        controller: effectiveController,
+        onTap: onChanged,
+        indicatorSize: TabBarIndicatorSize.tab,
+        dividerColor: Colors.transparent,
+        splashFactory: NoSplash.splashFactory,
+        overlayColor: WidgetStateProperty.all(Colors.transparent),
+        indicator: BoxDecoration(
+          color: AppColors.surface,
+          borderRadius: BorderRadius.circular(10),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.04),
+              blurRadius: 2,
+              offset: const Offset(0, 1),
+            ),
+          ],
+        ),
+        labelColor: AppColors.ink,
+        unselectedLabelColor: AppColors.ink3,
+        labelStyle: const TextStyle(fontSize: 13, fontWeight: FontWeight.w700),
+        unselectedLabelStyle: const TextStyle(
+          fontSize: 13,
+          fontWeight: FontWeight.w600,
+        ),
+        padding: EdgeInsets.zero,
+        labelPadding: EdgeInsets.zero,
+        indicatorPadding: EdgeInsets.zero,
+        tabs: labels
+            .map(
+              (label) => Tab(
+                child: Text(
+                  label,
+                  maxLines: 1,
+                  softWrap: false,
+                  overflow: TextOverflow.fade,
                 ),
               ),
-            ),
-        ],
+            )
+            .toList(),
       ),
     );
   }
 }
 
 class ThemisActionRow extends StatelessWidget {
-  final IconData icon;
+  final IconData? icon;
+  final Widget? iconWidget;
   final String label;
   final Color iconBackground;
   final Color iconColor;
@@ -286,7 +252,8 @@ class ThemisActionRow extends StatelessWidget {
 
   const ThemisActionRow({
     super.key,
-    required this.icon,
+    this.icon,
+    this.iconWidget,
     required this.label,
     this.iconBackground = AppColors.surface2,
     this.iconColor = AppColors.ink,
@@ -308,7 +275,9 @@ class ThemisActionRow extends StatelessWidget {
                 color: iconBackground,
                 borderRadius: BorderRadius.circular(10),
               ),
-              child: Icon(icon, color: iconColor, size: 20),
+              child: Center(
+                child: iconWidget ?? Icon(icon, color: iconColor, size: 20),
+              ),
             ),
             const SizedBox(width: 12),
             Expanded(

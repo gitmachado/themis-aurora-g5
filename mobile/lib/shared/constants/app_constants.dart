@@ -12,6 +12,11 @@ final class AppConstants {
         '713885920352-n4ahv30vrjtp1548g2u9os3ui1t8lbci.apps.googleusercontent.com',
   );
 
+  static const String officeWhatsApp = String.fromEnvironment(
+    'THEMIS_OFFICE_WHATSAPP',
+    defaultValue: '558487922092',
+  );
+
   static const Duration requestConnectTimeout = Duration(seconds: 15);
   static const Duration requestReceiveTimeout = Duration(seconds: 20);
 }

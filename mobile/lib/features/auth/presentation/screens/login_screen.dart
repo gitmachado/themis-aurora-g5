@@ -2,11 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter/services.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import '../../../../app/routes/app_router.dart';
 import '../../../../shared/constants/app_colors.dart';
 import '../../../../shared/constants/app_text_styles.dart';
+import '../../../../shared/constants/app_assets.dart';
 import '../../../../shared/widgets/buttons/primary_button.dart';
-import '../../../../shared/widgets/themis/themis_widgets.dart';
 import '../../domain/entities/account.dart';
 import '../providers/auth_providers.dart';
 
@@ -36,6 +37,8 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
         systemNavigationBarColor: AppColors.background,
         systemNavigationBarIconBrightness: Brightness.dark,
         systemNavigationBarDividerColor: Colors.transparent,
+        statusBarColor: Colors.transparent,
+        statusBarIconBrightness: Brightness.dark,
       ),
       child: Scaffold(
         backgroundColor: AppColors.background,
@@ -52,12 +55,15 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.stretch,
                         children: [
-                          const SizedBox(height: 48),
-                          const Align(
+                          const SizedBox(height: 5),
+                          Align(
                             alignment: Alignment.centerLeft,
-                            child: ThemisLogo(size: 38),
+                            child: SvgPicture.asset(
+                              AppAssets.logoFull,
+                              height: 140,
+                            ),
                           ),
-                          const SizedBox(height: 44),
+                          const SizedBox(height: 0),
                           Text(
                             'Bem-vindo',
                             style: AppTextStyles.h1.copyWith(fontSize: 34),

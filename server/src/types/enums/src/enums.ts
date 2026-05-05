@@ -32,6 +32,8 @@ export type TimelineEventType =
   | 'STATUS_UPDATE'
   | 'LAWYER_NOTE'
   | 'DOCUMENT_SENT'
+  | 'DOCUMENT_REQUESTED'
+  | 'EVENT_SCHEDULED'
   | 'PROCESS_CREATED';
 
 /** Contact availability reported by the lead */
@@ -42,6 +44,8 @@ export type NotificationType =
   | 'NEW_LEAD'
   | 'STATUS_CHANGED'
   | 'DOCUMENT_SENT'
+  | 'DOCUMENT_REQUESTED'
+  | 'NEW_NOTE'
   | 'HUMAN_SUPPORT';
 
 /** Who sent the message in the chat */

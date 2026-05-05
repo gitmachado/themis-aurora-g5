@@ -148,9 +148,15 @@ class _LawyerNotificationScreenState
     List<AppNotification> notifications, {
     required bool onlyUnread,
   }) {
+    final sortedList = [...notifications]
+      ..sort(
+        (a, b) => (b.createdAt ?? DateTime.fromMillisecondsSinceEpoch(0))
+            .compareTo(a.createdAt ?? DateTime.fromMillisecondsSinceEpoch(0)),
+      );
+
     final list = onlyUnread
-        ? notifications.where((n) => !n.isRead).toList()
-        : notifications;
+        ? sortedList.where((n) => !n.isRead).toList()
+        : sortedList;
 
     if (list.isEmpty) {
       return _buildEmptyState();

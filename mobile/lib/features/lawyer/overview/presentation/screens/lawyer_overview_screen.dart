@@ -6,11 +6,9 @@ import '../../../../../../features/lawyer/leads/domain/entities/lead.dart';
 import '../../../../../../features/lawyer/leads/presentation/lead_display.dart';
 import '../../../../../../features/lawyer/leads/presentation/providers/lead_providers.dart';
 import '../../../../../../features/notifications/presentation/providers/notification_providers.dart';
-import '../../../../../../features/procedures/domain/entities/process_document.dart';
 import '../../../../../../features/procedures/presentation/providers/procedure_providers.dart';
 import '../../../../../../shared/constants/app_colors.dart';
 import '../../../../../../shared/constants/app_text_styles.dart';
-import '../../../../../../shared/utils/api_formatters.dart';
 import '../../../../../../shared/widgets/cards/app_card.dart';
 import '../../../../../../shared/widgets/cards/app_list_tile.dart';
 import '../../../../../../shared/widgets/buttons/app_badge.dart';
@@ -101,16 +99,7 @@ class LawyerOverviewScreen extends ConsumerWidget {
                     ),
                     const SizedBox(height: 16),
                     _buildLeadsList(context, leads.take(2).toList()),
-                    const SizedBox(height: 24),
-                    _buildSectionHeader(
-                      'Arquivos Recentes',
-                      () => Navigator.pushNamed(
-                        context,
-                        AppRouter.lawyerFilesRoute,
-                      ),
-                    ),
-                    const SizedBox(height: 16),
-                    _buildDocsList(context, recentDocuments),
+                    const SizedBox(height: 12),
                     SizedBox(
                       height: AppDimensions.bottomPadding(context),
                     ), // Dynamic space
@@ -237,42 +226,6 @@ class LawyerOverviewScreen extends ConsumerWidget {
                   'urgency': lead.urgencyLabel,
                 },
               );
-            },
-          ),
-          const SizedBox(height: 12),
-        ],
-      ],
-    );
-  }
-
-  Widget _buildDocsList(BuildContext context, List<ProcessDocument> documents) {
-    if (documents.isEmpty) {
-      return AppCard(
-        child: Text('Nenhum arquivo recente', style: AppTextStyles.caption),
-      );
-    }
-
-    return Column(
-      children: [
-        for (final document in documents.take(3)) ...[
-          AppListTile(
-            title: document.fileName,
-            subtitle:
-                '${formatFileSize(document.sizeBytes)} • ${formatDateLabel(document.createdAt)}',
-            leading: Container(
-              padding: const EdgeInsets.all(8),
-              decoration: BoxDecoration(
-                color: AppColors.primary.withValues(alpha: 0.1),
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: const Icon(
-                Icons.description_outlined,
-                color: AppColors.primary,
-                size: 24,
-              ),
-            ),
-            onTap: () {
-              Navigator.pushNamed(context, AppRouter.lawyerFilesRoute);
             },
           ),
           const SizedBox(height: 12),

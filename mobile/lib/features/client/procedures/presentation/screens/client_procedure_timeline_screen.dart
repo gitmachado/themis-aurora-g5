@@ -1,18 +1,25 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../../../../../../features/procedures/domain/entities/legal_process.dart';
 import '../../../../../../features/procedures/domain/entities/process_document.dart';
 import '../../../../../../features/procedures/domain/entities/timeline_event.dart';
 import '../../../../../../features/procedures/presentation/procedure_display.dart';
 import '../../../../../../features/procedures/presentation/providers/procedure_providers.dart';
 import '../../../../../../shared/constants/app_colors.dart';
+import '../../../../../../shared/constants/app_dimensions.dart';
 import '../../../../../../shared/constants/app_text_styles.dart';
 import '../../../../../../shared/utils/api_formatters.dart';
 import '../../../../../../shared/widgets/layout/custom_app_bar.dart';
+import '../../../../../../shared/widgets/layout/app_file_viewer.dart';
+import '../../../../../../shared/network/api_client.dart';
 import '../../../../../../shared/widgets/buttons/primary_button.dart';
 import '../../../../../../shared/widgets/buttons/app_badge.dart';
 import '../../../../../../shared/widgets/cards/labeled_field.dart';
 import '../../../../../../shared/widgets/cards/file_card.dart';
+import '../../../../../../shared/widgets/themis/themis_widgets.dart';
+import '../../../../../../shared/constants/app_constants.dart';
 import '../../../../../../shared/widgets/layout/loading_skeleton.dart';
 import '../widgets/timeline_summary_card.dart';
 import '../widgets/timeline_event_tile.dart';
@@ -28,7 +35,21 @@ class ClientProcedureTimelineScreen extends ConsumerStatefulWidget {
 }
 
 class _ClientProcedureTimelineScreenState
-    extends ConsumerState<ClientProcedureTimelineScreen> {
+    extends ConsumerState<ClientProcedureTimelineScreen>
+    with SingleTickerProviderStateMixin {
+  late final TabController _tabController = TabController(
+    length: 3,
+    vsync: this,
+  )..addListener(() => setState(() {}));
+
+  String _selectedFileFilter = 'Todos';
+
+  @override
+  void dispose() {
+    _tabController.dispose();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     final processId = widget.processId;
@@ -44,14 +65,21 @@ class _ClientProcedureTimelineScreenState
     final timeline = ref.watch(procedureTimelineProvider(processId));
     final documents = ref.watch(procedureDocumentsProvider(processId));
 
-    return DefaultTabController(
-      length: 3,
+    return AnnotatedRegion<SystemUiOverlayStyle>(
+      value: const SystemUiOverlayStyle(
+        systemNavigationBarColor: AppColors.surface,
+        systemNavigationBarIconBrightness: Brightness.dark,
+        statusBarColor: Colors.transparent,
+        statusBarIconBrightness: Brightness.dark,
+      ),
       child: Scaffold(
         backgroundColor: AppColors.background,
         appBar: CustomAppBar(
+          backgroundColor: AppColors.surface,
           showBackButton: true,
           titleWidget: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisAlignment: MainAxisAlignment.center,
             children: process.maybeWhen(
               data: (data) => [
                 Text(
@@ -72,7 +100,7 @@ class _ClientProcedureTimelineScreenState
                     ),
                     const SizedBox(width: 8),
                     Text(
-                      'Atualizado ${formatRelativeDate(data.updatedAt)}',
+                      'Atualizado em ${formatFullDateTime(data.updatedAt)}',
                       style: AppTextStyles.caption.copyWith(
                         fontSize: 11,
                         color: AppColors.primary,
@@ -90,22 +118,10 @@ class _ClientProcedureTimelineScreenState
             ),
           ),
           title: '',
-          actions: [
-            IconButton(
-              icon: const Icon(
-                Icons.refresh_rounded,
-                color: AppColors.textCaption,
-              ),
-              onPressed: () {
-                ref.invalidate(procedureDetailsProvider(processId));
-                ref.invalidate(procedureTimelineProvider(processId));
-                ref.invalidate(procedureDocumentsProvider(processId));
-              },
-            ),
-          ],
           bottom: _buildDetailTabs(),
         ),
         body: TabBarView(
+          controller: _tabController,
           children: [
             timeline.when(
               data: _buildTimelineTab,
@@ -141,23 +157,70 @@ class _ClientProcedureTimelineScreenState
         return bDate.compareTo(aDate);
       });
 
-    return SingleChildScrollView(
-      padding: const EdgeInsets.all(20),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          _buildTimelineLegend('Atual'),
-          const SizedBox(height: 14),
-          for (var index = 0; index < sortedEvents.length; index++)
-            TimelineEventTile(
-              isFirst: index == 0,
-              isLast: index == sortedEvents.length - 1,
-              title: _timelineTitle(sortedEvents[index].type),
-              date: formatRelativeDate(sortedEvents[index].createdAt),
-              description: sortedEvents[index].content,
-            ),
-          _buildTimelineLegend('Antigo'),
-        ],
+    // Agrupar eventos por mês/ano
+    final Map<String, List<TimelineEvent>> groupedEvents = {};
+    for (var event in sortedEvents) {
+      final date = event.createdAt ?? DateTime.now();
+      final monthName = _getMonthName(date.month);
+      final key = '${monthName.toUpperCase()} ${date.year}';
+      groupedEvents.putIfAbsent(key, () => []).add(event);
+    }
+
+    return RefreshIndicator(
+      onRefresh: () async {
+        ref.invalidate(procedureTimelineProvider(widget.processId ?? ''));
+        return ref.read(
+          procedureTimelineProvider(widget.processId ?? '').future,
+        );
+      },
+      child: ListView.builder(
+        physics: const AlwaysScrollableScrollPhysics(),
+        padding: const EdgeInsets.all(20),
+        itemCount: groupedEvents.length,
+        itemBuilder: (context, groupIndex) {
+          final monthKey = groupedEvents.keys.elementAt(groupIndex);
+          final monthEvents = groupedEvents[monthKey]!;
+
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Padding(
+                padding: EdgeInsets.only(
+                  bottom: 16,
+                  top: groupIndex == 0 ? 0 : 8,
+                ),
+                child: Text(
+                  monthKey,
+                  style: AppTextStyles.cap.copyWith(
+                    color: AppColors.ink3,
+                    fontWeight: FontWeight.w800,
+                    letterSpacing: 0.5,
+                  ),
+                ),
+              ),
+              ...monthEvents.map((event) {
+                final isGlobalFirst = sortedEvents.indexOf(event) == 0;
+                final isGlobalLast =
+                    sortedEvents.indexOf(event) == sortedEvents.length - 1;
+
+                return TimelineEventTile(
+                  isFirst: isGlobalFirst,
+                  isLast: isGlobalLast,
+                  title: _timelineTitle(event.type),
+                  date: formatFullDateTime(event.createdAt),
+                  description: formatTimelineContent(event.content),
+                  icon: _timelineIcon(event.type),
+                  iconBackgroundColor: isGlobalFirst
+                      ? AppColors.yellow
+                      : AppColors.yellowSoft,
+                  iconColor: isGlobalFirst
+                      ? AppColors.ink
+                      : AppColors.yellowDeep,
+                );
+              }),
+            ],
+          );
+        },
       ),
     );
   }
@@ -165,236 +228,379 @@ class _ClientProcedureTimelineScreenState
   PreferredSizeWidget _buildDetailTabs() {
     return PreferredSize(
       preferredSize: const Size.fromHeight(68),
-      child: Padding(
-        padding: const EdgeInsets.fromLTRB(20, 12, 20, 12),
-        child: Container(
-          height: 44,
-          padding: const EdgeInsets.all(4),
-          decoration: BoxDecoration(
-            color: AppColors.surface2,
-            borderRadius: BorderRadius.circular(14),
-          ),
-          child: TabBar(
-            dividerColor: Colors.transparent,
-            indicatorSize: TabBarIndicatorSize.tab,
-            indicator: BoxDecoration(
-              color: AppColors.surface,
-              borderRadius: BorderRadius.circular(11),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withValues(alpha: 0.04),
-                  blurRadius: 2,
-                  offset: const Offset(0, 1),
-                ),
-              ],
-            ),
-            labelColor: AppColors.ink,
-            unselectedLabelColor: AppColors.ink3,
-            labelStyle: AppTextStyles.caption.copyWith(
-              fontWeight: FontWeight.w800,
-            ),
-            unselectedLabelStyle: AppTextStyles.caption.copyWith(
-              fontWeight: FontWeight.w700,
-            ),
-            tabs: const [
-              SizedBox(height: 36, child: Center(child: Text('Andamentos'))),
-              SizedBox(height: 36, child: Center(child: Text('Resumo'))),
-              SizedBox(height: 36, child: Center(child: Text('Documentos'))),
-            ],
+      child: Container(
+        decoration: const BoxDecoration(
+          color: AppColors.white,
+          border: Border(bottom: BorderSide(color: AppColors.divider)),
+        ),
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(20, 12, 20, 12),
+          child: ThemisSegmentedControl(
+            labels: const ['Andamentos', 'Resumo', 'Documentos'],
+            selectedIndex: _tabController.index,
+            controller: _tabController,
+            onChanged: (index) {
+              _tabController.animateTo(index);
+            },
           ),
         ),
-      ),
-    );
-  }
-
-  Widget _buildTimelineLegend(String label) {
-    return Text(
-      label,
-      style: AppTextStyles.cap.copyWith(
-        color: AppColors.ink,
-        fontWeight: FontWeight.w800,
       ),
     );
   }
 
   Widget _buildAiResumoTab(LegalProcess process) {
-    return SingleChildScrollView(
-      padding: const EdgeInsets.all(16),
-      child: Column(
-        children: [
-          TimelineSummaryCard(
-            status: process.displayStatus,
-            lastMovement: formatDateLabel(
-              process.lastMovementDate ?? process.updatedAt,
-            ),
-            onAiAnalysisTap: () {},
-          ),
-          const SizedBox(height: 16),
-          Container(
-            padding: const EdgeInsets.all(24),
-            decoration: BoxDecoration(
-              color: AppColors.white,
-              borderRadius: BorderRadius.circular(12),
-              border: Border.all(
-                color: AppColors.divider.withValues(alpha: 0.5),
+    return RefreshIndicator(
+      onRefresh: () async {
+        ref.invalidate(procedureDetailsProvider(widget.processId ?? ''));
+        return ref.read(
+          procedureDetailsProvider(widget.processId ?? '').future,
+        );
+      },
+      child: SingleChildScrollView(
+        physics: const AlwaysScrollableScrollPhysics(),
+        padding: const EdgeInsets.all(24),
+        child: Column(
+          children: [
+            TimelineSummaryCard(
+              status: process.displayStatus,
+              lastMovement: formatDateLabel(
+                process.lastMovementDate ?? process.updatedAt,
               ),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withValues(alpha: 0.04),
-                  blurRadius: 12,
-                  offset: const Offset(0, 4),
-                ),
-              ],
+              onAiAnalysisTap: () {
+                final processNumber = process.processNumber ?? process.title;
+                final message =
+                    'Olá! Gostaria de entender melhor o status do meu processo: $processNumber';
+                launchUrl(
+                  Uri.parse(
+                    'https://wa.me/${AppConstants.officeWhatsApp}?text=${Uri.encodeComponent(message)}',
+                  ),
+                  mode: LaunchMode.externalApplication,
+                );
+              },
             ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Container(
-                  width: double.infinity,
-                  padding: const EdgeInsets.all(20),
-                  decoration: BoxDecoration(
-                    color: AppColors.ink,
-                    borderRadius: BorderRadius.circular(16),
+            const SizedBox(height: 24),
+            Container(
+              padding: const EdgeInsets.all(20),
+              decoration: BoxDecoration(
+                color: AppColors.white,
+                borderRadius: BorderRadius.circular(AppDimensions.radiusXL),
+                border: Border.all(color: AppColors.border),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Detalhes do Processo',
+                    style: AppTextStyles.h2.copyWith(fontSize: 18),
                   ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'DESCRIÇÃO DO CASO',
-                        style: AppTextStyles.cap.copyWith(
-                          color: AppColors.white.withValues(alpha: 0.72),
+                  const SizedBox(height: 20),
+                  LabeledField(
+                    label: 'STATUS ATUAL',
+                    value: process.displayStatus,
+                    icon: Icons.info_outline,
+                    iconColor: AppColors.primary,
+                    valueWidget: Row(
+                      children: [
+                        AppBadge(
+                          label: process.displayStatus,
+                          type: process.badgeType,
                         ),
-                      ),
-                      const SizedBox(height: 12),
-                      Text(
-                        process.description != null &&
-                                process.description!.isNotEmpty
-                            ? process.description!
-                            : 'Descricao ainda nao cadastrada.',
-                        style: AppTextStyles.body.copyWith(
-                          color: AppColors.white,
-                          fontSize: 16,
-                          height: 1.5,
-                        ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
-                ),
-                const SizedBox(height: 24),
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    LabeledField(
-                      label: 'IDENTIFICADOR DO CLIENTE',
-                      value: process.clientId,
-                      icon: Icons.person_outline,
-                      iconColor: AppColors.primary,
+                  const SizedBox(height: 16),
+                  LabeledField(
+                    label: 'TIPO DE CASO',
+                    value: process.caseTypeLabel,
+                    icon: Icons.category_outlined,
+                    iconColor: AppColors.primary,
+                  ),
+                  const SizedBox(height: 16),
+                  LabeledField(
+                    label: 'NÚMERO DO TRAMITE',
+                    value: process.processNumber ?? '--',
+                    icon: Icons.tag,
+                    iconColor: AppColors.primary,
+                  ),
+                  const SizedBox(height: 16),
+                  LabeledField(
+                    label: 'ÚLTIMA MOVIMENTAÇÃO',
+                    value: formatDateLabel(process.lastMovementDate),
+                    icon: Icons.calendar_today_outlined,
+                    iconColor: AppColors.primary,
+                  ),
+                  const SizedBox(height: 16),
+                  LabeledField(
+                    label: 'CRIADO EM',
+                    value: formatDateLabel(process.createdAt),
+                    icon: Icons.calendar_today_outlined,
+                    iconColor: AppColors.primary,
+                  ),
+                  if (process.description != null &&
+                      process.description!.isNotEmpty) ...[
+                    const SizedBox(height: 24),
+                    const Divider(height: 1),
+                    const SizedBox(height: 24),
+                    Text(
+                      'Sobre este processo',
+                      style: AppTextStyles.h2.copyWith(fontSize: 16),
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      process.description!,
+                      style: AppTextStyles.body.copyWith(
+                        color: AppColors.textCaption,
+                        fontSize: 14,
+                        height: 1.5,
+                      ),
                     ),
                   ],
-                ),
-                const SizedBox(height: 24),
-                LabeledField(
-                  label: 'STATUS ATUAL',
-                  value: process.displayStatus,
-                  valueWidget: Row(
-                    children: [
-                      AppBadge(
-                        label: process.displayStatus,
-                        type: process.badgeType,
+                  if (process.lastNote != null &&
+                      process.lastNote!.isNotEmpty) ...[
+                    const SizedBox(height: 20),
+                    Container(
+                      padding: const EdgeInsets.all(16),
+                      decoration: BoxDecoration(
+                        color: AppColors.primary.withValues(alpha: 0.05),
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(
+                          color: AppColors.primary.withValues(alpha: 0.1),
+                        ),
                       ),
-                    ],
-                  ),
-                ),
-                const SizedBox(height: 24),
-                LabeledField(
-                  label: 'TIPO DE CASO',
-                  value: process.caseTypeLabel,
-                ),
-                const SizedBox(height: 16),
-                LabeledField(
-                  label: 'NUMERO DO TRAMITE',
-                  value: process.processNumber ?? '--',
-                ),
-                const SizedBox(height: 16),
-                LabeledField(
-                  label: 'CRIADO EM',
-                  value: formatDateLabel(process.createdAt),
-                ),
-              ],
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            children: [
+                              const Icon(
+                                Icons.chat_bubble_outline_rounded,
+                                size: 16,
+                                color: AppColors.primary,
+                              ),
+                              const SizedBox(width: 8),
+                              Text(
+                                'Última nota do advogado',
+                                style: AppTextStyles.h2.copyWith(
+                                  fontSize: 14,
+                                  color: AppColors.primary,
+                                ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 8),
+                          Text(
+                            process.lastNote!,
+                            style: AppTextStyles.body.copyWith(
+                              fontSize: 13,
+                              fontStyle: FontStyle.italic,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ],
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
 
   Widget _buildFilesTab(List<ProcessDocument> documents) {
-    if (documents.isEmpty) {
-      return _buildEmptyTab('Nenhum arquivo vinculado a este tramite');
-    }
+    // Calcular categorias dinâmicas
+    final uniqueCategories = documents
+        .map((doc) {
+          final isImage = doc.mimeType?.startsWith('image/') ?? false;
+          final isPdf = doc.mimeType == 'application/pdf';
+          if (isImage) return 'Imagem';
+          if (isPdf) return 'PDF';
+          return 'Outros';
+        })
+        .toSet()
+        .toList();
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        SingleChildScrollView(
-          scrollDirection: Axis.horizontal,
-          padding: const EdgeInsets.fromLTRB(20, 16, 20, 8),
-          child: Row(
-            children: [
-              _buildFilterChip('Todos', isSelected: true),
-              const SizedBox(width: 8),
-              _buildFilterChip('Petições'),
-              const SizedBox(width: 8),
-              _buildFilterChip('Provas'),
-            ],
-          ),
-        ),
-        Expanded(
-          child: ListView.builder(
-            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
-            itemCount: documents.length,
-            itemBuilder: (context, index) {
-              final document = documents[index];
-              final isImage = document.mimeType?.startsWith('image/') ?? false;
-              return AppFileCard(
-                category: document.mimeType ?? 'arquivo',
-                fileName: document.fileName,
-                fileSize: formatFileSize(document.sizeBytes),
-                dateAdded: formatDateLabel(document.createdAt),
-                icon: isImage
-                    ? Icons.image_outlined
-                    : Icons.description_outlined,
-                iconColor: isImage
-                    ? const Color(0xFFEA580C)
-                    : AppColors.primary,
-                iconBackgroundColor: isImage
-                    ? const Color(0xFFFFF7ED)
-                    : const Color(0xFFEEF2FF),
-                actionIcon: Icons.visibility_outlined,
-              );
-            },
-          ),
+    // Se houver apenas uma categoria, não mostramos filtros (além do 'Todos')
+    final showFilters = uniqueCategories.length > 1;
+
+    final filteredDocuments = _selectedFileFilter == 'Todos'
+        ? documents
+        : documents.where((doc) {
+            final isImage = doc.mimeType?.startsWith('image/') ?? false;
+            final isPdf = doc.mimeType == 'application/pdf';
+            if (_selectedFileFilter == 'Imagem') return isImage;
+            if (_selectedFileFilter == 'PDF') return isPdf;
+            return !isImage && !isPdf;
+          }).toList();
+
+    return RefreshIndicator(
+      onRefresh: () async {
+        ref.invalidate(procedureDocumentsProvider(widget.processId ?? ''));
+        return ref.read(
+          procedureDocumentsProvider(widget.processId ?? '').future,
+        );
+      },
+      child: documents.isEmpty
+          ? _buildEmptyTabScrollable('Nenhum arquivo vinculado.')
+          : Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                if (showFilters)
+                  Container(
+                    width: double.infinity,
+                    decoration: const BoxDecoration(
+                      color: AppColors.white,
+                      border: Border(
+                        bottom: BorderSide(color: AppColors.divider),
+                      ),
+                    ),
+                    child: SingleChildScrollView(
+                      scrollDirection: Axis.horizontal,
+                      child: Container(
+                        alignment: Alignment.centerLeft,
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 20,
+                          vertical: 12,
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          mainAxisAlignment: MainAxisAlignment.start,
+                          children: [
+                            _buildFilterChip(
+                              'Todos',
+                              isSelected: _selectedFileFilter == 'Todos',
+                              onTap: () =>
+                                  setState(() => _selectedFileFilter = 'Todos'),
+                            ),
+                            ...uniqueCategories.map(
+                              (cat) => Padding(
+                                padding: const EdgeInsets.only(left: 8),
+                                child: _buildFilterChip(
+                                  cat,
+                                  isSelected: _selectedFileFilter == cat,
+                                  onTap: () =>
+                                      setState(() => _selectedFileFilter = cat),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                Expanded(
+                  child: ListView.separated(
+                    physics: const AlwaysScrollableScrollPhysics(),
+                    padding: EdgeInsets.fromLTRB(
+                      20,
+                      showFilters ? 14 : 16,
+                      20,
+                      16,
+                    ),
+                    itemCount: filteredDocuments.length,
+                    separatorBuilder: (_, _) => const SizedBox(height: 12),
+                    itemBuilder: (context, index) {
+                      final document = filteredDocuments[index];
+                      final isImage =
+                          document.mimeType?.startsWith('image/') ?? false;
+                      final isPdf = document.mimeType == 'application/pdf';
+
+                      String displayCategory = 'Arquivo';
+                      if (isImage) displayCategory = 'Imagem';
+                      if (isPdf) displayCategory = 'PDF';
+
+                      return AppFileCard(
+                        category: displayCategory,
+                        fileName: document.fileName,
+                        fileSize: formatFileSize(document.sizeBytes),
+                        dateAdded: formatDateLabel(document.createdAt),
+                        onTap: () async {
+                          try {
+                            final url = await ref
+                                .read(apiClientProvider)
+                                .getDocumentAccessUrl(document.id);
+                            if (!context.mounted) return;
+
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => AppFileViewer(
+                                  fileUrl: url,
+                                  fileName: document.fileName,
+                                  mimeType: document.mimeType,
+                                ),
+                              ),
+                            );
+                          } catch (e) {
+                            if (!context.mounted) return;
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: Text('Erro ao abrir arquivo: $e'),
+                              ),
+                            );
+                          }
+                        },
+                        icon: isImage
+                            ? Icons.image_outlined
+                            : isPdf
+                            ? Icons.picture_as_pdf_outlined
+                            : Icons.description_outlined,
+                        iconColor: isImage
+                            ? const Color(0xFFEA580C)
+                            : isPdf
+                            ? const Color(0xFFDC2626)
+                            : AppColors.primary,
+                        iconBackgroundColor: isImage
+                            ? const Color(0xFFFFF7ED)
+                            : isPdf
+                            ? const Color(0xFFFEF2F2)
+                            : const Color(0xFFEEF2FF),
+                        actionIcon: Icons.visibility_outlined,
+                      );
+                    },
+                  ),
+                ),
+              ],
+            ),
+    );
+  }
+
+  Widget _buildEmptyTabScrollable(String message) {
+    return CustomScrollView(
+      physics: const AlwaysScrollableScrollPhysics(),
+      slivers: [
+        SliverFillRemaining(
+          hasScrollBody: false,
+          child: _buildEmptyTab(message),
         ),
       ],
     );
   }
 
-  Widget _buildFilterChip(String label, {bool isSelected = false}) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      decoration: BoxDecoration(
-        color: isSelected ? AppColors.yellow : AppColors.surface2,
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(
-          color: isSelected ? AppColors.yellow : AppColors.line,
+  Widget _buildFilterChip(
+    String label, {
+    required bool isSelected,
+    required VoidCallback onTap,
+  }) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        decoration: BoxDecoration(
+          color: isSelected ? AppColors.yellow : AppColors.surface2,
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(
+            color: isSelected ? AppColors.yellow : AppColors.line,
+          ),
         ),
-      ),
-      child: Text(
-        label,
-        style: TextStyle(
-          color: AppColors.textPrimary,
-          fontSize: 12,
-          fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
+        child: Text(
+          label,
+          style: TextStyle(
+            color: AppColors.textPrimary,
+            fontSize: 12,
+            fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
+          ),
         ),
       ),
     );
@@ -403,20 +609,21 @@ class _ClientProcedureTimelineScreenState
   Widget _buildActionFooter(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-        color: AppColors.background,
-        border: Border(
-          top: BorderSide(color: AppColors.divider.withValues(alpha: 0.5)),
-        ),
+        color: AppColors.surface,
+        border: Border(top: BorderSide(color: AppColors.divider)),
       ),
       child: SafeArea(
         top: false,
         child: Padding(
           padding: const EdgeInsets.fromLTRB(20, 16, 20, 16),
           child: PrimaryButton(
-            label: 'Dúvida? Falar no WhatsApp',
+            label: 'Dúvidas? Falar no WhatsApp',
             icon: Icons.chat_bubble_outline_rounded,
             backgroundColor: AppColors.success,
-            onPressed: () {},
+            onPressed: () => launchUrl(
+              Uri.parse('https://wa.me/${AppConstants.officeWhatsApp}'),
+              mode: LaunchMode.externalApplication,
+            ),
           ),
         ),
       ),
@@ -466,4 +673,30 @@ class _ClientProcedureTimelineScreenState
     'STATUS_UPDATE' => 'Status atualizado',
     _ => 'Atualizacao',
   };
+
+  IconData _timelineIcon(String type) => switch (type) {
+    'PROCESS_CREATED' => Icons.rocket_launch_outlined,
+    'DOCUMENT_SENT' => Icons.description_outlined,
+    'LAWYER_NOTE' => Icons.chat_bubble_outline_rounded,
+    'STATUS_UPDATE' => Icons.sync_outlined,
+    _ => Icons.circle_outlined,
+  };
+
+  String _getMonthName(int month) {
+    const months = [
+      'Janeiro',
+      'Fevereiro',
+      'Março',
+      'Abril',
+      'Maio',
+      'Junho',
+      'Julho',
+      'Agosto',
+      'Setembro',
+      'Outubro',
+      'Novembro',
+      'Dezembro',
+    ];
+    return months[month - 1];
+  }
 }

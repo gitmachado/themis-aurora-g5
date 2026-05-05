@@ -50,12 +50,14 @@ final class ProcedureRepositoryImpl implements ProcedureRepository {
     required String processId,
     required String filePath,
     required String fileName,
+    void Function(int count, int total)? onSendProgress,
   }) {
     return guardRepository(
       () => _remoteDataSource.uploadDocument(
         processId: processId,
         filePath: filePath,
         fileName: fileName,
+        onSendProgress: onSendProgress,
       ),
     );
   }
@@ -76,6 +78,44 @@ final class ProcedureRepositoryImpl implements ProcedureRepository {
         processId: processId,
         status: status,
         reason: reason,
+      ),
+    );
+  }
+
+  @override
+  Future<Either<Failure, Unit>> addNote({
+    required String processId,
+    required String note,
+  }) {
+    return guardRepositoryUnit(
+      () => _remoteDataSource.addNote(processId: processId, note: note),
+    );
+  }
+
+  @override
+  Future<Either<Failure, Unit>> requestDocument({
+    required String processId,
+    required String documentName,
+  }) {
+    return guardRepositoryUnit(
+      () => _remoteDataSource.requestDocument(
+        processId: processId,
+        documentName: documentName,
+      ),
+    );
+  }
+
+  @override
+  Future<Either<Failure, Unit>> scheduleEvent({
+    required String processId,
+    required String title,
+    required DateTime date,
+  }) {
+    return guardRepositoryUnit(
+      () => _remoteDataSource.scheduleEvent(
+        processId: processId,
+        title: title,
+        date: date,
       ),
     );
   }

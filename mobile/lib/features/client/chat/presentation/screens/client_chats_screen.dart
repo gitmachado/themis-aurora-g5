@@ -39,7 +39,7 @@ class ClientChatsScreen extends ConsumerWidget {
           return history.when(
             data: (messages) {
               if (messages.isEmpty) {
-                return _buildEmptyState('Nenhuma mensagem sincronizada ainda.');
+                return _buildEmptyState('Nenhuma mensagem sincronizada.');
               }
 
               final last = messages.last;

@@ -10,8 +10,11 @@ class AppFileCard extends StatelessWidget {
   final IconData icon;
   final IconData actionIcon;
   final VoidCallback? onTap;
+  final VoidCallback? onActionTap;
   final Color iconColor;
   final Color iconBackgroundColor;
+
+  final String? subtitle;
 
   const AppFileCard({
     super.key,
@@ -19,9 +22,11 @@ class AppFileCard extends StatelessWidget {
     required this.fileSize,
     required this.dateAdded,
     required this.category,
+    this.subtitle,
     this.icon = Icons.description_outlined,
     this.actionIcon = Icons.file_download_outlined,
     this.onTap,
+    this.onActionTap,
     this.iconColor = AppColors.primary,
     this.iconBackgroundColor = const Color(0xFFEEF2FF),
   });
@@ -29,7 +34,7 @@ class AppFileCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      margin: const EdgeInsets.only(bottom: 12),
+      margin: EdgeInsets.zero,
       decoration: BoxDecoration(
         color: AppColors.white,
         borderRadius: BorderRadius.circular(20),
@@ -77,16 +82,32 @@ class AppFileCard extends StatelessWidget {
                       ),
                       const SizedBox(height: 4),
                     ],
-                    Text(
-                      fileName,
-                      style: AppTextStyles.body.copyWith(
-                        fontSize: 14,
-                        fontWeight: FontWeight.w600,
-                        color: AppColors.textPrimary,
+                    Padding(
+                      padding: const EdgeInsets.only(right: 16),
+                      child: Text(
+                        fileName,
+                        style: AppTextStyles.body.copyWith(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w600,
+                          color: AppColors.textPrimary,
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
                       ),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
                     ),
+                    if (subtitle != null) ...[
+                      const SizedBox(height: 2),
+                      Text(
+                        subtitle!,
+                        style: const TextStyle(
+                          fontSize: 12,
+                          color: Color(0xFF64748B),
+                          fontWeight: FontWeight.w500,
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ],
                     const SizedBox(height: 2),
                     Text(
                       '$fileSize • Adicionado em $dateAdded',
@@ -98,7 +119,20 @@ class AppFileCard extends StatelessWidget {
                   ],
                 ),
               ),
-              Icon(actionIcon, color: const Color(0xFF64748B), size: 20),
+              if (onActionTap != null)
+                IconButton(
+                  onPressed: onActionTap,
+                  icon: Icon(
+                    actionIcon,
+                    color: const Color(0xFF64748B),
+                    size: 20,
+                  ),
+                  padding: EdgeInsets.zero,
+                  constraints: const BoxConstraints(),
+                  splashRadius: 20,
+                )
+              else
+                Icon(actionIcon, color: const Color(0xFF64748B), size: 20),
             ],
           ),
         ),

@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import '../../../../../../shared/constants/app_colors.dart';
 import '../../../../../../shared/constants/app_text_styles.dart';
+import '../../../../../../shared/constants/app_assets.dart';
 
 class QuickAiCard extends StatelessWidget {
   final VoidCallback onTap;
@@ -27,10 +29,14 @@ class QuickAiCard extends StatelessWidget {
                 color: AppColors.primary,
                 shape: BoxShape.circle,
               ),
-              child: const Icon(
-                Icons.smart_toy_outlined,
-                color: AppColors.white,
-                size: 24,
+              child: SvgPicture.asset(
+                AppAssets.logo,
+                width: 24,
+                height: 24,
+                colorFilter: const ColorFilter.mode(
+                  AppColors.white,
+                  BlendMode.srcIn,
+                ),
               ),
             ),
             const SizedBox(width: 16),

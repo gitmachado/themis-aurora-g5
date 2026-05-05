@@ -16,11 +16,25 @@ abstract interface class ProcedureRepository {
     required String processId,
     required String filePath,
     required String fileName,
+    void Function(int count, int total)? onSendProgress,
   });
   Future<Either<Failure, Unit>> deleteDocument(String id);
   Future<Either<Failure, LegalProcess>> updateStatus({
     required String processId,
     required String status,
     String? reason,
+  });
+  Future<Either<Failure, Unit>> addNote({
+    required String processId,
+    required String note,
+  });
+  Future<Either<Failure, Unit>> requestDocument({
+    required String processId,
+    required String documentName,
+  });
+  Future<Either<Failure, Unit>> scheduleEvent({
+    required String processId,
+    required String title,
+    required DateTime date,
   });
 }

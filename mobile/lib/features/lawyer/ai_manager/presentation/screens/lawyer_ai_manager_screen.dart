@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import '../../../../../../shared/constants/app_colors.dart';
 import '../../../../../../shared/constants/app_text_styles.dart';
+import '../../../../../../shared/constants/app_assets.dart';
 import '../../../../../../shared/widgets/layout/custom_app_bar.dart';
 
 class LawyerAIManagerScreen extends StatefulWidget {
@@ -48,10 +50,14 @@ class _LawyerAIManagerScreenState extends State<LawyerAIManagerScreen> {
       ),
       child: Row(
         children: [
-          const Icon(
-            Icons.smart_toy_outlined,
-            color: AppColors.yellow,
-            size: 32,
+          SvgPicture.asset(
+            AppAssets.logo,
+            width: 32,
+            height: 32,
+            colorFilter: const ColorFilter.mode(
+              AppColors.yellow,
+              BlendMode.srcIn,
+            ),
           ),
           const SizedBox(width: 16),
           Expanded(

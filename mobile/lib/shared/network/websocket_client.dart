@@ -108,7 +108,11 @@ class WebSocketClient {
     });
 
     _socket!.on('message:new', (data) {
-      if (kDebugMode) print('[WebSocket] Event received: message:new');
+      if (kDebugMode) {
+        print(
+          '[WebSocket] Event received: message:new for ${data['whatsappNumber']}',
+        );
+      }
       _eventController.add(WebSocketEvent(type: 'message:new', data: data));
     });
 
@@ -133,10 +137,14 @@ class WebSocketClient {
   }
 
   void joinChat(String whatsappNumber) {
+    if (kDebugMode) print('[WebSocket] Emitting join:chat for $whatsappNumber');
     _socket?.emit('join:chat', whatsappNumber);
   }
 
   void leaveChat(String whatsappNumber) {
+    if (kDebugMode) {
+      print('[WebSocket] Emitting leave:chat for $whatsappNumber');
+    }
     _socket?.emit('leave:chat', whatsappNumber);
   }
 
