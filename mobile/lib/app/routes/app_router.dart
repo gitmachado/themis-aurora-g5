@@ -126,7 +126,7 @@ final class AppRouter {
         );
       case lawyerClientsRoute:
         return MaterialPageRoute<void>(
-          builder: (_) => const LawyerMainLayout(initialIndex: 3),
+          builder: (_) => const LawyerMainLayout(initialIndex: 2),
           settings: settings,
         );
       case '/lawyer-client-detail':

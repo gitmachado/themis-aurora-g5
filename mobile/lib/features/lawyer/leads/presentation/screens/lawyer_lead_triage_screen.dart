@@ -7,27 +7,28 @@ import '../../../../../../features/lawyer/leads/presentation/providers/lead_prov
 import '../../../../../../shared/constants/app_colors.dart';
 import '../../../../../../shared/constants/app_text_styles.dart';
 import '../../../../../../shared/constants/app_dimensions.dart';
-import '../../../../../../shared/widgets/layout/custom_app_bar.dart';
 import '../widgets/lead_card.dart';
-import '../../../../../../shared/widgets/app_app_bar_actions.dart';
 import '../../../../../../shared/widgets/layout/loading_skeleton.dart';
 import '../../../../../../shared/widgets/themis/themis_widgets.dart';
 
-class LawyerLeadTriageScreen extends ConsumerStatefulWidget {
-  const LawyerLeadTriageScreen({super.key});
+class LawyerLeadTriageView extends ConsumerStatefulWidget {
+  const LawyerLeadTriageView({super.key});
 
   @override
-  ConsumerState<LawyerLeadTriageScreen> createState() =>
-      _LawyerLeadTriageScreenState();
+  ConsumerState<LawyerLeadTriageView> createState() =>
+      _LawyerLeadTriageViewState();
 }
 
-class _LawyerLeadTriageScreenState
-    extends ConsumerState<LawyerLeadTriageScreen> {
+class _LawyerLeadTriageViewState extends ConsumerState<LawyerLeadTriageView>
+    with AutomaticKeepAliveClientMixin {
   String _selectedFilter = 'Todos';
   int _selectedTabIndex = 0;
   final TextEditingController _searchController = TextEditingController();
 
   bool get _isArchivedTab => _selectedTabIndex == 1;
+
+  @override
+  bool get wantKeepAlive => true;
 
   @override
   void initState() {
@@ -43,45 +44,35 @@ class _LawyerLeadTriageScreenState
 
   @override
   Widget build(BuildContext context) {
+    super.build(context);
     final leads = ref.watch(
       _isArchivedTab ? archivedLeadsProvider : pendingLeadsProvider,
     );
 
-    return Scaffold(
-      backgroundColor: AppColors.background,
-      appBar: CustomAppBar(
-        title: 'Leads',
-        actions: [AppAppBarActions()],
-        showDivider: false,
-      ),
-      body: Column(
-        children: [
-          Container(
-            color: AppColors.background,
-            child: Column(
-              children: [_buildSearchField(), _buildTabs(), _buildFilters()],
+    return Column(
+      children: [
+        _buildSearchField(),
+        _buildTabs(),
+        _buildFilters(),
+        Expanded(
+          child: RefreshIndicator(
+            onRefresh: () async {
+              if (_isArchivedTab) {
+                ref.invalidate(allLeadsProvider);
+                await ref.read(allLeadsProvider.future);
+              } else {
+                await ref.read(pendingLeadsProvider.notifier).refresh();
+              }
+            },
+            child: leads.when(
+              data: (items) =>
+                  _buildLeadsList(items, archived: _isArchivedTab),
+              loading: _buildLoadingList,
+              error: (error, _) => _buildErrorState(error),
             ),
           ),
-          Expanded(
-            child: RefreshIndicator(
-              onRefresh: () async {
-                if (_isArchivedTab) {
-                  ref.invalidate(allLeadsProvider);
-                  await ref.read(allLeadsProvider.future);
-                } else {
-                  await ref.read(pendingLeadsProvider.notifier).refresh();
-                }
-              },
-              child: leads.when(
-                data: (items) =>
-                    _buildLeadsList(items, archived: _isArchivedTab),
-                loading: _buildLoadingList,
-                error: (error, _) => _buildErrorState(error),
-              ),
-            ),
-          ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 
@@ -210,7 +201,7 @@ class _LawyerLeadTriageScreenState
       return SingleChildScrollView(
         physics: const AlwaysScrollableScrollPhysics(),
         child: Container(
-          height: MediaQuery.of(context).size.height * 0.6,
+          height: MediaQuery.of(context).size.height * 0.5,
           alignment: Alignment.center,
           padding: const EdgeInsets.all(24),
           child: Column(
@@ -227,7 +218,7 @@ class _LawyerLeadTriageScreenState
               Text(
                 archived
                     ? 'Nenhum lead arquivado encontrado'
-                    : 'Nenhum lead encontrado',
+                    : 'Nenhum lead pendente',
                 style: AppTextStyles.h2.copyWith(color: AppColors.textCaption),
                 textAlign: TextAlign.center,
               ),
@@ -319,7 +310,7 @@ class _LawyerLeadTriageScreenState
     return SingleChildScrollView(
       physics: const AlwaysScrollableScrollPhysics(),
       child: Container(
-        height: MediaQuery.of(context).size.height * 0.6,
+        height: MediaQuery.of(context).size.height * 0.5,
         alignment: Alignment.center,
         padding: const EdgeInsets.all(24),
         child: Text(

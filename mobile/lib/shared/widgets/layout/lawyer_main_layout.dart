@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../../../features/lawyer/overview/presentation/screens/lawyer_overview_screen.dart';
-import '../../../../features/lawyer/leads/presentation/screens/lawyer_lead_triage_screen.dart';
 import '../../../../features/lawyer/procedures/presentation/screens/lawyer_procedure_list_screen.dart';
-import '../../../../features/lawyer/clients/presentation/screens/lawyer_client_list_screen.dart';
+import '../../../../features/lawyer/clients/presentation/screens/lawyer_clients_hub_screen.dart';
 import '../../../../features/lawyer/profile/presentation/screens/lawyer_profile_screen.dart';
 import 'app_bottom_nav_bar.dart';
 
@@ -16,14 +15,17 @@ class LawyerMainLayout extends StatefulWidget {
 }
 
 class LawyerMainLayoutState extends State<LawyerMainLayout> {
-  late int currentIndex;
+  static const int clientsHubIndex = 2;
 
-  final List<Widget> _screens = const [
-    LawyerOverviewScreen(),
-    LawyerLeadTriageScreen(),
-    LawyerProcedureListScreen(),
-    LawyerClientListScreen(),
-    LawyerProfileScreen(),
+  late int currentIndex;
+  final LawyerClientsHubController _clientsHubController =
+      LawyerClientsHubController();
+
+  late final List<Widget> _screens = [
+    const LawyerOverviewScreen(),
+    const LawyerProcedureListScreen(),
+    LawyerClientsHubScreen(controller: _clientsHubController),
+    const LawyerProfileScreen(),
   ];
 
   @override
@@ -32,13 +34,36 @@ class LawyerMainLayoutState extends State<LawyerMainLayout> {
     currentIndex = widget.initialIndex;
   }
 
+  @override
+  void dispose() {
+    _clientsHubController.dispose();
+    super.dispose();
+  }
+
   void setIndex(int index) {
     setState(() {
       currentIndex = index;
     });
   }
 
+  /// Navega para a aba Clientes e seleciona o sub-tab Pendentes (Leads).
+  void goToClientsHubPending() {
+    _clientsHubController.selectTab(1);
+    setIndex(clientsHubIndex);
+  }
+
+  /// Navega para a aba Clientes e seleciona o sub-tab Clientes.
+  void goToClientsHub() {
+    _clientsHubController.selectTab(0);
+    setIndex(clientsHubIndex);
+  }
+
   void _onTabTapped(int index) {
+    // Quando o usuário toca em "Clientes" pelo navbar, sempre volta pro
+    // sub-tab Clientes (não mantém Pendentes da última visita).
+    if (index == clientsHubIndex && currentIndex != clientsHubIndex) {
+      _clientsHubController.selectTab(0);
+    }
     setIndex(index);
   }
 
@@ -63,7 +88,6 @@ class LawyerMainLayoutState extends State<LawyerMainLayout> {
             onTap: _onTabTapped,
             items: const [
               NavItem(icon: Icons.grid_view_rounded, label: 'Painel'),
-              NavItem(icon: Icons.people_alt_rounded, label: 'Leads'),
               NavItem(icon: Icons.folder_rounded, label: 'Processos'),
               NavItem(icon: Icons.business_center_rounded, label: 'Clientes'),
               NavItem(icon: Icons.person_rounded, label: 'Perfil'),
