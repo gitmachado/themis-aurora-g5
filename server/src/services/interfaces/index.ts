@@ -7,3 +7,4 @@ export * from './message.service';
 export * from './notification.service';
 export * from './timeline.service';
 export * from './user.service';
+export * from './team.service';
