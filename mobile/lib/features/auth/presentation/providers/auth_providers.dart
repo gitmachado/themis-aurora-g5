@@ -181,7 +181,10 @@ final class AccountActions {
     final account =
         (await _ref
                 .read(changePasswordUseCaseProvider)
-                .call(newPassword: newPassword, currentPassword: currentPassword))
+                .call(
+                  newPassword: newPassword,
+                  currentPassword: currentPassword,
+                ))
             .getOrThrow();
     _ref.read(authControllerProvider.notifier).updateSessionAccount(account);
     _ref.invalidate(currentAccountProvider);

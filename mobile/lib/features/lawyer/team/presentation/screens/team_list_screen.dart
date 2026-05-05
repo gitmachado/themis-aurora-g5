@@ -73,7 +73,12 @@ class _TeamListContent extends ConsumerWidget {
     return RefreshIndicator(
       onRefresh: () => ref.read(teamListProvider.notifier).refresh(),
       child: ListView.separated(
-        padding: EdgeInsets.fromLTRB(20, 8, 20, AppDimensions.bottomPadding(context) + 80),
+        padding: EdgeInsets.fromLTRB(
+          20,
+          8,
+          20,
+          AppDimensions.bottomPadding(context) + 80,
+        ),
         itemCount: members.length,
         separatorBuilder: (_, _) => const SizedBox(height: 12),
         itemBuilder: (context, index) {
@@ -108,7 +113,8 @@ class _TeamMemberCard extends StatelessWidget {
               CircleAvatar(
                 radius: 26,
                 backgroundColor: AppColors.surface2,
-                backgroundImage: member.avatarUrl != null && member.avatarUrl!.isNotEmpty
+                backgroundImage:
+                    member.avatarUrl != null && member.avatarUrl!.isNotEmpty
                     ? NetworkImage(member.avatarUrl!)
                     : null,
                 child: member.avatarUrl == null || member.avatarUrl!.isEmpty
@@ -177,7 +183,11 @@ class _StatChip extends StatelessWidget {
   final String label;
   final String value;
 
-  const _StatChip({required this.icon, required this.label, required this.value});
+  const _StatChip({
+    required this.icon,
+    required this.label,
+    required this.value,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -289,10 +299,16 @@ class _TeamListSkeleton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ListView.separated(
-      padding: EdgeInsets.fromLTRB(20, 8, 20, AppDimensions.bottomPadding(context)),
+      padding: EdgeInsets.fromLTRB(
+        20,
+        8,
+        20,
+        AppDimensions.bottomPadding(context),
+      ),
       itemCount: 4,
       separatorBuilder: (_, _) => const SizedBox(height: 12),
-      itemBuilder: (_, _) => const LoadingSkeleton(height: 132, borderRadius: 20),
+      itemBuilder: (_, _) =>
+          const LoadingSkeleton(height: 132, borderRadius: 20),
     );
   }
 }
@@ -314,7 +330,10 @@ class _TeamListError extends StatelessWidget {
           const SizedBox(height: 12),
           Text(
             'Não foi possível carregar a equipe',
-            style: AppTextStyles.h2.copyWith(fontSize: 17, color: AppColors.ink),
+            style: AppTextStyles.h2.copyWith(
+              fontSize: 17,
+              color: AppColors.ink,
+            ),
             textAlign: TextAlign.center,
           ),
           const SizedBox(height: 6),

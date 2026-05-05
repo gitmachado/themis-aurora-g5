@@ -79,7 +79,8 @@ class LawyerMainLayoutState extends ConsumerState<LawyerMainLayout> {
   Widget build(BuildContext context) {
     final session = ref.watch(authControllerProvider).valueOrNull;
     final cachedAccount = ref.watch(currentAccountProvider).valueOrNull;
-    final role = session?.account?.role ?? cachedAccount?.role ?? UserRole.lawyer;
+    final role =
+        session?.account?.role ?? cachedAccount?.role ?? UserRole.lawyer;
     final isAdmin = role.isAdmin;
 
     final screens = <Widget>[
@@ -94,8 +95,7 @@ class LawyerMainLayoutState extends ConsumerState<LawyerMainLayout> {
       const NavItem(icon: Icons.grid_view_rounded, label: 'Painel'),
       const NavItem(icon: Icons.folder_rounded, label: 'Processos'),
       const NavItem(icon: Icons.business_center_rounded, label: 'Clientes'),
-      if (isAdmin)
-        const NavItem(icon: Icons.groups_2_rounded, label: 'Equipe'),
+      if (isAdmin) const NavItem(icon: Icons.groups_2_rounded, label: 'Equipe'),
       const NavItem(icon: Icons.person_rounded, label: 'Perfil'),
     ];
 

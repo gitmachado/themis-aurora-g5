@@ -247,10 +247,9 @@ class _ChangePasswordScreenState extends ConsumerState<ChangePasswordScreen> {
   Future<void> _logout() async {
     await ref.read(authControllerProvider.notifier).logout();
     if (!mounted) return;
-    Navigator.of(context).pushNamedAndRemoveUntil(
-      AppRouter.loginRoute,
-      (_) => false,
-    );
+    Navigator.of(
+      context,
+    ).pushNamedAndRemoveUntil(AppRouter.loginRoute, (_) => false);
   }
 }
 

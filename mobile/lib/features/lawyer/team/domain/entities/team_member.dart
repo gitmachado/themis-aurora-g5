@@ -7,7 +7,8 @@ class TeamPermissionKeys {
   static const String viewAllClients = 'viewAllClients';
   static const String convertLeads = 'convertLeads';
   static const String manageDocuments = 'manageDocuments';
-  static const String receiveSupportNotifications = 'receiveSupportNotifications';
+  static const String receiveSupportNotifications =
+      'receiveSupportNotifications';
 
   static const List<String> all = [
     viewAllClients,

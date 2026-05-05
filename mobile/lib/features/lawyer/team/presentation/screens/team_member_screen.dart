@@ -46,7 +46,12 @@ class _TeamMemberScreenState extends ConsumerState<TeamMemberScreen> {
 
   Widget _buildBody(TeamMember member) {
     return SingleChildScrollView(
-      padding: EdgeInsets.fromLTRB(20, 8, 20, AppDimensions.bottomPadding(context)),
+      padding: EdgeInsets.fromLTRB(
+        20,
+        8,
+        20,
+        AppDimensions.bottomPadding(context),
+      ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
@@ -83,7 +88,8 @@ class _TeamMemberScreenState extends ConsumerState<TeamMemberScreen> {
     if (_pendingPermissions.contains(key)) return;
 
     final original = Map<String, bool>.from(member.permissions);
-    final optimistic = Map<String, bool>.from(member.permissions)..[key] = value;
+    final optimistic = Map<String, bool>.from(member.permissions)
+      ..[key] = value;
 
     setState(() => _pendingPermissions.add(key));
 
@@ -95,14 +101,11 @@ class _TeamMemberScreenState extends ConsumerState<TeamMemberScreen> {
       final updated = await ref
           .read(updateTeamMemberPermissionsUseCaseProvider)
           .call(member.id, {key: value});
-      updated.match(
-        (failure) => throw failure,
-        (saved) {
-          notifier.replaceMember(saved);
-          // Force the detail provider to refresh from server values.
-          ref.invalidate(teamMemberDetailProvider(member.id));
-        },
-      );
+      updated.match((failure) => throw failure, (saved) {
+        notifier.replaceMember(saved);
+        // Force the detail provider to refresh from server values.
+        ref.invalidate(teamMemberDetailProvider(member.id));
+      });
     } catch (error) {
       // Revert.
       notifier.replaceMember(member.copyWith(permissions: original));
@@ -156,22 +159,19 @@ class _TeamMemberScreenState extends ConsumerState<TeamMemberScreen> {
           .read(removeTeamMemberUseCaseProvider)
           .call(member.id);
 
-      result.match(
-        (failure) => throw failure,
-        (_) {
-          ref.read(teamListProvider.notifier).removeLocally(member.id);
-          if (!mounted) return;
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('${member.name} removido(a) da equipe.')),
-          );
-          Navigator.of(context).pop();
-        },
-      );
+      result.match((failure) => throw failure, (_) {
+        ref.read(teamListProvider.notifier).removeLocally(member.id);
+        if (!mounted) return;
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('${member.name} removido(a) da equipe.')),
+        );
+        Navigator.of(context).pop();
+      });
     } catch (error) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(error.toString())),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(error.toString())));
     } finally {
       if (mounted) setState(() => _isRemoving = false);
     }
@@ -224,7 +224,8 @@ class _Header extends StatelessWidget {
                       ),
                     ),
                     const SizedBox(height: 4),
-                    if (member.oabNumber != null && member.oabNumber!.isNotEmpty)
+                    if (member.oabNumber != null &&
+                        member.oabNumber!.isNotEmpty)
                       Text(
                         'OAB ${member.oabNumber}',
                         style: AppTextStyles.caption.copyWith(fontSize: 13),
@@ -346,10 +347,7 @@ class _SectionTitle extends StatelessWidget {
       padding: const EdgeInsets.only(left: 4),
       child: Text(
         title,
-        style: AppTextStyles.h2.copyWith(
-          fontSize: 15.5,
-          color: AppColors.ink,
-        ),
+        style: AppTextStyles.h2.copyWith(fontSize: 15.5, color: AppColors.ink),
       ),
     );
   }
@@ -458,10 +456,7 @@ class _StatCard extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 2),
-          Text(
-            label,
-            style: AppTextStyles.caption.copyWith(fontSize: 12),
-          ),
+          Text(label, style: AppTextStyles.caption.copyWith(fontSize: 12)),
         ],
       ),
     );
@@ -494,7 +489,12 @@ class _PermissionsCard extends StatelessWidget {
               onChanged: (v) => onToggle(TeamPermissionKeys.all[i], v),
             ),
             if (i < TeamPermissionKeys.all.length - 1)
-              const Divider(height: 1, indent: 16, endIndent: 16, color: AppColors.line),
+              const Divider(
+                height: 1,
+                indent: 16,
+                endIndent: 16,
+                color: AppColors.line,
+              ),
           ],
         ],
       ),

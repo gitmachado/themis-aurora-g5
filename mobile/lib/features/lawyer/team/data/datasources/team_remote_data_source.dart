@@ -24,9 +24,8 @@ final class TeamRemoteDataSourceImpl implements TeamRemoteDataSource {
     final list = await _apiClient.getList('/team');
     return list
         .map(
-          (json) => TeamMemberModel.fromJson(
-            Map<String, dynamic>.from(json as Map),
-          ),
+          (json) =>
+              TeamMemberModel.fromJson(Map<String, dynamic>.from(json as Map)),
         )
         .toList();
   }

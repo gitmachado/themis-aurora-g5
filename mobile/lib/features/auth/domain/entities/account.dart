@@ -22,7 +22,8 @@ enum UserRole {
     UserRole.lawyerAdmin => 'LAWYER_ADMIN',
   };
 
-  bool get isLawyerSide => this == UserRole.lawyer || this == UserRole.lawyerAdmin;
+  bool get isLawyerSide =>
+      this == UserRole.lawyer || this == UserRole.lawyerAdmin;
 
   bool get isAdmin => this == UserRole.lawyerAdmin;
 }

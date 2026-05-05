@@ -50,8 +50,8 @@ class _LawyerProfileScreenState extends ConsumerState<LawyerProfileScreen>
       duration: const Duration(milliseconds: 850),
     );
 
-    _sheetSlide =
-        Tween<Offset>(begin: const Offset(0, 0.35), end: Offset.zero).animate(
+    _sheetSlide = Tween<Offset>(begin: const Offset(0, 0.35), end: Offset.zero)
+        .animate(
           CurvedAnimation(
             parent: _animController,
             curve: const Interval(0.0, 0.65, curve: Curves.easeOutCubic),
@@ -92,8 +92,11 @@ class _LawyerProfileScreenState extends ConsumerState<LawyerProfileScreen>
     super.didChangeDependencies();
     final layout = context.findAncestorStateOfType<LawyerMainLayoutState>();
     final notifier = layout?.currentIndexNotifier;
-    final isAdmin = ref.read(authControllerProvider).valueOrNull?.account?.role.isAdmin ?? false;
-    _profileIndex = layout?.profileIndexFor(isAdmin) ?? LawyerMainLayoutState.profileIndex;
+    final isAdmin =
+        ref.read(authControllerProvider).valueOrNull?.account?.role.isAdmin ??
+        false;
+    _profileIndex =
+        layout?.profileIndexFor(isAdmin) ?? LawyerMainLayoutState.profileIndex;
     if (notifier == _tabNotifier) return;
     _tabNotifier?.removeListener(_onTabChanged);
     _tabNotifier = notifier;
@@ -162,10 +165,7 @@ class _LawyerProfileScreenState extends ConsumerState<LawyerProfileScreen>
     final topInset = MediaQuery.of(context).padding.top;
     final sheetTopMin = topInset + kToolbarHeight + 8;
     final sheetTopMax = _headerHeight - _sheetOverlap;
-    final maxCollapse = (sheetTopMax - sheetTopMin).clamp(
-      0.0,
-      double.infinity,
-    );
+    final maxCollapse = (sheetTopMax - sheetTopMin).clamp(0.0, double.infinity);
 
     return Stack(
       children: [
@@ -373,72 +373,76 @@ class _LawyerProfileScreenState extends ConsumerState<LawyerProfileScreen>
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         _sectionTitle('Dados da Conta'),
-        _buildSection(children: [
-          _buildInfoTile(
-            Icons.person_outline_rounded,
-            'Nome',
-            account.name,
-          ),
-          _buildInfoTile(
-            Icons.fingerprint_rounded,
-            'CPF',
-            account.cpf?.isNotEmpty == true ? account.cpf! : 'Não informado',
-          ),
-          _buildInfoTile(
-            Icons.email_outlined,
-            'E-mail',
-            account.email?.isNotEmpty == true
-                ? account.email!
-                : 'Não informado',
-          ),
-          _buildInfoTile(
-            Icons.phone_android_rounded,
-            'WhatsApp',
-            account.whatsappNumber.isNotEmpty
-                ? account.whatsappNumber
-                : 'Não informado',
-          ),
-        ]),
+        _buildSection(
+          children: [
+            _buildInfoTile(Icons.person_outline_rounded, 'Nome', account.name),
+            _buildInfoTile(
+              Icons.fingerprint_rounded,
+              'CPF',
+              account.cpf?.isNotEmpty == true ? account.cpf! : 'Não informado',
+            ),
+            _buildInfoTile(
+              Icons.email_outlined,
+              'E-mail',
+              account.email?.isNotEmpty == true
+                  ? account.email!
+                  : 'Não informado',
+            ),
+            _buildInfoTile(
+              Icons.phone_android_rounded,
+              'WhatsApp',
+              account.whatsappNumber.isNotEmpty
+                  ? account.whatsappNumber
+                  : 'Não informado',
+            ),
+          ],
+        ),
         const SizedBox(height: 20),
         _sectionTitle('Atendimento'),
-        _buildSection(children: [
-          _buildActionTile(
-            Icons.chat_bubble_outline_rounded,
-            'Mensagens e Handoffs',
-            () => Navigator.pushNamed(context, '/lawyer-chats'),
-          ),
-        ]),
+        _buildSection(
+          children: [
+            _buildActionTile(
+              Icons.chat_bubble_outline_rounded,
+              'Mensagens e Handoffs',
+              () => Navigator.pushNamed(context, '/lawyer-chats'),
+            ),
+          ],
+        ),
         const SizedBox(height: 20),
         _sectionTitle('Notificações'),
-        _buildSection(children: [
-          _buildPreferenceTile(
-            title: 'Leads',
-            value: account.notificationPreferences['leads'] ?? true,
-            onChanged: (v) => _updatePreference(context, account, 'leads', v),
-          ),
-          _buildPreferenceTile(
-            title: 'Trâmites',
-            value: account.notificationPreferences['processUpdates'] ?? true,
-            onChanged: (v) =>
-                _updatePreference(context, account, 'processUpdates', v),
-          ),
-          _buildPreferenceTile(
-            title: 'Arquivos',
-            value: account.notificationPreferences['documents'] ?? true,
-            onChanged: (v) =>
-                _updatePreference(context, account, 'documents', v),
-          ),
-        ]),
+        _buildSection(
+          children: [
+            _buildPreferenceTile(
+              title: 'Leads',
+              value: account.notificationPreferences['leads'] ?? true,
+              onChanged: (v) => _updatePreference(context, account, 'leads', v),
+            ),
+            _buildPreferenceTile(
+              title: 'Trâmites',
+              value: account.notificationPreferences['processUpdates'] ?? true,
+              onChanged: (v) =>
+                  _updatePreference(context, account, 'processUpdates', v),
+            ),
+            _buildPreferenceTile(
+              title: 'Arquivos',
+              value: account.notificationPreferences['documents'] ?? true,
+              onChanged: (v) =>
+                  _updatePreference(context, account, 'documents', v),
+            ),
+          ],
+        ),
         const SizedBox(height: 20),
         _sectionTitle('Conta'),
-        _buildSection(children: [
-          _buildActionTile(
-            Icons.logout_rounded,
-            'Sair da Conta',
-            () => _showLogoutDialog(context),
-            isDestructive: true,
-          ),
-        ]),
+        _buildSection(
+          children: [
+            _buildActionTile(
+              Icons.logout_rounded,
+              'Sair da Conta',
+              () => _showLogoutDialog(context),
+              isDestructive: true,
+            ),
+          ],
+        ),
       ],
     );
   }
@@ -528,9 +532,7 @@ class _LawyerProfileScreenState extends ConsumerState<LawyerProfileScreen>
       leading: Container(
         padding: const EdgeInsets.all(8),
         decoration: BoxDecoration(
-          color: isDestructive
-              ? AppColors.errorBackground
-              : AppColors.surface2,
+          color: isDestructive ? AppColors.errorBackground : AppColors.surface2,
           borderRadius: BorderRadius.circular(10),
         ),
         child: Icon(

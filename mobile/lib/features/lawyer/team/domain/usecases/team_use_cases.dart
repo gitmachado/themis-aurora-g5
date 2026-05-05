@@ -43,6 +43,5 @@ final class RemoveTeamMemberUseCase {
   final TeamRepository _repository;
   const RemoveTeamMemberUseCase(this._repository);
 
-  Future<Either<Failure, Unit>> call(String id) =>
-      _repository.removeMember(id);
+  Future<Either<Failure, Unit>> call(String id) => _repository.removeMember(id);
 }

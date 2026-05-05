@@ -232,7 +232,9 @@ class _TeamAddScreenState extends ConsumerState<TeamAddScreen> {
         specialty: _specialty,
       );
 
-      final created = await ref.read(teamListProvider.notifier).addMember(draft);
+      final created = await ref
+          .read(teamListProvider.notifier)
+          .addMember(draft);
 
       if (!mounted) return;
 
@@ -296,7 +298,10 @@ class _TempPasswordDialog extends StatelessWidget {
           const SizedBox(height: 14),
           Text(
             'Senha temporária gerada',
-            style: AppTextStyles.h2.copyWith(fontSize: 18, color: AppColors.ink),
+            style: AppTextStyles.h2.copyWith(
+              fontSize: 18,
+              color: AppColors.ink,
+            ),
           ),
           const SizedBox(height: 6),
           Text(
@@ -328,25 +333,21 @@ class _TempPasswordDialog extends StatelessWidget {
             await Clipboard.setData(ClipboardData(text: tempPassword));
             if (!context.mounted) return;
             ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text('Senha copiada para a área de transferência.')),
+              const SnackBar(
+                content: Text('Senha copiada para a área de transferência.'),
+              ),
             );
           },
           child: const Text(
             'Copiar senha',
-            style: TextStyle(
-              color: AppColors.ink,
-              fontWeight: FontWeight.w800,
-            ),
+            style: TextStyle(color: AppColors.ink, fontWeight: FontWeight.w800),
           ),
         ),
         TextButton(
           onPressed: () => Navigator.pop(context),
           child: const Text(
             'Concluir',
-            style: TextStyle(
-              color: AppColors.ink,
-              fontWeight: FontWeight.w800,
-            ),
+            style: TextStyle(color: AppColors.ink, fontWeight: FontWeight.w800),
           ),
         ),
       ],
@@ -416,9 +417,9 @@ class _CopyableField extends StatelessWidget {
                 onPressed: () async {
                   await Clipboard.setData(ClipboardData(text: value));
                   if (!context.mounted) return;
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text('$label copiado.')),
-                  );
+                  ScaffoldMessenger.of(
+                    context,
+                  ).showSnackBar(SnackBar(content: Text('$label copiado.')));
                 },
                 icon: const Icon(
                   Icons.copy_rounded,

@@ -65,13 +65,15 @@ class TeamListNotifier extends AsyncNotifier<List<TeamMember>> {
   /// Adiciona um advogado e atualiza a lista localmente sem refetch.
   /// Retorna o membro criado + a senha temporária (UMA única vez).
   Future<TeamMemberCreated> addMember(TeamMemberDraft draft) async {
-    final created = (await ref
-            .read(addTeamMemberUseCaseProvider)(draft))
-        .getOrThrow();
+    final created = (await ref.read(addTeamMemberUseCaseProvider)(
+      draft,
+    )).getOrThrow();
 
     final current = state.valueOrNull ?? const <TeamMember>[];
-    state = AsyncData([...current, created.member]
-      ..sort((a, b) => a.name.toLowerCase().compareTo(b.name.toLowerCase())));
+    state = AsyncData(
+      [...current, created.member]
+        ..sort((a, b) => a.name.toLowerCase().compareTo(b.name.toLowerCase())),
+    );
     return created;
   }
 

@@ -77,8 +77,7 @@ final class AppRouter {
         );
       case forceChangePasswordRoute:
         return MaterialPageRoute<void>(
-          builder: (_) =>
-              const ChangePasswordScreen(forceFirstLogin: true),
+          builder: (_) => const ChangePasswordScreen(forceFirstLogin: true),
           settings: settings,
         );
       case clientDashboardRoute:
