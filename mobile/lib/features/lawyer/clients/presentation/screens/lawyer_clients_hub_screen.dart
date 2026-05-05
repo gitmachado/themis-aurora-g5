@@ -87,7 +87,8 @@ class _LawyerClientsHubScreenState
               index: _selectedTab,
               children: const [
                 LawyerClientListView(),
-                LawyerLeadTriageView(),
+                LawyerLeadTriageView(archived: false),
+                LawyerLeadTriageView(archived: true),
               ],
             ),
           ),
@@ -113,11 +114,11 @@ class _ClientsHubSegmented extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.fromLTRB(20, 8, 20, 0),
       child: Container(
-        height: 52,
+        height: 46,
         padding: const EdgeInsets.all(4),
         decoration: BoxDecoration(
           color: AppColors.surface2,
-          borderRadius: BorderRadius.circular(16),
+          borderRadius: BorderRadius.circular(14),
           border: Border.all(color: AppColors.border),
         ),
         child: Row(
@@ -125,7 +126,6 @@ class _ClientsHubSegmented extends StatelessWidget {
             Expanded(
               child: _Pill(
                 label: 'Clientes',
-                icon: Icons.people_alt_rounded,
                 selected: selectedIndex == 0,
                 onTap: () => onChanged(0),
               ),
@@ -133,10 +133,16 @@ class _ClientsHubSegmented extends StatelessWidget {
             Expanded(
               child: _Pill(
                 label: 'Pendentes',
-                icon: Icons.hourglass_top_rounded,
                 selected: selectedIndex == 1,
                 badgeCount: pendingCount,
                 onTap: () => onChanged(1),
+              ),
+            ),
+            Expanded(
+              child: _Pill(
+                label: 'Arquivados',
+                selected: selectedIndex == 2,
+                onTap: () => onChanged(2),
               ),
             ),
           ],
@@ -148,14 +154,12 @@ class _ClientsHubSegmented extends StatelessWidget {
 
 class _Pill extends StatelessWidget {
   final String label;
-  final IconData icon;
   final bool selected;
   final int? badgeCount;
   final VoidCallback onTap;
 
   const _Pill({
     required this.label,
-    required this.icon,
     required this.selected,
     required this.onTap,
     this.badgeCount,
@@ -164,6 +168,8 @@ class _Pill extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final fg = selected ? AppColors.ink : AppColors.ink3;
+    final hasBadge = badgeCount != null && badgeCount! > 0;
+
     return GestureDetector(
       behavior: HitTestBehavior.opaque,
       onTap: onTap,
@@ -172,7 +178,7 @@ class _Pill extends StatelessWidget {
         curve: Curves.easeOutCubic,
         decoration: BoxDecoration(
           color: selected ? AppColors.surface : Colors.transparent,
-          borderRadius: BorderRadius.circular(12),
+          borderRadius: BorderRadius.circular(10),
           boxShadow: selected
               ? [
                   BoxShadow(
@@ -183,46 +189,47 @@ class _Pill extends StatelessWidget {
                 ]
               : null,
         ),
-        child: Center(
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Icon(icon, size: 17, color: fg),
-              const SizedBox(width: 8),
-              Text(
+        padding: const EdgeInsets.symmetric(horizontal: 6),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Flexible(
+              child: Text(
                 label,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
                 style: TextStyle(
-                  fontSize: 13.5,
+                  fontSize: 13,
                   fontWeight: selected ? FontWeight.w800 : FontWeight.w600,
                   color: fg,
                   letterSpacing: 0.1,
                 ),
               ),
-              if (badgeCount != null && badgeCount! > 0) ...[
-                const SizedBox(width: 8),
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 7,
-                    vertical: 2,
-                  ),
-                  decoration: BoxDecoration(
-                    color: selected ? AppColors.yellow : AppColors.ink3,
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                  child: Text(
-                    badgeCount! > 99 ? '99+' : '$badgeCount',
-                    style: TextStyle(
-                      fontSize: 11,
-                      fontWeight: FontWeight.w900,
-                      color: selected ? AppColors.ink : AppColors.surface,
-                      height: 1.1,
-                    ),
+            ),
+            if (hasBadge) ...[
+              const SizedBox(width: 6),
+              Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 6,
+                  vertical: 1.5,
+                ),
+                decoration: BoxDecoration(
+                  color: selected ? AppColors.yellow : AppColors.ink3,
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Text(
+                  badgeCount! > 99 ? '99+' : '$badgeCount',
+                  style: TextStyle(
+                    fontSize: 10.5,
+                    fontWeight: FontWeight.w900,
+                    color: selected ? AppColors.ink : AppColors.surface,
+                    height: 1.1,
                   ),
                 ),
-              ],
+              ),
             ],
-          ),
+          ],
         ),
       ),
     );

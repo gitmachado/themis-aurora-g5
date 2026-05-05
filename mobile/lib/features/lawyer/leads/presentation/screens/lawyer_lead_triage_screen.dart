@@ -9,10 +9,11 @@ import '../../../../../../shared/constants/app_text_styles.dart';
 import '../../../../../../shared/constants/app_dimensions.dart';
 import '../widgets/lead_card.dart';
 import '../../../../../../shared/widgets/layout/loading_skeleton.dart';
-import '../../../../../../shared/widgets/themis/themis_widgets.dart';
 
 class LawyerLeadTriageView extends ConsumerStatefulWidget {
-  const LawyerLeadTriageView({super.key});
+  final bool archived;
+
+  const LawyerLeadTriageView({super.key, this.archived = false});
 
   @override
   ConsumerState<LawyerLeadTriageView> createState() =>
@@ -22,10 +23,7 @@ class LawyerLeadTriageView extends ConsumerStatefulWidget {
 class _LawyerLeadTriageViewState extends ConsumerState<LawyerLeadTriageView>
     with AutomaticKeepAliveClientMixin {
   String _selectedFilter = 'Todos';
-  int _selectedTabIndex = 0;
   final TextEditingController _searchController = TextEditingController();
-
-  bool get _isArchivedTab => _selectedTabIndex == 1;
 
   @override
   bool get wantKeepAlive => true;
@@ -46,18 +44,17 @@ class _LawyerLeadTriageViewState extends ConsumerState<LawyerLeadTriageView>
   Widget build(BuildContext context) {
     super.build(context);
     final leads = ref.watch(
-      _isArchivedTab ? archivedLeadsProvider : pendingLeadsProvider,
+      widget.archived ? archivedLeadsProvider : pendingLeadsProvider,
     );
 
     return Column(
       children: [
         _buildSearchField(),
-        _buildTabs(),
         _buildFilters(),
         Expanded(
           child: RefreshIndicator(
             onRefresh: () async {
-              if (_isArchivedTab) {
+              if (widget.archived) {
                 ref.invalidate(allLeadsProvider);
                 await ref.read(allLeadsProvider.future);
               } else {
@@ -66,7 +63,7 @@ class _LawyerLeadTriageViewState extends ConsumerState<LawyerLeadTriageView>
             },
             child: leads.when(
               data: (items) =>
-                  _buildLeadsList(items, archived: _isArchivedTab),
+                  _buildLeadsList(items, archived: widget.archived),
               loading: _buildLoadingList,
               error: (error, _) => _buildErrorState(error),
             ),
@@ -120,20 +117,6 @@ class _LawyerLeadTriageViewState extends ConsumerState<LawyerLeadTriageView>
             borderRadius: BorderRadius.circular(12),
             borderSide: const BorderSide(color: AppColors.yellow, width: 1.5),
           ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildTabs() {
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(20, 0, 20, 0),
-      child: DefaultTabController(
-        length: 2,
-        child: ThemisSegmentedControl(
-          labels: const ['Novos', 'Arquivados'],
-          selectedIndex: _selectedTabIndex,
-          onChanged: (index) => setState(() => _selectedTabIndex = index),
         ),
       ),
     );
