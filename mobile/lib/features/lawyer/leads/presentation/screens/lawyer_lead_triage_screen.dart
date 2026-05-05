@@ -9,6 +9,7 @@ import '../../../../../../shared/constants/app_text_styles.dart';
 import '../../../../../../shared/constants/app_dimensions.dart';
 import '../widgets/lead_card.dart';
 import '../../../../../../shared/widgets/layout/loading_skeleton.dart';
+import '../../../../../../shared/widgets/themis/themis_widgets.dart';
 
 class LawyerLeadTriageView extends ConsumerStatefulWidget {
   final bool archived;
@@ -249,16 +250,7 @@ class _LawyerLeadTriageViewState extends ConsumerState<LawyerLeadTriageView>
                 },
               );
             },
-            onAccept: () {
-              Navigator.pushNamed(
-                context,
-                AppRouter.lawyerChatHandoffRoute,
-                arguments: {
-                  'clientName': lead.displayName,
-                  'whatsappNumber': lead.whatsappNumber,
-                },
-              );
-            },
+            onAccept: () => _convertLead(lead),
             onArchive: () async {
               await ref
                   .read(leadActionsProvider)
@@ -272,6 +264,37 @@ class _LawyerLeadTriageViewState extends ConsumerState<LawyerLeadTriageView>
         },
       ),
     );
+  }
+
+  Future<void> _convertLead(Lead lead) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) => ThemisAlertDialog(
+        title: 'Converter Lead',
+        message: 'Deseja converter ${lead.displayName} em cliente?',
+        confirmLabel: 'Sim, Converter Agora',
+        onCancel: () => Navigator.pop(dialogContext, false),
+        onConfirm: () => Navigator.pop(dialogContext, true),
+      ),
+    );
+
+    if (confirmed != true || !mounted) return;
+
+    try {
+      await ref.read(leadActionsProvider).convert(lead.id);
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('${lead.displayName} convertido em cliente.')),
+      );
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Erro ao converter: $e'),
+          backgroundColor: AppColors.error,
+        ),
+      );
+    }
   }
 
   Widget _buildLoadingList() {

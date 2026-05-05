@@ -28,7 +28,7 @@ class LeadCard extends StatelessWidget {
     required this.onArchive,
     this.showArchiveAction = true,
     this.showChatAction = true,
-    this.chatLabel = 'Atender',
+    this.chatLabel = 'Converter',
   });
 
   @override
@@ -110,7 +110,7 @@ class LeadCard extends StatelessWidget {
                   if (showChatAction)
                     Expanded(
                       child: _buildActionButton(
-                        icon: Icons.support_agent_rounded,
+                        icon: Icons.person_add_alt_1_rounded,
                         color: AppColors.ink,
                         onPressed: onAccept,
                         label: chatLabel,
