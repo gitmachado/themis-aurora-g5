@@ -34,6 +34,9 @@ void main() {
         'avatarUrl': 'https://cdn/avatar.png',
         'role': 'CLIENT',
         'notificationPreferences': {'documents': true},
+        'teamPermissions': <String, bool>{},
+        'lawyerAdminId': null,
+        'mustChangePassword': false,
       },
     );
 

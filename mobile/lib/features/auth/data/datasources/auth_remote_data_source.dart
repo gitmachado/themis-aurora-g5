@@ -56,6 +56,18 @@ final class AuthRemoteDataSource {
     return AccountModel.fromJson(_normalizeAccountJson(json));
   }
 
+  Future<AccountModel> changePassword({
+    required String newPassword,
+    String? currentPassword,
+  }) async {
+    final body = <String, dynamic>{'newPassword': newPassword};
+    if (currentPassword != null && currentPassword.isNotEmpty) {
+      body['currentPassword'] = currentPassword;
+    }
+    final json = await _apiClient.patchJson('/account/password', data: body);
+    return AccountModel.fromJson(_normalizeAccountJson(json));
+  }
+
   Map<String, dynamic> _normalizeAccountJson(Map<String, dynamic> json) {
     final avatarUrl = json['avatarUrl'];
     if (avatarUrl is! String || avatarUrl.isEmpty) {

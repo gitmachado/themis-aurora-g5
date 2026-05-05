@@ -125,6 +125,19 @@ final class AuthRepositoryImpl implements AuthRepository {
   }
 
   @override
+  Future<Either<Failure, Account>> changePassword({
+    required String newPassword,
+    String? currentPassword,
+  }) {
+    return guardRepository(
+      () => _remoteDataSource.changePassword(
+        newPassword: newPassword,
+        currentPassword: currentPassword,
+      ),
+    );
+  }
+
+  @override
   Future<Either<Failure, Unit>> logout() {
     return guardRepositoryUnit(() async {
       await _tokenStorage.clearToken();

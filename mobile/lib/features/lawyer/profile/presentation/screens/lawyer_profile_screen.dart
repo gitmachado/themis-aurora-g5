@@ -11,6 +11,7 @@ import '../../../../../../shared/constants/app_text_styles.dart';
 import '../../../../../../shared/widgets/app_app_bar_actions.dart';
 import '../../../../../../shared/widgets/cards/app_card.dart';
 import '../../../../../../shared/widgets/layout/custom_app_bar.dart';
+import '../../../../../../shared/widgets/layout/lawyer_main_layout.dart';
 import '../../../../../../shared/widgets/layout/loading_skeleton.dart';
 import '../../../../../../shared/utils/string_utils.dart';
 
@@ -22,8 +23,105 @@ class LawyerProfileScreen extends ConsumerStatefulWidget {
       _LawyerProfileScreenState();
 }
 
-class _LawyerProfileScreenState extends ConsumerState<LawyerProfileScreen> {
+class _LawyerProfileScreenState extends ConsumerState<LawyerProfileScreen>
+    with SingleTickerProviderStateMixin {
   bool _isUploading = false;
+
+  late final AnimationController _animController;
+  late final Animation<Offset> _sheetSlide;
+  late final Animation<double> _sheetFade;
+  late final Animation<double> _contentFade;
+  late final Animation<Offset> _contentSlide;
+
+  final ScrollController _scrollController = ScrollController();
+  final ValueNotifier<double> _scrollOffset = ValueNotifier<double>(0);
+
+  ValueNotifier<int>? _tabNotifier;
+  int _profileIndex = LawyerMainLayoutState.profileIndex;
+
+  static const _headerHeight = 220.0;
+  static const _sheetOverlap = 60.0;
+
+  @override
+  void initState() {
+    super.initState();
+    _animController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 850),
+    );
+
+    _sheetSlide = Tween<Offset>(begin: const Offset(0, 0.35), end: Offset.zero)
+        .animate(
+          CurvedAnimation(
+            parent: _animController,
+            curve: const Interval(0.0, 0.65, curve: Curves.easeOutCubic),
+          ),
+        );
+
+    _sheetFade = CurvedAnimation(
+      parent: _animController,
+      curve: const Interval(0.0, 0.45, curve: Curves.easeOut),
+    );
+
+    _contentFade = CurvedAnimation(
+      parent: _animController,
+      curve: const Interval(0.5, 1.0, curve: Curves.easeOut),
+    );
+
+    _contentSlide =
+        Tween<Offset>(begin: const Offset(0, 0.08), end: Offset.zero).animate(
+          CurvedAnimation(
+            parent: _animController,
+            curve: const Interval(0.5, 1.0, curve: Curves.easeOutCubic),
+          ),
+        );
+
+    _scrollController.addListener(_onScroll);
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) _animController.forward();
+    });
+  }
+
+  void _onScroll() {
+    _scrollOffset.value = _scrollController.offset;
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final layout = context.findAncestorStateOfType<LawyerMainLayoutState>();
+    final notifier = layout?.currentIndexNotifier;
+    final isAdmin =
+        ref.read(authControllerProvider).valueOrNull?.account?.role.isAdmin ??
+        false;
+    _profileIndex =
+        layout?.profileIndexFor(isAdmin) ?? LawyerMainLayoutState.profileIndex;
+    if (notifier == _tabNotifier) return;
+    _tabNotifier?.removeListener(_onTabChanged);
+    _tabNotifier = notifier;
+    _tabNotifier?.addListener(_onTabChanged);
+  }
+
+  void _onTabChanged() {
+    if (!mounted) return;
+    if (_tabNotifier?.value == _profileIndex) {
+      if (_scrollController.hasClients) {
+        _scrollController.jumpTo(0);
+      }
+      _animController.forward(from: 0);
+    }
+  }
+
+  @override
+  void dispose() {
+    _tabNotifier?.removeListener(_onTabChanged);
+    _scrollController.removeListener(_onScroll);
+    _scrollController.dispose();
+    _scrollOffset.dispose();
+    _animController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -31,240 +129,432 @@ class _LawyerProfileScreenState extends ConsumerState<LawyerProfileScreen> {
     final cachedAccount = account.valueOrNull;
 
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: AppColors.yellow,
+      extendBodyBehindAppBar: true,
       appBar: CustomAppBar(
-        title: 'Perfil',
+        title: 'Meu Perfil',
         showBackButton: false,
         showDivider: false,
-        actions: [AppAppBarActions()],
+        backgroundColor: Colors.transparent,
+        actions: [AppAppBarActions(showChat: false)],
       ),
       body: cachedAccount != null
-          ? _buildContent(context, cachedAccount)
+          ? _buildBody(cachedAccount)
           : account.when(
-              data: (account) => _buildContent(context, account),
-              loading: () => const Padding(
-                padding: EdgeInsets.all(24),
-                child: LoadingSkeleton(height: 260, borderRadius: 16),
+              data: _buildBody,
+              loading: () => Container(
+                color: AppColors.background,
+                padding: const EdgeInsets.all(24),
+                child: const LoadingSkeleton(height: 260, borderRadius: 16),
               ),
-              error: (error, _) => Center(
-                child: Padding(
-                  padding: const EdgeInsets.all(24),
-                  child: Text(
-                    error.toString(),
-                    textAlign: TextAlign.center,
-                    style: AppTextStyles.body.copyWith(color: AppColors.error),
-                  ),
+              error: (error, _) => Container(
+                color: AppColors.background,
+                alignment: Alignment.center,
+                padding: const EdgeInsets.all(24),
+                child: Text(
+                  error.toString(),
+                  textAlign: TextAlign.center,
+                  style: AppTextStyles.body.copyWith(color: AppColors.error),
                 ),
               ),
             ),
     );
   }
 
-  Widget _buildContent(BuildContext context, Account account) {
-    return SingleChildScrollView(
-      key: const PageStorageKey<String>('lawyer-profile-scroll'),
-      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
-      child: Column(
-        children: [
-          _buildProfileHeader(context, account),
-          const SizedBox(height: 24),
-          _buildSection(
-            title: 'Dados da Conta',
-            children: [
-              _buildInfoTile(
-                Icons.person_outline_rounded,
-                account.name,
-                'Nome',
-              ),
-              _buildInfoTile(
-                Icons.fingerprint_rounded,
-                account.cpf?.isNotEmpty == true
-                    ? account.cpf!
-                    : 'Nao informado',
-                'CPF',
-              ),
-              _buildInfoTile(
-                Icons.email_outlined,
-                account.email?.isNotEmpty == true
-                    ? account.email!
-                    : 'Nao informado',
-                'E-mail',
-              ),
-              _buildInfoTile(
-                Icons.phone_android_rounded,
-                account.whatsappNumber.isNotEmpty
-                    ? account.whatsappNumber
-                    : 'Nao informado',
-                'WhatsApp',
-              ),
-            ],
+  Widget _buildBody(Account account) {
+    final topInset = MediaQuery.of(context).padding.top;
+    final sheetTopMin = topInset + kToolbarHeight + 8;
+    final sheetTopMax = _headerHeight - _sheetOverlap;
+    final maxCollapse = (sheetTopMax - sheetTopMin).clamp(0.0, double.infinity);
+
+    return Stack(
+      children: [
+        _buildGradientHeader(),
+        ValueListenableBuilder<double>(
+          valueListenable: _scrollOffset,
+          builder: (context, offset, child) {
+            final collapse = offset.clamp(0.0, maxCollapse);
+            return Padding(
+              padding: EdgeInsets.only(top: sheetTopMax - collapse),
+              child: child,
+            );
+          },
+          child: SlideTransition(
+            position: _sheetSlide,
+            child: FadeTransition(
+              opacity: _sheetFade,
+              child: _buildSheet(account),
+            ),
           ),
-          const SizedBox(height: 20),
-          _buildSection(
-            title: 'Atendimento',
-            children: [
-              _buildActionTile(
-                Icons.chat_bubble_outline_rounded,
-                'Mensagens e Handoffs',
-                () => Navigator.pushNamed(context, '/lawyer-chats'),
-              ),
-            ],
-          ),
-          const SizedBox(height: 20),
-          _buildPreferenceSection(context, account),
-          const SizedBox(height: 20),
-          _buildSection(
-            title: 'Conta',
-            children: [
-              _buildActionTile(
-                Icons.logout_rounded,
-                'Sair da Conta',
-                () => _showLogoutDialog(context),
-                isDestructive: true,
-              ),
-            ],
-          ),
-          SizedBox(height: AppDimensions.bottomPadding(context)),
-        ],
+        ),
+      ],
+    );
+  }
+
+  Widget _buildGradientHeader() {
+    return Container(
+      height: _headerHeight,
+      decoration: const BoxDecoration(
+        gradient: LinearGradient(
+          colors: [AppColors.yellow2, AppColors.yellow],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
       ),
     );
   }
 
-  Widget _buildProfileHeader(BuildContext context, Account account) {
+  Widget _buildSheet(Account account) {
+    return Container(
+      decoration: const BoxDecoration(
+        color: AppColors.background,
+        borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
+        boxShadow: [
+          BoxShadow(
+            color: Color(0x14000000),
+            blurRadius: 24,
+            offset: Offset(0, -8),
+          ),
+        ],
+      ),
+      child: ClipRRect(
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
+        child: SingleChildScrollView(
+          controller: _scrollController,
+          key: const PageStorageKey<String>('lawyer-profile-scroll'),
+          padding: EdgeInsets.fromLTRB(
+            20,
+            22,
+            20,
+            AppDimensions.bottomPadding(context),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              _buildIdentityRow(account),
+              const SizedBox(height: 22),
+              FadeTransition(
+                opacity: _contentFade,
+                child: SlideTransition(
+                  position: _contentSlide,
+                  child: _buildOverviewContent(account),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildIdentityRow(Account account) {
     final initial = StringUtils.getInitials(account.name);
     final avatarUrl = account.avatarUrl;
 
-    return AppCard(
-      padding: EdgeInsets.zero,
-      child: Column(
-        children: [
-          SizedBox(
-            height: 132,
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: [
+        Tooltip(
+          message: 'Alterar foto',
+          child: GestureDetector(
+            onTap: _isUploading ? null : () => _pickAndUploadAvatar(context),
             child: Stack(
-              alignment: Alignment.topCenter,
-              clipBehavior: Clip.none,
+              alignment: Alignment.center,
               children: [
-                Positioned(
-                  top: 0,
-                  left: 0,
-                  right: 0,
-                  child: Container(
-                    height: 80,
-                    decoration: const BoxDecoration(
-                      gradient: LinearGradient(
-                        colors: [AppColors.ink, AppColors.yellow],
-                        begin: Alignment.topLeft,
-                        end: Alignment.bottomRight,
+                Container(
+                  width: 84,
+                  height: 84,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: AppColors.surface,
+                    border: Border.all(color: AppColors.surface, width: 4),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withValues(alpha: 0.08),
+                        blurRadius: 14,
+                        offset: const Offset(0, 4),
                       ),
-                      borderRadius: BorderRadius.vertical(
-                        top: Radius.circular(16),
-                      ),
-                    ),
+                    ],
                   ),
-                ),
-                Positioned(
-                  top: 40,
-                  child: Tooltip(
-                    message: 'Alterar foto',
-                    child: GestureDetector(
-                      onTap: _isUploading
-                          ? null
-                          : () => _pickAndUploadAvatar(context),
-                      child: Container(
-                        padding: const EdgeInsets.all(4),
-                        decoration: const BoxDecoration(
-                          color: AppColors.white,
-                          shape: BoxShape.circle,
-                        ),
-                        child: Stack(
-                          alignment: Alignment.center,
-                          children: [
-                            CircleAvatar(
-                              radius: 40,
-                              backgroundColor: AppColors.yellow,
-                              backgroundImage:
-                                  avatarUrl != null && avatarUrl.isNotEmpty
-                                  ? NetworkImage(avatarUrl)
-                                  : null,
-                              child: avatarUrl == null || avatarUrl.isEmpty
-                                  ? Text(
-                                      initial,
-                                      style: const TextStyle(
-                                        color: AppColors.ink,
-                                        fontSize: 28,
-                                        fontWeight: FontWeight.bold,
-                                      ),
-                                    )
-                                  : null,
-                            ),
-                            if (_isUploading)
-                              Container(
-                                width: 80,
-                                height: 80,
-                                decoration: BoxDecoration(
-                                  color: Colors.black.withValues(alpha: 0.3),
-                                  shape: BoxShape.circle,
-                                ),
-                                child: const Center(
-                                  child: CircularProgressIndicator(
-                                    color: AppColors.yellow,
-                                    strokeWidth: 3,
-                                  ),
-                                ),
+                  child: ClipOval(
+                    child: avatarUrl != null && avatarUrl.isNotEmpty
+                        ? Image.network(avatarUrl, fit: BoxFit.cover)
+                        : Container(
+                            color: AppColors.yellow,
+                            alignment: Alignment.center,
+                            child: Text(
+                              initial,
+                              style: const TextStyle(
+                                color: AppColors.ink,
+                                fontSize: 28,
+                                fontWeight: FontWeight.w800,
                               ),
-                          ],
-                        ),
+                            ),
+                          ),
+                  ),
+                ),
+                if (_isUploading)
+                  Container(
+                    width: 84,
+                    height: 84,
+                    decoration: BoxDecoration(
+                      color: Colors.black.withValues(alpha: 0.35),
+                      shape: BoxShape.circle,
+                    ),
+                    child: const Center(
+                      child: CircularProgressIndicator(
+                        color: AppColors.yellow,
+                        strokeWidth: 3,
                       ),
                     ),
                   ),
-                ),
                 Positioned(
-                  top: 96,
-                  child: Transform.translate(
-                    offset: const Offset(30, 0),
-                    child: SizedBox(
-                      width: 36,
-                      height: 36,
-                      child: IconButton.filled(
-                        padding: EdgeInsets.zero,
-                        tooltip: 'Alterar foto',
-                        icon: const Icon(Icons.photo_camera_outlined, size: 18),
-                        onPressed: _isUploading
-                            ? null
-                            : () => _pickAndUploadAvatar(context),
-                        style: IconButton.styleFrom(
-                          backgroundColor: AppColors.ink,
-                          foregroundColor: AppColors.yellow,
-                        ),
-                      ),
+                  right: 0,
+                  bottom: 0,
+                  child: Container(
+                    width: 26,
+                    height: 26,
+                    decoration: BoxDecoration(
+                      color: AppColors.ink,
+                      shape: BoxShape.circle,
+                      border: Border.all(color: AppColors.surface, width: 2),
+                    ),
+                    child: const Icon(
+                      Icons.edit_rounded,
+                      size: 12,
+                      color: AppColors.yellow,
                     ),
                   ),
                 ),
               ],
             ),
           ),
-          const SizedBox(height: 12),
-          Text(account.name, style: AppTextStyles.h1),
-          const SizedBox(height: 4),
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-            decoration: BoxDecoration(
-              color: AppColors.yellowSoft,
-              borderRadius: BorderRadius.circular(20),
+        ),
+        const SizedBox(width: 16),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                account.name,
+                style: AppTextStyles.h1.copyWith(fontSize: 22, height: 1.15),
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+              ),
+              const SizedBox(height: 6),
+              Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 10,
+                  vertical: 4,
+                ),
+                decoration: BoxDecoration(
+                  color: AppColors.yellowSoft,
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Text(
+                  'Advogado',
+                  style: AppTextStyles.caption.copyWith(
+                    color: AppColors.yellowDeep,
+                    fontWeight: FontWeight.w800,
+                    fontSize: 11.5,
+                    letterSpacing: 0.4,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildOverviewContent(Account account) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        _sectionTitle('Dados da Conta'),
+        _buildSection(
+          children: [
+            _buildInfoTile(Icons.person_outline_rounded, 'Nome', account.name),
+            _buildInfoTile(
+              Icons.fingerprint_rounded,
+              'CPF',
+              account.cpf?.isNotEmpty == true ? account.cpf! : 'Não informado',
             ),
-            child: Text(
+            _buildInfoTile(
+              Icons.email_outlined,
+              'E-mail',
               account.email?.isNotEmpty == true
                   ? account.email!
-                  : 'Conta de advogado',
-              style: AppTextStyles.caption.copyWith(
-                color: AppColors.yellowDeep,
-                fontWeight: FontWeight.bold,
-              ),
+                  : 'Não informado',
             ),
-          ),
-          const SizedBox(height: 20),
-        ],
+            _buildInfoTile(
+              Icons.phone_android_rounded,
+              'WhatsApp',
+              account.whatsappNumber.isNotEmpty
+                  ? account.whatsappNumber
+                  : 'Não informado',
+            ),
+          ],
+        ),
+        const SizedBox(height: 20),
+        _sectionTitle('Atendimento'),
+        _buildSection(
+          children: [
+            _buildActionTile(
+              Icons.chat_bubble_outline_rounded,
+              'Mensagens e Handoffs',
+              () => Navigator.pushNamed(context, '/lawyer-chats'),
+            ),
+          ],
+        ),
+        const SizedBox(height: 20),
+        _sectionTitle('Notificações'),
+        _buildSection(
+          children: [
+            _buildPreferenceTile(
+              title: 'Leads',
+              value: account.notificationPreferences['leads'] ?? true,
+              onChanged: (v) => _updatePreference(context, account, 'leads', v),
+            ),
+            _buildPreferenceTile(
+              title: 'Trâmites',
+              value: account.notificationPreferences['processUpdates'] ?? true,
+              onChanged: (v) =>
+                  _updatePreference(context, account, 'processUpdates', v),
+            ),
+            _buildPreferenceTile(
+              title: 'Arquivos',
+              value: account.notificationPreferences['documents'] ?? true,
+              onChanged: (v) =>
+                  _updatePreference(context, account, 'documents', v),
+            ),
+          ],
+        ),
+        const SizedBox(height: 20),
+        _sectionTitle('Conta'),
+        _buildSection(
+          children: [
+            _buildActionTile(
+              Icons.logout_rounded,
+              'Sair da Conta',
+              () => _showLogoutDialog(context),
+              isDestructive: true,
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+
+  Widget _sectionTitle(String text) {
+    return Padding(
+      padding: const EdgeInsets.only(left: 4, bottom: 10),
+      child: Text(
+        text,
+        style: AppTextStyles.h2.copyWith(fontSize: 16, color: AppColors.ink),
       ),
+    );
+  }
+
+  Widget _buildSection({required List<Widget> children}) {
+    return AppCard(
+      padding: EdgeInsets.zero,
+      child: Column(
+        children: List.generate(children.length, (index) {
+          return Column(
+            children: [
+              children[index],
+              if (index < children.length - 1)
+                const Divider(height: 1, indent: 60, endIndent: 16),
+            ],
+          );
+        }),
+      ),
+    );
+  }
+
+  Widget _buildInfoTile(IconData icon, String label, String value) {
+    return ListTile(
+      leading: Container(
+        padding: const EdgeInsets.all(8),
+        decoration: BoxDecoration(
+          color: AppColors.surface2,
+          borderRadius: BorderRadius.circular(10),
+        ),
+        child: Icon(icon, color: AppColors.ink, size: 20),
+      ),
+      title: Text(
+        label,
+        style: AppTextStyles.caption.copyWith(
+          fontSize: 11.5,
+          color: AppColors.textCaption,
+          fontWeight: FontWeight.w600,
+        ),
+      ),
+      subtitle: Padding(
+        padding: const EdgeInsets.only(top: 2),
+        child: Text(
+          value,
+          style: const TextStyle(
+            fontWeight: FontWeight.w700,
+            fontSize: 14,
+            color: AppColors.ink,
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildPreferenceTile({
+    required String title,
+    required bool value,
+    required ValueChanged<bool> onChanged,
+  }) {
+    return SwitchListTile(
+      value: value,
+      onChanged: onChanged,
+      title: Text(
+        title,
+        style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 14),
+      ),
+      activeThumbColor: AppColors.ink,
+    );
+  }
+
+  Widget _buildActionTile(
+    IconData icon,
+    String label,
+    VoidCallback onTap, {
+    bool isDestructive = false,
+  }) {
+    return ListTile(
+      leading: Container(
+        padding: const EdgeInsets.all(8),
+        decoration: BoxDecoration(
+          color: isDestructive ? AppColors.errorBackground : AppColors.surface2,
+          borderRadius: BorderRadius.circular(10),
+        ),
+        child: Icon(
+          icon,
+          color: isDestructive ? AppColors.error : AppColors.ink,
+          size: 20,
+        ),
+      ),
+      title: Text(
+        label,
+        style: TextStyle(
+          fontWeight: FontWeight.w600,
+          fontSize: 14,
+          color: isDestructive ? AppColors.error : AppColors.textPrimary,
+        ),
+      ),
+      trailing: const Icon(
+        Icons.chevron_right_rounded,
+        size: 20,
+        color: AppColors.textCaption,
+      ),
+      onTap: onTap,
     );
   }
 
@@ -323,136 +613,6 @@ class _LawyerProfileScreenState extends ConsumerState<LawyerProfileScreen> {
     );
   }
 
-  Widget _buildPreferenceSection(BuildContext context, Account account) {
-    final preferences = account.notificationPreferences;
-
-    return _buildSection(
-      title: 'Notificações',
-      children: [
-        _buildPreferenceTile(
-          title: 'Leads',
-          value: preferences['leads'] ?? true,
-          onChanged: (value) =>
-              _updatePreference(context, account, 'leads', value),
-        ),
-        _buildPreferenceTile(
-          title: 'Trâmites',
-          value: preferences['processUpdates'] ?? true,
-          onChanged: (value) =>
-              _updatePreference(context, account, 'processUpdates', value),
-        ),
-        _buildPreferenceTile(
-          title: 'Arquivos',
-          value: preferences['documents'] ?? true,
-          onChanged: (value) =>
-              _updatePreference(context, account, 'documents', value),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildSection({
-    required String title,
-    required List<Widget> children,
-  }) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Padding(
-          padding: const EdgeInsets.only(left: 4, bottom: 8),
-          child: Text(title, style: AppTextStyles.h2.copyWith(fontSize: 16)),
-        ),
-        AppCard(
-          padding: EdgeInsets.zero,
-          child: Column(
-            children: List.generate(children.length, (index) {
-              return Column(
-                children: [
-                  children[index],
-                  if (index < children.length - 1)
-                    const Divider(height: 1, indent: 56, endIndent: 16),
-                ],
-              );
-            }),
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildInfoTile(IconData icon, String label, String subtitle) {
-    return ListTile(
-      leading: Container(
-        padding: const EdgeInsets.all(8),
-        decoration: BoxDecoration(
-          color: AppColors.surface2,
-          borderRadius: BorderRadius.circular(10),
-        ),
-        child: Icon(icon, color: AppColors.ink, size: 20),
-      ),
-      title: Text(
-        label,
-        style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 14),
-      ),
-      subtitle: Text(
-        subtitle,
-        style: AppTextStyles.caption.copyWith(fontSize: 11),
-      ),
-    );
-  }
-
-  Widget _buildPreferenceTile({
-    required String title,
-    required bool value,
-    required ValueChanged<bool> onChanged,
-  }) {
-    return SwitchListTile(
-      value: value,
-      onChanged: onChanged,
-      title: Text(
-        title,
-        style: const TextStyle(fontWeight: FontWeight.w500, fontSize: 14),
-      ),
-      activeThumbColor: AppColors.ink,
-    );
-  }
-
-  Widget _buildActionTile(
-    IconData icon,
-    String label,
-    VoidCallback onTap, {
-    bool isDestructive = false,
-  }) {
-    return ListTile(
-      leading: Container(
-        padding: const EdgeInsets.all(8),
-        decoration: BoxDecoration(
-          color: isDestructive ? AppColors.errorBackground : AppColors.surface2,
-          borderRadius: BorderRadius.circular(10),
-        ),
-        child: Icon(
-          icon,
-          color: isDestructive ? AppColors.error : AppColors.ink,
-          size: 20,
-        ),
-      ),
-      title: Text(
-        label,
-        style: TextStyle(
-          fontWeight: FontWeight.w500,
-          fontSize: 14,
-          color: isDestructive ? AppColors.error : AppColors.textPrimary,
-        ),
-      ),
-      trailing: const Icon(
-        Icons.chevron_right_rounded,
-        size: 20,
-        color: AppColors.textCaption,
-      ),
-      onTap: onTap,
-    );
-  }
-
   Future<void> _updatePreference(
     BuildContext context,
     Account account,
@@ -470,6 +630,9 @@ class _LawyerProfileScreenState extends ConsumerState<LawyerProfileScreen> {
       email: account.email,
       avatarUrl: account.avatarUrl,
       notificationPreferences: updated,
+      teamPermissions: account.teamPermissions,
+      lawyerAdminId: account.lawyerAdminId,
+      mustChangePassword: account.mustChangePassword,
     );
 
     ref

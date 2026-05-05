@@ -9,6 +9,7 @@ import messageRoutes from './v1/message.routes';
 import notificationRoutes from './v1/notification.routes';
 import timelineRoutes from './v1/timeline.routes';
 import botRoutes from './v1/bot.routes';
+import teamRoutes from './v1/team.routes';
 
 const router = Router();
 
@@ -22,5 +23,6 @@ router.use('/messages', messageRoutes);
 router.use('/notifications', notificationRoutes);
 router.use('/timeline', timelineRoutes);
 router.use('/bot', botRoutes);
+router.use('/team', teamRoutes);
 
 export default router;

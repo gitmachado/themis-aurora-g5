@@ -11,6 +11,11 @@ export interface User {
   passwordHash: string | null;
   fcmToken: string | null;
   notificationPreferences: Record<string, boolean> | null;
+  teamPermissions: Record<string, boolean>;
+  lawyerAdminId: string | null;
+  oabNumber: string | null;
+  specialty: string | null;
+  mustChangePassword: boolean;
   createdAt: Date;
   updatedAt: Date;
 }

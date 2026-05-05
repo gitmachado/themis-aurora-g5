@@ -5,6 +5,7 @@ import 'package:mobile/shared/errors/either_failure_extensions.dart';
 import '../../../../../../shared/network/websocket_client.dart';
 
 import '../../../../../../shared/network/api_client.dart';
+import '../../../clients/presentation/providers/lawyer_client_providers.dart';
 import '../../data/datasources/lead_remote_data_source.dart';
 import '../../data/repositories/lead_repository_impl.dart';
 import '../../domain/entities/lead.dart';
@@ -140,9 +141,7 @@ class AllLeadsNotifier extends AsyncNotifier<List<Lead>> {
 final archivedLeadsProvider = Provider<AsyncValue<List<Lead>>>((ref) {
   final allLeads = ref.watch(allLeadsProvider);
   return allLeads.whenData(
-    (items) => items
-        .where((l) => l.status == 'DISCARDED' || l.status == 'CONVERTED')
-        .toList(),
+    (items) => items.where((l) => l.status == 'DISCARDED').toList(),
   );
 });
 
@@ -168,6 +167,7 @@ final class LeadActions {
     _ref.invalidate(allLeadsProvider);
     _ref.invalidate(archivedLeadsProvider);
     _ref.invalidate(leadDetailsProvider(id));
+    _ref.invalidate(myLawyerClientsProvider);
   }
 
   Future<void> discard(String id, {String? reason}) async {

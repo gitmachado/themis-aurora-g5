@@ -6,7 +6,6 @@ import 'package:flutter_svg/flutter_svg.dart';
 import '../../../../app/routes/app_router.dart';
 import '../../../../shared/constants/app_colors.dart';
 import '../../../../shared/constants/app_assets.dart';
-import '../../domain/entities/account.dart';
 import '../providers/auth_providers.dart';
 
 class SplashScreen extends ConsumerStatefulWidget {
@@ -47,9 +46,14 @@ class _SplashScreenState extends ConsumerState<SplashScreen> {
             // Persist the session in the global state to trigger WebSocket connection
             ref.read(authControllerProvider.notifier).setSession(session);
 
-            final route = session.role == UserRole.lawyer
-                ? AppRouter.lawyerDashboardRoute
-                : AppRouter.clientDashboardRoute;
+            final String route;
+            if (session.account?.mustChangePassword == true) {
+              route = AppRouter.forceChangePasswordRoute;
+            } else if (session.role.isLawyerSide) {
+              route = AppRouter.lawyerDashboardRoute;
+            } else {
+              route = AppRouter.clientDashboardRoute;
+            }
             Navigator.pushReplacementNamed(context, route);
           }
         },
