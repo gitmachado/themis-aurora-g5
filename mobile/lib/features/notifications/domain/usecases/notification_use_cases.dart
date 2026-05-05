@@ -43,3 +43,13 @@ final class DeleteNotificationUseCase {
     return _repository.delete(id);
   }
 }
+
+final class DeleteManyNotificationsUseCase {
+  final NotificationRepository _repository;
+
+  const DeleteManyNotificationsUseCase(this._repository);
+
+  Future<Either<Failure, Unit>> call(List<String> ids) {
+    return _repository.deleteMany(ids);
+  }
+}

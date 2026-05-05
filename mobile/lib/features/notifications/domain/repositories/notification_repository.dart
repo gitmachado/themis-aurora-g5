@@ -8,4 +8,5 @@ abstract interface class NotificationRepository {
   Future<Either<Failure, Unit>> markAsRead(String id);
   Future<Either<Failure, Unit>> markAllAsRead();
   Future<Either<Failure, Unit>> delete(String id);
+  Future<Either<Failure, Unit>> deleteMany(List<String> ids);
 }

@@ -49,6 +49,13 @@ final deleteNotificationUseCaseProvider = Provider<DeleteNotificationUseCase>((
   return DeleteNotificationUseCase(ref.watch(notificationRepositoryProvider));
 });
 
+final deleteManyNotificationsUseCaseProvider =
+    Provider<DeleteManyNotificationsUseCase>((ref) {
+      return DeleteManyNotificationsUseCase(
+        ref.watch(notificationRepositoryProvider),
+      );
+    });
+
 final myNotificationsProvider =
     AsyncNotifierProvider<MyNotificationsNotifier, List<AppNotification>>(
       MyNotificationsNotifier.new,
@@ -111,6 +118,11 @@ final class NotificationActions {
 
   Future<void> delete(String id) async {
     (await _ref.read(deleteNotificationUseCaseProvider)(id)).getOrThrow();
+    await _ref.read(myNotificationsProvider.notifier).refresh();
+  }
+
+  Future<void> deleteMany(List<String> ids) async {
+    (await _ref.read(deleteManyNotificationsUseCaseProvider)(ids)).getOrThrow();
     await _ref.read(myNotificationsProvider.notifier).refresh();
   }
 }

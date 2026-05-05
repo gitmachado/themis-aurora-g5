@@ -8,4 +8,5 @@ export interface INotificationRepository {
   markAsRead(id: string): Promise<void>;
   markAllAsRead(userId: string): Promise<void>;
   delete(id: string): Promise<void>;
+  deleteMany(ids: string[], userId: string): Promise<void>;
 }

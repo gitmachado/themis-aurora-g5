@@ -64,4 +64,8 @@ export class NotificationService implements INotificationService {
 
     await this.notificationRepository.delete(id);
   }
+
+  async deleteMany(ids: string[], userId: string): Promise<void> {
+    await this.notificationRepository.deleteMany(ids, userId);
+  }
 }

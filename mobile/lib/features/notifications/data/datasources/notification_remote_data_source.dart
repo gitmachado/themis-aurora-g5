@@ -28,4 +28,8 @@ final class NotificationRemoteDataSource {
   Future<void> delete(String id) async {
     await _apiClient.deleteVoid('/notifications/$id');
   }
+
+  Future<void> deleteMany(List<String> ids) async {
+    await _apiClient.deleteVoid('/notifications/bulk', data: {'ids': ids});
+  }
 }

@@ -10,6 +10,8 @@ const notificationRepository = new NotificationRepository();
 const notificationService = new NotificationService(notificationRepository);
 const controller = new NotificationController(notificationService);
 
+router.delete('/bulk', authMiddleware, controller.deleteMany);
+
 /**
  * @openapi
  * /notifications/my:

@@ -9,8 +9,12 @@ class AppNotificationTile extends StatelessWidget {
   final String time;
   final String type;
   final bool isRead;
+  final bool isSelected;
+  final bool isSelectionMode;
   final Function(String id) onToggleRead;
   final Function(String id) onDelete;
+  final Function(String id, bool selected)? onSelected;
+  final Function(String id)? onLongPress;
   final VoidCallback? onTap;
 
   const AppNotificationTile({
@@ -21,101 +25,91 @@ class AppNotificationTile extends StatelessWidget {
     required this.time,
     required this.type,
     required this.isRead,
+    this.isSelected = false,
+    this.isSelectionMode = false,
     required this.onToggleRead,
     required this.onDelete,
+    this.onSelected,
+    this.onLongPress,
     this.onTap,
   });
 
   @override
   Widget build(BuildContext context) {
-    return Dismissible(
-      key: Key('notif_$id'),
-      direction: DismissDirection.horizontal,
-      onDismissed: (direction) {
-        if (direction == DismissDirection.endToStart) {
-          onDelete(id);
-        } else {
-          onToggleRead(id);
-        }
-      },
-      background: _buildSwipeBackground(
-        color: isRead ? AppColors.textCaption : AppColors.primary,
-        icon: isRead
-            ? Icons.mark_email_unread_rounded
-            : Icons.mark_email_read_rounded,
-        alignment: Alignment.centerLeft,
+    final cardContent = Container(
+      margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 4),
+      decoration: BoxDecoration(
+        color: isSelected
+            ? AppColors.yellowSoft.withValues(alpha: 0.5)
+            : (isRead ? AppColors.surface : AppColors.yellowSoft),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(
+          color: isSelected
+              ? AppColors.yellow
+              : (isRead ? AppColors.line : Colors.transparent),
+          width: isSelected ? 2 : 1,
+        ),
       ),
-      secondaryBackground: _buildSwipeBackground(
-        color: AppColors.error,
-        icon: Icons.delete_outline_rounded,
-        alignment: Alignment.centerRight,
-      ),
-      child: Container(
-        margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 4),
-        decoration: BoxDecoration(
-          color: isRead ? AppColors.surface : AppColors.yellowSoft,
-          borderRadius: BorderRadius.circular(20),
-          border: Border.all(
-            color: isRead ? AppColors.line : Colors.transparent,
+      child: ListTile(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        contentPadding: const EdgeInsets.all(16),
+        leading: isSelectionMode
+            ? Checkbox(
+                value: isSelected,
+                activeColor: AppColors.yellow,
+                checkColor: AppColors.ink,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(4),
+                ),
+                onChanged: (val) => onSelected?.call(id, val ?? false),
+              )
+            : CircleAvatar(
+                backgroundColor: _getOverlayColor(type),
+                child: Icon(
+                  _getIcon(type),
+                  color: _getIconColor(type),
+                  size: 20,
+                ),
+              ),
+        title: Text(
+          title,
+          style: TextStyle(
+            fontWeight: isRead ? FontWeight.normal : FontWeight.bold,
+            color: AppColors.textPrimary,
           ),
         ),
-        child: ListTile(
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(20),
-          ),
-          contentPadding: const EdgeInsets.all(16),
-          leading: CircleAvatar(
-            backgroundColor: _getOverlayColor(type),
-            child: Icon(_getIcon(type), color: _getIconColor(type), size: 20),
-          ),
-          title: Text(
-            title,
-            style: TextStyle(
-              fontWeight: isRead ? FontWeight.normal : FontWeight.bold,
-              color: AppColors.textPrimary,
+        subtitle: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const SizedBox(height: 4),
+            Text(
+              body,
+              style: AppTextStyles.caption.copyWith(
+                fontSize: 13,
+                color: isRead
+                    ? AppColors.textCaption
+                    : AppColors.textPrimary.withValues(alpha: 0.8),
+              ),
             ),
-          ),
-          subtitle: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const SizedBox(height: 4),
-              Text(
-                body,
-                style: AppTextStyles.caption.copyWith(
-                  fontSize: 13,
-                  color: isRead
-                      ? AppColors.textCaption
-                      : AppColors.textPrimary.withValues(alpha: 0.8),
-                ),
+            const SizedBox(height: 4),
+            Text(
+              time,
+              style: AppTextStyles.caption.copyWith(
+                fontSize: 11,
+                color: AppColors.textCaption,
               ),
-              const SizedBox(height: 4),
-              Text(
-                time,
-                style: AppTextStyles.caption.copyWith(
-                  fontSize: 11,
-                  color: AppColors.textCaption,
-                ),
-              ),
-            ],
-          ),
-          isThreeLine: true,
-          onTap: onTap ?? () => onToggleRead(id),
+            ),
+          ],
         ),
+        isThreeLine: true,
+        onTap: isSelectionMode
+            ? () => onSelected?.call(id, !isSelected)
+            : (onTap ?? () => onToggleRead(id)),
+        onLongPress: isSelectionMode ? null : () => onLongPress?.call(id),
       ),
     );
-  }
 
-  Widget _buildSwipeBackground({
-    required Color color,
-    required IconData icon,
-    required Alignment alignment,
-  }) {
-    return Container(
-      color: color,
-      alignment: alignment,
-      padding: const EdgeInsets.symmetric(horizontal: 20),
-      child: Icon(icon, color: Colors.white),
-    );
+    return cardContent;
   }
 
   IconData _getIcon(String type) {
