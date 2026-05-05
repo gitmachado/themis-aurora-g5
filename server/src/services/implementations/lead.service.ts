@@ -6,7 +6,7 @@ import { INotificationService } from '../interfaces/notification.service';
 import { ILegalProcessService } from '../interfaces/legal-process.service';
 import type { Lead, User } from '@models';
 import type { CreateLeadDTO, ConvertLeadDTO } from '@dtos';
-import { NotFoundError, ConflictError, BadRequestError } from './errors';
+import { NotFoundError, BadRequestError } from './errors';
 import { LeadStatus, UserRole } from '@enums';
 import bcrypt from 'bcryptjs';
 import { eventBus } from '../communication/InternalEventBus';
@@ -81,61 +81,71 @@ export class LeadService implements ILeadService {
       throw new NotFoundError('Lead não encontrado');
     }
 
-    // Check if user already exists
-    const existingUser = await this.userRepository.findByWhatsapp(lead.whatsappNumber);
-    if (existingUser) {
-      throw new ConflictError('Usuário já cadastrado com este número');
+    const wasAlreadyConverted =
+      lead.status === 'CONVERTED' && Boolean(lead.convertedUserId);
+
+    // Caminho idempotente: lead já convertido e ligado a um user existente.
+    if (wasAlreadyConverted) {
+      const linkedUser = await this.userRepository.findById(lead.convertedUserId!);
+      if (linkedUser) {
+        eventBus.emitLeadUpdate(lead);
+        return linkedUser;
+      }
+      // Usuário ligado não existe mais (raro): segue o fluxo para recriar/relinkar.
     }
 
     const cpf = lead.cpf?.trim() || null;
-    if (cpf) {
-      const existingUserByCpf = await this.userRepository.findByCpf(cpf);
-      if (existingUserByCpf) {
-        throw new ConflictError('Usuário já cadastrado com este CPF');
-      }
+
+    // Reaproveita user existente (whatsapp ou CPF) em vez de falhar com conflito.
+    let user = await this.userRepository.findByWhatsapp(lead.whatsappNumber);
+    if (!user && cpf) {
+      user = await this.userRepository.findByCpf(cpf);
     }
 
-    const tempPassword = this.authService.generateTempPassword();
-    const passwordHash = await bcrypt.hash(tempPassword, 10);
+    if (!user) {
+      const tempPassword = this.authService.generateTempPassword();
+      const passwordHash = await bcrypt.hash(tempPassword, 10);
 
-    // Create User
-    const user = await this.userRepository.create({
-      name: lead.name || 'Cliente',
-      whatsappNumber: lead.whatsappNumber!,
-      cpf,
-      email: lead.email || null,
-      avatarUrl: null,
-      role: 'CLIENT',
-      passwordHash,
-      fcmToken: null,
-      notificationPreferences: {
-        push: true,
-        whatsapp: true
-      }
-    });
+      user = await this.userRepository.create({
+        name: lead.name || 'Cliente',
+        whatsappNumber: lead.whatsappNumber!,
+        cpf,
+        email: lead.email || null,
+        avatarUrl: null,
+        role: 'CLIENT',
+        passwordHash,
+        fcmToken: null,
+        notificationPreferences: {
+          push: true,
+          whatsapp: true,
+        },
+      });
 
-    // Update lead status
+      await this.notificationService.sendPush(
+        user.id,
+        'Seu acesso ao Themis',
+        `Bem-vindo! Baixe nosso app e use a senha temporária: ${tempPassword}`
+      );
+    }
+
     const updatedLead = await this.leadRepository.update(lead.id, {
       status: 'CONVERTED',
       convertedUserId: user.id,
+      discardReason: null,
     });
 
-    await this.legalProcessService.create({
-      clientId: user.id,
-      lawyerId: dto.lawyerId,
-      title: `${lead.caseType || 'Civil'} - ${lead.name || 'Cliente'}`,
-      description: lead.caseDescription || '',
-      caseType: lead.caseType || 'Civil',
-    });
+    // Evita duplicar processo caso o lead já tivesse sido convertido antes.
+    if (!wasAlreadyConverted) {
+      await this.legalProcessService.create({
+        clientId: user.id,
+        lawyerId: dto.lawyerId,
+        title: `${lead.caseType || 'Civil'} - ${lead.name || 'Cliente'}`,
+        description: lead.caseDescription || '',
+        caseType: lead.caseType || 'Civil',
+      });
+    }
 
-    // Notify update via Socket
     eventBus.emitLeadUpdate(updatedLead);
-
-    await this.notificationService.sendPush(
-      user.id,
-      'Seu acesso ao Themis',
-      `Bem-vindo! Baixe nosso app e use a senha temporária: ${tempPassword}`
-    );
 
     return user;
   }
