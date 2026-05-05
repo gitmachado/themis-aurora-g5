@@ -25,5 +25,10 @@ abstract interface class AuthRepository {
     required String fileName,
   });
 
+  Future<Either<Failure, Account>> changePassword({
+    required String newPassword,
+    String? currentPassword,
+  });
+
   Future<Either<Failure, Unit>> logout();
 }
