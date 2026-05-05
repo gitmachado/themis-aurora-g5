@@ -20,10 +20,12 @@ class ClientChatMirrorScreen extends ConsumerStatefulWidget {
   const ClientChatMirrorScreen({super.key, this.showBackButton = true});
 
   @override
-  ConsumerState<ClientChatMirrorScreen> createState() => _ClientChatMirrorScreenState();
+  ConsumerState<ClientChatMirrorScreen> createState() =>
+      _ClientChatMirrorScreenState();
 }
 
-class _ClientChatMirrorScreenState extends ConsumerState<ClientChatMirrorScreen> {
+class _ClientChatMirrorScreenState
+    extends ConsumerState<ClientChatMirrorScreen> {
   final ScrollController _scrollController = ScrollController();
   int _unreadCount = 0;
   bool _showScrollDownButton = false;
@@ -46,7 +48,7 @@ class _ClientChatMirrorScreenState extends ConsumerState<ClientChatMirrorScreen>
 
     final offset = _scrollController.offset;
     final isFarFromBottom = offset > 100;
-    
+
     debugPrint('[ClientChat] Scroll Offset: $offset, IsFar: $isFarFromBottom');
 
     if (isFarFromBottom != _showScrollDownButton) {
@@ -91,31 +93,33 @@ class _ClientChatMirrorScreenState extends ConsumerState<ClientChatMirrorScreen>
 
     // Escuta novas mensagens no topo do build para garantir reatividade constante
     if (whatsappNumber.isNotEmpty) {
-      ref.listen<AsyncValue<List<ChatMessage>>>(
-        liveChatProvider(whatsappNumber),
-        (previous, next) {
-          if (next is AsyncData<List<ChatMessage>>) {
-            final currentMsgs = next.value;
-            final prevMsgs = previous?.valueOrNull ?? [];
+      ref.listen<
+        AsyncValue<List<ChatMessage>>
+      >(liveChatProvider(whatsappNumber), (previous, next) {
+        if (next is AsyncData<List<ChatMessage>>) {
+          final currentMsgs = next.value;
+          final prevMsgs = previous?.valueOrNull ?? [];
 
-            debugPrint('[ClientChat] New update! Prev: ${prevMsgs.length}, Current: ${currentMsgs.length}');
+          debugPrint(
+            '[ClientChat] New update! Prev: ${prevMsgs.length}, Current: ${currentMsgs.length}',
+          );
 
-            if (currentMsgs.length > prevMsgs.length) {
-              final isFar = _scrollController.hasClients && _scrollController.offset > 100;
-              
-              debugPrint('[ClientChat] Message added! IsFar: $isFar');
+          if (currentMsgs.length > prevMsgs.length) {
+            final isFar =
+                _scrollController.hasClients && _scrollController.offset > 100;
 
-              if (isFar) {
-                setState(() {
-                  _unreadCount += (currentMsgs.length - prevMsgs.length);
-                });
-              } else {
-                _scrollToBottom();
-              }
+            debugPrint('[ClientChat] Message added! IsFar: $isFar');
+
+            if (isFar) {
+              setState(() {
+                _unreadCount += (currentMsgs.length - prevMsgs.length);
+              });
+            } else {
+              _scrollToBottom();
             }
           }
-        },
-      );
+        }
+      });
     }
 
     return Scaffold(
@@ -139,11 +143,7 @@ class _ClientChatMirrorScreenState extends ConsumerState<ClientChatMirrorScreen>
                 border: Border.all(color: AppColors.yellow, width: 1.5),
               ),
               child: Center(
-                child: SvgPicture.asset(
-                  AppAssets.logo,
-                  width: 22,
-                  height: 22,
-                ),
+                child: SvgPicture.asset(AppAssets.logo, width: 22, height: 22),
               ),
             ),
             const SizedBox(width: 10),
@@ -190,9 +190,7 @@ class _ClientChatMirrorScreenState extends ConsumerState<ClientChatMirrorScreen>
             return _buildNoWhatsAppState();
           }
 
-          final history = ref.watch(
-            liveChatProvider(account.whatsappNumber),
-          );
+          final history = ref.watch(liveChatProvider(account.whatsappNumber));
 
           return Stack(
             children: [
@@ -242,11 +240,7 @@ class _ClientChatMirrorScreenState extends ConsumerState<ClientChatMirrorScreen>
       child: Row(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          const Icon(
-            Icons.history_rounded,
-            size: 13,
-            color: AppColors.ink3,
-          ),
+          const Icon(Icons.history_rounded, size: 13, color: AppColors.ink3),
           const SizedBox(width: 6),
           Text(
             'Histórico sincronizado · Apenas leitura',
@@ -276,7 +270,7 @@ class _ClientChatMirrorScreenState extends ConsumerState<ClientChatMirrorScreen>
       itemBuilder: (context, index) {
         final message = reversedMessages[index];
         final isClient = message.sender == 'CLIENT';
-        
+
         return ChatBubble(
           message: message.content,
           time: formatTime(message.createdAt),
@@ -521,10 +515,7 @@ class _ClientChatMirrorScreenState extends ConsumerState<ClientChatMirrorScreen>
                   color: AppColors.success,
                   shape: BoxShape.circle,
                 ),
-                constraints: const BoxConstraints(
-                  minWidth: 20,
-                  minHeight: 20,
-                ),
+                constraints: const BoxConstraints(minWidth: 20, minHeight: 20),
                 child: Center(
                   child: Text(
                     _unreadCount > 9 ? '9+' : '$_unreadCount',

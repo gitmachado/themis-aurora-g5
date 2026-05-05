@@ -17,7 +17,8 @@ class ClientProfileScreen extends ConsumerStatefulWidget {
   const ClientProfileScreen({super.key});
 
   @override
-  ConsumerState<ClientProfileScreen> createState() => _ClientProfileScreenState();
+  ConsumerState<ClientProfileScreen> createState() =>
+      _ClientProfileScreenState();
 }
 
 class _ClientProfileScreenState extends ConsumerState<ClientProfileScreen> {
@@ -117,10 +118,7 @@ class _ClientProfileScreenState extends ConsumerState<ClientProfileScreen> {
     );
   }
 
-  Widget _buildProfileHeader(
-    BuildContext context,
-    Account account,
-  ) {
+  Widget _buildProfileHeader(BuildContext context, Account account) {
     final initial = account.name.isEmpty ? '?' : account.name[0].toUpperCase();
     final avatarUrl = account.avatarUrl;
 
@@ -157,7 +155,9 @@ class _ClientProfileScreenState extends ConsumerState<ClientProfileScreen> {
                   child: Tooltip(
                     message: 'Alterar foto',
                     child: GestureDetector(
-                      onTap: _isUploading ? null : () => _pickAndUploadAvatar(context),
+                      onTap: _isUploading
+                          ? null
+                          : () => _pickAndUploadAvatar(context),
                       child: Container(
                         padding: const EdgeInsets.all(4),
                         decoration: const BoxDecoration(
@@ -217,7 +217,9 @@ class _ClientProfileScreenState extends ConsumerState<ClientProfileScreen> {
                         padding: EdgeInsets.zero,
                         tooltip: 'Alterar foto',
                         icon: const Icon(Icons.photo_camera_outlined, size: 18),
-                        onPressed: _isUploading ? null : () => _pickAndUploadAvatar(context),
+                        onPressed: _isUploading
+                            ? null
+                            : () => _pickAndUploadAvatar(context),
                         style: IconButton.styleFrom(
                           backgroundColor: AppColors.ink,
                           foregroundColor: AppColors.yellow,
@@ -307,10 +309,7 @@ class _ClientProfileScreenState extends ConsumerState<ClientProfileScreen> {
     );
   }
 
-  Widget _buildPreferenceSection(
-    BuildContext context,
-    Account account,
-  ) {
+  Widget _buildPreferenceSection(BuildContext context, Account account) {
     final preferences = account.notificationPreferences;
 
     return _buildSection(

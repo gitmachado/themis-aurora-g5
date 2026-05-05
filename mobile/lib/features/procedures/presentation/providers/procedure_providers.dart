@@ -119,11 +119,14 @@ class MyProceduresNotifier extends AsyncNotifier<List<LegalProcess>> {
 }
 
 final procedureDetailsProvider =
-    AsyncNotifierProvider.family<ProcedureDetailsNotifier, LegalProcess, String>(
-      ProcedureDetailsNotifier.new,
-    );
+    AsyncNotifierProvider.family<
+      ProcedureDetailsNotifier,
+      LegalProcess,
+      String
+    >(ProcedureDetailsNotifier.new);
 
-class ProcedureDetailsNotifier extends FamilyAsyncNotifier<LegalProcess, String> {
+class ProcedureDetailsNotifier
+    extends FamilyAsyncNotifier<LegalProcess, String> {
   StreamSubscription? _subscription;
 
   @override
@@ -154,11 +157,14 @@ class ProcedureDetailsNotifier extends FamilyAsyncNotifier<LegalProcess, String>
 }
 
 final procedureTimelineProvider =
-    AsyncNotifierProvider.family<ProcedureTimelineNotifier, List<TimelineEvent>, String>(
-      ProcedureTimelineNotifier.new,
-    );
+    AsyncNotifierProvider.family<
+      ProcedureTimelineNotifier,
+      List<TimelineEvent>,
+      String
+    >(ProcedureTimelineNotifier.new);
 
-class ProcedureTimelineNotifier extends FamilyAsyncNotifier<List<TimelineEvent>, String> {
+class ProcedureTimelineNotifier
+    extends FamilyAsyncNotifier<List<TimelineEvent>, String> {
   StreamSubscription? _subscription;
 
   @override
@@ -173,7 +179,8 @@ class ProcedureTimelineNotifier extends FamilyAsyncNotifier<List<TimelineEvent>,
     _subscription = ref.watch(webSocketClientProvider).events.listen((event) {
       final processId = arg;
       // Se o evento for de atualização de processo e o ID bater, ou se reconectar
-      if ((event.type == 'procedure:updated' && event.data['id'] == processId) || 
+      if ((event.type == 'procedure:updated' &&
+              event.data['id'] == processId) ||
           event.type == 'connected') {
         refresh();
       }
@@ -181,7 +188,9 @@ class ProcedureTimelineNotifier extends FamilyAsyncNotifier<List<TimelineEvent>,
   }
 
   Future<List<TimelineEvent>> _fetch() async {
-    return (await ref.read(getProcedureTimelineUseCaseProvider)(arg)).getOrThrow();
+    return (await ref.read(getProcedureTimelineUseCaseProvider)(
+      arg,
+    )).getOrThrow();
   }
 
   Future<void> refresh() async {
@@ -268,12 +277,14 @@ final class ProcedureActions {
     required String fileName,
     void Function(int count, int total)? onSendProgress,
   }) async {
-    (await _ref.read(uploadDocumentUseCaseProvider).call(
-          processId: processId,
-          filePath: filePath,
-          fileName: fileName,
-          onSendProgress: onSendProgress,
-        ))
+    (await _ref
+            .read(uploadDocumentUseCaseProvider)
+            .call(
+              processId: processId,
+              filePath: filePath,
+              fileName: fileName,
+              onSendProgress: onSendProgress,
+            ))
         .getOrThrow();
     _ref.invalidate(procedureDocumentsProvider(processId));
     _ref.invalidate(myDocumentsProvider);
@@ -284,10 +295,9 @@ final class ProcedureActions {
     required String processId,
     required String note,
   }) async {
-    (await _ref.read(addNoteUseCaseProvider).call(
-          processId: processId,
-          note: note,
-        ))
+    (await _ref
+            .read(addNoteUseCaseProvider)
+            .call(processId: processId, note: note))
         .getOrThrow();
     _ref.invalidate(procedureDetailsProvider(processId));
     _ref.invalidate(procedureTimelineProvider(processId));
@@ -297,10 +307,9 @@ final class ProcedureActions {
     required String processId,
     required String documentName,
   }) async {
-    (await _ref.read(requestDocumentUseCaseProvider).call(
-          processId: processId,
-          documentName: documentName,
-        ))
+    (await _ref
+            .read(requestDocumentUseCaseProvider)
+            .call(processId: processId, documentName: documentName))
         .getOrThrow();
     _ref.invalidate(procedureDetailsProvider(processId));
     _ref.invalidate(procedureTimelineProvider(processId));
@@ -311,11 +320,9 @@ final class ProcedureActions {
     required String title,
     required DateTime date,
   }) async {
-    (await _ref.read(scheduleEventUseCaseProvider).call(
-          processId: processId,
-          title: title,
-          date: date,
-        ))
+    (await _ref
+            .read(scheduleEventUseCaseProvider)
+            .call(processId: processId, title: title, date: date))
         .getOrThrow();
     _ref.invalidate(procedureDetailsProvider(processId));
     _ref.invalidate(procedureTimelineProvider(processId));

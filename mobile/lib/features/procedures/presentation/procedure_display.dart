@@ -53,13 +53,13 @@ extension LegalProcessDisplay on LegalProcess {
 }
 
 String translateStatus(String status) => switch (status) {
-      'UNDER_ANALYSIS' => 'EM ANÁLISE',
-      'AWAITING_DOCUMENT' => 'AGUARDANDO DOCUMENTO',
-      'COMPLETED' => 'CONCLUÍDO',
-      'ARCHIVED' => 'ARQUIVADO',
-      'OPEN' => 'ABERTO',
-      _ => status,
-    };
+  'UNDER_ANALYSIS' => 'EM ANÁLISE',
+  'AWAITING_DOCUMENT' => 'AGUARDANDO DOCUMENTO',
+  'COMPLETED' => 'CONCLUÍDO',
+  'ARCHIVED' => 'ARQUIVADO',
+  'OPEN' => 'ABERTO',
+  _ => status,
+};
 
 String formatTimelineContent(String content) {
   var formatted = content;
@@ -68,7 +68,7 @@ String formatTimelineContent(String content) {
     'AWAITING_DOCUMENT',
     'COMPLETED',
     'ARCHIVED',
-    'OPEN'
+    'OPEN',
   ];
 
   for (final status in statuses) {

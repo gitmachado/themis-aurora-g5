@@ -16,9 +16,9 @@ class ThemisLogo extends StatelessWidget {
     return SvgPicture.asset(
       AppAssets.logo,
       height: size,
-      colorFilter: dark 
-        ? const ColorFilter.mode(AppColors.white, BlendMode.srcIn)
-        : null,
+      colorFilter: dark
+          ? const ColorFilter.mode(AppColors.white, BlendMode.srcIn)
+          : null,
     );
   }
 }
@@ -181,7 +181,8 @@ class ThemisSegmentedControl extends StatelessWidget {
     required this.selectedIndex,
     required this.onChanged,
     this.controller,
-    Animation<double>? animation, // Mantido para compatibilidade, mas ignorado se houver controller
+    Animation<double>?
+    animation, // Mantido para compatibilidade, mas ignorado se houver controller
   });
 
   @override
@@ -216,10 +217,7 @@ class ThemisSegmentedControl extends StatelessWidget {
         ),
         labelColor: AppColors.ink,
         unselectedLabelColor: AppColors.ink3,
-        labelStyle: const TextStyle(
-          fontSize: 13,
-          fontWeight: FontWeight.w700,
-        ),
+        labelStyle: const TextStyle(fontSize: 13, fontWeight: FontWeight.w700),
         unselectedLabelStyle: const TextStyle(
           fontSize: 13,
           fontWeight: FontWeight.w600,
@@ -227,14 +225,18 @@ class ThemisSegmentedControl extends StatelessWidget {
         padding: EdgeInsets.zero,
         labelPadding: EdgeInsets.zero,
         indicatorPadding: EdgeInsets.zero,
-        tabs: labels.map((label) => Tab(
-          child: Text(
-            label,
-            maxLines: 1,
-            softWrap: false,
-            overflow: TextOverflow.fade,
-          ),
-        )).toList(),
+        tabs: labels
+            .map(
+              (label) => Tab(
+                child: Text(
+                  label,
+                  maxLines: 1,
+                  softWrap: false,
+                  overflow: TextOverflow.fade,
+                ),
+              ),
+            )
+            .toList(),
       ),
     );
   }

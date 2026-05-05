@@ -54,7 +54,10 @@ class _LawyerAIManagerScreenState extends State<LawyerAIManagerScreen> {
             AppAssets.logo,
             width: 32,
             height: 32,
-            colorFilter: const ColorFilter.mode(AppColors.yellow, BlendMode.srcIn),
+            colorFilter: const ColorFilter.mode(
+              AppColors.yellow,
+              BlendMode.srcIn,
+            ),
           ),
           const SizedBox(width: 16),
           Expanded(

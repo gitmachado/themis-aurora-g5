@@ -29,7 +29,8 @@ class _LawyerProcedureListScreenState
   @override
   Widget build(BuildContext context) {
     final procedures = ref.watch(myProceduresProvider);
-    final notifications = ref.watch(myNotificationsProvider).valueOrNull ?? const [];
+    final notifications =
+        ref.watch(myNotificationsProvider).valueOrNull ?? const [];
     final unreadCount = notifications.where((n) => !n.isRead).length;
 
     return Scaffold(
@@ -46,12 +47,7 @@ class _LawyerProcedureListScreenState
         children: [
           Container(
             color: AppColors.background,
-            child: Column(
-              children: [
-                _buildSearchBar(),
-                _buildFilters(),
-              ],
-            ),
+            child: Column(children: [_buildSearchBar(), _buildFilters()]),
           ),
           Expanded(
             child: procedures.when(
@@ -195,7 +191,8 @@ class _LawyerProcedureListScreenState
               statusLabel: p.displayStatus,
               statusType: p.badgeType,
               progressPercentage: p.progressPercentage,
-              lastUpdate: p.lastNote ??
+              lastUpdate:
+                  p.lastNote ??
                   'Atualizado em ${formatFullDateTime(p.updatedAt)}',
               onTap: () {
                 Navigator.pushNamed(

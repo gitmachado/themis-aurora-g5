@@ -76,13 +76,16 @@ class _ClientFilesScreenState extends ConsumerState<ClientFilesScreen> {
       body: documents.when(
         data: (items) {
           // Calcular categorias dinâmicas presentes nos documentos
-          final uniqueCategories = items.map((doc) {
-            final isImage = doc.mimeType?.startsWith('image/') ?? false;
-            final isPdf = doc.mimeType == 'application/pdf';
-            if (isImage) return 'Imagem';
-            if (isPdf) return 'Pdf';
-            return 'Outros';
-          }).toSet().toList();
+          final uniqueCategories = items
+              .map((doc) {
+                final isImage = doc.mimeType?.startsWith('image/') ?? false;
+                final isPdf = doc.mimeType == 'application/pdf';
+                if (isImage) return 'Imagem';
+                if (isPdf) return 'Pdf';
+                return 'Outros';
+              })
+              .toSet()
+              .toList();
 
           final showFilters = uniqueCategories.length > 1;
 
@@ -93,9 +96,7 @@ class _ClientFilesScreenState extends ConsumerState<ClientFilesScreen> {
                 width: double.infinity,
                 decoration: const BoxDecoration(
                   color: AppColors.white,
-                  border: Border(
-                    bottom: BorderSide(color: AppColors.divider),
-                  ),
+                  border: Border(bottom: BorderSide(color: AppColors.divider)),
                 ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -119,24 +120,28 @@ class _ClientFilesScreenState extends ConsumerState<ClientFilesScreen> {
                         child: Row(
                           children: [
                             const SizedBox(width: 20),
-                            ...procedures.map((p) => Builder(
-                                  builder: (context) => Padding(
-                                    padding: const EdgeInsets.only(right: 10),
-                                    child: _buildProcessTab(
-                                      p,
-                                      isSelected: _selectedProcessId == p.id,
-                                      onTap: () {
-                                        setState(() => _selectedProcessId = p.id);
-                                        Scrollable.ensureVisible(
-                                          context,
-                                          duration: const Duration(milliseconds: 300),
-                                          curve: Curves.easeInOut,
-                                          alignment: 0.5,
-                                        );
-                                      },
-                                    ),
+                            ...procedures.map(
+                              (p) => Builder(
+                                builder: (context) => Padding(
+                                  padding: const EdgeInsets.only(right: 10),
+                                  child: _buildProcessTab(
+                                    p,
+                                    isSelected: _selectedProcessId == p.id,
+                                    onTap: () {
+                                      setState(() => _selectedProcessId = p.id);
+                                      Scrollable.ensureVisible(
+                                        context,
+                                        duration: const Duration(
+                                          milliseconds: 300,
+                                        ),
+                                        curve: Curves.easeInOut,
+                                        alignment: 0.5,
+                                      );
+                                    },
                                   ),
-                                )),
+                                ),
+                              ),
+                            ),
                             const SizedBox(width: 10),
                           ],
                         ),
@@ -163,16 +168,20 @@ class _ClientFilesScreenState extends ConsumerState<ClientFilesScreen> {
                             _buildFilterChip(
                               'Todos',
                               isSelected: _selectedFilter == 'Todos',
-                              onTap: () => setState(() => _selectedFilter = 'Todos'),
+                              onTap: () =>
+                                  setState(() => _selectedFilter = 'Todos'),
                             ),
-                            ...uniqueCategories.map((cat) => Padding(
-                                  padding: const EdgeInsets.only(left: 8),
-                                  child: _buildFilterChip(
-                                    cat,
-                                    isSelected: _selectedFilter == cat,
-                                    onTap: () => setState(() => _selectedFilter = cat),
-                                  ),
-                                )),
+                            ...uniqueCategories.map(
+                              (cat) => Padding(
+                                padding: const EdgeInsets.only(left: 8),
+                                child: _buildFilterChip(
+                                  cat,
+                                  isSelected: _selectedFilter == cat,
+                                  onTap: () =>
+                                      setState(() => _selectedFilter = cat),
+                                ),
+                              ),
+                            ),
                             const SizedBox(width: 20),
                           ],
                         ),
@@ -188,9 +197,7 @@ class _ClientFilesScreenState extends ConsumerState<ClientFilesScreen> {
                   color: AppColors.yellow,
                   minHeight: 3,
                 ),
-              Expanded(
-                child: _buildFileList(items, procedures, showFilters),
-              ),
+              Expanded(child: _buildFileList(items, procedures, showFilters)),
             ],
           );
         },
@@ -199,10 +206,10 @@ class _ClientFilesScreenState extends ConsumerState<ClientFilesScreen> {
       ),
       floatingActionButton: FloatingActionButton(
         heroTag: 'client_file_fab',
-        onPressed: _isUploading 
-          ? null 
-          : () => _pickAndUpload(procedures),
-        backgroundColor: _isUploading ? AppColors.textCaption : AppColors.yellow,
+        onPressed: _isUploading ? null : () => _pickAndUpload(procedures),
+        backgroundColor: _isUploading
+            ? AppColors.textCaption
+            : AppColors.yellow,
         child: _isUploading
             ? const SizedBox(
                 width: 20,
@@ -221,7 +228,11 @@ class _ClientFilesScreenState extends ConsumerState<ClientFilesScreen> {
     );
   }
 
-  Widget _buildProcessTab(LegalProcess process, {required bool isSelected, required VoidCallback onTap}) {
+  Widget _buildProcessTab(
+    LegalProcess process, {
+    required bool isSelected,
+    required VoidCallback onTap,
+  }) {
     return GestureDetector(
       onTap: onTap,
       child: Container(
@@ -230,16 +241,20 @@ class _ClientFilesScreenState extends ConsumerState<ClientFilesScreen> {
           color: isSelected ? AppColors.primary : AppColors.surface2,
           borderRadius: BorderRadius.circular(100),
           border: Border.all(
-            color: isSelected ? AppColors.primary : AppColors.divider.withValues(alpha: 0.5),
+            color: isSelected
+                ? AppColors.primary
+                : AppColors.divider.withValues(alpha: 0.5),
             width: 1.5,
           ),
-          boxShadow: isSelected ? [
-            BoxShadow(
-              color: AppColors.primary.withValues(alpha: 0.2),
-              blurRadius: 8,
-              offset: const Offset(0, 3),
-            )
-          ] : null,
+          boxShadow: isSelected
+              ? [
+                  BoxShadow(
+                    color: AppColors.primary.withValues(alpha: 0.2),
+                    blurRadius: 8,
+                    offset: const Offset(0, 3),
+                  ),
+                ]
+              : null,
         ),
         child: Row(
           mainAxisSize: MainAxisSize.min,
@@ -264,7 +279,11 @@ class _ClientFilesScreenState extends ConsumerState<ClientFilesScreen> {
     );
   }
 
-  Widget _buildFilterChip(String label, {required bool isSelected, required VoidCallback onTap}) {
+  Widget _buildFilterChip(
+    String label, {
+    required bool isSelected,
+    required VoidCallback onTap,
+  }) {
     return GestureDetector(
       onTap: onTap,
       child: Container(
@@ -288,8 +307,16 @@ class _ClientFilesScreenState extends ConsumerState<ClientFilesScreen> {
     );
   }
 
-  Widget _buildFileList(List<ProcessDocument> documents, List<LegalProcess> procedures, bool hasFilters) {
-    final filtered = documents.where((doc) => _matchesFilter(doc, _selectedFilter, _selectedProcessId)).toList();
+  Widget _buildFileList(
+    List<ProcessDocument> documents,
+    List<LegalProcess> procedures,
+    bool hasFilters,
+  ) {
+    final filtered = documents
+        .where(
+          (doc) => _matchesFilter(doc, _selectedFilter, _selectedProcessId),
+        )
+        .toList();
 
     // Map para busca rapida de processos
     final processMap = {for (var p in procedures) p.id: p};
@@ -317,7 +344,9 @@ class _ClientFilesScreenState extends ConsumerState<ClientFilesScreen> {
                       Text(
                         'Nenhum arquivo encontrado',
                         textAlign: TextAlign.center,
-                        style: AppTextStyles.h2.copyWith(color: AppColors.textCaption),
+                        style: AppTextStyles.h2.copyWith(
+                          color: AppColors.textCaption,
+                        ),
                       ),
                     ],
                   ),
@@ -344,7 +373,7 @@ class _ClientFilesScreenState extends ConsumerState<ClientFilesScreen> {
           final document = filtered[index];
           final isImage = document.mimeType?.startsWith('image/') ?? false;
           final isPdf = document.mimeType == 'application/pdf';
-          
+
           String displayCategory = 'Arquivo';
           if (isImage) displayCategory = 'Imagem';
           if (isPdf) displayCategory = 'PDF';
@@ -354,24 +383,24 @@ class _ClientFilesScreenState extends ConsumerState<ClientFilesScreen> {
             fileSize: formatFileSize(document.sizeBytes),
             dateAdded: formatDateLabel(document.createdAt),
             category: displayCategory,
-            subtitle: processMap[document.legalProcessId] != null 
+            subtitle: processMap[document.legalProcessId] != null
                 ? '${processMap[document.legalProcessId]!.title} • ${processMap[document.legalProcessId]!.processNumber ?? 'N/A'}'
                 : null,
             icon: isImage
                 ? Icons.image_outlined
                 : isPdf
-                    ? Icons.picture_as_pdf_outlined
-                    : Icons.description_outlined,
+                ? Icons.picture_as_pdf_outlined
+                : Icons.description_outlined,
             iconColor: isImage
                 ? const Color(0xFFEA580C)
                 : isPdf
-                    ? const Color(0xFFDC2626)
-                    : AppColors.primary,
+                ? const Color(0xFFDC2626)
+                : AppColors.primary,
             iconBackgroundColor: isImage
                 ? const Color(0xFFFFF7ED)
                 : isPdf
-                    ? const Color(0xFFFEF2F2)
-                    : const Color(0xFFEEF2FF),
+                ? const Color(0xFFFEF2F2)
+                : const Color(0xFFEEF2FF),
             actionIcon: Icons.visibility_outlined,
             onTap: () => _openDocument(document),
           );
@@ -379,7 +408,6 @@ class _ClientFilesScreenState extends ConsumerState<ClientFilesScreen> {
       ),
     );
   }
-
 
   Widget _buildLoadingList() {
     return ListView.separated(
@@ -442,7 +470,7 @@ class _ClientFilesScreenState extends ConsumerState<ClientFilesScreen> {
 
     // Filtro de categoria
     if (category == 'Todos') return true;
-    
+
     return _documentType(doc) == category;
   }
 
@@ -462,7 +490,11 @@ class _ClientFilesScreenState extends ConsumerState<ClientFilesScreen> {
   Future<void> _pickAndUpload(List<LegalProcess> procedures) async {
     if (procedures.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Voce precisa ter um tramite ativo para enviar arquivo.')),
+        const SnackBar(
+          content: Text(
+            'Voce precisa ter um tramite ativo para enviar arquivo.',
+          ),
+        ),
       );
       return;
     }
@@ -474,17 +506,26 @@ class _ClientFilesScreenState extends ConsumerState<ClientFilesScreen> {
 
     // Modal de confirmacao elegante
     final confirmed = await _showUploadConfirmation(process);
-    
+
     if (confirmed != true) return;
 
     final result = await FilePicker.pickFiles(
       type: FileType.custom,
       allowedExtensions: const [
-        'pdf', 'png', 'jpg', 'jpeg', 'heic', 'heif', 'doc', 'docx', 'xls', 'xlsx',
+        'pdf',
+        'png',
+        'jpg',
+        'jpeg',
+        'heic',
+        'heif',
+        'doc',
+        'docx',
+        'xls',
+        'xlsx',
       ],
       withData: false,
     );
-    
+
     final file = result?.files.single;
     if (file == null || file.path == null) return;
 
@@ -564,10 +605,7 @@ class _ClientFilesScreenState extends ConsumerState<ClientFilesScreen> {
                   ),
                 ),
                 const SizedBox(height: 20),
-                Text(
-                  'Confirmar Envio',
-                  style: AppTextStyles.h2,
-                ),
+                Text('Confirmar Envio', style: AppTextStyles.h2),
                 const SizedBox(height: 8),
                 Text(
                   'Voce esta prestes a adicionar um arquivo ao processo:',
@@ -576,7 +614,10 @@ class _ClientFilesScreenState extends ConsumerState<ClientFilesScreen> {
                 ),
                 const SizedBox(height: 12),
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 12,
+                  ),
                   decoration: BoxDecoration(
                     color: AppColors.white,
                     borderRadius: BorderRadius.circular(12),
@@ -621,7 +662,9 @@ class _ClientFilesScreenState extends ConsumerState<ClientFilesScreen> {
                           backgroundColor: AppColors.ink,
                           foregroundColor: AppColors.white,
                           padding: const EdgeInsets.symmetric(vertical: 16),
-                          textStyle: AppTextStyles.body.copyWith(fontWeight: FontWeight.bold),
+                          textStyle: AppTextStyles.body.copyWith(
+                            fontWeight: FontWeight.bold,
+                          ),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(12),
                           ),
@@ -637,7 +680,9 @@ class _ClientFilesScreenState extends ConsumerState<ClientFilesScreen> {
                           backgroundColor: AppColors.yellow,
                           foregroundColor: AppColors.ink,
                           padding: const EdgeInsets.symmetric(vertical: 16),
-                          textStyle: AppTextStyles.body.copyWith(fontWeight: FontWeight.bold),
+                          textStyle: AppTextStyles.body.copyWith(
+                            fontWeight: FontWeight.bold,
+                          ),
                           elevation: 0,
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(12),
@@ -661,7 +706,7 @@ class _ClientFilesScreenState extends ConsumerState<ClientFilesScreen> {
       final url = await ref
           .read(apiClientProvider)
           .getDocumentAccessUrl(document.id);
-      
+
       if (!mounted) return;
 
       Navigator.push(

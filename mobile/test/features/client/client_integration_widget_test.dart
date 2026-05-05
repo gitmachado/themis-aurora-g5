@@ -157,4 +157,3 @@ class _MockProceduresNotifier extends MyProceduresNotifier {
   @override
   Future<List<LegalProcess>> build() async => data;
 }
-

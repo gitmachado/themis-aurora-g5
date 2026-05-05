@@ -78,7 +78,11 @@ class ApiClient {
       fileField: await MultipartFile.fromFile(filePath, filename: fileName),
     });
     final response = await _send(
-      () => _dio.post<Object?>(path, data: formData, onSendProgress: onSendProgress),
+      () => _dio.post<Object?>(
+        path,
+        data: formData,
+        onSendProgress: onSendProgress,
+      ),
     );
     return _asMap(response.data);
   }

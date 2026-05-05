@@ -59,10 +59,10 @@ class _LawyerChatHandoffScreenState
 
   void _onScroll() {
     if (!_scrollController.hasClients) return;
-    
+
     final offset = _scrollController.offset;
     final isFarFromBottom = offset > 100;
-    
+
     debugPrint('[LawyerChat] Scroll Offset: $offset, IsFar: $isFarFromBottom');
 
     if (isFarFromBottom != _showScrollDownButton) {
@@ -216,32 +216,33 @@ class _LawyerChatHandoffScreenState
     final isLockedByOther = lockState.isLocked && lockState.lawyerId != myId;
 
     // Escuta novas mensagens no topo do build
-    ref.listen<AsyncValue<List<ChatMessage>>>(
-      liveChatProvider(widget.whatsappNumber),
-      (previous, next) {
-        if (next is AsyncData<List<ChatMessage>>) {
-          final currentMsgs = next.value;
-          final prevMsgs = previous?.valueOrNull ?? [];
+    ref.listen<
+      AsyncValue<List<ChatMessage>>
+    >(liveChatProvider(widget.whatsappNumber), (previous, next) {
+      if (next is AsyncData<List<ChatMessage>>) {
+        final currentMsgs = next.value;
+        final prevMsgs = previous?.valueOrNull ?? [];
 
-          debugPrint('[LawyerChat] New update! Prev: ${prevMsgs.length}, Current: ${currentMsgs.length}');
+        debugPrint(
+          '[LawyerChat] New update! Prev: ${prevMsgs.length}, Current: ${currentMsgs.length}',
+        );
 
-          if (currentMsgs.length > prevMsgs.length) {
-            final isFar = _scrollController.hasClients && 
-                         _scrollController.offset > 100;
-            
-            debugPrint('[LawyerChat] Message added! IsFar: $isFar');
+        if (currentMsgs.length > prevMsgs.length) {
+          final isFar =
+              _scrollController.hasClients && _scrollController.offset > 100;
 
-            if (isFar) {
-              setState(() {
-                _unreadCount += (currentMsgs.length - prevMsgs.length);
-              });
-            } else {
-              _scrollToBottom();
-            }
+          debugPrint('[LawyerChat] Message added! IsFar: $isFar');
+
+          if (isFar) {
+            setState(() {
+              _unreadCount += (currentMsgs.length - prevMsgs.length);
+            });
+          } else {
+            _scrollToBottom();
           }
         }
-      },
-    );
+      }
+    });
 
     return AnnotatedRegion<SystemUiOverlayStyle>(
       value: const SystemUiOverlayStyle(
@@ -396,14 +397,17 @@ class _LawyerChatHandoffScreenState
                   .withValues(alpha: 0.1),
               shape: BoxShape.circle,
             ),
-            child: _isAIPaused 
-              ? Icon(Icons.bolt, color: AppColors.primary, size: 20)
-              : SvgPicture.asset(
-                  AppAssets.logo,
-                  width: 20,
-                  height: 20,
-                  colorFilter: const ColorFilter.mode(AppColors.secondary, BlendMode.srcIn),
-                ),
+            child: _isAIPaused
+                ? Icon(Icons.bolt, color: AppColors.primary, size: 20)
+                : SvgPicture.asset(
+                    AppAssets.logo,
+                    width: 20,
+                    height: 20,
+                    colorFilter: const ColorFilter.mode(
+                      AppColors.secondary,
+                      BlendMode.srcIn,
+                    ),
+                  ),
           ),
           const SizedBox(width: 12),
           Expanded(
@@ -440,7 +444,10 @@ class _LawyerChatHandoffScreenState
                   AppAssets.logo,
                   width: 18,
                   height: 18,
-                  colorFilter: const ColorFilter.mode(AppColors.primary, BlendMode.srcIn),
+                  colorFilter: const ColorFilter.mode(
+                    AppColors.primary,
+                    BlendMode.srcIn,
+                  ),
                 ),
                 label: const Text('Devolver p/ IA'),
                 style: TextButton.styleFrom(
@@ -751,10 +758,7 @@ class _LawyerChatHandoffScreenState
                   color: AppColors.primary,
                   shape: BoxShape.circle,
                 ),
-                constraints: const BoxConstraints(
-                  minWidth: 20,
-                  minHeight: 20,
-                ),
+                constraints: const BoxConstraints(minWidth: 20, minHeight: 20),
                 child: Center(
                   child: Text(
                     _unreadCount > 9 ? '9+' : '$_unreadCount',

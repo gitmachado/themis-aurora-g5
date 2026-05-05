@@ -55,7 +55,9 @@ class TimelineEventTile extends StatelessWidget {
                   child: Icon(
                     icon ?? (isFirst ? Icons.check : Icons.circle),
                     size: 16,
-                    color: iconColor ?? (isFirst ? AppColors.ink : AppColors.divider),
+                    color:
+                        iconColor ??
+                        (isFirst ? AppColors.ink : AppColors.divider),
                   ),
                 ),
                 if (!isLast)

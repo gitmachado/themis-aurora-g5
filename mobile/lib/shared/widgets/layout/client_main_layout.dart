@@ -31,7 +31,8 @@ class _ClientMainLayoutState extends ConsumerState<ClientMainLayout> {
     super.initState();
     Future.microtask(() {
       if (mounted) {
-        ref.read(clientNavigationIndexProvider.notifier).state = widget.initialIndex;
+        ref.read(clientNavigationIndexProvider.notifier).state =
+            widget.initialIndex;
       }
     });
   }

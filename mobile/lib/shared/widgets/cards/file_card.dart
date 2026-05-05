@@ -122,7 +122,11 @@ class AppFileCard extends StatelessWidget {
               if (onActionTap != null)
                 IconButton(
                   onPressed: onActionTap,
-                  icon: Icon(actionIcon, color: const Color(0xFF64748B), size: 20),
+                  icon: Icon(
+                    actionIcon,
+                    color: const Color(0xFF64748B),
+                    size: 20,
+                  ),
                   padding: EdgeInsets.zero,
                   constraints: const BoxConstraints(),
                   splashRadius: 20,

@@ -37,8 +37,10 @@ class LawyerProcedureDetailScreen extends ConsumerStatefulWidget {
 class _LawyerProcedureDetailScreenState
     extends ConsumerState<LawyerProcedureDetailScreen>
     with SingleTickerProviderStateMixin {
-  late final TabController _tabController = TabController(length: 3, vsync: this)
-    ..addListener(() => setState(() {}));
+  late final TabController _tabController = TabController(
+    length: 3,
+    vsync: this,
+  )..addListener(() => setState(() {}));
 
   String _selectedFileFilter = 'Todos';
 
@@ -138,9 +140,7 @@ class _LawyerProcedureDetailScreenState
       child: Container(
         decoration: const BoxDecoration(
           color: AppColors.white,
-          border: Border(
-            bottom: BorderSide(color: AppColors.divider),
-          ),
+          border: Border(bottom: BorderSide(color: AppColors.divider)),
         ),
         child: Padding(
           padding: const EdgeInsets.fromLTRB(20, 12, 20, 12),
@@ -161,7 +161,9 @@ class _LawyerProcedureDetailScreenState
     return RefreshIndicator(
       onRefresh: () async {
         ref.invalidate(procedureDetailsProvider(widget.processId ?? ''));
-        return ref.read(procedureDetailsProvider(widget.processId ?? '').future);
+        return ref.read(
+          procedureDetailsProvider(widget.processId ?? '').future,
+        );
       },
       child: SingleChildScrollView(
         physics: const AlwaysScrollableScrollPhysics(),
@@ -225,7 +227,8 @@ class _LawyerProcedureDetailScreenState
                     icon: Icons.calendar_today_outlined,
                     iconColor: AppColors.primary,
                   ),
-                  if (process.description != null && process.description!.isNotEmpty) ...[
+                  if (process.description != null &&
+                      process.description!.isNotEmpty) ...[
                     const SizedBox(height: 24),
                     const Divider(height: 1),
                     const SizedBox(height: 24),
@@ -243,7 +246,8 @@ class _LawyerProcedureDetailScreenState
                       ),
                     ),
                   ],
-                  if (process.lastNote != null && process.lastNote!.isNotEmpty) ...[
+                  if (process.lastNote != null &&
+                      process.lastNote!.isNotEmpty) ...[
                     const SizedBox(height: 20),
                     Container(
                       padding: const EdgeInsets.all(16),
@@ -340,7 +344,10 @@ class _LawyerProcedureDetailScreenState
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Padding(
-                    padding: EdgeInsets.only(bottom: 16, top: groupIndex == 0 ? 0 : 8),
+                    padding: EdgeInsets.only(
+                      bottom: 16,
+                      top: groupIndex == 0 ? 0 : 8,
+                    ),
                     child: Text(
                       monthKey,
                       style: AppTextStyles.cap.copyWith(
@@ -352,7 +359,8 @@ class _LawyerProcedureDetailScreenState
                   ),
                   ...monthEvents.map((event) {
                     final isGlobalFirst = sortedEvents.indexOf(event) == 0;
-                    final isGlobalLast = sortedEvents.indexOf(event) == sortedEvents.length - 1;
+                    final isGlobalLast =
+                        sortedEvents.indexOf(event) == sortedEvents.length - 1;
 
                     return TimelineEventTile(
                       isFirst: isGlobalFirst,
@@ -361,8 +369,12 @@ class _LawyerProcedureDetailScreenState
                       date: formatFullDateTime(event.createdAt),
                       description: formatTimelineContent(event.content),
                       icon: _timelineIcon(event.type),
-                      iconBackgroundColor: isGlobalFirst ? AppColors.yellow : AppColors.yellowSoft,
-                      iconColor: isGlobalFirst ? AppColors.ink : AppColors.yellowDeep,
+                      iconBackgroundColor: isGlobalFirst
+                          ? AppColors.yellow
+                          : AppColors.yellowSoft,
+                      iconColor: isGlobalFirst
+                          ? AppColors.ink
+                          : AppColors.yellowDeep,
                     );
                   }),
                 ],
@@ -395,13 +407,16 @@ class _LawyerProcedureDetailScreenState
         }
 
         // Calcular categorias dinâmicas (igual ao cliente)
-        final uniqueCategories = documents.map((doc) {
-          final isImage = doc.mimeType?.startsWith('image/') ?? false;
-          final isPdf = doc.mimeType == 'application/pdf';
-          if (isImage) return 'Imagem';
-          if (isPdf) return 'PDF';
-          return 'Outros';
-        }).toSet().toList();
+        final uniqueCategories = documents
+            .map((doc) {
+              final isImage = doc.mimeType?.startsWith('image/') ?? false;
+              final isPdf = doc.mimeType == 'application/pdf';
+              if (isImage) return 'Imagem';
+              if (isPdf) return 'PDF';
+              return 'Outros';
+            })
+            .toSet()
+            .toList();
 
         // Se houver apenas uma categoria, não mostramos filtros (além do 'Todos')
         final showFilters = uniqueCategories.length > 1;
@@ -437,7 +452,10 @@ class _LawyerProcedureDetailScreenState
                     scrollDirection: Axis.horizontal,
                     child: Container(
                       alignment: Alignment.centerLeft,
-                      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 20,
+                        vertical: 12,
+                      ),
                       child: Row(
                         mainAxisSize: MainAxisSize.min,
                         mainAxisAlignment: MainAxisAlignment.start,
@@ -445,16 +463,20 @@ class _LawyerProcedureDetailScreenState
                           _buildFilterChip(
                             'Todos',
                             isSelected: _selectedFileFilter == 'Todos',
-                            onTap: () => setState(() => _selectedFileFilter = 'Todos'),
+                            onTap: () =>
+                                setState(() => _selectedFileFilter = 'Todos'),
                           ),
-                          ...uniqueCategories.map((cat) => Padding(
-                                padding: const EdgeInsets.only(left: 8),
-                                child: _buildFilterChip(
-                                  cat,
-                                  isSelected: _selectedFileFilter == cat,
-                                  onTap: () => setState(() => _selectedFileFilter = cat),
-                                ),
-                              )),
+                          ...uniqueCategories.map(
+                            (cat) => Padding(
+                              padding: const EdgeInsets.only(left: 8),
+                              child: _buildFilterChip(
+                                cat,
+                                isSelected: _selectedFileFilter == cat,
+                                onTap: () =>
+                                    setState(() => _selectedFileFilter = cat),
+                              ),
+                            ),
+                          ),
                         ],
                       ),
                     ),
@@ -468,7 +490,8 @@ class _LawyerProcedureDetailScreenState
                   separatorBuilder: (_, _) => const SizedBox(height: 12),
                   itemBuilder: (context, index) {
                     final document = filteredDocuments[index];
-                    final isImage = document.mimeType?.startsWith('image/') ?? false;
+                    final isImage =
+                        document.mimeType?.startsWith('image/') ?? false;
                     final isPdf = document.mimeType == 'application/pdf';
 
                     String displayCategory = 'Arquivo';
@@ -482,9 +505,11 @@ class _LawyerProcedureDetailScreenState
                       dateAdded: formatDateLabel(document.createdAt),
                       onTap: () async {
                         try {
-                          final url = await ref.read(apiClientProvider).getDocumentAccessUrl(document.id);
+                          final url = await ref
+                              .read(apiClientProvider)
+                              .getDocumentAccessUrl(document.id);
                           if (!context.mounted) return;
-                          
+
                           Navigator.push(
                             context,
                             MaterialPageRoute(
@@ -498,25 +523,27 @@ class _LawyerProcedureDetailScreenState
                         } catch (e) {
                           if (!context.mounted) return;
                           ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(content: Text('Erro ao abrir arquivo: $e')),
+                            SnackBar(
+                              content: Text('Erro ao abrir arquivo: $e'),
+                            ),
                           );
                         }
                       },
                       icon: isImage
                           ? Icons.image_outlined
-                          : isPdf 
-                              ? Icons.picture_as_pdf_outlined
-                              : Icons.description_outlined,
+                          : isPdf
+                          ? Icons.picture_as_pdf_outlined
+                          : Icons.description_outlined,
                       iconColor: isImage
                           ? const Color(0xFFEA580C)
                           : isPdf
-                              ? const Color(0xFFDC2626)
-                              : AppColors.primary,
+                          ? const Color(0xFFDC2626)
+                          : AppColors.primary,
                       iconBackgroundColor: isImage
                           ? const Color(0xFFFFF7ED)
                           : isPdf
-                              ? const Color(0xFFFEF2F2)
-                              : const Color(0xFFEEF2FF),
+                          ? const Color(0xFFFEF2F2)
+                          : const Color(0xFFEEF2FF),
                       actionIcon: Icons.visibility_outlined,
                       onActionTap: () => _showFileActions(processId, document),
                     );
@@ -538,7 +565,11 @@ class _LawyerProcedureDetailScreenState
     );
   }
 
-  Widget _buildFilterChip(String label, {required bool isSelected, required VoidCallback onTap}) {
+  Widget _buildFilterChip(
+    String label, {
+    required bool isSelected,
+    required VoidCallback onTap,
+  }) {
     return GestureDetector(
       onTap: onTap,
       child: Container(
@@ -579,8 +610,14 @@ class _LawyerProcedureDetailScreenState
               },
             ),
             ListTile(
-              leading: const Icon(Icons.delete_outline_rounded, color: AppColors.error),
-              title: const Text('Remover', style: TextStyle(color: AppColors.error)),
+              leading: const Icon(
+                Icons.delete_outline_rounded,
+                color: AppColors.error,
+              ),
+              title: const Text(
+                'Remover',
+                style: TextStyle(color: AppColors.error),
+              ),
               onTap: () {
                 Navigator.pop(context);
                 _confirmDeleteDocument(processId, document);
@@ -594,8 +631,18 @@ class _LawyerProcedureDetailScreenState
 
   String _getMonthName(int month) {
     const months = [
-      'Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho',
-      'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'
+      'Janeiro',
+      'Fevereiro',
+      'Março',
+      'Abril',
+      'Maio',
+      'Junho',
+      'Julho',
+      'Agosto',
+      'Setembro',
+      'Outubro',
+      'Novembro',
+      'Dezembro',
     ];
     return months[month - 1];
   }
@@ -925,7 +972,10 @@ class _LawyerProcedureDetailScreenState
                       onPressed: () async {
                         if (controller.text.trim().isEmpty) return;
                         Navigator.pop(context);
-                        await _requestDocument(processId, controller.text.trim());
+                        await _requestDocument(
+                          processId,
+                          controller.text.trim(),
+                        );
                       },
                       style: ElevatedButton.styleFrom(
                         backgroundColor: AppColors.yellow,
@@ -958,7 +1008,9 @@ class _LawyerProcedureDetailScreenState
         builder: (context, setState) => Dialog(
           backgroundColor: AppColors.white,
           surfaceTintColor: Colors.transparent,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(24),
+          ),
           child: Padding(
             padding: const EdgeInsets.fromLTRB(24, 32, 24, 24),
             child: Column(
@@ -1000,25 +1052,38 @@ class _LawyerProcedureDetailScreenState
                     }
                   },
                   child: Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 12,
+                    ),
                     decoration: BoxDecoration(
                       color: AppColors.surface2,
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: Row(
                       children: [
-                        const Icon(Icons.calendar_today_rounded, size: 20, color: AppColors.primary),
+                        const Icon(
+                          Icons.calendar_today_rounded,
+                          size: 20,
+                          color: AppColors.primary,
+                        ),
                         const SizedBox(width: 12),
                         Expanded(
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text('DATA DO EVENTO', style: AppTextStyles.cap),
-                              Text(formatDateLabel(selectedDate), style: AppTextStyles.body),
+                              Text(
+                                formatDateLabel(selectedDate),
+                                style: AppTextStyles.body,
+                              ),
                             ],
                           ),
                         ),
-                        const Icon(Icons.arrow_drop_down_rounded, color: AppColors.ink4),
+                        const Icon(
+                          Icons.arrow_drop_down_rounded,
+                          color: AppColors.ink4,
+                        ),
                       ],
                     ),
                   ),
@@ -1047,7 +1112,11 @@ class _LawyerProcedureDetailScreenState
                         onPressed: () async {
                           if (controller.text.trim().isEmpty) return;
                           Navigator.pop(context);
-                          await _scheduleEvent(processId, controller.text.trim(), selectedDate);
+                          await _scheduleEvent(
+                            processId,
+                            controller.text.trim(),
+                            selectedDate,
+                          );
                         },
                         style: ElevatedButton.styleFrom(
                           backgroundColor: AppColors.yellow,
@@ -1085,7 +1154,8 @@ class _LawyerProcedureDetailScreenState
         context: context,
         builder: (context) => ThemisAlertDialog(
           title: 'Anexar Arquivo?',
-          message: 'Deseja anexar o arquivo "${file.name}" a este trâmite? Esta ação notificará o cliente.',
+          message:
+              'Deseja anexar o arquivo "${file.name}" a este trâmite? Esta ação notificará o cliente.',
           confirmLabel: 'Anexar',
           onCancel: () => Navigator.pop(context, false),
           onConfirm: () => Navigator.pop(context, true),
@@ -1093,17 +1163,19 @@ class _LawyerProcedureDetailScreenState
       );
 
       if (confirm != true) return;
-      
-      if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Enviando ${file.name}...')),
-      );
 
-      await ref.read(procedureActionsProvider).uploadDocument(
-        processId: processId,
-        filePath: file.path!,
-        fileName: file.name,
-      );
+      if (!mounted) return;
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Enviando ${file.name}...')));
+
+      await ref
+          .read(procedureActionsProvider)
+          .uploadDocument(
+            processId: processId,
+            filePath: file.path!,
+            fileName: file.name,
+          );
 
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
@@ -1111,9 +1183,9 @@ class _LawyerProcedureDetailScreenState
       );
     } catch (e) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Erro ao enviar arquivo: $e')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Erro ao enviar arquivo: $e')));
     }
   }
 
@@ -1136,53 +1208,56 @@ class _LawyerProcedureDetailScreenState
 
   Future<void> _addNote(String processId, String note) async {
     try {
-      await ref.read(procedureActionsProvider).addNote(processId: processId, note: note);
+      await ref
+          .read(procedureActionsProvider)
+          .addNote(processId: processId, note: note);
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Nota adicionada.')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Nota adicionada.')));
     } catch (error) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(error.toString())),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(error.toString())));
     }
   }
 
   Future<void> _requestDocument(String processId, String documentName) async {
     try {
-      await ref.read(procedureActionsProvider).requestDocument(
-        processId: processId,
-        documentName: documentName,
-      );
+      await ref
+          .read(procedureActionsProvider)
+          .requestDocument(processId: processId, documentName: documentName);
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Solicitação enviada.')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Solicitação enviada.')));
     } catch (error) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(error.toString())),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(error.toString())));
     }
   }
 
-  Future<void> _scheduleEvent(String processId, String title, DateTime date) async {
+  Future<void> _scheduleEvent(
+    String processId,
+    String title,
+    DateTime date,
+  ) async {
     try {
-      await ref.read(procedureActionsProvider).scheduleEvent(
-        processId: processId,
-        title: title,
-        date: date,
-      );
+      await ref
+          .read(procedureActionsProvider)
+          .scheduleEvent(processId: processId, title: title, date: date);
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Evento agendado.')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Evento agendado.')));
     } catch (error) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(error.toString())),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(error.toString())));
     }
   }
 

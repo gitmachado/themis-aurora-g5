@@ -45,7 +45,9 @@ class ChatBubble extends StatelessWidget {
     }
 
     final isDark = (isLawyer && !isInverted) || (isClient && isInverted);
-    final secondaryTextColor = isDark ? Colors.white.withValues(alpha: 0.7) : AppColors.ink3;
+    final secondaryTextColor = isDark
+        ? Colors.white.withValues(alpha: 0.7)
+        : AppColors.ink3;
 
     return Align(
       alignment: isMe ? Alignment.centerRight : Alignment.centerLeft,
@@ -111,11 +113,7 @@ class ChatBubble extends StatelessWidget {
                 ),
                 if (isMe) ...[
                   const SizedBox(width: 4),
-                  Icon(
-                    Icons.done_all,
-                    size: 13,
-                    color: secondaryTextColor,
-                  ),
+                  Icon(Icons.done_all, size: 13, color: secondaryTextColor),
                 ],
               ],
             ),

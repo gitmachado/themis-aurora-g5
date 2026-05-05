@@ -51,12 +51,7 @@ class _ClientProcedureListScreenState
         children: [
           Container(
             color: AppColors.background,
-            child: Column(
-              children: [
-                _buildSearchBar(),
-                _buildFilters(),
-              ],
-            ),
+            child: Column(children: [_buildSearchBar(), _buildFilters()]),
           ),
           Expanded(
             child: account.when(
@@ -216,12 +211,12 @@ class _ClientProcedureListScreenState
               lastUpdate:
                   proc.lastNote ??
                   'Atualizado em ${formatFullDateTime(proc.updatedAt)}',
-            progressPercentage: proc.progressPercentage,
-            onTap: () => Navigator.pushNamed(
-              context,
-              AppRouter.procedureTimelineRoute,
-              arguments: {'processId': proc.id},
-            ),
+              progressPercentage: proc.progressPercentage,
+              onTap: () => Navigator.pushNamed(
+                context,
+                AppRouter.procedureTimelineRoute,
+                arguments: {'processId': proc.id},
+              ),
             ),
           );
         },

@@ -78,7 +78,10 @@ class ClientHomeScreen extends ConsumerWidget {
                           const SizedBox(height: 18),
                           _buildHeroProcessCard(context, firstProcedure),
                           const SizedBox(height: 14),
-                          _buildStatsGrid(procedureList.length, documents.length),
+                          _buildStatsGrid(
+                            procedureList.length,
+                            documents.length,
+                          ),
                           const SizedBox(height: 18),
                           const Padding(
                             padding: EdgeInsets.symmetric(horizontal: 4),
@@ -86,7 +89,9 @@ class ClientHomeScreen extends ConsumerWidget {
                           ),
                           const SizedBox(height: 10),
                           _buildQuickActions(context, ref),
-                          SizedBox(height: AppDimensions.bottomPadding(context)),
+                          SizedBox(
+                            height: AppDimensions.bottomPadding(context),
+                          ),
                         ],
                       ),
                     ),
@@ -219,14 +224,11 @@ class ClientHomeScreen extends ConsumerWidget {
       child: Column(
         children: [
           ThemisActionRow(
-            iconWidget: SvgPicture.asset(
-              AppAssets.logo,
-              width: 18,
-              height: 18,
-            ),
+            iconWidget: SvgPicture.asset(AppAssets.logo, width: 18, height: 18),
             label: 'Falar com a Themis',
             iconBackground: AppColors.yellowSoft,
-            onTap: () => ref.read(clientNavigationIndexProvider.notifier).state = 3,
+            onTap: () =>
+                ref.read(clientNavigationIndexProvider.notifier).state = 3,
           ),
           const Divider(height: 1, color: AppColors.line2),
           ThemisActionRow(

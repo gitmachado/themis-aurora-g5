@@ -33,7 +33,10 @@ class QuickAiCard extends StatelessWidget {
                 AppAssets.logo,
                 width: 24,
                 height: 24,
-                colorFilter: const ColorFilter.mode(AppColors.white, BlendMode.srcIn),
+                colorFilter: const ColorFilter.mode(
+                  AppColors.white,
+                  BlendMode.srcIn,
+                ),
               ),
             ),
             const SizedBox(width: 16),

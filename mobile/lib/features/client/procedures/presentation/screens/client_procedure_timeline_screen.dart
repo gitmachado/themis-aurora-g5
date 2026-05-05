@@ -37,8 +37,10 @@ class ClientProcedureTimelineScreen extends ConsumerStatefulWidget {
 class _ClientProcedureTimelineScreenState
     extends ConsumerState<ClientProcedureTimelineScreen>
     with SingleTickerProviderStateMixin {
-  late final TabController _tabController = TabController(length: 3, vsync: this)
-    ..addListener(() => setState(() {}));
+  late final TabController _tabController = TabController(
+    length: 3,
+    vsync: this,
+  )..addListener(() => setState(() {}));
 
   String _selectedFileFilter = 'Todos';
 
@@ -167,7 +169,9 @@ class _ClientProcedureTimelineScreenState
     return RefreshIndicator(
       onRefresh: () async {
         ref.invalidate(procedureTimelineProvider(widget.processId ?? ''));
-        return ref.read(procedureTimelineProvider(widget.processId ?? '').future);
+        return ref.read(
+          procedureTimelineProvider(widget.processId ?? '').future,
+        );
       },
       child: ListView.builder(
         physics: const AlwaysScrollableScrollPhysics(),
@@ -181,7 +185,10 @@ class _ClientProcedureTimelineScreenState
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Padding(
-                padding: EdgeInsets.only(bottom: 16, top: groupIndex == 0 ? 0 : 8),
+                padding: EdgeInsets.only(
+                  bottom: 16,
+                  top: groupIndex == 0 ? 0 : 8,
+                ),
                 child: Text(
                   monthKey,
                   style: AppTextStyles.cap.copyWith(
@@ -193,7 +200,8 @@ class _ClientProcedureTimelineScreenState
               ),
               ...monthEvents.map((event) {
                 final isGlobalFirst = sortedEvents.indexOf(event) == 0;
-                final isGlobalLast = sortedEvents.indexOf(event) == sortedEvents.length - 1;
+                final isGlobalLast =
+                    sortedEvents.indexOf(event) == sortedEvents.length - 1;
 
                 return TimelineEventTile(
                   isFirst: isGlobalFirst,
@@ -202,8 +210,12 @@ class _ClientProcedureTimelineScreenState
                   date: formatFullDateTime(event.createdAt),
                   description: formatTimelineContent(event.content),
                   icon: _timelineIcon(event.type),
-                  iconBackgroundColor: isGlobalFirst ? AppColors.yellow : AppColors.yellowSoft,
-                  iconColor: isGlobalFirst ? AppColors.ink : AppColors.yellowDeep,
+                  iconBackgroundColor: isGlobalFirst
+                      ? AppColors.yellow
+                      : AppColors.yellowSoft,
+                  iconColor: isGlobalFirst
+                      ? AppColors.ink
+                      : AppColors.yellowDeep,
                 );
               }),
             ],
@@ -219,9 +231,7 @@ class _ClientProcedureTimelineScreenState
       child: Container(
         decoration: const BoxDecoration(
           color: AppColors.white,
-          border: Border(
-            bottom: BorderSide(color: AppColors.divider),
-          ),
+          border: Border(bottom: BorderSide(color: AppColors.divider)),
         ),
         child: Padding(
           padding: const EdgeInsets.fromLTRB(20, 12, 20, 12),
@@ -242,7 +252,9 @@ class _ClientProcedureTimelineScreenState
     return RefreshIndicator(
       onRefresh: () async {
         ref.invalidate(procedureDetailsProvider(widget.processId ?? ''));
-        return ref.read(procedureDetailsProvider(widget.processId ?? '').future);
+        return ref.read(
+          procedureDetailsProvider(widget.processId ?? '').future,
+        );
       },
       child: SingleChildScrollView(
         physics: const AlwaysScrollableScrollPhysics(),
@@ -256,9 +268,12 @@ class _ClientProcedureTimelineScreenState
               ),
               onAiAnalysisTap: () {
                 final processNumber = process.processNumber ?? process.title;
-                final message = 'Olá! Gostaria de entender melhor o status do meu processo: $processNumber';
+                final message =
+                    'Olá! Gostaria de entender melhor o status do meu processo: $processNumber';
                 launchUrl(
-                  Uri.parse('https://wa.me/${AppConstants.officeWhatsApp}?text=${Uri.encodeComponent(message)}'),
+                  Uri.parse(
+                    'https://wa.me/${AppConstants.officeWhatsApp}?text=${Uri.encodeComponent(message)}',
+                  ),
                   mode: LaunchMode.externalApplication,
                 );
               },
@@ -321,7 +336,8 @@ class _ClientProcedureTimelineScreenState
                     icon: Icons.calendar_today_outlined,
                     iconColor: AppColors.primary,
                   ),
-                  if (process.description != null && process.description!.isNotEmpty) ...[
+                  if (process.description != null &&
+                      process.description!.isNotEmpty) ...[
                     const SizedBox(height: 24),
                     const Divider(height: 1),
                     const SizedBox(height: 24),
@@ -339,7 +355,8 @@ class _ClientProcedureTimelineScreenState
                       ),
                     ),
                   ],
-                  if (process.lastNote != null && process.lastNote!.isNotEmpty) ...[
+                  if (process.lastNote != null &&
+                      process.lastNote!.isNotEmpty) ...[
                     const SizedBox(height: 20),
                     Container(
                       padding: const EdgeInsets.all(16),
@@ -393,13 +410,16 @@ class _ClientProcedureTimelineScreenState
 
   Widget _buildFilesTab(List<ProcessDocument> documents) {
     // Calcular categorias dinâmicas
-    final uniqueCategories = documents.map((doc) {
-      final isImage = doc.mimeType?.startsWith('image/') ?? false;
-      final isPdf = doc.mimeType == 'application/pdf';
-      if (isImage) return 'Imagem';
-      if (isPdf) return 'PDF';
-      return 'Outros';
-    }).toSet().toList();
+    final uniqueCategories = documents
+        .map((doc) {
+          final isImage = doc.mimeType?.startsWith('image/') ?? false;
+          final isPdf = doc.mimeType == 'application/pdf';
+          if (isImage) return 'Imagem';
+          if (isPdf) return 'PDF';
+          return 'Outros';
+        })
+        .toSet()
+        .toList();
 
     // Se houver apenas uma categoria, não mostramos filtros (além do 'Todos')
     final showFilters = uniqueCategories.length > 1;
@@ -417,7 +437,9 @@ class _ClientProcedureTimelineScreenState
     return RefreshIndicator(
       onRefresh: () async {
         ref.invalidate(procedureDocumentsProvider(widget.processId ?? ''));
-        return ref.read(procedureDocumentsProvider(widget.processId ?? '').future);
+        return ref.read(
+          procedureDocumentsProvider(widget.processId ?? '').future,
+        );
       },
       child: documents.isEmpty
           ? _buildEmptyTabScrollable('Nenhum arquivo vinculado.')
@@ -437,7 +459,10 @@ class _ClientProcedureTimelineScreenState
                       scrollDirection: Axis.horizontal,
                       child: Container(
                         alignment: Alignment.centerLeft,
-                        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 20,
+                          vertical: 12,
+                        ),
                         child: Row(
                           mainAxisSize: MainAxisSize.min,
                           mainAxisAlignment: MainAxisAlignment.start,
@@ -445,16 +470,20 @@ class _ClientProcedureTimelineScreenState
                             _buildFilterChip(
                               'Todos',
                               isSelected: _selectedFileFilter == 'Todos',
-                              onTap: () => setState(() => _selectedFileFilter = 'Todos'),
+                              onTap: () =>
+                                  setState(() => _selectedFileFilter = 'Todos'),
                             ),
-                            ...uniqueCategories.map((cat) => Padding(
-                                  padding: const EdgeInsets.only(left: 8),
-                                  child: _buildFilterChip(
-                                    cat,
-                                    isSelected: _selectedFileFilter == cat,
-                                    onTap: () => setState(() => _selectedFileFilter = cat),
-                                  ),
-                                )),
+                            ...uniqueCategories.map(
+                              (cat) => Padding(
+                                padding: const EdgeInsets.only(left: 8),
+                                child: _buildFilterChip(
+                                  cat,
+                                  isSelected: _selectedFileFilter == cat,
+                                  onTap: () =>
+                                      setState(() => _selectedFileFilter = cat),
+                                ),
+                              ),
+                            ),
                           ],
                         ),
                       ),
@@ -473,9 +502,10 @@ class _ClientProcedureTimelineScreenState
                     separatorBuilder: (_, _) => const SizedBox(height: 12),
                     itemBuilder: (context, index) {
                       final document = filteredDocuments[index];
-                      final isImage = document.mimeType?.startsWith('image/') ?? false;
+                      final isImage =
+                          document.mimeType?.startsWith('image/') ?? false;
                       final isPdf = document.mimeType == 'application/pdf';
-                      
+
                       String displayCategory = 'Arquivo';
                       if (isImage) displayCategory = 'Imagem';
                       if (isPdf) displayCategory = 'PDF';
@@ -487,9 +517,11 @@ class _ClientProcedureTimelineScreenState
                         dateAdded: formatDateLabel(document.createdAt),
                         onTap: () async {
                           try {
-                            final url = await ref.read(apiClientProvider).getDocumentAccessUrl(document.id);
+                            final url = await ref
+                                .read(apiClientProvider)
+                                .getDocumentAccessUrl(document.id);
                             if (!context.mounted) return;
-                            
+
                             Navigator.push(
                               context,
                               MaterialPageRoute(
@@ -503,25 +535,27 @@ class _ClientProcedureTimelineScreenState
                           } catch (e) {
                             if (!context.mounted) return;
                             ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(content: Text('Erro ao abrir arquivo: $e')),
+                              SnackBar(
+                                content: Text('Erro ao abrir arquivo: $e'),
+                              ),
                             );
                           }
                         },
                         icon: isImage
                             ? Icons.image_outlined
-                            : isPdf 
-                                ? Icons.picture_as_pdf_outlined
-                                : Icons.description_outlined,
+                            : isPdf
+                            ? Icons.picture_as_pdf_outlined
+                            : Icons.description_outlined,
                         iconColor: isImage
                             ? const Color(0xFFEA580C)
                             : isPdf
-                                ? const Color(0xFFDC2626)
-                                : AppColors.primary,
+                            ? const Color(0xFFDC2626)
+                            : AppColors.primary,
                         iconBackgroundColor: isImage
                             ? const Color(0xFFFFF7ED)
                             : isPdf
-                                ? const Color(0xFFFEF2F2)
-                                : const Color(0xFFEEF2FF),
+                            ? const Color(0xFFFEF2F2)
+                            : const Color(0xFFEEF2FF),
                         actionIcon: Icons.visibility_outlined,
                       );
                     },
@@ -544,7 +578,11 @@ class _ClientProcedureTimelineScreenState
     );
   }
 
-  Widget _buildFilterChip(String label, {required bool isSelected, required VoidCallback onTap}) {
+  Widget _buildFilterChip(
+    String label, {
+    required bool isSelected,
+    required VoidCallback onTap,
+  }) {
     return GestureDetector(
       onTap: onTap,
       child: Container(
@@ -572,9 +610,7 @@ class _ClientProcedureTimelineScreenState
     return Container(
       decoration: BoxDecoration(
         color: AppColors.surface,
-        border: Border(
-          top: BorderSide(color: AppColors.divider),
-        ),
+        border: Border(top: BorderSide(color: AppColors.divider)),
       ),
       child: SafeArea(
         top: false,
@@ -648,8 +684,18 @@ class _ClientProcedureTimelineScreenState
 
   String _getMonthName(int month) {
     const months = [
-      'Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho',
-      'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'
+      'Janeiro',
+      'Fevereiro',
+      'Março',
+      'Abril',
+      'Maio',
+      'Junho',
+      'Julho',
+      'Agosto',
+      'Setembro',
+      'Outubro',
+      'Novembro',
+      'Dezembro',
     ];
     return months[month - 1];
   }

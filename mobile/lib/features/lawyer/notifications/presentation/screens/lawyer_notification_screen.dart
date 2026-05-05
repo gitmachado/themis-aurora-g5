@@ -149,8 +149,10 @@ class _LawyerNotificationScreenState
     required bool onlyUnread,
   }) {
     final sortedList = [...notifications]
-      ..sort((a, b) => (b.createdAt ?? DateTime.fromMillisecondsSinceEpoch(0))
-          .compareTo(a.createdAt ?? DateTime.fromMillisecondsSinceEpoch(0)));
+      ..sort(
+        (a, b) => (b.createdAt ?? DateTime.fromMillisecondsSinceEpoch(0))
+            .compareTo(a.createdAt ?? DateTime.fromMillisecondsSinceEpoch(0)),
+      );
 
     final list = onlyUnread
         ? sortedList.where((n) => !n.isRead).toList()

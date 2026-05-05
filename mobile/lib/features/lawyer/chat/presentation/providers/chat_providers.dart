@@ -82,7 +82,7 @@ class LiveChatNotifier extends FamilyAsyncNotifier<List<ChatMessage>, String> {
   Future<List<ChatMessage>> build(String arg) async {
     final wsClient = ref.watch(webSocketClientProvider);
 
-    // Tenta entrar na sala. Se não estiver conectado ainda, 
+    // Tenta entrar na sala. Se não estiver conectado ainda,
     // o listener abaixo cuidará disso quando conectar.
     if (wsClient.isConnected) {
       wsClient.joinChat(arg);
@@ -103,12 +103,16 @@ class LiveChatNotifier extends FamilyAsyncNotifier<List<ChatMessage>, String> {
     // Usamos read aqui para evitar reconstruir a subscription se o provider do cliente mudar
     _subscription = ref.read(webSocketClientProvider).events.listen((event) {
       final currentChat = arg.split('@')[0].replaceFirst('+', '');
-      
+
       if (event.type == 'message:new') {
-        final incomingNumber = (event.data['whatsappNumber'] as String).split('@')[0].replaceFirst('+', '');
-        
+        final incomingNumber = (event.data['whatsappNumber'] as String)
+            .split('@')[0]
+            .replaceFirst('+', '');
+
         if (kDebugMode) {
-          print('[LiveChat] Message arrived for $incomingNumber. Current chat: $currentChat');
+          print(
+            '[LiveChat] Message arrived for $incomingNumber. Current chat: $currentChat',
+          );
         }
 
         if (incomingNumber == currentChat) {
@@ -116,7 +120,9 @@ class LiveChatNotifier extends FamilyAsyncNotifier<List<ChatMessage>, String> {
           state = AsyncData([...state.value ?? [], message]);
         }
       } else if (event.type == 'lead:locked') {
-        final incomingNumber = (event.data['whatsappNumber'] as String).split('@')[0].replaceFirst('+', '');
+        final incomingNumber = (event.data['whatsappNumber'] as String)
+            .split('@')[0]
+            .replaceFirst('+', '');
         if (incomingNumber == currentChat) {
           final data = event.data;
           ref.read(chatLockProvider(arg).notifier).state = ChatLockState(
@@ -126,7 +132,9 @@ class LiveChatNotifier extends FamilyAsyncNotifier<List<ChatMessage>, String> {
           );
         }
       } else if (event.type == 'lead:unlocked') {
-        final incomingNumber = (event.data['whatsappNumber'] as String).split('@')[0].replaceFirst('+', '');
+        final incomingNumber = (event.data['whatsappNumber'] as String)
+            .split('@')[0]
+            .replaceFirst('+', '');
         if (incomingNumber == currentChat) {
           ref.read(chatLockProvider(arg).notifier).state =
               ChatLockState.initial();

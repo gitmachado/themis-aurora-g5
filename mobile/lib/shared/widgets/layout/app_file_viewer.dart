@@ -43,7 +43,7 @@ class _AppFileViewerState extends ConsumerState<AppFileViewer> {
     try {
       final dir = await getTemporaryDirectory();
       final file = File('${dir.path}/${widget.fileName}');
-      
+
       if (await file.exists()) {
         setState(() {
           _localPath = file.path;
@@ -73,12 +73,15 @@ class _AppFileViewerState extends ConsumerState<AppFileViewer> {
 
   @override
   Widget build(BuildContext context) {
-    final isImage = widget.mimeType?.startsWith('image/') ?? 
-                    (widget.fileName.toLowerCase().endsWith('.jpg') || 
-                     widget.fileName.toLowerCase().endsWith('.png') || 
-                     widget.fileName.toLowerCase().endsWith('.jpeg'));
-    
-    final isPdf = widget.mimeType == 'application/pdf' || widget.fileName.toLowerCase().endsWith('.pdf');
+    final isImage =
+        widget.mimeType?.startsWith('image/') ??
+        (widget.fileName.toLowerCase().endsWith('.jpg') ||
+            widget.fileName.toLowerCase().endsWith('.png') ||
+            widget.fileName.toLowerCase().endsWith('.jpeg'));
+
+    final isPdf =
+        widget.mimeType == 'application/pdf' ||
+        widget.fileName.toLowerCase().endsWith('.pdf');
 
     return AnnotatedRegion<SystemUiOverlayStyle>(
       value: const SystemUiOverlayStyle(
@@ -95,73 +98,83 @@ class _AppFileViewerState extends ConsumerState<AppFileViewer> {
           showBackButton: true,
         ),
         body: _isLoading
-          ? const Center(child: CircularProgressIndicator(color: AppColors.yellow))
-          : _errorMessage != null
-              ? Center(
-                  child: Padding(
-                    padding: const EdgeInsets.all(24),
-                    child: Text(
-                      _errorMessage!,
-                      style: const TextStyle(color: Colors.white),
-                      textAlign: TextAlign.center,
+            ? const Center(
+                child: CircularProgressIndicator(color: AppColors.yellow),
+              )
+            : _errorMessage != null
+            ? Center(
+                child: Padding(
+                  padding: const EdgeInsets.all(24),
+                  child: Text(
+                    _errorMessage!,
+                    style: const TextStyle(color: Colors.white),
+                    textAlign: TextAlign.center,
+                  ),
+                ),
+              )
+            : isImage && _localPath != null
+            ? Center(
+                child: InteractiveViewer(
+                  minScale: 0.5,
+                  maxScale: 4.0,
+                  child: Image.file(
+                    File(_localPath!),
+                    fit: BoxFit.contain,
+                    errorBuilder: (context, error, stackTrace) => const Center(
+                      child: Icon(
+                        Icons.error_outline,
+                        color: Colors.white,
+                        size: 48,
+                      ),
                     ),
                   ),
-                )
-              : isImage && _localPath != null
-                  ? Center(
-                      child: InteractiveViewer(
-                        minScale: 0.5,
-                        maxScale: 4.0,
-                        child: Image.file(
-                          File(_localPath!),
-                          fit: BoxFit.contain,
-                          errorBuilder: (context, error, stackTrace) => const Center(
-                            child: Icon(Icons.error_outline, color: Colors.white, size: 48),
-                          ),
-                        ),
+                ),
+              )
+            : isPdf && _localPath != null
+            ? PDFView(
+                filePath: _localPath,
+                enableSwipe: true,
+                swipeHorizontal: false,
+                autoSpacing: true,
+                pageFling: true,
+                onRender: (pages) {
+                  debugPrint('PDF Renderizado com $pages páginas');
+                },
+                onError: (error) {
+                  setState(() {
+                    _errorMessage = 'Erro ao carregar PDF: $error';
+                  });
+                },
+                onPageError: (page, error) {
+                  debugPrint('Erro na página $page: $error');
+                },
+              )
+            : Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    const Icon(
+                      Icons.insert_drive_file_outlined,
+                      color: Colors.white,
+                      size: 64,
+                    ),
+                    const SizedBox(height: 16),
+                    const Text(
+                      'Tipo de arquivo não suportado para visualização direta.',
+                      style: TextStyle(color: Colors.white),
+                    ),
+                    const SizedBox(height: 24),
+                    ElevatedButton(
+                      onPressed: () => Navigator.pop(context),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: AppColors.yellow,
+                        foregroundColor: AppColors.ink,
                       ),
-                    )
-                  : isPdf && _localPath != null
-                      ? PDFView(
-                          filePath: _localPath,
-                          enableSwipe: true,
-                          swipeHorizontal: false,
-                          autoSpacing: true,
-                          pageFling: true,
-                          onRender: (pages) {
-                            debugPrint('PDF Renderizado com $pages páginas');
-                          },
-                          onError: (error) {
-                            setState(() {
-                              _errorMessage = 'Erro ao carregar PDF: $error';
-                            });
-                          },
-                          onPageError: (page, error) {
-                            debugPrint('Erro na página $page: $error');
-                          },
-                        )
-                      : Center(
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              const Icon(Icons.insert_drive_file_outlined, color: Colors.white, size: 64),
-                              const SizedBox(height: 16),
-                              const Text(
-                                'Tipo de arquivo não suportado para visualização direta.',
-                                style: TextStyle(color: Colors.white),
-                              ),
-                              const SizedBox(height: 24),
-                              ElevatedButton(
-                                onPressed: () => Navigator.pop(context),
-                                style: ElevatedButton.styleFrom(
-                                  backgroundColor: AppColors.yellow,
-                                  foregroundColor: AppColors.ink,
-                                ),
-                                child: const Text('Voltar'),
-                              ),
-                            ],
-                          ),
-                        ),
+                      child: const Text('Voltar'),
+                    ),
+                  ],
+                ),
+              ),
       ),
     );
   }

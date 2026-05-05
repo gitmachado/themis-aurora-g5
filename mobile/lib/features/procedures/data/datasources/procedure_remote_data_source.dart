@@ -125,10 +125,7 @@ final class ProcedureRemoteDataSource {
   }) async {
     await _apiClient.postVoid(
       '/processes/$processId/schedule-event',
-      data: {
-        'title': title,
-        'date': date.toIso8601String(),
-      },
+      data: {'title': title, 'date': date.toIso8601String()},
     );
   }
 }

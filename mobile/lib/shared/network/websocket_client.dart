@@ -109,7 +109,9 @@ class WebSocketClient {
 
     _socket!.on('message:new', (data) {
       if (kDebugMode) {
-        print('[WebSocket] Event received: message:new for ${data['whatsappNumber']}');
+        print(
+          '[WebSocket] Event received: message:new for ${data['whatsappNumber']}',
+        );
       }
       _eventController.add(WebSocketEvent(type: 'message:new', data: data));
     });
@@ -140,7 +142,9 @@ class WebSocketClient {
   }
 
   void leaveChat(String whatsappNumber) {
-    if (kDebugMode) print('[WebSocket] Emitting leave:chat for $whatsappNumber');
+    if (kDebugMode) {
+      print('[WebSocket] Emitting leave:chat for $whatsappNumber');
+    }
     _socket?.emit('leave:chat', whatsappNumber);
   }
 
