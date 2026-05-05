@@ -74,12 +74,17 @@ void main() {
       await _pumpApp(tester, apiClient: apiClient, tokenStorage: tokenStorage);
       await _login(tester, email: 'advogado@themis.test');
 
+      // Painel — overview do advogado.
       expect(find.text('Dra. Paula Nunes'), findsOneWidget);
       expect(find.text('Handoff humano'), findsOneWidget);
       expect(find.text('Maria Oliveira'), findsOneWidget);
 
-      await _tapBottomNavAt(tester, 1);
-      expect(find.text('Leads'), findsWidgets);
+      // Hub Clientes → sub-aba Pendentes para chegar nos leads.
+      await _tapNavLabel(tester, 'Clientes');
+      expect(find.text('Lucas Silva'), findsOneWidget);
+
+      await tester.tap(find.text('Pendentes'));
+      await tester.pumpAndSettle();
       expect(find.text('Maria Oliveira'), findsOneWidget);
 
       await tester.tap(find.text('Maria Oliveira').first);
@@ -102,7 +107,8 @@ void main() {
       await tester.tap(find.text('Voltar à Fila'));
       await tester.pumpAndSettle();
 
-      await _tapBottomNavAt(tester, 2);
+      // Processos.
+      await _tapNavLabel(tester, 'Processos');
       expect(find.text('Ação trabalhista'), findsOneWidget);
 
       await tester.tap(find.text('Ação trabalhista'));
@@ -133,7 +139,8 @@ void main() {
 
       await _goBack(tester);
 
-      await _tapBottomNavAt(tester, 3);
+      // Volta ao hub Clientes (default sub-aba Clientes) e abre a ficha.
+      await _tapNavLabel(tester, 'Clientes');
       expect(find.text('Lucas Silva'), findsOneWidget);
 
       await tester.tap(find.text('Lucas Silva').first);
@@ -155,7 +162,8 @@ void main() {
       await _goBack(tester);
       await _goBack(tester);
 
-      await _tapBottomNavAt(tester, 4);
+      // Perfil.
+      await _tapNavLabel(tester, 'Perfil');
       expect(find.text('advogado@themis.test'), findsWidgets);
       expect(find.text('Mensagens e Handoffs'), findsOneWidget);
 
@@ -204,6 +212,18 @@ Future<void> _tapBottomNavAt(WidgetTester tester, int index) async {
   final itemWidth = nav.width / 5;
   await tester.tapAt(
     Offset(nav.left + itemWidth * (index + 0.5), nav.center.dy),
+  );
+  await tester.pumpAndSettle();
+}
+
+/// Localiza o item da navbar pelo rótulo. Mais robusto que tap por offset
+/// quando o número de tabs varia (ex.: layout do advogado-chefe ganha "Equipe").
+Future<void> _tapNavLabel(WidgetTester tester, String label) async {
+  await tester.tap(
+    find.descendant(
+      of: find.byType(AppBottomNavigationBar),
+      matching: find.text(label),
+    ),
   );
   await tester.pumpAndSettle();
 }
