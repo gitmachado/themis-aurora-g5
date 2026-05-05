@@ -1,7 +1,8 @@
 import { Router } from 'express';
 import { LegalProcessController } from '../../controllers/implementations/legal-process.controller';
 import { LegalProcessService, TimelineService, NotificationService } from '@services';
-import { LegalProcessRepository, TimelineEventRepository, NotificationRepository } from '@repositories';
+import { LegalProcessRepository, TimelineEventRepository, NotificationRepository, UserRepository } from '@repositories';
+import { PushNotificationService } from '../../services/notifications/push_notification_service';
 import { authMiddleware } from '../../middlewares/implementations/authMiddleware';
 import { roleMiddleware } from '../../middlewares/implementations/roleMiddleware';
 import { validate } from '../../middlewares/implementations/validationMiddleware';
@@ -13,7 +14,9 @@ const legalProcessRepository = new LegalProcessRepository();
 const timelineRepository = new TimelineEventRepository();
 const timelineService = new TimelineService(timelineRepository);
 const notificationRepository = new NotificationRepository();
-const notificationService = new NotificationService(notificationRepository);
+const userRepository = new UserRepository();
+const pushNotificationService = new PushNotificationService();
+const notificationService = new NotificationService(notificationRepository, userRepository, pushNotificationService);
 const legalProcessService = new LegalProcessService(
   legalProcessRepository,
   timelineService,

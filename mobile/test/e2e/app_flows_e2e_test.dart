@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:firebase_core/firebase_core.dart';
 
 import 'package:mobile/app/app.dart';
+import 'package:mobile/features/auth/presentation/providers/auth_providers.dart';
 import 'package:mobile/shared/network/api_client.dart';
 import 'package:mobile/shared/widgets/layout/app_bottom_nav_bar.dart';
 import 'package:mobile/shared/network/websocket_client.dart';
@@ -10,6 +12,11 @@ import 'package:mobile/shared/network/websocket_client.dart';
 import '../helpers/fakes.dart';
 
 void main() {
+  setUpAll(() async {
+    setupFirebaseForTesting();
+    await Firebase.initializeApp();
+  });
+
   testWidgets('cliente percorre login, trâmites, arquivos, chat e perfil', (
     tester,
   ) async {
@@ -192,6 +199,9 @@ Future<void> _pumpApp(
         apiClientProvider.overrideWithValue(apiClient),
         tokenStorageProvider.overrideWithValue(tokenStorage),
         webSocketClientProvider.overrideWithValue(FakeWebSocketClient()),
+        pushNotificationServiceProvider.overrideWith(
+          (ref) => FakePushNotificationService(ref.watch(apiClientProvider)),
+        ),
       ],
       child: const ThemisApp(),
     ),
