@@ -2,6 +2,7 @@ import { Router } from 'express';
 import { BotController } from '../../controllers/implementations/bot.controller';
 import { UserService, LegalProcessService, NotificationService } from '@services';
 import { ConfigurationService } from '../../services/implementations/configuration.service';
+import { PushNotificationService } from '../../services/notifications/push_notification_service';
 import {
   UserRepository,
   LegalProcessRepository,
@@ -26,7 +27,8 @@ const leadRepository = new LeadRepository();
 // Services
 const userService = new UserService(userRepository);
 const timelineService = new TimelineService(timelineRepository);
-const notificationService = new NotificationService(notificationRepository);
+const pushNotificationService = new PushNotificationService();
+const notificationService = new NotificationService(notificationRepository, userRepository, pushNotificationService);
 const legalProcessService = new LegalProcessService(
   legalProcessRepository,
   timelineService,

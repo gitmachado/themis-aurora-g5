@@ -11,6 +11,10 @@ interface UpdateNotificationPreferencesBody {
   notificationPreferences?: Record<string, boolean>;
 }
 
+interface UpdateFcmTokenBody {
+  fcmToken?: string | null;
+}
+
 const ALLOWED_AVATAR_MIME_TYPES = new Set([
   'image/png',
   'image/jpeg',
@@ -65,6 +69,35 @@ export class AccountController {
 
       const user = await this.userService.update(req.user!.id, {
         notificationPreferences: preferences,
+      });
+
+      return res.status(200).json(await this.toAccountResponse(user));
+    } catch (error) {
+      next(error);
+    }
+  };
+
+  updateFcmToken: RequestHandler<
+    any,
+    AccountResponseDTO,
+    UpdateFcmTokenBody
+  > = async (
+    req: AuthRequest<any, AccountResponseDTO, UpdateFcmTokenBody>,
+    res: Response,
+    next: NextFunction
+  ) => {
+    try {
+      if (!('fcmToken' in req.body)) {
+        throw new ValidationError('fcmToken é obrigatório');
+      }
+
+      const fcmToken = req.body.fcmToken;
+      if (fcmToken !== null && typeof fcmToken !== 'string') {
+        throw new ValidationError('fcmToken deve ser uma string ou null');
+      }
+
+      const user = await this.userService.update(req.user!.id, {
+        fcmToken: fcmToken,
       });
 
       return res.status(200).json(await this.toAccountResponse(user));

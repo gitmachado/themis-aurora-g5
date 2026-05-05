@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "47630056934",
+    "project_id": "omniconnect-aurora-g5",
+    "storage_bucket": "omniconnect-aurora-g5.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:47630056934:android:10519465ba45c9c1af2a27",
+        "android_client_info": {
+          "package_name": "com.example.mobile"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDsZRwjVSqETONWvNtZUKbU1mA7rB7QOfk"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:47630056934:android:7a94cd4a6df9f308af2a27",
+        "android_client_info": {
+          "package_name": "com.themis.mobile"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDsZRwjVSqETONWvNtZUKbU1mA7rB7QOfk"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

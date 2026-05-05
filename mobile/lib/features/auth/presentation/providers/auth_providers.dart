@@ -1,7 +1,9 @@
+import 'dart:developer';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:mobile/shared/errors/either_failure_extensions.dart';
 
 import '../../../../shared/network/api_client.dart';
+import '../../../../shared/services/push_notification_service.dart';
 import '../../data/datasources/auth_remote_data_source.dart';
 import '../../data/repositories/auth_repository_impl.dart';
 import '../../domain/entities/account.dart';
@@ -12,6 +14,12 @@ import '../../domain/usecases/google_sign_in_use_case.dart';
 
 final authRemoteDataSourceProvider = Provider<AuthRemoteDataSource>((ref) {
   return AuthRemoteDataSource(ref.watch(apiClientProvider));
+});
+
+final pushNotificationServiceProvider = Provider<PushNotificationService>((
+  ref,
+) {
+  return PushNotificationService(ref.watch(apiClientProvider));
 });
 
 final authRepositoryProvider = Provider<AuthRepository>((ref) {
@@ -64,6 +72,7 @@ final authControllerProvider =
         loginUseCase: ref.watch(loginUseCaseProvider),
         logoutUseCase: ref.watch(logoutUseCaseProvider),
         googleSignInUseCase: ref.watch(googleSignInUseCaseProvider),
+        pushNotificationService: ref.watch(pushNotificationServiceProvider),
       );
     });
 
@@ -81,14 +90,17 @@ class AuthController extends StateNotifier<AsyncValue<AuthSession?>> {
   final LoginUseCase _loginUseCase;
   final LogoutUseCase _logoutUseCase;
   final GoogleSignInUseCase _googleSignInUseCase;
+  final PushNotificationService _pushNotificationService;
 
   AuthController({
     required LoginUseCase loginUseCase,
     required LogoutUseCase logoutUseCase,
     required GoogleSignInUseCase googleSignInUseCase,
+    required PushNotificationService pushNotificationService,
   }) : _loginUseCase = loginUseCase,
        _logoutUseCase = logoutUseCase,
        _googleSignInUseCase = googleSignInUseCase,
+       _pushNotificationService = pushNotificationService,
        super(const AsyncData(null));
 
   Future<AuthSession> login({
@@ -102,6 +114,13 @@ class AuthController extends StateNotifier<AsyncValue<AuthSession?>> {
         password: password,
       )).getOrThrow();
       state = AsyncData(session);
+
+      try {
+        await _pushNotificationService.initializePushNotifications();
+      } catch (e) {
+        log('[AuthController] Push init failed: $e');
+      }
+
       return session;
     } catch (error, stackTrace) {
       state = AsyncError(error, stackTrace);
@@ -114,6 +133,13 @@ class AuthController extends StateNotifier<AsyncValue<AuthSession?>> {
     try {
       final session = (await _googleSignInUseCase()).getOrThrow();
       state = AsyncData(session);
+
+      try {
+        await _pushNotificationService.initializePushNotifications();
+      } catch (e) {
+        log('[AuthController] Push init failed: $e');
+      }
+
       return session;
     } catch (error, stackTrace) {
       state = AsyncError(error, stackTrace);
@@ -140,6 +166,13 @@ class AuthController extends StateNotifier<AsyncValue<AuthSession?>> {
 
   void setSession(AuthSession? session) {
     state = AsyncData(session);
+    if (session != null) {
+      try {
+        _pushNotificationService.initializePushNotifications();
+      } catch (e) {
+        log('[AuthController] Push init failed: $e');
+      }
+    }
   }
 }
 
