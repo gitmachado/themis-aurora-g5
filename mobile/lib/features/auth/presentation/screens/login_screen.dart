@@ -8,7 +8,7 @@ import '../../../../shared/constants/app_colors.dart';
 import '../../../../shared/constants/app_text_styles.dart';
 import '../../../../shared/constants/app_assets.dart';
 import '../../../../shared/widgets/buttons/primary_button.dart';
-import '../../domain/entities/account.dart';
+import '../../domain/entities/auth_session.dart';
 import '../providers/auth_providers.dart';
 
 class LoginScreen extends ConsumerStatefulWidget {
@@ -295,13 +295,19 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
 
       if (!mounted) return;
 
-      final route = session.role == UserRole.lawyer
-          ? AppRouter.lawyerDashboardRoute
-          : AppRouter.clientDashboardRoute;
-      Navigator.pushReplacementNamed(context, route);
+      Navigator.pushReplacementNamed(context, _routeForSession(session));
     } catch (_) {
       // Error state is rendered in the form.
     }
+  }
+
+  String _routeForSession(AuthSession session) {
+    if (session.account?.mustChangePassword == true) {
+      return AppRouter.forceChangePasswordRoute;
+    }
+    return session.role.isLawyerSide
+        ? AppRouter.lawyerDashboardRoute
+        : AppRouter.clientDashboardRoute;
   }
 
   Future<void> _submitGoogleSignIn() async {
@@ -312,10 +318,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
 
       if (!mounted) return;
 
-      final route = session.role == UserRole.lawyer
-          ? AppRouter.lawyerDashboardRoute
-          : AppRouter.clientDashboardRoute;
-      Navigator.pushReplacementNamed(context, route);
+      Navigator.pushReplacementNamed(context, _routeForSession(session));
     } catch (_) {
       // Error state is rendered in the form.
     }
