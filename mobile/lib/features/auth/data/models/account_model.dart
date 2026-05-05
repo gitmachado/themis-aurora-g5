@@ -10,6 +10,9 @@ final class AccountModel extends Account {
     super.email,
     super.avatarUrl,
     super.notificationPreferences,
+    super.teamPermissions,
+    super.lawyerAdminId,
+    super.mustChangePassword,
   });
 
   factory AccountModel.fromJson(Map<String, dynamic> json) {
@@ -21,7 +24,10 @@ final class AccountModel extends Account {
       email: json['email'] as String?,
       avatarUrl: json['avatarUrl'] as String?,
       role: UserRole.fromApi(json['role'] as String? ?? 'CLIENT'),
-      notificationPreferences: _preferences(json['notificationPreferences']),
+      notificationPreferences: _boolMap(json['notificationPreferences']),
+      teamPermissions: _boolMap(json['teamPermissions']),
+      lawyerAdminId: json['lawyerAdminId'] as String?,
+      mustChangePassword: json['mustChangePassword'] == true,
     );
   }
 
@@ -35,11 +41,14 @@ final class AccountModel extends Account {
       'avatarUrl': avatarUrl,
       'role': role.apiValue,
       'notificationPreferences': notificationPreferences,
+      'teamPermissions': teamPermissions,
+      'lawyerAdminId': lawyerAdminId,
+      'mustChangePassword': mustChangePassword,
     };
   }
 }
 
-Map<String, bool> _preferences(Object? value) {
+Map<String, bool> _boolMap(Object? value) {
   if (value is! Map) return const {};
 
   return Map<String, bool>.unmodifiable(

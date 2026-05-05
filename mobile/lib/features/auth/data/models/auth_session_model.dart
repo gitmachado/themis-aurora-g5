@@ -48,5 +48,8 @@ Map<String, dynamic> _accountToJson(Account account) {
     'avatarUrl': account.avatarUrl,
     'role': account.role.apiValue,
     'notificationPreferences': account.notificationPreferences,
+    'teamPermissions': account.teamPermissions,
+    'lawyerAdminId': account.lawyerAdminId,
+    'mustChangePassword': account.mustChangePassword,
   };
 }
