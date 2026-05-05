@@ -16,8 +16,12 @@ class LawyerMainLayout extends StatefulWidget {
 
 class LawyerMainLayoutState extends State<LawyerMainLayout> {
   static const int clientsHubIndex = 2;
+  static const int profileIndex = 3;
 
   late int currentIndex;
+
+  final ValueNotifier<int> currentIndexNotifier = ValueNotifier<int>(0);
+
   final LawyerClientsHubController _clientsHubController =
       LawyerClientsHubController();
 
@@ -32,11 +36,13 @@ class LawyerMainLayoutState extends State<LawyerMainLayout> {
   void initState() {
     super.initState();
     currentIndex = widget.initialIndex;
+    currentIndexNotifier.value = widget.initialIndex;
   }
 
   @override
   void dispose() {
     _clientsHubController.dispose();
+    currentIndexNotifier.dispose();
     super.dispose();
   }
 
@@ -44,6 +50,7 @@ class LawyerMainLayoutState extends State<LawyerMainLayout> {
     setState(() {
       currentIndex = index;
     });
+    currentIndexNotifier.value = index;
   }
 
   /// Navega para a aba Clientes e seleciona o sub-tab Pendentes (Leads).
@@ -51,16 +58,13 @@ class LawyerMainLayoutState extends State<LawyerMainLayout> {
     _clientsHubController.selectTab(1);
     setIndex(clientsHubIndex);
   }
-
-  /// Navega para a aba Clientes e seleciona o sub-tab Clientes.
+  
   void goToClientsHub() {
     _clientsHubController.selectTab(0);
     setIndex(clientsHubIndex);
   }
 
   void _onTabTapped(int index) {
-    // Quando o usuário toca em "Clientes" pelo navbar, sempre volta pro
-    // sub-tab Clientes (não mantém Pendentes da última visita).
     if (index == clientsHubIndex && currentIndex != clientsHubIndex) {
       _clientsHubController.selectTab(0);
     }
