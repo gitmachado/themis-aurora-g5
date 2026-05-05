@@ -78,7 +78,12 @@ export class AuthService implements IAuthService {
       notificationPreferences: {
         push: true,
         whatsapp: true
-      }
+      },
+      teamPermissions: {},
+      lawyerAdminId: null,
+      oabNumber: null,
+      specialty: null,
+      mustChangePassword: false,
     });
 
     const token = this.generateToken(user.id, user.role);
