@@ -30,4 +30,9 @@ final class NotificationRepositoryImpl implements NotificationRepository {
   Future<Either<Failure, Unit>> delete(String id) {
     return guardRepositoryUnit(() => _remoteDataSource.delete(id));
   }
+
+  @override
+  Future<Either<Failure, Unit>> deleteMany(List<String> ids) {
+    return guardRepositoryUnit(() => _remoteDataSource.deleteMany(ids));
+  }
 }

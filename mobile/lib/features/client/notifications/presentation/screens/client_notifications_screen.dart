@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../../../../../app/routes/app_router.dart';
 import '../../../../../../features/notifications/domain/entities/app_notification.dart';
 import '../../../../../../features/notifications/presentation/notification_display.dart';
 import '../../../../../../features/notifications/presentation/providers/notification_providers.dart';
@@ -18,43 +19,104 @@ class ClientNotificationsScreen extends ConsumerStatefulWidget {
 }
 
 class _ClientNotificationsScreenState
-    extends ConsumerState<ClientNotificationsScreen> {
+    extends ConsumerState<ClientNotificationsScreen>
+    with SingleTickerProviderStateMixin {
+  bool _isSelectionMode = false;
+  final Set<String> _selectedIds = {};
+  late TabController _tabController;
+
+  @override
+  void initState() {
+    super.initState();
+    _tabController = TabController(length: 2, vsync: this);
+    _tabController.addListener(() {
+      if (!_tabController.indexIsChanging) {
+        setState(() {
+          if (_isSelectionMode) {
+            _isSelectionMode = false;
+            _selectedIds.clear();
+          }
+        });
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _tabController.dispose();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
-    final notifications = ref.watch(myNotificationsProvider);
+    final notificationsAsync = ref.watch(myNotificationsProvider);
+    final notifications = notificationsAsync.valueOrNull ?? [];
 
-    return DefaultTabController(
-      length: 2,
+    return PopScope(
+      canPop: !_isSelectionMode,
+      onPopInvokedWithResult: (didPop, result) {
+        if (didPop) return;
+        if (_isSelectionMode) {
+          setState(() {
+            _isSelectionMode = false;
+            _selectedIds.clear();
+          });
+        }
+      },
       child: Scaffold(
         backgroundColor: AppColors.background,
         appBar: CustomAppBar(
-          title: 'Notificações',
-          showBackButton: true,
+          title: _isSelectionMode
+              ? '${_selectedIds.length} selecionados'
+              : 'Notificações',
+          showBackButton: !_isSelectionMode,
           actions: [
-            TextButton(
-              onPressed: () =>
-                  ref.read(notificationActionsProvider).markAllAsRead(),
-              child: const Text(
-                'Limpar',
-                style: TextStyle(color: AppColors.ink),
+            if (_isSelectionMode) ...[
+              IconButton(
+                icon: const Icon(Icons.select_all_rounded),
+                onPressed: () {
+                  setState(() {
+                    final currentList = _tabController.index == 0
+                        ? notifications.where((n) => !n.isRead).toList()
+                        : notifications;
+
+                    if (_selectedIds.length == currentList.length) {
+                      _selectedIds.clear();
+                    } else {
+                      _selectedIds.addAll(currentList.map((n) => n.id));
+                    }
+                  });
+                },
               ),
-            ),
-          ],
-          bottom: const TabBar(
-            tabs: [
-              Tab(text: 'Não lidas'),
-              Tab(text: 'Todas'),
+              IconButton(
+                icon: const Icon(Icons.close_rounded),
+                onPressed: () {
+                  setState(() {
+                    _isSelectionMode = false;
+                    _selectedIds.clear();
+                  });
+                },
+              ),
             ],
+          ],
+          bottom: TabBar(
+            controller: _tabController,
             labelColor: AppColors.ink,
             unselectedLabelColor: AppColors.textCaption,
             indicatorColor: AppColors.yellow,
-            indicatorWeight: 3,
+            indicatorSize: TabBarIndicatorSize.label,
+            tabs: const [
+              Tab(text: 'Não lidas'),
+              Tab(text: 'Todas'),
+            ],
           ),
         ),
         body: SafeArea(
           top: false,
-          child: notifications.when(
+          child: notificationsAsync.when(
             data: (data) => TabBarView(
+              controller: _tabController,
+              physics: const NeverScrollableScrollPhysics(),
               children: [
                 _buildNotificationList(data, onlyUnread: true),
                 _buildNotificationList(data, onlyUnread: false),
@@ -64,6 +126,20 @@ class _ClientNotificationsScreenState
             error: (error, _) => _buildErrorState(error),
           ),
         ),
+        floatingActionButton: _isSelectionMode && _selectedIds.isNotEmpty
+            ? FloatingActionButton.extended(
+                onPressed: _deleteSelected,
+                backgroundColor: AppColors.error,
+                icon: const Icon(
+                  Icons.delete_outline_rounded,
+                  color: Colors.white,
+                ),
+                label: const Text(
+                  'Excluir',
+                  style: TextStyle(color: Colors.white),
+                ),
+              )
+            : null,
       ),
     );
   }
@@ -92,11 +168,106 @@ class _ClientNotificationsScreenState
           time: n.timeLabel,
           type: n.tileType,
           isRead: n.isRead,
+          isSelected: _selectedIds.contains(n.id),
+          isSelectionMode: _isSelectionMode,
           onToggleRead: _toggleReadStatus,
           onDelete: _deleteNotification,
+          onSelected: (id, selected) {
+            setState(() {
+              if (selected) {
+                _selectedIds.add(id);
+              } else {
+                _selectedIds.remove(id);
+              }
+            });
+          },
+          onLongPress: (id) {
+            setState(() {
+              _isSelectionMode = true;
+              _selectedIds.add(id);
+            });
+          },
+          onTap: () => _handleNotificationTap(n),
         );
       },
     );
+  }
+
+  Future<void> _deleteSelected() async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Excluir notificações'),
+        content: Text(
+          'Deseja excluir as ${_selectedIds.length} notificações selecionadas?',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('Cancelar'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(context, true),
+            style: TextButton.styleFrom(foregroundColor: AppColors.error),
+            child: const Text('Excluir'),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed == true) {
+      try {
+        final count = _selectedIds.length;
+        await ref
+            .read(notificationActionsProvider)
+            .deleteMany(_selectedIds.toList());
+
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(
+                '$count ${count == 1 ? 'notificação excluída' : 'notificações excluídas'} com sucesso',
+              ),
+              backgroundColor: AppColors.success,
+              behavior: SnackBarBehavior.floating,
+            ),
+          );
+          setState(() {
+            _isSelectionMode = false;
+            _selectedIds.clear();
+          });
+        }
+      } catch (e) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Erro ao excluir notificações'),
+              backgroundColor: AppColors.error,
+              behavior: SnackBarBehavior.floating,
+            ),
+          );
+        }
+      }
+    }
+  }
+
+  void _handleNotificationTap(AppNotification n) {
+    if (!n.isRead) {
+      _toggleReadStatus(n.id);
+    }
+
+    final extra = n.extraData;
+    if (extra == null) return;
+
+    if (n.type == 'STATUS_CHANGED' && extra.containsKey('processId')) {
+      Navigator.pushNamed(
+        context,
+        AppRouter.procedureTimelineRoute,
+        arguments: extra['processId'],
+      );
+    } else if (n.type == 'DOCUMENT_SENT') {
+      Navigator.pushNamed(context, AppRouter.filesRoute);
+    }
   }
 
   Widget _buildEmptyState() {
@@ -124,7 +295,28 @@ class _ClientNotificationsScreenState
   }
 
   Future<void> _deleteNotification(String id) async {
-    await ref.read(notificationActionsProvider).delete(id);
+    try {
+      await ref.read(notificationActionsProvider).delete(id);
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Notificação excluída'),
+            backgroundColor: AppColors.success,
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Erro ao excluir notificação'),
+            backgroundColor: AppColors.error,
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+      }
+    }
   }
 
   Widget _buildLoadingList() {

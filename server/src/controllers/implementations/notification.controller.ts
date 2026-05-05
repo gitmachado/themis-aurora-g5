@@ -64,6 +64,7 @@ export class NotificationController {
     res: Response,
     next: NextFunction
   ) => {
+    console.log('[NotificationController] delete called with id:', req.params.id);
     try {
       const notificationId = req.params.id;
       const user = req.user!;
@@ -78,6 +79,27 @@ export class NotificationController {
       }
 
       await this.notificationService.delete(notificationId);
+      return res.status(204).send();
+    } catch (error) {
+      next(error);
+    }
+  };
+
+  deleteMany: RequestHandler = async (
+    req: AuthRequest,
+    res: Response,
+    next: NextFunction
+  ) => {
+    console.log('[NotificationController] deleteMany called with body:', req.body);
+    try {
+      const { ids } = req.body;
+      const user = req.user!;
+
+      if (!Array.isArray(ids)) {
+        return res.status(400).json({ message: 'IDs devem ser uma array' });
+      }
+
+      await this.notificationService.deleteMany(ids, user.id);
       return res.status(204).send();
     } catch (error) {
       next(error);

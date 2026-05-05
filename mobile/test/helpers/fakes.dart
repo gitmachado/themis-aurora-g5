@@ -96,8 +96,8 @@ class FakeApiClient implements ApiClient {
   }
 
   @override
-  Future<void> deleteVoid(String path) async {
-    calls.add(ApiCall('DELETE', path));
+  Future<void> deleteVoid(String path, {Map<String, dynamic>? data}) async {
+    calls.add(ApiCall('DELETE', path, data));
   }
 
   @override

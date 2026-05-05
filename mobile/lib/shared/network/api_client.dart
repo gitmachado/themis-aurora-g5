@@ -97,8 +97,8 @@ class ApiClient {
     await _send(() => _dio.post<Object?>(path));
   }
 
-  Future<void> deleteVoid(String path) async {
-    await _send(() => _dio.delete<Object?>(path));
+  Future<void> deleteVoid(String path, {Map<String, dynamic>? data}) async {
+    await _send(() => _dio.delete<Object?>(path, data: data));
   }
 
   Future<String> getDocumentAccessUrl(String documentId) async {
