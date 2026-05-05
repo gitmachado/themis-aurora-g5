@@ -202,7 +202,7 @@ export class DocumentController {
       const user = req.user!;
 
       // 1. RBAC check: Only lawyers can delete documents
-      if (user.role !== 'LAWYER') {
+      if (user.role !== 'LAWYER' && user.role !== 'LAWYER_ADMIN') {
         throw new ForbiddenError('Apenas advogados podem deletar documentos do sistema');
       }
 
@@ -213,7 +213,7 @@ export class DocumentController {
       }
 
       const process = await this.legalProcessService.getById(document.legalProcessId);
-      if (process && process.lawyerId && process.lawyerId !== user.id) {
+      if (process && process.lawyerId && process.lawyerId !== user.id && user.role !== 'LAWYER_ADMIN') {
         throw new ForbiddenError('Apenas o advogado responsável por este processo pode remover documentos');
       }
 
@@ -242,6 +242,7 @@ export class DocumentController {
     if (user.role === 'LAWYER' && process.lawyerId !== user.id) {
       throw new ForbiddenError('Você não tem permissão para acessar documentos deste trâmite');
     }
+    // LAWYER_ADMIN tem acesso a todos os processos do escritório.
   }
 
   private async cleanupTempFile(file: { path?: string }): Promise<void> {

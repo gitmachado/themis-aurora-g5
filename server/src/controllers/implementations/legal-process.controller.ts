@@ -15,7 +15,7 @@ export class LegalProcessController {
   ) => {
     try {
       const user = req.user!;
-      const processes = user.role === 'LAWYER'
+      const processes = (user.role === 'LAWYER' || user.role === 'LAWYER_ADMIN')
         ? await this.legalProcessService.getByLawyerId(user.id)
         : await this.legalProcessService.getByClientId(user.id);
       return res.status(200).json(processes);
