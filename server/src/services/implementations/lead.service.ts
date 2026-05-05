@@ -102,8 +102,9 @@ export class LeadService implements ILeadService {
       user = await this.userRepository.findByCpf(cpf);
     }
 
+    let tempPassword: string | null = null;
     if (!user) {
-      const tempPassword = this.authService.generateTempPassword();
+      tempPassword = this.authService.generateTempPassword();
       const passwordHash = await bcrypt.hash(tempPassword, 10);
 
       user = await this.userRepository.create({
@@ -119,13 +120,12 @@ export class LeadService implements ILeadService {
           push: true,
           whatsapp: true,
         },
+        teamPermissions: {},
+        lawyerAdminId: null,
+        oabNumber: null,
+        specialty: null,
+        mustChangePassword: false,
       });
-
-      await this.notificationService.sendPush(
-        user.id,
-        'Seu acesso ao Themis',
-        `Bem-vindo! Baixe nosso app e use a senha temporária: ${tempPassword}`
-      );
     }
 
     const updatedLead = await this.leadRepository.update(lead.id, {
@@ -143,6 +143,15 @@ export class LeadService implements ILeadService {
         description: lead.caseDescription || '',
         caseType: lead.caseType || 'Civil',
       });
+    }
+
+    // Push só depois do processo criado, para o cliente já encontrar contexto ao logar.
+    if (tempPassword) {
+      await this.notificationService.sendPush(
+        user.id,
+        'Seu acesso ao Themis',
+        `Bem-vindo! Baixe nosso app e use a senha temporária: ${tempPassword}`
+      );
     }
 
     eventBus.emitLeadUpdate(updatedLead);
