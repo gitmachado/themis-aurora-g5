@@ -369,20 +369,6 @@ class _LawyerProfileScreenState extends ConsumerState<LawyerProfileScreen>
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        _sectionTitle('Sobre'),
-        AppCard(
-          child: Text(
-            'Perfil profissional ativo no Themis. Atendimento integrado por '
-            'WhatsApp, gestão de leads, processos e comunicação direta com '
-            'clientes em um único lugar.',
-            style: AppTextStyles.body.copyWith(
-              fontSize: 13.5,
-              color: AppColors.ink2,
-              height: 1.5,
-            ),
-          ),
-        ),
-        const SizedBox(height: 20),
         _sectionTitle('Dados da Conta'),
         _buildSection(children: [
           _buildInfoTile(
