@@ -79,7 +79,13 @@ class _LawyerClientsHubScreenState
           _ClientsHubSegmented(
             selectedIndex: _selectedTab,
             pendingCount: pendingCount,
-            onChanged: (i) => setState(() => _selectedTab = i),
+            onChanged: (i) {
+              // Mantém o controller em sincronia com o pill, senao o reset
+              // que o LawyerMainLayout aciona ao voltar para a aba Clientes
+              // não tem efeito (selectTab(0) retorna cedo se _index já é 0).
+              widget.controller?.selectTab(i);
+              setState(() => _selectedTab = i);
+            },
           ),
           const SizedBox(height: 16),
           Expanded(
