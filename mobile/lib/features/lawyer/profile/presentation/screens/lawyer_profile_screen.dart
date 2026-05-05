@@ -37,6 +37,7 @@ class _LawyerProfileScreenState extends ConsumerState<LawyerProfileScreen>
   final ValueNotifier<double> _scrollOffset = ValueNotifier<double>(0);
 
   ValueNotifier<int>? _tabNotifier;
+  int _profileIndex = LawyerMainLayoutState.profileIndex;
 
   static const _headerHeight = 220.0;
   static const _sheetOverlap = 60.0;
@@ -91,6 +92,8 @@ class _LawyerProfileScreenState extends ConsumerState<LawyerProfileScreen>
     super.didChangeDependencies();
     final layout = context.findAncestorStateOfType<LawyerMainLayoutState>();
     final notifier = layout?.currentIndexNotifier;
+    final isAdmin = ref.read(authControllerProvider).valueOrNull?.account?.role.isAdmin ?? false;
+    _profileIndex = layout?.profileIndexFor(isAdmin) ?? LawyerMainLayoutState.profileIndex;
     if (notifier == _tabNotifier) return;
     _tabNotifier?.removeListener(_onTabChanged);
     _tabNotifier = notifier;
@@ -99,7 +102,7 @@ class _LawyerProfileScreenState extends ConsumerState<LawyerProfileScreen>
 
   void _onTabChanged() {
     if (!mounted) return;
-    if (_tabNotifier?.value == LawyerMainLayoutState.profileIndex) {
+    if (_tabNotifier?.value == _profileIndex) {
       if (_scrollController.hasClients) {
         _scrollController.jumpTo(0);
       }
@@ -625,6 +628,9 @@ class _LawyerProfileScreenState extends ConsumerState<LawyerProfileScreen>
       email: account.email,
       avatarUrl: account.avatarUrl,
       notificationPreferences: updated,
+      teamPermissions: account.teamPermissions,
+      lawyerAdminId: account.lawyerAdminId,
+      mustChangePassword: account.mustChangePassword,
     );
 
     ref

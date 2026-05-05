@@ -456,6 +456,9 @@ class _ClientProfileScreenState extends ConsumerState<ClientProfileScreen> {
       email: account.email,
       avatarUrl: account.avatarUrl,
       notificationPreferences: updated,
+      teamPermissions: account.teamPermissions,
+      lawyerAdminId: account.lawyerAdminId,
+      mustChangePassword: account.mustChangePassword,
     );
 
     ref
