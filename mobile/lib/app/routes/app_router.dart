@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../features/design_system/presentation/screens/design_system_screen.dart';
+import '../../features/auth/presentation/screens/change_password_screen.dart';
 import '../../features/auth/presentation/screens/login_screen.dart';
 import '../../features/auth/presentation/screens/splash_screen.dart';
 import '../../features/legal/presentation/screens/privacy_policy_screen.dart';
@@ -20,6 +21,8 @@ import '../../features/lawyer/chat/presentation/screens/lawyer_chat_list_screen.
 import '../../features/lawyer/ai_manager/presentation/screens/lawyer_ai_manager_screen.dart';
 import '../../features/lawyer/chat/presentation/screens/lawyer_chat_handoff_screen.dart';
 import '../../features/lawyer/clients/presentation/screens/lawyer_client_detail_screen.dart';
+import '../../features/lawyer/team/presentation/screens/team_add_screen.dart';
+import '../../features/lawyer/team/presentation/screens/team_member_screen.dart';
 import '../../shared/widgets/layout/client_main_layout.dart';
 import '../../shared/widgets/layout/lawyer_main_layout.dart';
 
@@ -27,9 +30,14 @@ final class AppRouter {
   static const String initialRoute = '/splash';
   static const String splashRoute = '/splash';
   static const String loginRoute = '/login';
+  static const String changePasswordRoute = '/change-password';
+  static const String forceChangePasswordRoute = '/change-password/force';
   static const String clientDashboardRoute = '/client-dashboard';
   static const String lawyerDashboardRoute = '/lawyer-dashboard';
   static const String lawyerClientsRoute = '/lawyer-clients';
+  static const String lawyerTeamRoute = '/lawyer-team';
+  static const String lawyerTeamAddRoute = '/lawyer-team/add';
+  static const String lawyerTeamMemberRoute = '/lawyer-team/member';
   static const String lawyerProcedureDetailRoute = '/lawyer-procedure-detail';
   static const String lawyerProfileRoute = '/lawyer-profile';
   static const String lawyerLeadDetailRoute = '/lawyer-lead-detail';
@@ -60,6 +68,17 @@ final class AppRouter {
       case loginRoute:
         return MaterialPageRoute<void>(
           builder: (_) => const LoginScreen(),
+          settings: settings,
+        );
+      case changePasswordRoute:
+        return MaterialPageRoute<void>(
+          builder: (_) => const ChangePasswordScreen(),
+          settings: settings,
+        );
+      case forceChangePasswordRoute:
+        return MaterialPageRoute<void>(
+          builder: (_) =>
+              const ChangePasswordScreen(forceFirstLogin: true),
           settings: settings,
         );
       case clientDashboardRoute:
@@ -127,6 +146,23 @@ final class AppRouter {
       case lawyerClientsRoute:
         return MaterialPageRoute<void>(
           builder: (_) => const LawyerMainLayout(initialIndex: 2),
+          settings: settings,
+        );
+      case lawyerTeamRoute:
+        return MaterialPageRoute<void>(
+          builder: (_) => const LawyerMainLayout(initialIndex: 3),
+          settings: settings,
+        );
+      case lawyerTeamAddRoute:
+        return MaterialPageRoute<void>(
+          builder: (_) => const TeamAddScreen(),
+          settings: settings,
+        );
+      case lawyerTeamMemberRoute:
+        final args = settings.arguments as Map<String, dynamic>?;
+        final id = args?['id'] as String? ?? '';
+        return MaterialPageRoute<void>(
+          builder: (_) => TeamMemberScreen(memberId: id),
           settings: settings,
         );
       case '/lawyer-client-detail':
