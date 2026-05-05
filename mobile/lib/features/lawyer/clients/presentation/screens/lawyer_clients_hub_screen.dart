@@ -114,14 +114,16 @@ class _ClientsHubSegmented extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.fromLTRB(20, 8, 20, 0),
       child: Container(
-        height: 46,
-        padding: const EdgeInsets.all(4),
+        height: 44,
+        padding: const EdgeInsets.all(3),
         decoration: BoxDecoration(
           color: AppColors.surface2,
-          borderRadius: BorderRadius.circular(14),
+          borderRadius: BorderRadius.circular(10),
           border: Border.all(color: AppColors.border),
+          shape: BoxShape.rectangle,
         ),
         child: Row(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             Expanded(
               child: _Pill(
@@ -178,13 +180,13 @@ class _Pill extends StatelessWidget {
         curve: Curves.easeOutCubic,
         decoration: BoxDecoration(
           color: selected ? AppColors.surface : Colors.transparent,
-          borderRadius: BorderRadius.circular(10),
+          borderRadius: BorderRadius.circular(9),
           boxShadow: selected
               ? [
                   BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.06),
-                    blurRadius: 6,
-                    offset: const Offset(0, 2),
+                    color: Colors.black.withValues(alpha: 0.04),
+                    blurRadius: 2,
+                    offset: const Offset(0, 1),
                   ),
                 ]
               : null,
