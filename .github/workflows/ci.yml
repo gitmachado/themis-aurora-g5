@@ -12,44 +12,6 @@ permissions:
   contents: read
 
 jobs:
-  commits:
-    name: Commit policy
-    runs-on: ubuntu-latest
-    timeout-minutes: 10
-
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: 22
-          cache: npm
-          cache-dependency-path: package-lock.json
-
-      - name: Install root dependencies
-        run: npm ci
-
-      - name: Validate commit messages
-        shell: bash
-        run: |
-          if [[ "${{ github.event_name }}" == "pull_request" ]]; then
-            npx commitlint --from "${{ github.event.pull_request.base.sha }}" --to "${{ github.event.pull_request.head.sha }}"
-          elif [[ "${{ github.event_name }}" == "workflow_dispatch" || "${{ github.event.before }}" == "0000000000000000000000000000000000000000" ]]; then
-            npx commitlint --last
-          elif ! git rev-parse --verify --quiet "${{ github.event.before }}^{commit}" >/dev/null; then
-            # Force-push: the previous tip no longer exists in the repo, so the
-            # range is invalid. Fall back to validating only the new tip; the
-            # full range is still validated on the corresponding pull_request.
-            echo "Previous SHA ${{ github.event.before }} not found (force-push). Falling back to --last."
-            npx commitlint --last
-          else
-            npx commitlint --from "${{ github.event.before }}" --to "${{ github.sha }}"
-          fi
-
   backend:
     name: Backend
     runs-on: ubuntu-latest

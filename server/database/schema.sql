@@ -26,10 +26,15 @@ CREATE TABLE IF NOT EXISTS users (
     cpf TEXT UNIQUE,
     email TEXT UNIQUE,
     avatar_url TEXT,
-    role TEXT NOT NULL CHECK (role IN ('LAWYER', 'CLIENT')),
+    role TEXT NOT NULL CHECK (role IN ('LAWYER', 'CLIENT', 'LAWYER_ADMIN')),
     password_hash TEXT,
     fcm_token TEXT,
     notification_preferences JSONB DEFAULT '{}',
+    team_permissions JSONB NOT NULL DEFAULT '{}',
+    lawyer_admin_id UUID REFERENCES users(id) ON DELETE SET NULL,
+    oab_number TEXT,
+    specialty TEXT,
+    must_change_password BOOLEAN NOT NULL DEFAULT FALSE,
     created_at TIMESTAMPTZ DEFAULT NOW(),
     updated_at TIMESTAMPTZ DEFAULT NOW()
 );

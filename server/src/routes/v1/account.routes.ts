@@ -40,6 +40,30 @@ router.patch('/me/fcm-token', authMiddleware, controller.updateFcmToken);
 
 /**
  * @openapi
+ * /account/password:
+ *   patch:
+ *     summary: Troca a senha do usuário autenticado
+ *     description: |
+ *       Quando o usuário tiver `mustChangePassword=true` (ex.: advogado recém-cadastrado
+ *       pelo chefe via /team), o campo `currentPassword` é dispensado.
+ *     tags: [Conta]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required: [newPassword]
+ *             properties:
+ *               newPassword: { type: string, minLength: 6 }
+ *               currentPassword: { type: string }
+ */
+router.patch('/password', authMiddleware, controller.changePassword);
+
+/**
+ * @openapi
  * /account/avatar:
  *   post:
  *     summary: Atualiza a foto de perfil do usuário autenticado

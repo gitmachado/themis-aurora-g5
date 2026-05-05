@@ -6,3 +6,4 @@ export * from './src/notification.dto';
 export * from './src/user.dto';
 export * from './src/legal-process.dto';
 export * from './src/timeline-event.dto';
+export * from './src/team.dto';

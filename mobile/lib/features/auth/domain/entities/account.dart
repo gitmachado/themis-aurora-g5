@@ -2,16 +2,30 @@ import 'package:equatable/equatable.dart';
 
 enum UserRole {
   client,
-  lawyer;
+  lawyer,
+  lawyerAdmin;
 
   static UserRole fromApi(String value) {
-    return value.toUpperCase() == 'LAWYER' ? UserRole.lawyer : UserRole.client;
+    switch (value.toUpperCase()) {
+      case 'LAWYER_ADMIN':
+        return UserRole.lawyerAdmin;
+      case 'LAWYER':
+        return UserRole.lawyer;
+      default:
+        return UserRole.client;
+    }
   }
 
   String get apiValue => switch (this) {
     UserRole.client => 'CLIENT',
     UserRole.lawyer => 'LAWYER',
+    UserRole.lawyerAdmin => 'LAWYER_ADMIN',
   };
+
+  bool get isLawyerSide =>
+      this == UserRole.lawyer || this == UserRole.lawyerAdmin;
+
+  bool get isAdmin => this == UserRole.lawyerAdmin;
 }
 
 class Account extends Equatable {
@@ -23,6 +37,9 @@ class Account extends Equatable {
   final String? avatarUrl;
   final UserRole role;
   final Map<String, bool> notificationPreferences;
+  final Map<String, bool> teamPermissions;
+  final String? lawyerAdminId;
+  final bool mustChangePassword;
 
   const Account({
     required this.id,
@@ -33,6 +50,9 @@ class Account extends Equatable {
     this.email,
     this.avatarUrl,
     this.notificationPreferences = const {},
+    this.teamPermissions = const {},
+    this.lawyerAdminId,
+    this.mustChangePassword = false,
   });
 
   @override
@@ -45,5 +65,8 @@ class Account extends Equatable {
     avatarUrl,
     role,
     notificationPreferences,
+    teamPermissions,
+    lawyerAdminId,
+    mustChangePassword,
   ];
 }

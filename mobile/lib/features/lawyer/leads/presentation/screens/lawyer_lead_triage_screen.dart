@@ -7,27 +7,27 @@ import '../../../../../../features/lawyer/leads/presentation/providers/lead_prov
 import '../../../../../../shared/constants/app_colors.dart';
 import '../../../../../../shared/constants/app_text_styles.dart';
 import '../../../../../../shared/constants/app_dimensions.dart';
-import '../../../../../../shared/widgets/layout/custom_app_bar.dart';
 import '../widgets/lead_card.dart';
-import '../../../../../../shared/widgets/app_app_bar_actions.dart';
 import '../../../../../../shared/widgets/layout/loading_skeleton.dart';
 import '../../../../../../shared/widgets/themis/themis_widgets.dart';
 
-class LawyerLeadTriageScreen extends ConsumerStatefulWidget {
-  const LawyerLeadTriageScreen({super.key});
+class LawyerLeadTriageView extends ConsumerStatefulWidget {
+  final bool archived;
+
+  const LawyerLeadTriageView({super.key, this.archived = false});
 
   @override
-  ConsumerState<LawyerLeadTriageScreen> createState() =>
-      _LawyerLeadTriageScreenState();
+  ConsumerState<LawyerLeadTriageView> createState() =>
+      _LawyerLeadTriageViewState();
 }
 
-class _LawyerLeadTriageScreenState
-    extends ConsumerState<LawyerLeadTriageScreen> {
+class _LawyerLeadTriageViewState extends ConsumerState<LawyerLeadTriageView>
+    with AutomaticKeepAliveClientMixin {
   String _selectedFilter = 'Todos';
-  int _selectedTabIndex = 0;
   final TextEditingController _searchController = TextEditingController();
 
-  bool get _isArchivedTab => _selectedTabIndex == 1;
+  @override
+  bool get wantKeepAlive => true;
 
   @override
   void initState() {
@@ -43,45 +43,34 @@ class _LawyerLeadTriageScreenState
 
   @override
   Widget build(BuildContext context) {
+    super.build(context);
     final leads = ref.watch(
-      _isArchivedTab ? archivedLeadsProvider : pendingLeadsProvider,
+      widget.archived ? archivedLeadsProvider : pendingLeadsProvider,
     );
 
-    return Scaffold(
-      backgroundColor: AppColors.background,
-      appBar: CustomAppBar(
-        title: 'Leads',
-        actions: [AppAppBarActions()],
-        showDivider: false,
-      ),
-      body: Column(
-        children: [
-          Container(
-            color: AppColors.background,
-            child: Column(
-              children: [_buildSearchField(), _buildTabs(), _buildFilters()],
+    return Column(
+      children: [
+        _buildSearchField(),
+        _buildFilters(),
+        Expanded(
+          child: RefreshIndicator(
+            onRefresh: () async {
+              if (widget.archived) {
+                ref.invalidate(allLeadsProvider);
+                await ref.read(allLeadsProvider.future);
+              } else {
+                await ref.read(pendingLeadsProvider.notifier).refresh();
+              }
+            },
+            child: leads.when(
+              data: (items) =>
+                  _buildLeadsList(items, archived: widget.archived),
+              loading: _buildLoadingList,
+              error: (error, _) => _buildErrorState(error),
             ),
           ),
-          Expanded(
-            child: RefreshIndicator(
-              onRefresh: () async {
-                if (_isArchivedTab) {
-                  ref.invalidate(allLeadsProvider);
-                  await ref.read(allLeadsProvider.future);
-                } else {
-                  await ref.read(pendingLeadsProvider.notifier).refresh();
-                }
-              },
-              child: leads.when(
-                data: (items) =>
-                    _buildLeadsList(items, archived: _isArchivedTab),
-                loading: _buildLoadingList,
-                error: (error, _) => _buildErrorState(error),
-              ),
-            ),
-          ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 
@@ -129,20 +118,6 @@ class _LawyerLeadTriageScreenState
             borderRadius: BorderRadius.circular(12),
             borderSide: const BorderSide(color: AppColors.yellow, width: 1.5),
           ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildTabs() {
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(20, 0, 20, 0),
-      child: DefaultTabController(
-        length: 2,
-        child: ThemisSegmentedControl(
-          labels: const ['Novos', 'Arquivados'],
-          selectedIndex: _selectedTabIndex,
-          onChanged: (index) => setState(() => _selectedTabIndex = index),
         ),
       ),
     );
@@ -210,7 +185,7 @@ class _LawyerLeadTriageScreenState
       return SingleChildScrollView(
         physics: const AlwaysScrollableScrollPhysics(),
         child: Container(
-          height: MediaQuery.of(context).size.height * 0.6,
+          height: MediaQuery.of(context).size.height * 0.5,
           alignment: Alignment.center,
           padding: const EdgeInsets.all(24),
           child: Column(
@@ -227,7 +202,7 @@ class _LawyerLeadTriageScreenState
               Text(
                 archived
                     ? 'Nenhum lead arquivado encontrado'
-                    : 'Nenhum lead encontrado',
+                    : 'Nenhum lead pendente',
                 style: AppTextStyles.h2.copyWith(color: AppColors.textCaption),
                 textAlign: TextAlign.center,
               ),
@@ -275,16 +250,7 @@ class _LawyerLeadTriageScreenState
                 },
               );
             },
-            onAccept: () {
-              Navigator.pushNamed(
-                context,
-                AppRouter.lawyerChatHandoffRoute,
-                arguments: {
-                  'clientName': lead.displayName,
-                  'whatsappNumber': lead.whatsappNumber,
-                },
-              );
-            },
+            onAccept: () => _convertLead(lead),
             onArchive: () async {
               await ref
                   .read(leadActionsProvider)
@@ -298,6 +264,37 @@ class _LawyerLeadTriageScreenState
         },
       ),
     );
+  }
+
+  Future<void> _convertLead(Lead lead) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) => ThemisAlertDialog(
+        title: 'Converter Lead',
+        message: 'Deseja converter ${lead.displayName} em cliente?',
+        confirmLabel: 'Sim, Converter Agora',
+        onCancel: () => Navigator.pop(dialogContext, false),
+        onConfirm: () => Navigator.pop(dialogContext, true),
+      ),
+    );
+
+    if (confirmed != true || !mounted) return;
+
+    try {
+      await ref.read(leadActionsProvider).convert(lead.id);
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('${lead.displayName} convertido em cliente.')),
+      );
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Erro ao converter: $e'),
+          backgroundColor: AppColors.error,
+        ),
+      );
+    }
   }
 
   Widget _buildLoadingList() {
@@ -319,7 +316,7 @@ class _LawyerLeadTriageScreenState
     return SingleChildScrollView(
       physics: const AlwaysScrollableScrollPhysics(),
       child: Container(
-        height: MediaQuery.of(context).size.height * 0.6,
+        height: MediaQuery.of(context).size.height * 0.5,
         alignment: Alignment.center,
         padding: const EdgeInsets.all(24),
         child: Text(

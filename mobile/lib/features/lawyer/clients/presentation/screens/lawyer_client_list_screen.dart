@@ -6,88 +6,80 @@ import '../../../../../../features/lawyer/clients/domain/entities/lawyer_client.
 import '../../../../../../features/lawyer/clients/presentation/providers/lawyer_client_providers.dart';
 import '../../../../../../shared/constants/app_colors.dart';
 import '../../../../../../shared/constants/app_text_styles.dart';
-import '../../../../../../shared/widgets/layout/custom_app_bar.dart';
 import '../../../../../../shared/constants/app_dimensions.dart';
-import '../../../../../../shared/widgets/app_app_bar_actions.dart';
 import '../../../../../../shared/widgets/layout/loading_skeleton.dart';
 
-class LawyerClientListScreen extends ConsumerStatefulWidget {
-  const LawyerClientListScreen({super.key});
+class LawyerClientListView extends ConsumerStatefulWidget {
+  const LawyerClientListView({super.key});
 
   @override
-  ConsumerState<LawyerClientListScreen> createState() =>
-      _LawyerClientListScreenState();
+  ConsumerState<LawyerClientListView> createState() =>
+      _LawyerClientListViewState();
 }
 
-class _LawyerClientListScreenState
-    extends ConsumerState<LawyerClientListScreen> {
+class _LawyerClientListViewState extends ConsumerState<LawyerClientListView>
+    with AutomaticKeepAliveClientMixin {
   String _searchQuery = '';
 
   @override
+  bool get wantKeepAlive => true;
+
+  @override
   Widget build(BuildContext context) {
+    super.build(context);
     final clients = ref.watch(myLawyerClientsProvider);
 
-    return Scaffold(
-      backgroundColor: AppColors.background,
-      appBar: CustomAppBar(
-        title: 'Clientes',
-        actions: [AppAppBarActions()],
-        showDivider: false,
-      ),
-      body: Column(
-        children: [
-          Container(
-            color: AppColors.background,
-            padding: const EdgeInsets.fromLTRB(20, 0, 20, 16),
-            child: TextField(
-              onChanged: (value) => setState(() => _searchQuery = value),
-              style: AppTextStyles.body.copyWith(
+    return Column(
+      children: [
+        Padding(
+          padding: const EdgeInsets.fromLTRB(20, 0, 20, 16),
+          child: TextField(
+            onChanged: (value) => setState(() => _searchQuery = value),
+            style: AppTextStyles.body.copyWith(
+              fontSize: 15.5,
+              fontWeight: FontWeight.w600,
+              color: AppColors.ink,
+            ),
+            decoration: InputDecoration(
+              hintText: 'Buscar por nome ou CPF...',
+              hintStyle: AppTextStyles.body.copyWith(
+                color: AppColors.ink4,
                 fontSize: 15.5,
-                fontWeight: FontWeight.w600,
-                color: AppColors.ink,
+                fontWeight: FontWeight.w500,
               ),
-              decoration: InputDecoration(
-                hintText: 'Buscar por nome ou CPF...',
-                hintStyle: AppTextStyles.body.copyWith(
-                  color: AppColors.ink4,
-                  fontSize: 15.5,
-                  fontWeight: FontWeight.w500,
-                ),
-                prefixIcon: const Icon(
-                  Icons.search,
-                  color: AppColors.textCaption,
-                ),
-                filled: true,
-                fillColor: AppColors.surface2,
-                contentPadding: const EdgeInsets.symmetric(vertical: 0),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
-                  borderSide: BorderSide(color: AppColors.border),
-                ),
-                enabledBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
-                  borderSide: BorderSide(color: AppColors.border),
-                ),
-                focusedBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
-                  borderSide: const BorderSide(
-                    color: AppColors.yellow,
-                    width: 1.5,
-                  ),
+              prefixIcon: const Icon(
+                Icons.search,
+                color: AppColors.textCaption,
+              ),
+              filled: true,
+              fillColor: AppColors.surface2,
+              contentPadding: const EdgeInsets.symmetric(vertical: 0),
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+                borderSide: BorderSide(color: AppColors.border),
+              ),
+              enabledBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+                borderSide: BorderSide(color: AppColors.border),
+              ),
+              focusedBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+                borderSide: const BorderSide(
+                  color: AppColors.yellow,
+                  width: 1.5,
                 ),
               ),
             ),
           ),
-          const SizedBox(height: 16),
-          Expanded(
-            child: clients.when(
-              data: _buildClientList,
-              loading: _buildLoadingList,
-              error: (error, _) => _buildErrorState(error),
-            ),
+        ),
+        Expanded(
+          child: clients.when(
+            data: _buildClientList,
+            loading: _buildLoadingList,
+            error: (error, _) => _buildErrorState(error),
           ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 
@@ -103,12 +95,7 @@ class _LawyerClientListScreenState
         );
 
     if (filtered.isEmpty) {
-      return Center(
-        child: Text(
-          'Nenhum cliente encontrado',
-          style: AppTextStyles.h2.copyWith(color: AppColors.textCaption),
-        ),
-      );
+      return _buildEmptyState();
     }
 
     final grouped = <String, List<LawyerClient>>{};
@@ -135,6 +122,33 @@ class _LawyerClientListScreenState
             const SizedBox(height: 8),
           ],
         ],
+      ),
+    );
+  }
+
+  Widget _buildEmptyState() {
+    return SingleChildScrollView(
+      physics: const AlwaysScrollableScrollPhysics(),
+      child: Container(
+        height: MediaQuery.of(context).size.height * 0.55,
+        alignment: Alignment.center,
+        padding: const EdgeInsets.all(24),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              Icons.people_outline_rounded,
+              size: 64,
+              color: AppColors.textCaption.withValues(alpha: 0.5),
+            ),
+            const SizedBox(height: 16),
+            Text(
+              'Nenhum cliente encontrado',
+              style: AppTextStyles.h2.copyWith(color: AppColors.textCaption),
+              textAlign: TextAlign.center,
+            ),
+          ],
+        ),
       ),
     );
   }

@@ -1,8 +1,14 @@
+import bcrypt from 'bcryptjs';
 import { IUserService } from '../interfaces/user.service';
 import { IUserRepository } from '../../repositories/interfaces/user.repository';
 import type { User } from '@models';
 import type { CreateUserDTO, UpdateUserDTO } from '@dtos';
-import { NotFoundError, ConflictError } from './errors';
+import {
+  NotFoundError,
+  ConflictError,
+  ValidationError,
+  UnauthorizedError,
+} from './errors';
 
 export class UserService implements IUserService {
   constructor(private readonly userRepository: IUserRepository) {}
@@ -25,7 +31,12 @@ export class UserService implements IUserService {
       notificationPreferences: dto.notificationPreferences || {
         push: true,
         whatsapp: true
-      }
+      },
+      teamPermissions: {},
+      lawyerAdminId: null,
+      oabNumber: null,
+      specialty: null,
+      mustChangePassword: false,
     });
   }
 
@@ -73,5 +84,40 @@ export class UserService implements IUserService {
     }
 
     return this.userRepository.delete(id);
+  }
+
+  async changePassword(
+    id: string,
+    newPassword: string,
+    currentPassword?: string
+  ): Promise<User> {
+    const user = await this.userRepository.findById(id);
+    if (!user) {
+      throw new NotFoundError('Usuário não encontrado');
+    }
+
+    if (newPassword.length < 6) {
+      throw new ValidationError('A nova senha deve ter ao menos 6 caracteres');
+    }
+
+    // Quando o usuário NÃO está em fluxo forçado de troca, exige senha atual.
+    if (!user.mustChangePassword) {
+      if (!currentPassword) {
+        throw new ValidationError('Informe a senha atual');
+      }
+      if (!user.passwordHash) {
+        throw new UnauthorizedError('Conta sem senha cadastrada');
+      }
+      const ok = await bcrypt.compare(currentPassword, user.passwordHash);
+      if (!ok) {
+        throw new UnauthorizedError('Senha atual incorreta');
+      }
+    }
+
+    const newHash = await bcrypt.hash(newPassword, 10);
+    return this.userRepository.update(id, {
+      passwordHash: newHash,
+      mustChangePassword: false,
+    });
   }
 }

@@ -43,6 +43,14 @@ export interface AccountResponseDTO {
   avatarUrl: string | null;
   role: UserRole;
   notificationPreferences: Record<string, boolean> | null;
+  teamPermissions: Record<string, boolean>;
+  lawyerAdminId: string | null;
+  mustChangePassword: boolean;
   createdAt: Date;
   updatedAt: Date;
+}
+
+export interface ChangePasswordDTO {
+  newPassword: string;
+  currentPassword?: string;
 }

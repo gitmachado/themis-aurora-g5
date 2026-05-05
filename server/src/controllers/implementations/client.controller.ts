@@ -13,7 +13,7 @@ export class ClientController {
     next: NextFunction
   ) => {
     try {
-      if (req.user!.role !== 'LAWYER') {
+      if (req.user!.role !== 'LAWYER' && req.user!.role !== 'LAWYER_ADMIN') {
         throw new ForbiddenError('Apenas advogados podem listar clientes');
       }
 
@@ -40,7 +40,7 @@ export class ClientController {
     next: NextFunction
   ) => {
     try {
-      if (req.user!.role !== 'LAWYER') {
+      if (req.user!.role !== 'LAWYER' && req.user!.role !== 'LAWYER_ADMIN') {
         throw new ForbiddenError('Apenas advogados podem acessar clientes');
       }
 

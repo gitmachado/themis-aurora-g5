@@ -6,8 +6,13 @@ export class UserRepository implements IUserRepository {
   private readonly userSelect = `
     id, name, whatsapp_number as "whatsappNumber", cpf, email,
     avatar_url as "avatarUrl", role,
-    password_hash as "passwordHash", fcm_token as "fcmToken", 
-    notification_preferences as "notificationPreferences", 
+    password_hash as "passwordHash", fcm_token as "fcmToken",
+    notification_preferences as "notificationPreferences",
+    team_permissions as "teamPermissions",
+    lawyer_admin_id as "lawyerAdminId",
+    oab_number as "oabNumber",
+    specialty,
+    must_change_password as "mustChangePassword",
     created_at as "createdAt", updated_at as "updatedAt"
   `;
 
@@ -82,6 +87,11 @@ export class UserRepository implements IUserRepository {
         users.password_hash as "passwordHash",
         users.fcm_token as "fcmToken",
         users.notification_preferences as "notificationPreferences",
+        users.team_permissions as "teamPermissions",
+        users.lawyer_admin_id as "lawyerAdminId",
+        users.oab_number as "oabNumber",
+        users.specialty,
+        users.must_change_password as "mustChangePassword",
         users.created_at as "createdAt",
         users.updated_at as "updatedAt"
        FROM users
@@ -106,6 +116,11 @@ export class UserRepository implements IUserRepository {
         users.password_hash as "passwordHash",
         users.fcm_token as "fcmToken",
         users.notification_preferences as "notificationPreferences",
+        users.team_permissions as "teamPermissions",
+        users.lawyer_admin_id as "lawyerAdminId",
+        users.oab_number as "oabNumber",
+        users.specialty,
+        users.must_change_password as "mustChangePassword",
         users.created_at as "createdAt",
         users.updated_at as "updatedAt"
        FROM users
@@ -119,14 +134,19 @@ export class UserRepository implements IUserRepository {
 
   async findAllLawyers(): Promise<User[]> {
     return dbAll<User>(
-      `SELECT ${this.userSelect} FROM users WHERE role = 'LAWYER'`
+      `SELECT ${this.userSelect} FROM users WHERE role IN ('LAWYER', 'LAWYER_ADMIN')`
     );
   }
 
   async create(user: Omit<User, 'id' | 'createdAt' | 'updatedAt'>): Promise<User> {
     return (await dbGet<User>(
-      `INSERT INTO users (name, whatsapp_number, cpf, email, avatar_url, role, password_hash, fcm_token, notification_preferences)
-       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+      `INSERT INTO users (
+         name, whatsapp_number, cpf, email, avatar_url, role,
+         password_hash, fcm_token, notification_preferences,
+         team_permissions, lawyer_admin_id, oab_number, specialty,
+         must_change_password
+       )
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14)
        RETURNING ${this.userSelect}`,
       [
         user.name,
@@ -138,6 +158,11 @@ export class UserRepository implements IUserRepository {
         user.passwordHash,
         user.fcmToken,
         user.notificationPreferences,
+        user.teamPermissions ?? {},
+        user.lawyerAdminId ?? null,
+        user.oabNumber ?? null,
+        user.specialty ?? null,
+        user.mustChangePassword ?? false,
       ]
     ))!;
   }

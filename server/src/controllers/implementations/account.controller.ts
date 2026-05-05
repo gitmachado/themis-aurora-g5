@@ -3,7 +3,7 @@ import fs from 'fs';
 import { IUserService } from '@services';
 import { AuthRequest } from '../../middlewares/implementations/authMiddleware';
 import { NotFoundError, ValidationError } from '../../services/implementations/errors';
-import { AccountResponseDTO } from '@dtos';
+import { AccountResponseDTO, ChangePasswordDTO } from '@dtos';
 import { User } from '@models';
 import { IStorageProvider } from '../../utils/storage/storage.provider';
 
@@ -106,6 +106,27 @@ export class AccountController {
     }
   };
 
+  changePassword: RequestHandler<any, AccountResponseDTO, ChangePasswordDTO> = async (
+    req: AuthRequest<any, AccountResponseDTO, ChangePasswordDTO>,
+    res: Response,
+    next: NextFunction
+  ) => {
+    try {
+      const { newPassword, currentPassword } = req.body ?? {};
+      if (!newPassword || typeof newPassword !== 'string') {
+        throw new ValidationError('A nova senha é obrigatória');
+      }
+      const user = await this.userService.changePassword(
+        req.user!.id,
+        newPassword,
+        currentPassword
+      );
+      return res.status(200).json(await this.toAccountResponse(user));
+    } catch (error) {
+      next(error);
+    }
+  };
+
   uploadAvatar: RequestHandler<any, AccountResponseDTO> = async (
     req: AuthRequest<any, AccountResponseDTO>,
     res: Response,
@@ -182,6 +203,9 @@ export class AccountController {
       avatarUrl,
       role: user.role,
       notificationPreferences: user.notificationPreferences,
+      teamPermissions: user.teamPermissions,
+      lawyerAdminId: user.lawyerAdminId,
+      mustChangePassword: user.mustChangePassword,
       createdAt: user.createdAt,
       updatedAt: user.updatedAt,
     };

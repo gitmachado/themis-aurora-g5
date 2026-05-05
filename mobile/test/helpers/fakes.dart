@@ -2,13 +2,26 @@ import 'dart:async';
 import 'package:mobile/shared/network/api_client.dart';
 import 'package:mobile/shared/network/token_storage.dart';
 import 'package:mobile/shared/network/websocket_client.dart';
-import 'package:firebase_core/firebase_core.dart';
+import 'package:mobile/shared/services/push_notification_service.dart';
 import 'package:firebase_core_platform_interface/test.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void setupFirebaseForTesting() {
   TestWidgetsFlutterBinding.ensureInitialized();
   setupFirebaseCoreMocks();
+}
+
+/// Substitui o serviço real nos testes para evitar que
+/// FirebaseMessaging.instance.requestPermission/getInitialMessage tente bater
+/// no MethodChannel — sem implementação no host de teste, o future fica
+/// pendurado e o pumpAndSettle nunca decide.
+class FakePushNotificationService extends PushNotificationService {
+  FakePushNotificationService(super.apiClient);
+
+  @override
+  Future<void> initializePushNotifications() async {
+    // no-op
+  }
 }
 
 final class ApiCall {

@@ -95,7 +95,7 @@ class LawyerOverviewScreen extends ConsumerWidget {
                     const SizedBox(height: 24),
                     _buildSectionHeader(
                       'Últimos Leads',
-                      () => layoutState?.setIndex(1),
+                      () => layoutState?.goToClientsHubPending(),
                     ),
                     const SizedBox(height: 16),
                     _buildLeadsList(context, leads.take(2).toList()),
@@ -140,13 +140,13 @@ class LawyerOverviewScreen extends ConsumerWidget {
           titleColor: AppColors.white.withValues(alpha: 0.74),
           valueColor: AppColors.white,
           hasBorder: false,
-          onTap: () => layoutState?.setIndex(2),
+          onTap: () => layoutState?.setIndex(1),
         ),
         MetricCard(
           title: 'Leads hoje',
           value: '$leadCount',
           icon: Icons.people_alt_rounded,
-          onTap: () => layoutState?.setIndex(1),
+          onTap: () => layoutState?.goToClientsHubPending(),
         ),
         MetricCard(
           title: 'Handoff humano',
