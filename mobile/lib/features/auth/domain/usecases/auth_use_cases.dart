@@ -61,6 +61,22 @@ final class UploadAvatarUseCase {
   }
 }
 
+final class ChangePasswordUseCase {
+  final AuthRepository _repository;
+
+  const ChangePasswordUseCase(this._repository);
+
+  Future<Either<Failure, Account>> call({
+    required String newPassword,
+    String? currentPassword,
+  }) {
+    return _repository.changePassword(
+      newPassword: newPassword,
+      currentPassword: currentPassword,
+    );
+  }
+}
+
 final class LogoutUseCase {
   final AuthRepository _repository;
 

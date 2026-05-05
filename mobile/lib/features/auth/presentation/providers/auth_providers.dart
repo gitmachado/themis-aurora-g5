@@ -50,6 +50,10 @@ final uploadAvatarUseCaseProvider = Provider<UploadAvatarUseCase>((ref) {
   return UploadAvatarUseCase(ref.watch(authRepositoryProvider));
 });
 
+final changePasswordUseCaseProvider = Provider<ChangePasswordUseCase>((ref) {
+  return ChangePasswordUseCase(ref.watch(authRepositoryProvider));
+});
+
 final logoutUseCaseProvider = Provider<LogoutUseCase>((ref) {
   return LogoutUseCase(ref.watch(authRepositoryProvider));
 });
@@ -164,6 +168,20 @@ final class AccountActions {
         (await _ref
                 .read(uploadAvatarUseCaseProvider)
                 .call(filePath: filePath, fileName: fileName))
+            .getOrThrow();
+    _ref.read(authControllerProvider.notifier).updateSessionAccount(account);
+    _ref.invalidate(currentAccountProvider);
+    return account;
+  }
+
+  Future<Account> changePassword({
+    required String newPassword,
+    String? currentPassword,
+  }) async {
+    final account =
+        (await _ref
+                .read(changePasswordUseCaseProvider)
+                .call(newPassword: newPassword, currentPassword: currentPassword))
             .getOrThrow();
     _ref.read(authControllerProvider.notifier).updateSessionAccount(account);
     _ref.invalidate(currentAccountProvider);
