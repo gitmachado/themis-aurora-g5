@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../../../features/procedures/domain/entities/legal_process.dart';
 import '../../../../../../features/procedures/presentation/procedure_display.dart';
 import '../../../../../../features/procedures/presentation/providers/procedure_providers.dart';
+import '../../../../../../features/notifications/presentation/providers/notification_providers.dart';
 import '../../../../../../shared/utils/api_formatters.dart';
 import '../../../../../../shared/constants/app_colors.dart';
 import '../../../../../../shared/constants/app_text_styles.dart';
@@ -28,19 +29,29 @@ class _LawyerProcedureListScreenState
   @override
   Widget build(BuildContext context) {
     final procedures = ref.watch(myProceduresProvider);
+    final notifications = ref.watch(myNotificationsProvider).valueOrNull ?? const [];
+    final unreadCount = notifications.where((n) => !n.isRead).length;
 
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: CustomAppBar(
         title: 'Processos',
-        actions: [AppAppBarActions()],
+        showBackButton: false,
+        actions: [
+          AppAppBarActions(showChat: false, notificationCount: unreadCount),
+        ],
         showDivider: false,
       ),
       body: Column(
         children: [
           Container(
             color: AppColors.background,
-            child: Column(children: [_buildSearchBar(), _buildFilters()]),
+            child: Column(
+              children: [
+                _buildSearchBar(),
+                _buildFilters(),
+              ],
+            ),
           ),
           Expanded(
             child: procedures.when(
@@ -79,15 +90,11 @@ class _LawyerProcedureListScreenState
           fillColor: AppColors.surface2,
           border: OutlineInputBorder(
             borderRadius: BorderRadius.circular(12),
-            borderSide: BorderSide(
-              color: AppColors.divider.withValues(alpha: 0.5),
-            ),
+            borderSide: const BorderSide(color: AppColors.border),
           ),
           enabledBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(12),
-            borderSide: BorderSide(
-              color: AppColors.divider.withValues(alpha: 0.5),
-            ),
+            borderSide: const BorderSide(color: AppColors.border),
           ),
           focusedBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(12),
@@ -163,53 +170,54 @@ class _LawyerProcedureListScreenState
       );
     }
 
-    return ListView.builder(
-      padding: EdgeInsets.fromLTRB(
-        20,
-        0,
-        20,
-        AppDimensions.bottomPadding(context),
-      ),
-
-      itemCount: filtered.length,
-      itemBuilder: (context, index) {
-        final p = filtered[index];
-        return Padding(
-          padding: const EdgeInsets.only(bottom: 16),
-          child: AppProcedureCard(
-            title: p.title,
-            subtitle: p.processNumber == null
-                ? 'Cliente: ${p.clientId}'
-                : 'Proc: ${p.processNumber}',
-            statusLabel: p.displayStatus,
-            statusType: p.badgeType,
-            lastUpdate:
-                p.lastNote ?? 'Atualizado ${formatRelativeDate(p.updatedAt)}',
-            onTap: () {
-              Navigator.pushNamed(
-                context,
-                '/lawyer-procedure-detail',
-                arguments: {'processId': p.id},
-              );
-            },
-          ),
-        );
+    return RefreshIndicator(
+      onRefresh: () async {
+        ref.invalidate(myProceduresProvider);
+        await ref.read(myProceduresProvider.future);
       },
+      child: ListView.builder(
+        physics: const AlwaysScrollableScrollPhysics(),
+        padding: EdgeInsets.fromLTRB(
+          20,
+          0,
+          20,
+          AppDimensions.bottomPadding(context),
+        ),
+        itemCount: filtered.length,
+        itemBuilder: (context, index) {
+          final p = filtered[index];
+          return Padding(
+            padding: const EdgeInsets.only(bottom: 16),
+            child: AppProcedureCard(
+              icon: p.icon,
+              title: p.displayTitle,
+              subtitle: p.displaySubtitle,
+              statusLabel: p.displayStatus,
+              statusType: p.badgeType,
+              progressPercentage: p.progressPercentage,
+              lastUpdate: p.lastNote ??
+                  'Atualizado em ${formatFullDateTime(p.updatedAt)}',
+              onTap: () {
+                Navigator.pushNamed(
+                  context,
+                  '/lawyer-procedure-detail',
+                  arguments: {'processId': p.id},
+                );
+              },
+            ),
+          );
+        },
+      ),
     );
   }
 
   Widget _buildLoadingList() {
     return ListView.separated(
-      padding: EdgeInsets.fromLTRB(
-        20,
-        0,
-        20,
-        AppDimensions.bottomPadding(context),
-      ),
+      padding: const EdgeInsets.fromLTRB(20, 0, 20, 24),
       itemCount: 4,
       separatorBuilder: (_, _) => const SizedBox(height: 16),
       itemBuilder: (_, _) =>
-          const LoadingSkeleton(height: 118, borderRadius: 12),
+          const LoadingSkeleton(height: 128, borderRadius: 12),
     );
   }
 

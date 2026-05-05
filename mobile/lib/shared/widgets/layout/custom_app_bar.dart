@@ -44,12 +44,17 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
       titleSpacing: showBackButton ? 0 : 20,
       title:
           titleWidget ??
-          Text(
-            title,
-            style: AppTextStyles.h2.copyWith(
-              color: AppColors.textPrimary,
-              fontSize: 22,
-              fontWeight: FontWeight.w800,
+          Padding(
+            padding: const EdgeInsets.only(right: 24),
+            child: Text(
+              title,
+              style: AppTextStyles.h2.copyWith(
+                color: AppColors.textPrimary,
+                fontSize: 22,
+                fontWeight: FontWeight.w800,
+              ),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
             ),
           ),
       actions: hasTrailingActions

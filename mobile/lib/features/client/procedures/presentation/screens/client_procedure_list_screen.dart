@@ -26,6 +26,7 @@ class ClientProcedureListScreen extends ConsumerStatefulWidget {
 
 class _ClientProcedureListScreenState
     extends ConsumerState<ClientProcedureListScreen> {
+  String _searchQuery = '';
   String _selectedFilter = 'Todos';
 
   @override
@@ -48,8 +49,15 @@ class _ClientProcedureListScreenState
       ),
       body: Column(
         children: [
-          Container(color: AppColors.background, child: _buildFilters()),
-          const SizedBox(height: 16),
+          Container(
+            color: AppColors.background,
+            child: Column(
+              children: [
+                _buildSearchBar(),
+                _buildFilters(),
+              ],
+            ),
+          ),
           Expanded(
             child: account.when(
               data: (account) => procedures.when(
@@ -66,11 +74,52 @@ class _ClientProcedureListScreenState
     );
   }
 
+  Widget _buildSearchBar() {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(20, 0, 20, 0),
+      child: TextField(
+        onChanged: (val) => setState(() => _searchQuery = val),
+        style: AppTextStyles.body.copyWith(
+          fontSize: 15.5,
+          fontWeight: FontWeight.w600,
+          color: AppColors.ink,
+        ),
+        decoration: InputDecoration(
+          hintText: 'Buscar por processo...',
+          hintStyle: AppTextStyles.body.copyWith(
+            color: AppColors.ink4,
+            fontSize: 15.5,
+            fontWeight: FontWeight.w500,
+          ),
+          prefixIcon: const Icon(
+            Icons.search_rounded,
+            color: AppColors.textCaption,
+          ),
+          filled: true,
+          fillColor: AppColors.surface2,
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+            borderSide: const BorderSide(color: AppColors.border),
+          ),
+          enabledBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+            borderSide: const BorderSide(color: AppColors.border),
+          ),
+          focusedBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+            borderSide: const BorderSide(color: AppColors.yellow, width: 1.5),
+          ),
+          contentPadding: const EdgeInsets.symmetric(vertical: 0),
+        ),
+      ),
+    );
+  }
+
   Widget _buildFilters() {
     final filters = ['Todos', 'Ativos', 'Concluídos', 'Pendentes'];
     return SingleChildScrollView(
       scrollDirection: Axis.horizontal,
-      padding: const EdgeInsets.fromLTRB(20, 0, 20, 16),
+      padding: const EdgeInsets.fromLTRB(20, 10, 20, 10),
       child: Row(
         children: filters.map((f) {
           final isSelected = _selectedFilter == f;
@@ -85,12 +134,12 @@ class _ClientProcedureListScreenState
               labelStyle: TextStyle(
                 color: AppColors.textPrimary,
                 fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-                fontSize: 12,
+                fontSize: 13,
               ),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(20),
                 side: BorderSide(
-                  color: isSelected ? AppColors.yellow : AppColors.border,
+                  color: isSelected ? AppColors.yellow : AppColors.divider,
                 ),
               ),
               showCheckmark: false,
@@ -114,6 +163,12 @@ class _ClientProcedureListScreenState
 
   Widget _buildList(List<LegalProcess> allProcedures) {
     final filteredProcedures = allProcedures.where((proc) {
+      final query = _searchQuery.toLowerCase();
+      final matchesSearch =
+          proc.title.toLowerCase().contains(query) ||
+          (proc.processNumber ?? '').contains(_searchQuery);
+      if (!matchesSearch) return false;
+
       if (_selectedFilter == 'Todos') return true;
       if (_selectedFilter == 'Ativos') {
         return proc.currentStatus == 'OPEN' ||
@@ -134,36 +189,43 @@ class _ClientProcedureListScreenState
       return _buildEmptyState();
     }
 
-    return ListView.builder(
-      padding: EdgeInsets.fromLTRB(
-        20,
-        0,
-        20,
-        AppDimensions.bottomPadding(context),
-      ),
-      itemCount: filteredProcedures.length,
-      itemBuilder: (context, index) {
-        final proc = filteredProcedures[index];
-        return Padding(
-          padding: const EdgeInsets.only(bottom: 16),
-          child: AppProcedureCard(
-            icon: proc.icon,
-            title: proc.displayTitle,
-            subtitle: proc.displaySubtitle,
-            statusLabel: proc.displayStatus,
-            statusType: proc.badgeType,
-            lastUpdate:
-                proc.lastNote ??
-                'Atualizado ${formatRelativeDate(proc.updatedAt)}',
+    return RefreshIndicator(
+      onRefresh: () async {
+        ref.invalidate(myProceduresProvider);
+        await ref.read(myProceduresProvider.future);
+      },
+      child: ListView.builder(
+        physics: const AlwaysScrollableScrollPhysics(),
+        padding: EdgeInsets.fromLTRB(
+          20,
+          0,
+          20,
+          AppDimensions.bottomPadding(context),
+        ),
+        itemCount: filteredProcedures.length,
+        itemBuilder: (context, index) {
+          final proc = filteredProcedures[index];
+          return Padding(
+            padding: const EdgeInsets.only(bottom: 16),
+            child: AppProcedureCard(
+              icon: proc.icon,
+              title: proc.displayTitle,
+              subtitle: proc.displaySubtitle,
+              statusLabel: proc.displayStatus,
+              statusType: proc.badgeType,
+              lastUpdate:
+                  proc.lastNote ??
+                  'Atualizado em ${formatFullDateTime(proc.updatedAt)}',
             progressPercentage: proc.progressPercentage,
             onTap: () => Navigator.pushNamed(
               context,
               AppRouter.procedureTimelineRoute,
               arguments: {'processId': proc.id},
             ),
-          ),
-        );
-      },
+            ),
+          );
+        },
+      ),
     );
   }
 

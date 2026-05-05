@@ -66,6 +66,7 @@ final class ProcedureRemoteDataSource {
     required String processId,
     required String filePath,
     required String fileName,
+    void Function(int count, int total)? onSendProgress,
   }) async {
     final json = await _apiClient.postMultipart(
       '/documents/upload',
@@ -73,6 +74,7 @@ final class ProcedureRemoteDataSource {
       filePath: filePath,
       fileName: fileName,
       fields: {'legalProcessId': processId},
+      onSendProgress: onSendProgress,
     );
     return ProcessDocumentModel.fromJson(json);
   }
@@ -94,5 +96,39 @@ final class ProcedureRemoteDataSource {
       },
     );
     return LegalProcessModel.fromJson(json);
+  }
+
+  Future<void> addNote({
+    required String processId,
+    required String note,
+  }) async {
+    await _apiClient.postVoid(
+      '/processes/$processId/note',
+      data: {'note': note},
+    );
+  }
+
+  Future<void> requestDocument({
+    required String processId,
+    required String documentName,
+  }) async {
+    await _apiClient.postVoid(
+      '/processes/$processId/request-document',
+      data: {'documentName': documentName},
+    );
+  }
+
+  Future<void> scheduleEvent({
+    required String processId,
+    required String title,
+    required DateTime date,
+  }) async {
+    await _apiClient.postVoid(
+      '/processes/$processId/schedule-event',
+      data: {
+        'title': title,
+        'date': date.toIso8601String(),
+      },
+    );
   }
 }

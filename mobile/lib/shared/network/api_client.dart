@@ -71,13 +71,14 @@ class ApiClient {
     required String filePath,
     String? fileName,
     Map<String, dynamic>? fields,
+    void Function(int count, int total)? onSendProgress,
   }) async {
     final formData = FormData.fromMap({
       ...?fields,
       fileField: await MultipartFile.fromFile(filePath, filename: fileName),
     });
     final response = await _send(
-      () => _dio.post<Object?>(path, data: formData),
+      () => _dio.post<Object?>(path, data: formData, onSendProgress: onSendProgress),
     );
     return _asMap(response.data);
   }
@@ -93,8 +94,8 @@ class ApiClient {
     return _asMap(response.data);
   }
 
-  Future<void> postVoid(String path) async {
-    await _send(() => _dio.post<Object?>(path));
+  Future<void> postVoid(String path, {Map<String, dynamic>? data}) async {
+    await _send(() => _dio.post<Object?>(path, data: data));
   }
 
   Future<void> deleteVoid(String path, {Map<String, dynamic>? data}) async {
@@ -135,6 +136,10 @@ class ApiClient {
     }
 
     return Uri.parse(_dio.options.baseUrl).resolve(urlOrPath).toString();
+  }
+
+  Future<void> downloadFile(String url, String savePath) async {
+    await _send(() => _dio.download(url, savePath));
   }
 
   Future<Response<Object?>> _send(

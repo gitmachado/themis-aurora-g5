@@ -108,10 +108,14 @@ void main() {
       await tester.tap(find.text('Ação trabalhista'));
       await tester.pumpAndSettle();
 
-      expect(find.text('Resumo'), findsOneWidget);
-      expect(find.text('Dados do trâmite'), findsOneWidget);
+      await tester.tap(find.text('Resumo'));
+      await tester.pumpAndSettle();
 
-      await tester.tap(find.text('Status'));
+      expect(find.text('Detalhes do Processo'), findsOneWidget);
+
+      await tester.tap(find.text('Ações'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Atualizar Status'));
       await tester.pumpAndSettle();
       await tester.tap(find.text('Concluído'));
       await tester.pumpAndSettle();
@@ -119,7 +123,7 @@ void main() {
       expect(find.text('Status atualizado.'), findsOneWidget);
       _expectCall(apiClient, 'PATCH', '/processes/process-1/status');
 
-      await tester.tap(find.text('Andamento'));
+      await tester.tap(find.text('Andamentos'));
       await tester.pumpAndSettle();
       expect(find.text('Nota do advogado registrada'), findsOneWidget);
 

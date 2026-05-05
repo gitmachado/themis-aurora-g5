@@ -1,5 +1,7 @@
+import 'dart:async';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:mobile/shared/errors/either_failure_extensions.dart';
+import '../../../../shared/network/websocket_client.dart';
 
 import '../../../../shared/network/api_client.dart';
 import '../../data/datasources/procedure_remote_data_source.dart';
@@ -67,25 +69,126 @@ final updateProcedureStatusUseCaseProvider =
       );
     });
 
-final myProceduresProvider = FutureProvider<List<LegalProcess>>((ref) async {
-  return (await ref.watch(getMyProceduresUseCaseProvider)()).getOrThrow();
+final addNoteUseCaseProvider = Provider<AddNoteUseCase>((ref) {
+  return AddNoteUseCase(ref.watch(procedureRepositoryProvider));
 });
 
-final procedureDetailsProvider = FutureProvider.family<LegalProcess, String>((
-  ref,
-  processId,
-) async {
-  return (await ref.watch(getProcedureByIdUseCaseProvider)(
-    processId,
-  )).getOrThrow();
+final requestDocumentUseCaseProvider = Provider<RequestDocumentUseCase>((ref) {
+  return RequestDocumentUseCase(ref.watch(procedureRepositoryProvider));
 });
+
+final scheduleEventUseCaseProvider = Provider<ScheduleEventUseCase>((ref) {
+  return ScheduleEventUseCase(ref.watch(procedureRepositoryProvider));
+});
+
+final myProceduresProvider =
+    AsyncNotifierProvider<MyProceduresNotifier, List<LegalProcess>>(
+      MyProceduresNotifier.new,
+    );
+
+class MyProceduresNotifier extends AsyncNotifier<List<LegalProcess>> {
+  StreamSubscription? _subscription;
+
+  @override
+  Future<List<LegalProcess>> build() async {
+    _listenToEvents();
+    ref.onDispose(() => _subscription?.cancel());
+    return _fetch();
+  }
+
+  void _listenToEvents() {
+    _subscription?.cancel();
+    _subscription = ref.watch(webSocketClientProvider).events.listen((event) {
+      if (event.type == 'procedure:updated' || event.type == 'connected') {
+        // Recarrega a lista completa quando houver qualquer atualização ou reconexão
+        refresh();
+      }
+    });
+  }
+
+  Future<List<LegalProcess>> _fetch() async {
+    return (await ref.read(getMyProceduresUseCaseProvider)()).getOrThrow();
+  }
+
+  Future<void> refresh() async {
+    // Não usamos loading state aqui para evitar flickering na UI principal
+    // Apenas atualizamos os dados silenciosamente
+    final newData = await _fetch();
+    state = AsyncData(newData);
+  }
+}
+
+final procedureDetailsProvider =
+    AsyncNotifierProvider.family<ProcedureDetailsNotifier, LegalProcess, String>(
+      ProcedureDetailsNotifier.new,
+    );
+
+class ProcedureDetailsNotifier extends FamilyAsyncNotifier<LegalProcess, String> {
+  StreamSubscription? _subscription;
+
+  @override
+  Future<LegalProcess> build(String arg) async {
+    _listenToEvents();
+    ref.onDispose(() => _subscription?.cancel());
+    return _fetch();
+  }
+
+  void _listenToEvents() {
+    _subscription?.cancel();
+    _subscription = ref.watch(webSocketClientProvider).events.listen((event) {
+      if ((event.type == 'procedure:updated' && event.data['id'] == arg) ||
+          event.type == 'connected') {
+        refresh();
+      }
+    });
+  }
+
+  Future<LegalProcess> _fetch() async {
+    return (await ref.read(getProcedureByIdUseCaseProvider)(arg)).getOrThrow();
+  }
+
+  Future<void> refresh() async {
+    final newData = await _fetch();
+    state = AsyncData(newData);
+  }
+}
 
 final procedureTimelineProvider =
-    FutureProvider.family<List<TimelineEvent>, String>((ref, processId) async {
-      return (await ref.watch(getProcedureTimelineUseCaseProvider)(
-        processId,
-      )).getOrThrow();
+    AsyncNotifierProvider.family<ProcedureTimelineNotifier, List<TimelineEvent>, String>(
+      ProcedureTimelineNotifier.new,
+    );
+
+class ProcedureTimelineNotifier extends FamilyAsyncNotifier<List<TimelineEvent>, String> {
+  StreamSubscription? _subscription;
+
+  @override
+  Future<List<TimelineEvent>> build(String arg) async {
+    _listenToEvents();
+    ref.onDispose(() => _subscription?.cancel());
+    return _fetch();
+  }
+
+  void _listenToEvents() {
+    _subscription?.cancel();
+    _subscription = ref.watch(webSocketClientProvider).events.listen((event) {
+      final processId = arg;
+      // Se o evento for de atualização de processo e o ID bater, ou se reconectar
+      if ((event.type == 'procedure:updated' && event.data['id'] == processId) || 
+          event.type == 'connected') {
+        refresh();
+      }
     });
+  }
+
+  Future<List<TimelineEvent>> _fetch() async {
+    return (await ref.read(getProcedureTimelineUseCaseProvider)(arg)).getOrThrow();
+  }
+
+  Future<void> refresh() async {
+    final newData = await _fetch();
+    state = AsyncData(newData);
+  }
+}
 
 final procedureDocumentsProvider =
     FutureProvider.family<List<ProcessDocument>, String>((
@@ -163,13 +266,58 @@ final class ProcedureActions {
     required String processId,
     required String filePath,
     required String fileName,
+    void Function(int count, int total)? onSendProgress,
   }) async {
-    (await _ref
-            .read(uploadDocumentUseCaseProvider)
-            .call(processId: processId, filePath: filePath, fileName: fileName))
+    (await _ref.read(uploadDocumentUseCaseProvider).call(
+          processId: processId,
+          filePath: filePath,
+          fileName: fileName,
+          onSendProgress: onSendProgress,
+        ))
         .getOrThrow();
     _ref.invalidate(procedureDocumentsProvider(processId));
     _ref.invalidate(myDocumentsProvider);
     _ref.invalidate(myRecentDocumentsProvider);
+  }
+
+  Future<void> addNote({
+    required String processId,
+    required String note,
+  }) async {
+    (await _ref.read(addNoteUseCaseProvider).call(
+          processId: processId,
+          note: note,
+        ))
+        .getOrThrow();
+    _ref.invalidate(procedureDetailsProvider(processId));
+    _ref.invalidate(procedureTimelineProvider(processId));
+  }
+
+  Future<void> requestDocument({
+    required String processId,
+    required String documentName,
+  }) async {
+    (await _ref.read(requestDocumentUseCaseProvider).call(
+          processId: processId,
+          documentName: documentName,
+        ))
+        .getOrThrow();
+    _ref.invalidate(procedureDetailsProvider(processId));
+    _ref.invalidate(procedureTimelineProvider(processId));
+  }
+
+  Future<void> scheduleEvent({
+    required String processId,
+    required String title,
+    required DateTime date,
+  }) async {
+    (await _ref.read(scheduleEventUseCaseProvider).call(
+          processId: processId,
+          title: title,
+          date: date,
+        ))
+        .getOrThrow();
+    _ref.invalidate(procedureDetailsProvider(processId));
+    _ref.invalidate(procedureTimelineProvider(processId));
   }
 }

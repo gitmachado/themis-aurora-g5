@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:file_picker/file_picker.dart';
+import 'package:image_cropper/image_cropper.dart';
 
 import '../../../../../../features/auth/domain/entities/account.dart';
 import '../../../../../../features/auth/presentation/providers/auth_providers.dart';
@@ -12,11 +13,18 @@ import '../../../../../../shared/widgets/cards/app_card.dart';
 import '../../../../../../shared/widgets/layout/custom_app_bar.dart';
 import '../../../../../../shared/widgets/layout/loading_skeleton.dart';
 
-class ClientProfileScreen extends ConsumerWidget {
+class ClientProfileScreen extends ConsumerStatefulWidget {
   const ClientProfileScreen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<ClientProfileScreen> createState() => _ClientProfileScreenState();
+}
+
+class _ClientProfileScreenState extends ConsumerState<ClientProfileScreen> {
+  bool _isUploading = false;
+
+  @override
+  Widget build(BuildContext context) {
     final account = ref.watch(currentAccountProvider);
     final cachedAccount = account.valueOrNull;
 
@@ -24,13 +32,14 @@ class ClientProfileScreen extends ConsumerWidget {
       backgroundColor: AppColors.background,
       appBar: CustomAppBar(
         title: 'Perfil',
-        showBackButton: true,
+        showBackButton: false,
+        showDivider: false,
         actions: [AppAppBarActions(showChat: false)],
       ),
       body: cachedAccount != null
-          ? _buildContent(context, ref, cachedAccount)
+          ? _buildContent(context, cachedAccount)
           : account.when(
-              data: (account) => _buildContent(context, ref, account),
+              data: (account) => _buildContent(context, account),
               loading: () => const Padding(
                 padding: EdgeInsets.all(24),
                 child: LoadingSkeleton(height: 260, borderRadius: 16),
@@ -49,13 +58,13 @@ class ClientProfileScreen extends ConsumerWidget {
     );
   }
 
-  Widget _buildContent(BuildContext context, WidgetRef ref, Account account) {
+  Widget _buildContent(BuildContext context, Account account) {
     return SingleChildScrollView(
       key: const PageStorageKey<String>('client-profile-scroll'),
       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
       child: Column(
         children: [
-          _buildProfileHeader(context, ref, account),
+          _buildProfileHeader(context, account),
           const SizedBox(height: 24),
           _buildSection(
             title: 'Dados Pessoais',
@@ -89,7 +98,7 @@ class ClientProfileScreen extends ConsumerWidget {
             ],
           ),
           const SizedBox(height: 20),
-          _buildPreferenceSection(context, ref, account),
+          _buildPreferenceSection(context, account),
           const SizedBox(height: 20),
           _buildSection(
             title: 'Conta',
@@ -97,7 +106,7 @@ class ClientProfileScreen extends ConsumerWidget {
               _buildActionTile(
                 Icons.logout_rounded,
                 'Sair do Aplicativo',
-                () => _showLogoutDialog(context, ref),
+                () => _showLogoutDialog(context),
                 isDestructive: true,
               ),
             ],
@@ -110,7 +119,6 @@ class ClientProfileScreen extends ConsumerWidget {
 
   Widget _buildProfileHeader(
     BuildContext context,
-    WidgetRef ref,
     Account account,
   ) {
     final initial = account.name.isEmpty ? '?' : account.name[0].toUpperCase();
@@ -149,30 +157,50 @@ class ClientProfileScreen extends ConsumerWidget {
                   child: Tooltip(
                     message: 'Alterar foto',
                     child: GestureDetector(
-                      onTap: () => _pickAndUploadAvatar(context, ref),
+                      onTap: _isUploading ? null : () => _pickAndUploadAvatar(context),
                       child: Container(
                         padding: const EdgeInsets.all(4),
                         decoration: const BoxDecoration(
                           color: AppColors.white,
                           shape: BoxShape.circle,
                         ),
-                        child: CircleAvatar(
-                          radius: 40,
-                          backgroundColor: AppColors.yellow,
-                          backgroundImage:
-                              avatarUrl != null && avatarUrl.isNotEmpty
-                              ? NetworkImage(avatarUrl)
-                              : null,
-                          child: avatarUrl == null || avatarUrl.isEmpty
-                              ? Text(
-                                  initial,
-                                  style: const TextStyle(
-                                    color: AppColors.ink,
-                                    fontSize: 28,
-                                    fontWeight: FontWeight.bold,
+                        child: Stack(
+                          alignment: Alignment.center,
+                          children: [
+                            CircleAvatar(
+                              radius: 40,
+                              backgroundColor: AppColors.yellow,
+                              backgroundImage:
+                                  avatarUrl != null && avatarUrl.isNotEmpty
+                                  ? NetworkImage(avatarUrl)
+                                  : null,
+                              child: avatarUrl == null || avatarUrl.isEmpty
+                                  ? Text(
+                                      initial,
+                                      style: const TextStyle(
+                                        color: AppColors.ink,
+                                        fontSize: 28,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    )
+                                  : null,
+                            ),
+                            if (_isUploading)
+                              Container(
+                                width: 80,
+                                height: 80,
+                                decoration: BoxDecoration(
+                                  color: Colors.black.withValues(alpha: 0.3),
+                                  shape: BoxShape.circle,
+                                ),
+                                child: const Center(
+                                  child: CircularProgressIndicator(
+                                    color: AppColors.yellow,
+                                    strokeWidth: 3,
                                   ),
-                                )
-                              : null,
+                                ),
+                              ),
+                          ],
                         ),
                       ),
                     ),
@@ -189,7 +217,7 @@ class ClientProfileScreen extends ConsumerWidget {
                         padding: EdgeInsets.zero,
                         tooltip: 'Alterar foto',
                         icon: const Icon(Icons.photo_camera_outlined, size: 18),
-                        onPressed: () => _pickAndUploadAvatar(context, ref),
+                        onPressed: _isUploading ? null : () => _pickAndUploadAvatar(context),
                         style: IconButton.styleFrom(
                           backgroundColor: AppColors.ink,
                           foregroundColor: AppColors.yellow,
@@ -224,7 +252,7 @@ class ClientProfileScreen extends ConsumerWidget {
     );
   }
 
-  Future<void> _pickAndUploadAvatar(BuildContext context, WidgetRef ref) async {
+  Future<void> _pickAndUploadAvatar(BuildContext context) async {
     final result = await FilePicker.pickFiles(
       type: FileType.custom,
       allowedExtensions: const ['png', 'jpg', 'jpeg', 'heic', 'heif'],
@@ -233,10 +261,14 @@ class ClientProfileScreen extends ConsumerWidget {
     final file = result?.files.single;
     if (file == null || file.path == null) return;
 
+    final croppedFile = await _cropImage(file.path!);
+    if (croppedFile == null) return;
+
+    setState(() => _isUploading = true);
     try {
       await ref
           .read(accountActionsProvider)
-          .uploadAvatar(filePath: file.path!, fileName: file.name);
+          .uploadAvatar(filePath: croppedFile.path, fileName: file.name);
       if (!context.mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Foto de perfil atualizada.')),
@@ -246,12 +278,37 @@ class ClientProfileScreen extends ConsumerWidget {
       ScaffoldMessenger.of(
         context,
       ).showSnackBar(SnackBar(content: Text(error.toString())));
+    } finally {
+      if (mounted) setState(() => _isUploading = false);
     }
+  }
+
+  Future<CroppedFile?> _cropImage(String path) async {
+    return await ImageCropper().cropImage(
+      sourcePath: path,
+      aspectRatio: const CropAspectRatio(ratioX: 1, ratioY: 1),
+      uiSettings: [
+        AndroidUiSettings(
+          toolbarTitle: 'Ajustar imagem',
+          toolbarColor: AppColors.background,
+          toolbarWidgetColor: AppColors.ink,
+          activeControlsWidgetColor: AppColors.yellow,
+          statusBarLight: true,
+          initAspectRatio: CropAspectRatioPreset.square,
+          lockAspectRatio: true,
+          hideBottomControls: true,
+        ),
+        IOSUiSettings(
+          title: 'Ajustar imagem',
+          aspectRatioLockEnabled: true,
+          resetAspectRatioEnabled: false,
+        ),
+      ],
+    );
   }
 
   Widget _buildPreferenceSection(
     BuildContext context,
-    WidgetRef ref,
     Account account,
   ) {
     final preferences = account.notificationPreferences;
@@ -263,19 +320,19 @@ class ClientProfileScreen extends ConsumerWidget {
           title: 'Atualizações de trâmite',
           value: preferences['processUpdates'] ?? true,
           onChanged: (value) =>
-              _updatePreference(context, ref, account, 'processUpdates', value),
+              _updatePreference(context, account, 'processUpdates', value),
         ),
         _buildPreferenceTile(
           title: 'Arquivos e documentos',
           value: preferences['documents'] ?? true,
           onChanged: (value) =>
-              _updatePreference(context, ref, account, 'documents', value),
+              _updatePreference(context, account, 'documents', value),
         ),
         _buildPreferenceTile(
           title: 'Mensagens espelhadas',
           value: preferences['messages'] ?? true,
           onChanged: (value) =>
-              _updatePreference(context, ref, account, 'messages', value),
+              _updatePreference(context, account, 'messages', value),
         ),
       ],
     );
@@ -385,7 +442,6 @@ class ClientProfileScreen extends ConsumerWidget {
 
   Future<void> _updatePreference(
     BuildContext context,
-    WidgetRef ref,
     Account account,
     String key,
     bool value,
@@ -420,7 +476,7 @@ class ClientProfileScreen extends ConsumerWidget {
     }
   }
 
-  void _showLogoutDialog(BuildContext context, WidgetRef ref) {
+  void _showLogoutDialog(BuildContext context) {
     showDialog<void>(
       context: context,
       builder: (dialogContext) => AlertDialog(

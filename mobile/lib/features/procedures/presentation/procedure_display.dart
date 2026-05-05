@@ -51,3 +51,29 @@ extension LegalProcessDisplay on LegalProcess {
     _ => 'Juridico',
   };
 }
+
+String translateStatus(String status) => switch (status) {
+      'UNDER_ANALYSIS' => 'EM ANÁLISE',
+      'AWAITING_DOCUMENT' => 'AGUARDANDO DOCUMENTO',
+      'COMPLETED' => 'CONCLUÍDO',
+      'ARCHIVED' => 'ARQUIVADO',
+      'OPEN' => 'ABERTO',
+      _ => status,
+    };
+
+String formatTimelineContent(String content) {
+  var formatted = content;
+  final statuses = [
+    'UNDER_ANALYSIS',
+    'AWAITING_DOCUMENT',
+    'COMPLETED',
+    'ARCHIVED',
+    'OPEN'
+  ];
+
+  for (final status in statuses) {
+    formatted = formatted.replaceAll(status, translateStatus(status));
+  }
+
+  return formatted;
+}

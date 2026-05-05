@@ -44,9 +44,7 @@ class AppNotificationTile extends StatelessWidget {
             : (isRead ? AppColors.surface : AppColors.yellowSoft),
         borderRadius: BorderRadius.circular(20),
         border: Border.all(
-          color: isSelected
-              ? AppColors.yellow
-              : (isRead ? AppColors.line : Colors.transparent),
+          color: isSelected ? AppColors.yellow : AppColors.line,
           width: isSelected ? 2 : 1,
         ),
       ),

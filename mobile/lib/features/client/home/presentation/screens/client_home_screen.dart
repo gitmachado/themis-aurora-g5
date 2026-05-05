@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:url_launcher/url_launcher.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import '../../../../../../app/routes/app_router.dart';
 import '../../../../../../features/auth/presentation/providers/auth_providers.dart';
 import '../../../../../../features/notifications/presentation/providers/notification_providers.dart';
@@ -13,6 +15,8 @@ import '../../../../../../shared/widgets/cards/app_card.dart';
 import '../../../../../../shared/widgets/layout/app_dashboard_header.dart';
 import '../../../../../../shared/widgets/themis/themis_widgets.dart';
 import '../../../../../../shared/constants/app_dimensions.dart';
+import '../../../../../../shared/constants/app_assets.dart';
+import '../providers/client_navigation_provider.dart';
 
 class ClientHomeScreen extends ConsumerWidget {
   const ClientHomeScreen({super.key});
@@ -48,37 +52,46 @@ class ClientHomeScreen extends ConsumerWidget {
                 Navigator.pushNamed(context, '/notifications'),
           ),
           Expanded(
-            child: SingleChildScrollView(
-              padding: const EdgeInsets.symmetric(vertical: 8),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 20),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        const SizedBox(height: 18),
-                        Text(
-                          'Seu processo\nem andamento',
-                          style: AppTextStyles.h1.copyWith(fontSize: 29),
-                        ),
-                        const SizedBox(height: 18),
-                        _buildHeroProcessCard(context, firstProcedure),
-                        const SizedBox(height: 14),
-                        _buildStatsGrid(procedureList.length, documents.length),
-                        const SizedBox(height: 18),
-                        const Padding(
-                          padding: EdgeInsets.symmetric(horizontal: 4),
-                          child: ThemisSectionLabel('Ações rápidas'),
-                        ),
-                        const SizedBox(height: 10),
-                        _buildQuickActions(context),
-                        SizedBox(height: AppDimensions.bottomPadding(context)),
-                      ],
+            child: RefreshIndicator(
+              onRefresh: () async {
+                ref.invalidate(myProceduresProvider);
+                ref.invalidate(myNotificationsProvider);
+                ref.invalidate(myDocumentsProvider);
+                await ref.read(myProceduresProvider.future);
+              },
+              child: SingleChildScrollView(
+                physics: const AlwaysScrollableScrollPhysics(),
+                padding: const EdgeInsets.symmetric(vertical: 8),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 20),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const SizedBox(height: 18),
+                          Text(
+                            'Seu processo\nem andamento',
+                            style: AppTextStyles.h1.copyWith(fontSize: 29),
+                          ),
+                          const SizedBox(height: 18),
+                          _buildHeroProcessCard(context, firstProcedure),
+                          const SizedBox(height: 14),
+                          _buildStatsGrid(procedureList.length, documents.length),
+                          const SizedBox(height: 18),
+                          const Padding(
+                            padding: EdgeInsets.symmetric(horizontal: 4),
+                            child: ThemisSectionLabel('Ações rápidas'),
+                          ),
+                          const SizedBox(height: 10),
+                          _buildQuickActions(context, ref),
+                          SizedBox(height: AppDimensions.bottomPadding(context)),
+                        ],
+                      ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
             ),
           ),
@@ -126,7 +139,7 @@ class ClientHomeScreen extends ConsumerWidget {
           Text(
             hasProcedure
                 ? (firstProcedure.lastNote ??
-                      'Atualizado ${formatRelativeDate(firstProcedure.updatedAt)}')
+                      'Atualizado em ${formatFullDateTime(firstProcedure.updatedAt)}')
                 : 'Quando houver atualizacoes, elas aparecerao aqui.',
             style: AppTextStyles.body.copyWith(
               color: AppColors.white.withValues(alpha: 0.72),
@@ -200,16 +213,20 @@ class ClientHomeScreen extends ConsumerWidget {
     );
   }
 
-  Widget _buildQuickActions(BuildContext context) {
+  Widget _buildQuickActions(BuildContext context, WidgetRef ref) {
     return AppCard(
       padding: EdgeInsets.zero,
       child: Column(
         children: [
           ThemisActionRow(
-            icon: Icons.smart_toy_outlined,
+            iconWidget: SvgPicture.asset(
+              AppAssets.logo,
+              width: 18,
+              height: 18,
+            ),
             label: 'Falar com a Themis',
             iconBackground: AppColors.yellowSoft,
-            onTap: () => Navigator.pushNamed(context, '/chat-mirror'),
+            onTap: () => ref.read(clientNavigationIndexProvider.notifier).state = 3,
           ),
           const Divider(height: 1, color: AppColors.line2),
           ThemisActionRow(
@@ -223,7 +240,10 @@ class ClientHomeScreen extends ConsumerWidget {
             label: 'Continuar no WhatsApp',
             iconBackground: AppColors.successBackground,
             iconColor: AppColors.success,
-            onTap: () => Navigator.pushNamed(context, '/chat-mirror'),
+            onTap: () => launchUrl(
+              Uri.parse('https://wa.me/558487922092'),
+              mode: LaunchMode.externalApplication,
+            ),
           ),
         ],
       ),

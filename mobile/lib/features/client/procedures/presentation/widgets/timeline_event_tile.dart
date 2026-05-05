@@ -9,6 +9,7 @@ class TimelineEventTile extends StatelessWidget {
   final String? responsible;
   final IconData? icon;
   final Color? iconBackgroundColor;
+  final Color? iconColor;
   final bool isLast;
   final bool isFirst;
 
@@ -20,6 +21,7 @@ class TimelineEventTile extends StatelessWidget {
     this.responsible,
     this.icon,
     this.iconBackgroundColor,
+    this.iconColor,
     this.isLast = false,
     this.isFirst = false,
   });
@@ -53,7 +55,7 @@ class TimelineEventTile extends StatelessWidget {
                   child: Icon(
                     icon ?? (isFirst ? Icons.check : Icons.circle),
                     size: 16,
-                    color: isFirst ? AppColors.ink : AppColors.divider,
+                    color: iconColor ?? (isFirst ? AppColors.ink : AppColors.divider),
                   ),
                 ),
                 if (!isLast)

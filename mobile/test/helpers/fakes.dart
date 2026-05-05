@@ -70,6 +70,7 @@ class FakeApiClient implements ApiClient {
     required String filePath,
     String? fileName,
     Map<String, dynamic>? fields,
+    void Function(int count, int total)? onSendProgress,
   }) async {
     calls.add(
       ApiCall('POST_MULTIPART', path, fields, filePath, fileName, fileField),
@@ -91,8 +92,8 @@ class FakeApiClient implements ApiClient {
   }
 
   @override
-  Future<void> postVoid(String path) async {
-    calls.add(ApiCall('POST', path));
+  Future<void> postVoid(String path, {Map<String, dynamic>? data}) async {
+    calls.add(ApiCall('POST', path, data));
   }
 
   @override
@@ -129,6 +130,11 @@ class FakeApiClient implements ApiClient {
     }
 
     return Uri.parse(_baseUrl).resolve(urlOrPath).toString();
+  }
+
+  @override
+  Future<void> downloadFile(String url, String savePath) async {
+    calls.add(ApiCall('DOWNLOAD', url, null, savePath));
   }
 }
 

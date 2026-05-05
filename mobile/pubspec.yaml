@@ -44,6 +44,9 @@ dependencies:
   socket_io_client: ^3.1.2
   google_sign_in: ^7.2.0
   image_cropper: ^8.1.0
+  flutter_pdfview: ^1.4.4
+  path_provider: ^2.1.5
+  flutter_svg: ^2.2.4
 
 dev_dependencies:
   flutter_test:
@@ -55,6 +58,16 @@ dev_dependencies:
   # package. See that file for information about deactivating specific lint
   # rules and activating additional ones.
   flutter_lints: ^6.0.0
+  flutter_launcher_icons: ^0.13.1
+
+flutter_launcher_icons:
+  android: true
+  ios: true
+  image_path: "assets/AppIcon/android/playstore-icon.png"
+  adaptive_icon_background: "#FBFAF6"
+  adaptive_icon_foreground: "assets/AppIcon/foreground.png"
+  remove_alpha_ios: true
+  min_sdk_android: 21
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec

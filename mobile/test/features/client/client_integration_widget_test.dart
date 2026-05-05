@@ -21,14 +21,14 @@ void main() {
       ProviderScope(
         overrides: [
           currentAccountProvider.overrideWith((ref) async => _account),
-          chatHistoryProvider(_account.whatsappNumber).overrideWith(
-            (ref) async => const [
+          liveChatProvider.overrideWith(
+            () => _MockChatNotifier(const [
               ChatMessage(
                 id: 'message-1',
                 sender: 'CLIENT',
                 content: 'Mensagem real do WhatsApp',
               ),
-            ],
+            ]),
           ),
         ],
         child: const MaterialApp(home: ClientChatMirrorScreen()),
@@ -60,14 +60,14 @@ void main() {
             ],
           ),
           myProceduresProvider.overrideWith(
-            (ref) async => const [
+            () => _MockProceduresNotifier(const [
               LegalProcess(
                 id: 'process-1',
                 clientId: 'client-1',
                 title: 'Tramite real',
                 currentStatus: 'OPEN',
               ),
-            ],
+            ]),
           ),
         ],
         child: const MaterialApp(home: ClientFilesScreen()),
@@ -87,7 +87,7 @@ void main() {
         overrides: [
           currentAccountProvider.overrideWith((ref) async => _account),
           myProceduresProvider.overrideWith(
-            (ref) async => const [
+            () => _MockProceduresNotifier(const [
               LegalProcess(
                 id: 'process-1',
                 clientId: 'client-1',
@@ -100,7 +100,7 @@ void main() {
                 title: 'Processo de outro cliente',
                 currentStatus: 'OPEN',
               ),
-            ],
+            ]),
           ),
         ],
         child: const MaterialApp(home: ClientProcedureListScreen()),
@@ -141,3 +141,20 @@ const _account = Account(
   email: 'lucas@example.com',
   notificationPreferences: {'documents': true},
 );
+
+class _MockChatNotifier extends LiveChatNotifier {
+  final List<ChatMessage> data;
+  _MockChatNotifier(this.data);
+
+  @override
+  Future<List<ChatMessage>> build(String arg) async => data;
+}
+
+class _MockProceduresNotifier extends MyProceduresNotifier {
+  final List<LegalProcess> data;
+  _MockProceduresNotifier(this.data);
+
+  @override
+  Future<List<LegalProcess>> build() async => data;
+}
+

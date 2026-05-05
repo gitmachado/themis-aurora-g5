@@ -137,10 +137,13 @@ class _LawyerLeadTriageScreenState
   Widget _buildTabs() {
     return Padding(
       padding: const EdgeInsets.fromLTRB(20, 0, 20, 0),
-      child: ThemisSegmentedControl(
-        labels: const ['Novos', 'Arquivados'],
-        selectedIndex: _selectedTabIndex,
-        onChanged: (index) => setState(() => _selectedTabIndex = index),
+      child: DefaultTabController(
+        length: 2,
+        child: ThemisSegmentedControl(
+          labels: const ['Novos', 'Arquivados'],
+          selectedIndex: _selectedTabIndex,
+          onChanged: (index) => setState(() => _selectedTabIndex = index),
+        ),
       ),
     );
   }

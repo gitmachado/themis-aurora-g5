@@ -12,7 +12,9 @@ import '../../../../../../shared/utils/api_formatters.dart';
 import '../../../../../../shared/widgets/layout/custom_app_bar.dart';
 import '../../../../../../shared/widgets/layout/loading_skeleton.dart';
 
+import 'package:flutter_svg/flutter_svg.dart';
 import '../../../../../../shared/utils/string_utils.dart';
+import '../../../../../../shared/constants/app_assets.dart';
 
 class LawyerChatHandoffScreen extends ConsumerStatefulWidget {
   final String clientName;
@@ -33,33 +35,64 @@ class _LawyerChatHandoffScreenState
     extends ConsumerState<LawyerChatHandoffScreen> {
   final TextEditingController _messageController = TextEditingController();
   final ScrollController _scrollController = ScrollController();
-
   String? _leadId;
   bool _isAIPaused = false;
   bool _isAITyping = false;
   int _lastMessageCount = 0;
-
-  @override
-  void dispose() {
-    _messageController.dispose();
-    _scrollController.dispose();
-    super.dispose();
-  }
-
-  void _scrollToBottom() {
-    if (_scrollController.hasClients) {
-      _scrollController.animateTo(
-        _scrollController.position.maxScrollExtent,
-        duration: const Duration(milliseconds: 300),
-        curve: Curves.easeOut,
-      );
-    }
-  }
+  int _unreadCount = 0;
+  bool _showScrollDownButton = false;
 
   @override
   void initState() {
     super.initState();
     _loadInitialData();
+    _scrollController.addListener(_onScroll);
+  }
+
+  @override
+  void dispose() {
+    _messageController.dispose();
+    _scrollController.removeListener(_onScroll);
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  void _onScroll() {
+    if (!_scrollController.hasClients) return;
+    
+    final offset = _scrollController.offset;
+    final isFarFromBottom = offset > 100;
+    
+    debugPrint('[LawyerChat] Scroll Offset: $offset, IsFar: $isFarFromBottom');
+
+    if (isFarFromBottom != _showScrollDownButton) {
+      setState(() {
+        _showScrollDownButton = isFarFromBottom;
+      });
+    }
+
+    if (offset < 50 && _unreadCount > 0) {
+      setState(() {
+        _unreadCount = 0;
+      });
+    }
+  }
+
+  void _scrollToBottom() {
+    if (_scrollController.hasClients) {
+      setState(() {
+        _unreadCount = 0;
+      });
+      Future.microtask(() {
+        if (_scrollController.hasClients) {
+          _scrollController.animateTo(
+            0,
+            duration: const Duration(milliseconds: 400),
+            curve: Curves.fastOutSlowIn,
+          );
+        }
+      });
+    }
   }
 
   Future<void> _loadInitialData() async {
@@ -182,6 +215,34 @@ class _LawyerChatHandoffScreenState
     final myId = ref.watch(authControllerProvider).valueOrNull?.account?.id;
     final isLockedByOther = lockState.isLocked && lockState.lawyerId != myId;
 
+    // Escuta novas mensagens no topo do build
+    ref.listen<AsyncValue<List<ChatMessage>>>(
+      liveChatProvider(widget.whatsappNumber),
+      (previous, next) {
+        if (next is AsyncData<List<ChatMessage>>) {
+          final currentMsgs = next.value;
+          final prevMsgs = previous?.valueOrNull ?? [];
+
+          debugPrint('[LawyerChat] New update! Prev: ${prevMsgs.length}, Current: ${currentMsgs.length}');
+
+          if (currentMsgs.length > prevMsgs.length) {
+            final isFar = _scrollController.hasClients && 
+                         _scrollController.offset > 100;
+            
+            debugPrint('[LawyerChat] Message added! IsFar: $isFar');
+
+            if (isFar) {
+              setState(() {
+                _unreadCount += (currentMsgs.length - prevMsgs.length);
+              });
+            } else {
+              _scrollToBottom();
+            }
+          }
+        }
+      },
+    );
+
     return AnnotatedRegion<SystemUiOverlayStyle>(
       value: const SystemUiOverlayStyle(
         systemNavigationBarColor: Colors.white,
@@ -238,47 +299,57 @@ class _LawyerChatHandoffScreenState
           ],
         ),
         body: SafeArea(
-          child: Column(
+          child: Stack(
             children: [
-              if (isLockedByOther)
-                _buildOtherLawyerBanner(
-                  lockState.lawyerName ?? 'Outro advogado',
-                ),
-              _buildLiveHeader(isLockedByOther),
-              if (!_isAIPaused)
-                Container(
-                  width: double.infinity,
-                  padding: const EdgeInsets.symmetric(
-                    vertical: 8,
-                    horizontal: 16,
-                  ),
-                  color: AppColors.surface2,
-                  child: const Text(
-                    'Histórico do WhatsApp em modo somente leitura.',
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                      color: AppColors.textCaption,
-                      fontSize: 12,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ),
-              Expanded(
-                child: history == null
-                    ? const Center(child: Text('WhatsApp não informado.'))
-                    : history.when(
-                        data: (messages) {
-                          WidgetsBinding.instance.addPostFrameCallback(
-                            (_) => _scrollToBottom(),
-                          );
-                          return _buildChatList(messages);
-                        },
-                        loading: _buildLoadingList,
-                        error: (error, _) =>
-                            Center(child: Text(error.toString())),
+              Positioned.fill(
+                child: Column(
+                  children: [
+                    if (isLockedByOther)
+                      _buildOtherLawyerBanner(
+                        lockState.lawyerName ?? 'Outro advogado',
                       ),
+                    _buildLiveHeader(isLockedByOther),
+                    if (!_isAIPaused)
+                      Container(
+                        width: double.infinity,
+                        padding: const EdgeInsets.symmetric(
+                          vertical: 8,
+                          horizontal: 16,
+                        ),
+                        color: AppColors.surface2,
+                        child: const Text(
+                          'Histórico do WhatsApp em modo somente leitura.',
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                            color: AppColors.textCaption,
+                            fontSize: 12,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                    Expanded(
+                      child: history == null
+                          ? const Center(child: Text('WhatsApp não informado.'))
+                          : history.when(
+                              data: (messages) {
+                                return _buildChatList(messages);
+                              },
+                              loading: _buildLoadingList,
+                              error: (error, _) =>
+                                  Center(child: Text(error.toString())),
+                            ),
+                    ),
+                    if (_isAIPaused && !isLockedByOther) _buildMessageInput(),
+                  ],
+                ),
               ),
-              if (_isAIPaused && !isLockedByOther) _buildMessageInput(),
+              // Botão Scroll to Bottom
+              if (_showScrollDownButton)
+                Positioned(
+                  right: 16,
+                  bottom: _isAIPaused && !isLockedByOther ? 90 : 24,
+                  child: _buildScrollToBottomButton(),
+                ),
             ],
           ),
         ),
@@ -325,11 +396,14 @@ class _LawyerChatHandoffScreenState
                   .withValues(alpha: 0.1),
               shape: BoxShape.circle,
             ),
-            child: Icon(
-              _isAIPaused ? Icons.bolt : Icons.smart_toy_outlined,
-              color: _isAIPaused ? AppColors.primary : AppColors.secondary,
-              size: 20,
-            ),
+            child: _isAIPaused 
+              ? Icon(Icons.bolt, color: AppColors.primary, size: 20)
+              : SvgPicture.asset(
+                  AppAssets.logo,
+                  width: 20,
+                  height: 20,
+                  colorFilter: const ColorFilter.mode(AppColors.secondary, BlendMode.srcIn),
+                ),
           ),
           const SizedBox(width: 12),
           Expanded(
@@ -362,7 +436,12 @@ class _LawyerChatHandoffScreenState
             if (_isAIPaused)
               TextButton.icon(
                 onPressed: _handleResumeAI,
-                icon: const Icon(Icons.smart_toy_outlined, size: 18),
+                icon: SvgPicture.asset(
+                  AppAssets.logo,
+                  width: 18,
+                  height: 18,
+                  colorFilter: const ColorFilter.mode(AppColors.primary, BlendMode.srcIn),
+                ),
                 label: const Text('Devolver p/ IA'),
                 style: TextButton.styleFrom(
                   foregroundColor: AppColors.primary,
@@ -407,17 +486,23 @@ class _LawyerChatHandoffScreenState
       return const Center(child: Text('Nenhuma mensagem encontrada.'));
     }
 
-    final itemCount = messages.length + (_isAITyping ? 1 : 0);
+    final reversedMessages = messages.reversed.toList();
+    final itemCount = reversedMessages.length + (_isAITyping ? 1 : 0);
 
     return ListView.builder(
       controller: _scrollController,
+      reverse: true,
       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
       itemCount: itemCount,
       itemBuilder: (context, index) {
-        if (index == messages.length) {
+        // No modo reverso, o item 0 é o de baixo. Se estiver digitando, ele vem primeiro.
+        if (_isAITyping && index == 0) {
           return _buildTypingIndicator(context);
         }
-        return _buildChatBubble(context, messages[index]);
+
+        // Ajusta o índice se o typing indicator estiver ocupando a posição 0
+        final messageIndex = _isAITyping ? index - 1 : index;
+        return _buildChatBubble(context, reversedMessages[messageIndex]);
       },
     );
   }
@@ -626,6 +711,63 @@ class _LawyerChatHandoffScreenState
             ),
           ],
         ),
+      ),
+    );
+  }
+
+  Widget _buildScrollToBottomButton() {
+    return GestureDetector(
+      onTap: _scrollToBottom,
+      child: Stack(
+        clipBehavior: Clip.none,
+        children: [
+          Container(
+            width: 42,
+            height: 42,
+            decoration: BoxDecoration(
+              color: AppColors.white,
+              shape: BoxShape.circle,
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.15),
+                  blurRadius: 10,
+                  offset: const Offset(0, 4),
+                ),
+              ],
+            ),
+            child: const Icon(
+              Icons.keyboard_arrow_down_rounded,
+              color: AppColors.ink,
+              size: 28,
+            ),
+          ),
+          if (_unreadCount > 0)
+            Positioned(
+              top: -4,
+              right: -2,
+              child: Container(
+                padding: const EdgeInsets.all(6),
+                decoration: const BoxDecoration(
+                  color: AppColors.primary,
+                  shape: BoxShape.circle,
+                ),
+                constraints: const BoxConstraints(
+                  minWidth: 20,
+                  minHeight: 20,
+                ),
+                child: Center(
+                  child: Text(
+                    _unreadCount > 9 ? '9+' : '$_unreadCount',
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 10,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+              ),
+            ),
+        ],
       ),
     );
   }

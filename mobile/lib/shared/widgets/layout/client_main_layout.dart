@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../../../features/client/home/presentation/providers/client_navigation_provider.dart';
 import '../../../../features/client/home/presentation/screens/client_home_screen.dart';
 import '../../../../features/client/procedures/presentation/screens/client_procedure_list_screen.dart';
 import '../../../../features/client/files/presentation/screens/client_files_screen.dart';
@@ -6,18 +8,16 @@ import '../../../../features/client/chat/presentation/screens/client_chat_mirror
 import '../../../../features/client/profile/presentation/screens/client_profile_screen.dart';
 import 'app_bottom_nav_bar.dart';
 
-class ClientMainLayout extends StatefulWidget {
+class ClientMainLayout extends ConsumerStatefulWidget {
   final int initialIndex;
 
   const ClientMainLayout({super.key, this.initialIndex = 0});
 
   @override
-  State<ClientMainLayout> createState() => _ClientMainLayoutState();
+  ConsumerState<ClientMainLayout> createState() => _ClientMainLayoutState();
 }
 
-class _ClientMainLayoutState extends State<ClientMainLayout> {
-  late int _currentIndex;
-
+class _ClientMainLayoutState extends ConsumerState<ClientMainLayout> {
   final List<Widget> _screens = const [
     ClientHomeScreen(),
     ClientProcedureListScreen(),
@@ -29,33 +29,35 @@ class _ClientMainLayoutState extends State<ClientMainLayout> {
   @override
   void initState() {
     super.initState();
-    _currentIndex = widget.initialIndex;
+    Future.microtask(() {
+      if (mounted) {
+        ref.read(clientNavigationIndexProvider.notifier).state = widget.initialIndex;
+      }
+    });
   }
 
   void _onTabTapped(int index) {
-    setState(() {
-      _currentIndex = index;
-    });
+    ref.read(clientNavigationIndexProvider.notifier).state = index;
   }
 
   @override
   Widget build(BuildContext context) {
+    final currentIndex = ref.watch(clientNavigationIndexProvider);
+
     return PopScope(
       canPop: false,
       onPopInvokedWithResult: (didPop, result) {
         if (didPop) return;
-        if (_currentIndex > 0) {
-          setState(() {
-            _currentIndex = 0;
-          });
+        if (currentIndex > 0) {
+          ref.read(clientNavigationIndexProvider.notifier).state = 0;
         }
       },
       child: Scaffold(
-        body: IndexedStack(index: _currentIndex, children: _screens),
+        body: IndexedStack(index: currentIndex, children: _screens),
         bottomNavigationBar: SafeArea(
           top: false,
           child: AppBottomNavigationBar(
-            currentIndex: _currentIndex,
+            currentIndex: currentIndex,
             onTap: _onTabTapped,
           ),
         ),

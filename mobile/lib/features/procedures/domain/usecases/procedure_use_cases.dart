@@ -75,11 +75,13 @@ final class UploadDocumentUseCase {
     required String processId,
     required String filePath,
     required String fileName,
+    void Function(int count, int total)? onSendProgress,
   }) {
     return _repository.uploadDocument(
       processId: processId,
       filePath: filePath,
       fileName: fileName,
+      onSendProgress: onSendProgress,
     );
   }
 }
@@ -108,6 +110,53 @@ final class UpdateProcedureStatusUseCase {
       processId: processId,
       status: status,
       reason: reason,
+    );
+  }
+}
+
+final class AddNoteUseCase {
+  final ProcedureRepository _repository;
+
+  const AddNoteUseCase(this._repository);
+
+  Future<Either<Failure, Unit>> call({
+    required String processId,
+    required String note,
+  }) {
+    return _repository.addNote(processId: processId, note: note);
+  }
+}
+
+final class RequestDocumentUseCase {
+  final ProcedureRepository _repository;
+
+  const RequestDocumentUseCase(this._repository);
+
+  Future<Either<Failure, Unit>> call({
+    required String processId,
+    required String documentName,
+  }) {
+    return _repository.requestDocument(
+      processId: processId,
+      documentName: documentName,
+    );
+  }
+}
+
+final class ScheduleEventUseCase {
+  final ProcedureRepository _repository;
+
+  const ScheduleEventUseCase(this._repository);
+
+  Future<Either<Failure, Unit>> call({
+    required String processId,
+    required String title,
+    required DateTime date,
+  }) {
+    return _repository.scheduleEvent(
+      processId: processId,
+      title: title,
+      date: date,
     );
   }
 }

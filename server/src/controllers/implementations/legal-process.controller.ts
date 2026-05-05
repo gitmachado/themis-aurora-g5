@@ -82,4 +82,79 @@ export class LegalProcessController {
       next(error);
     }
   };
+
+  addNote: RequestHandler<
+    { id: string },
+    void,
+    { note: string }
+  > = async (
+    req: AuthRequest<
+      { id: string },
+      void,
+      { note: string }
+    >,
+    res: Response,
+    next: NextFunction
+  ) => {
+    try {
+      const processId = req.params.id;
+      const user = req.user!;
+      const { note } = req.body;
+
+      await this.legalProcessService.addNote(processId, note, user.id);
+      return res.status(204).send();
+    } catch (error) {
+      next(error);
+    }
+  };
+
+  requestDocument: RequestHandler<
+    { id: string },
+    void,
+    { documentName: string }
+  > = async (
+    req: AuthRequest<
+      { id: string },
+      void,
+      { documentName: string }
+    >,
+    res: Response,
+    next: NextFunction
+  ) => {
+    try {
+      const processId = req.params.id;
+      const user = req.user!;
+      const { documentName } = req.body;
+
+      await this.legalProcessService.requestDocument(processId, documentName, user.id);
+      return res.status(204).send();
+    } catch (error) {
+      next(error);
+    }
+  };
+
+  scheduleEvent: RequestHandler<
+    { id: string },
+    void,
+    { title: string; date: string }
+  > = async (
+    req: AuthRequest<
+      { id: string },
+      void,
+      { title: string; date: string }
+    >,
+    res: Response,
+    next: NextFunction
+  ) => {
+    try {
+      const processId = req.params.id;
+      const user = req.user!;
+      const { title, date } = req.body;
+
+      await this.legalProcessService.scheduleEvent(processId, title, new Date(date), user.id);
+      return res.status(204).send();
+    } catch (error) {
+      next(error);
+    }
+  };
 }
