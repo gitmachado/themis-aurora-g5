@@ -1,13 +1,28 @@
 import * as admin from 'firebase-admin';
 
-if (!admin.apps.length) {
+// Inicialização defensiva: em CI / docker-smoke / dev sem credenciais
+// FIREBASE_*, simplesmente não inicializa. A app sobe normalmente e
+// sendPushNotification vira no-op (com aviso). Em produção, todas as três
+// variaveis devem estar configuradas.
+const projectId = process.env.FIREBASE_PROJECT_ID;
+const clientEmail = process.env.FIREBASE_CLIENT_EMAIL;
+const privateKey = process.env.FIREBASE_PRIVATE_KEY?.replace(/\\n/g, '\n');
+
+const firebaseConfigured = Boolean(projectId && clientEmail && privateKey);
+
+if (firebaseConfigured && !admin.apps.length) {
   admin.initializeApp({
     credential: admin.credential.cert({
-      projectId: process.env.FIREBASE_PROJECT_ID,
-      clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
-      privateKey: process.env.FIREBASE_PRIVATE_KEY?.replace(/\\n/g, '\n'),
+      projectId,
+      clientEmail,
+      privateKey,
     }),
   });
+} else if (!firebaseConfigured) {
+  console.warn(
+    '[PushNotificationService] FIREBASE_PROJECT_ID/CLIENT_EMAIL/PRIVATE_KEY ' +
+      'ausentes — envio de push desativado neste ambiente.'
+  );
 }
 
 export interface SendPushParams {
@@ -19,6 +34,13 @@ export interface SendPushParams {
 
 export class PushNotificationService {
   public async sendPushNotification(params: SendPushParams): Promise<void> {
+    if (!firebaseConfigured) {
+      console.log(
+        `[PushNotificationService] Skipping push to ${params.token} — Firebase not configured.`
+      );
+      return;
+    }
+
     try {
       const message = {
         token: params.token,
