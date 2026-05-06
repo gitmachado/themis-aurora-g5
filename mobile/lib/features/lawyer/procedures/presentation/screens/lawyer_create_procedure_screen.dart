@@ -27,12 +27,12 @@ class _LawyerCreateProcedureScreenState
   bool _isLoading = false;
 
   final List<Map<String, String>> _caseTypes = [
-    {'value': 'TRABALHISTA', 'label': 'Trabalhista'},
-    {'value': 'CIVEL', 'label': 'Cível'},
-    {'value': 'FAMILIA', 'label': 'Família'},
-    {'value': 'CRIMINAL', 'label': 'Criminal'},
-    {'value': 'PREVIDENCIARIO', 'label': 'Previdenciário'},
-    {'value': 'OUTROS', 'label': 'Outros'},
+    {'value': 'Labor', 'label': 'Trabalhista'},
+    {'value': 'Civil', 'label': 'Cível'},
+    {'value': 'Family', 'label': 'Família'},
+    {'value': 'Criminal', 'label': 'Criminal'},
+    {'value': 'SocialSecurity', 'label': 'Previdenciário'},
+    {'value': 'Civil', 'label': 'Outros'}, // Fallback for Outros
   ];
 
   @override
@@ -98,7 +98,7 @@ class _LawyerCreateProcedureScreenState
 
     return AnnotatedRegion<SystemUiOverlayStyle>(
       value: const SystemUiOverlayStyle(
-        systemNavigationBarColor: AppColors.background,
+        systemNavigationBarColor: AppColors.white,
         systemNavigationBarIconBrightness: Brightness.dark,
         systemNavigationBarDividerColor: Colors.transparent,
         statusBarColor: Colors.transparent,
@@ -266,6 +266,10 @@ class _LawyerCreateProcedureScreenState
               ],
             ),
           ),
+        ),
+        bottomNavigationBar: Container(
+          height: MediaQuery.of(context).padding.bottom,
+          color: AppColors.white,
         ),
       ),
     );
