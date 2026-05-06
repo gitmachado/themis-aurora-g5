@@ -128,7 +128,7 @@ class _LawyerProcedureDetailScreenState
         onPressed: () => _showActionsSheet(process),
         backgroundColor: AppColors.yellow,
         foregroundColor: AppColors.ink,
-        icon: const Icon(Icons.add_rounded),
+        icon: const Icon(Icons.pending_actions_rounded),
         label: const Text('Ações'),
       ),
     );

@@ -149,24 +149,10 @@ class _LawyerLeadDetailScreenState extends ConsumerState<LawyerLeadDetailScreen>
               ],
             ),
           ),
-          // Cobertura rígida da barra de navegação/botão
-          if (!widget.isModal)
-            Positioned(
-              bottom: 0,
-              left: 0,
-              right: 0,
-              child: Container(
-                height:
-                    MediaQuery.of(context).padding.bottom +
-                    45, // Ajustado para sumir no meio do botão
-                color: AppColors.background,
-              ),
-            ),
         ],
       ),
-      extendBody: !widget.isModal,
       floatingActionButton: widget.isModal ? null : _buildFloatingActions(lead),
-      floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
+      floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
     );
   }
 
@@ -366,7 +352,7 @@ class _LawyerLeadDetailScreenState extends ConsumerState<LawyerLeadDetailScreen>
       onPressed: () => _showActionsSheet(lead),
       backgroundColor: AppColors.yellow,
       foregroundColor: AppColors.ink,
-      icon: const Icon(Icons.add_rounded),
+      icon: const Icon(Icons.pending_actions_rounded),
       label: const Text('Ações'),
     );
   }
