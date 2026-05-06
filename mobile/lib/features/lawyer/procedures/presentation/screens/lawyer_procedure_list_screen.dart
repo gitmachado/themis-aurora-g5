@@ -12,6 +12,7 @@ import '../../../../../../shared/widgets/layout/custom_app_bar.dart';
 import '../../../../../../shared/widgets/app_app_bar_actions.dart';
 import '../../../../../../shared/widgets/cards/app_procedure_card.dart';
 import '../../../../../../shared/widgets/layout/loading_skeleton.dart';
+import '../../../clients/presentation/providers/lawyer_client_providers.dart';
 
 class LawyerProcedureListScreen extends ConsumerStatefulWidget {
   const LawyerProcedureListScreen({super.key});
@@ -32,6 +33,9 @@ class _LawyerProcedureListScreenState
     final notifications =
         ref.watch(myNotificationsProvider).valueOrNull ?? const [];
     final unreadCount = notifications.where((n) => !n.isRead).length;
+
+    final clients = ref.watch(myLawyerClientsProvider).valueOrNull ?? const [];
+    final hasClients = clients.isNotEmpty;
 
     return Scaffold(
       backgroundColor: AppColors.background,
@@ -58,6 +62,14 @@ class _LawyerProcedureListScreenState
           ),
         ],
       ),
+      floatingActionButton: hasClients
+          ? FloatingActionButton(
+              onPressed: () =>
+                  Navigator.pushNamed(context, '/lawyer-procedure-create'),
+              backgroundColor: AppColors.yellow,
+              child: const Icon(Icons.add_rounded, color: AppColors.ink),
+            )
+          : null,
     );
   }
 
@@ -158,10 +170,28 @@ class _LawyerProcedureListScreenState
     }).toList();
 
     if (filtered.isEmpty) {
-      return Center(
-        child: Text(
-          'Nenhum processo encontrado',
-          style: AppTextStyles.h2.copyWith(color: AppColors.textCaption),
+      return SingleChildScrollView(
+        physics: const AlwaysScrollableScrollPhysics(),
+        child: Container(
+          height: MediaQuery.of(context).size.height * 0.55,
+          alignment: Alignment.center,
+          padding: const EdgeInsets.all(24),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(
+                Icons.gavel_rounded,
+                size: 64,
+                color: AppColors.textCaption.withValues(alpha: 0.5),
+              ),
+              const SizedBox(height: 16),
+              Text(
+                'Nenhum processo encontrado',
+                style: AppTextStyles.h2.copyWith(color: AppColors.textCaption),
+                textAlign: TextAlign.center,
+              ),
+            ],
+          ),
         ),
       );
     }
