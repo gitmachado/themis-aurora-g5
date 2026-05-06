@@ -352,7 +352,7 @@ class _LawyerLeadDetailScreenState extends ConsumerState<LawyerLeadDetailScreen>
       onPressed: () => _showActionsSheet(lead),
       backgroundColor: AppColors.yellow,
       foregroundColor: AppColors.ink,
-      icon: const Icon(Icons.notes_rounded),
+      icon: const Icon(Icons.assignment_rounded),
       label: const Text('Ações'),
     );
   }
