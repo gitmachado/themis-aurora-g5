@@ -63,11 +63,19 @@ class _LawyerProcedureListScreenState
         ],
       ),
       floatingActionButton: hasClients
-          ? FloatingActionButton(
+          ? FloatingActionButton.extended(
               onPressed: () =>
                   Navigator.pushNamed(context, '/lawyer-procedure-create'),
               backgroundColor: AppColors.yellow,
-              child: const Icon(Icons.add_rounded, color: AppColors.ink),
+              icon: const Icon(Icons.add_rounded, color: AppColors.ink),
+              label: Text(
+                'Novo processo',
+                style: AppTextStyles.body.copyWith(
+                  fontWeight: FontWeight.bold,
+                  color: AppColors.ink,
+                  fontSize: 14,
+                ),
+              ),
             )
           : null,
     );
