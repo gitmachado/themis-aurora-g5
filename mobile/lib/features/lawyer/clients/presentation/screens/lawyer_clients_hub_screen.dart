@@ -92,8 +92,8 @@ class _LawyerClientsHubScreenState
             child: IndexedStack(
               index: _selectedTab,
               children: const [
-                LawyerClientListView(),
                 LawyerLeadTriageView(archived: false),
+                LawyerClientListView(),
                 LawyerLeadTriageView(archived: true),
               ],
             ),
@@ -133,16 +133,16 @@ class _ClientsHubSegmented extends StatelessWidget {
           children: [
             Expanded(
               child: _Pill(
-                label: 'Clientes',
+                label: 'Leads',
                 selected: selectedIndex == 0,
+                badgeCount: pendingCount,
                 onTap: () => onChanged(0),
               ),
             ),
             Expanded(
               child: _Pill(
-                label: 'Pendentes',
+                label: 'Clientes',
                 selected: selectedIndex == 1,
-                badgeCount: pendingCount,
                 onTap: () => onChanged(1),
               ),
             ),
