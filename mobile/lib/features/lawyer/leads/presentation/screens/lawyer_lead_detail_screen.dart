@@ -361,96 +361,101 @@ class _LawyerLeadDetailScreenState extends ConsumerState<LawyerLeadDetailScreen>
       return null;
     }
 
+    return FloatingActionButton.extended(
+      heroTag: 'lawyer_lead_detail_fab_${lead?.id ?? widget.leadId}',
+      onPressed: () => _showActionsSheet(lead),
+      backgroundColor: AppColors.yellow,
+      foregroundColor: AppColors.ink,
+      icon: const Icon(Icons.add_rounded),
+      label: const Text('Ações'),
+    );
+  }
+
+  void _showActionsSheet(Lead? lead) {
     final showArchiveAction = lead == null || lead.status == 'PENDING';
 
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 24),
-      child: Row(
-        children: [
-          if (showArchiveAction) ...[
-            Expanded(
-              child: OutlinedButton(
-                onPressed: () => _discardLead(lead),
-                style: OutlinedButton.styleFrom(
-                  backgroundColor: AppColors.white.withValues(alpha: 0.9),
-                  foregroundColor: AppColors.error,
-                  side: const BorderSide(color: AppColors.error),
-                  minimumSize: const Size(0, 56),
-                  elevation: 2,
-                  shadowColor: Colors.black.withValues(alpha: 0.1),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(999),
+    showModalBottomSheet<void>(
+      context: context,
+      showDragHandle: true,
+      backgroundColor: AppColors.white,
+      isScrollControlled: true,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      ),
+      builder: (context) {
+        return AnnotatedRegion<SystemUiOverlayStyle>(
+          value: const SystemUiOverlayStyle(
+            systemNavigationBarColor: AppColors.white,
+            systemNavigationBarIconBrightness: Brightness.dark,
+          ),
+          child: SafeArea(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(24, 0, 24, 8),
+                  child: Row(
+                    children: [
+                      Text('Ações do Lead', style: AppTextStyles.h2),
+                    ],
                   ),
                 ),
-                child: const Text('Arquivar'),
-              ),
-            ),
-            const SizedBox(width: 12),
-          ],
-          Expanded(
-            child: ElevatedButton.icon(
-              onPressed: () => _convertLead(lead),
-              icon: const Icon(Icons.check_circle_outline, size: 20),
-              label: const Text('Converter'),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.primary,
-                foregroundColor: Colors.white,
-                minimumSize: const Size(0, 56),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(999),
+                ThemisActionRow(
+                  icon: Icons.check_circle_outline,
+                  label: 'Converter em Cliente',
+                  iconBackground: AppColors.primary.withValues(alpha: 0.1),
+                  iconColor: AppColors.primary,
+                  onTap: () {
+                    Navigator.pop(context);
+                    _convertLead(lead);
+                  },
                 ),
-                elevation: 4,
-                textStyle: const TextStyle(
-                  fontWeight: FontWeight.bold,
-                  fontSize: 16,
+                ThemisActionRow(
+                  icon: Icons.support_agent_rounded,
+                  label: 'Abrir Chat (Suporte)',
+                  iconBackground: AppColors.yellowSoft,
+                  iconColor: AppColors.yellowDeep,
+                  onTap: () {
+                    Navigator.pop(context);
+                    final targetLead = lead;
+                    if (targetLead != null) {
+                      Navigator.pushNamed(
+                        context,
+                        AppRouter.lawyerChatHandoffRoute,
+                        arguments: {
+                          'clientName': targetLead.displayName,
+                          'whatsappNumber': targetLead.whatsappNumber,
+                        },
+                      );
+                    } else if (widget.leadId != null) {
+                      Navigator.pushNamed(
+                        context,
+                        AppRouter.lawyerChatHandoffRoute,
+                        arguments: {
+                          'clientName': widget.name,
+                          'whatsappNumber': '',
+                        },
+                      );
+                    }
+                  },
                 ),
-              ),
+                if (showArchiveAction)
+                  ThemisActionRow(
+                    icon: Icons.archive_outlined,
+                    label: 'Arquivar Lead',
+                    iconBackground: AppColors.error.withValues(alpha: 0.1),
+                    iconColor: AppColors.error,
+                    onTap: () {
+                      Navigator.pop(context);
+                      _discardLead(lead);
+                    },
+                  ),
+                const SizedBox(height: 12),
+              ],
             ),
           ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: ElevatedButton.icon(
-              onPressed: () {
-                final targetLead = lead;
-                if (targetLead != null) {
-                  Navigator.pushNamed(
-                    context,
-                    AppRouter.lawyerChatHandoffRoute,
-                    arguments: {
-                      'clientName': targetLead.displayName,
-                      'whatsappNumber': targetLead.whatsappNumber,
-                    },
-                  );
-                } else if (widget.leadId != null) {
-                  Navigator.pushNamed(
-                    context,
-                    AppRouter.lawyerChatHandoffRoute,
-                    arguments: {
-                      'clientName': widget.name,
-                      'whatsappNumber': '',
-                    },
-                  );
-                }
-              },
-              icon: const Icon(Icons.support_agent_rounded, size: 20),
-              label: const Text('Chat'),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.yellow,
-                foregroundColor: AppColors.ink,
-                minimumSize: const Size(0, 56),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(999),
-                ),
-                elevation: 4,
-                textStyle: const TextStyle(
-                  fontWeight: FontWeight.bold,
-                  fontSize: 16,
-                ),
-              ),
-            ),
-          ),
-        ],
-      ),
+        );
+      },
     );
   }
 
