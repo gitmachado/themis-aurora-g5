@@ -71,22 +71,32 @@ class _LawyerClientsHubScreenState
       backgroundColor: AppColors.background,
       appBar: CustomAppBar(
         title: 'Clientes',
+        backgroundColor: AppColors.surface,
         actions: [AppAppBarActions()],
         showDivider: false,
+        bottom: PreferredSize(
+          preferredSize: const Size.fromHeight(68),
+          child: Container(
+            decoration: const BoxDecoration(
+              color: AppColors.surface,
+              border: Border(bottom: BorderSide(color: AppColors.divider)),
+            ),
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(20, 12, 20, 12),
+              child: _ClientsHubSegmented(
+                selectedIndex: _selectedTab,
+                pendingCount: pendingCount,
+                onChanged: (i) {
+                  widget.controller?.selectTab(i);
+                  setState(() => _selectedTab = i);
+                },
+              ),
+            ),
+          ),
+        ),
       ),
       body: Column(
         children: [
-          _ClientsHubSegmented(
-            selectedIndex: _selectedTab,
-            pendingCount: pendingCount,
-            onChanged: (i) {
-              // Mantém o controller em sincronia com o pill, senao o reset
-              // que o LawyerMainLayout aciona ao voltar para a aba Clientes
-              // não tem efeito (selectTab(0) retorna cedo se _index já é 0).
-              widget.controller?.selectTab(i);
-              setState(() => _selectedTab = i);
-            },
-          ),
           const SizedBox(height: 16),
           Expanded(
             child: IndexedStack(
@@ -117,17 +127,14 @@ class _ClientsHubSegmented extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(20, 8, 20, 0),
-      child: Container(
-        height: 44,
-        padding: const EdgeInsets.all(3),
-        decoration: BoxDecoration(
-          color: AppColors.surface2,
-          borderRadius: BorderRadius.circular(10),
-          border: Border.all(color: AppColors.border),
-          shape: BoxShape.rectangle,
-        ),
+    return Container(
+      height: 44,
+      padding: const EdgeInsets.all(4),
+      decoration: BoxDecoration(
+        color: AppColors.surface2,
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: AppColors.border),
+      ),
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
@@ -186,7 +193,7 @@ class _Pill extends StatelessWidget {
         curve: Curves.easeOutCubic,
         decoration: BoxDecoration(
           color: selected ? AppColors.surface : Colors.transparent,
-          borderRadius: BorderRadius.circular(9),
+          borderRadius: BorderRadius.circular(10),
           boxShadow: selected
               ? [
                   BoxShadow(
