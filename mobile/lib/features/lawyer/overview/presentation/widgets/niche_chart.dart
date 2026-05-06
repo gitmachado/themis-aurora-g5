@@ -56,7 +56,7 @@ class NicheChart extends StatelessWidget {
                     ],
                   ),
                 ),
-                const SizedBox(width: 32),
+                const SizedBox(width: 24),
                 Expanded(
                   child: Column(children: data.map(_buildLegendItem).toList()),
                 ),
@@ -117,12 +117,15 @@ class NicheChart extends StatelessWidget {
           Expanded(
             child: Text(
               item.label,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
               style: AppTextStyles.caption.copyWith(
                 fontWeight: FontWeight.w600,
                 color: AppColors.textBody,
               ),
             ),
           ),
+          const SizedBox(width: 8),
           Text(
             '${(item.percentage * 100).round()}%',
             style: AppTextStyles.caption.copyWith(
