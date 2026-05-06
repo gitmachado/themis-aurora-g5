@@ -5,6 +5,7 @@ import '../../../../../../shared/constants/app_colors.dart';
 import '../../../../../../shared/constants/app_text_styles.dart';
 import '../../../../../../shared/widgets/layout/custom_app_bar.dart';
 import '../../../../../../shared/widgets/buttons/primary_button.dart';
+import '../../../../../../shared/widgets/cards/app_card.dart';
 import '../../../../../../features/procedures/presentation/providers/procedure_providers.dart';
 import '../../../../../../features/lawyer/clients/presentation/providers/lawyer_client_providers.dart';
 
@@ -33,7 +34,7 @@ class _LawyerCreateProcedureScreenState
     {'value': 'Family', 'label': 'Família'},
     {'value': 'Criminal', 'label': 'Criminal'},
     {'value': 'SocialSecurity', 'label': 'Previdenciário'},
-    {'value': 'Civil', 'label': 'Outros'}, // Fallback for Outros
+    {'value': 'Civil', 'label': 'Outros'},
   ];
 
   @override
@@ -110,129 +111,106 @@ class _LawyerCreateProcedureScreenState
         appBar:
             const CustomAppBar(title: 'Novo Processo', showBackButton: true),
         body: SingleChildScrollView(
-          padding: const EdgeInsets.all(24),
+          padding: const EdgeInsets.fromLTRB(20, 8, 20, 32),
           child: Form(
             key: _formKey,
             child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                Text(
-                  'Informações do Processo',
-                  style: AppTextStyles.h2.copyWith(color: AppColors.ink),
-                ),
-                const SizedBox(height: 8),
                 Text(
                   'Preencha os dados abaixo para cadastrar um novo processo manualmente.',
                   style: AppTextStyles.body.copyWith(
                     color: AppColors.textCaption,
+                    fontSize: 14,
                   ),
                 ),
-                const SizedBox(height: 32),
-
-                // Cliente
-                Text(
-                  'Cliente',
-                  style: AppTextStyles.body.copyWith(
-                    fontWeight: FontWeight.bold,
-                    color: AppColors.ink,
-                  ),
-                ),
-                const SizedBox(height: 8),
-                clientsAsync.when(
-                  data: (clients) => DropdownButtonFormField<String>(
-                    initialValue: _selectedClientId,
-                    decoration: _inputDecoration('Selecione o cliente'),
-                    items: clients
-                        .map(
-                          (c) => DropdownMenuItem(
-                              value: c.id, child: Text(c.name)),
-                        )
-                        .toList(),
-                    onChanged: (val) => setState(() => _selectedClientId = val),
-                    validator: (val) => val == null ? 'Obrigatório' : null,
-                  ),
-                  loading: () =>
-                      const LinearProgressIndicator(color: AppColors.yellow),
-                  error: (e, _) => Text('Erro ao carregar clientes: $e'),
-                ),
-                const SizedBox(height: 20),
-
-                // Título
-                Text(
-                  'Título do Processo',
-                  style: AppTextStyles.body.copyWith(
-                    fontWeight: FontWeight.bold,
-                    color: AppColors.ink,
-                  ),
-                ),
-                const SizedBox(height: 8),
-                TextFormField(
-                  controller: _titleController,
-                  decoration: _inputDecoration(
-                    'Ex: Ação de Alimentos - Maria Silva',
-                  ),
-                  validator: (val) =>
-                      val == null || val.isEmpty ? 'Obrigatório' : null,
-                ),
-                const SizedBox(height: 20),
-
-                // Área/Tipo
-                Text(
-                  'Área de Atuação',
-                  style: AppTextStyles.body.copyWith(
-                    fontWeight: FontWeight.bold,
-                    color: AppColors.ink,
-                  ),
-                ),
-                const SizedBox(height: 8),
-                DropdownButtonFormField<String>(
-                  initialValue: _selectedCaseType,
-                  decoration: _inputDecoration('Selecione a área'),
-                  items: _caseTypes
-                      .map(
-                        (t) => DropdownMenuItem(
-                          value: t['value'],
-                          child: Text(t['label']!),
+                const SizedBox(height: 24),
+                AppCard(
+                  padding: const EdgeInsets.all(16),
+                  child: Column(
+                    children: [
+                      // Cliente
+                      _LabeledField(
+                        label: 'Cliente',
+                        child: clientsAsync.when(
+                          data: (clients) => DropdownButtonFormField<String>(
+                            initialValue: _selectedClientId,
+                            decoration: _inputDecoration('Selecione o cliente'),
+                            items: clients
+                                .map(
+                                  (c) => DropdownMenuItem(
+                                      value: c.id, child: Text(c.name)),
+                                )
+                                .toList(),
+                            onChanged: (val) => setState(() => _selectedClientId = val),
+                            validator: (val) => val == null ? 'Obrigatório' : null,
+                          ),
+                          loading: () =>
+                              const LinearProgressIndicator(color: AppColors.yellow),
+                          error: (e, _) => Text('Erro ao carregar clientes: $e'),
                         ),
-                      )
-                      .toList(),
-                  onChanged: (val) => setState(() => _selectedCaseType = val),
-                  validator: (val) => val == null ? 'Obrigatório' : null,
-                ),
-                const SizedBox(height: 20),
+                      ),
+                      const SizedBox(height: 16),
 
-                // Número do Processo (Opcional)
-                Text(
-                  'Número do Processo (Opcional)',
-                  style: AppTextStyles.body.copyWith(
-                    fontWeight: FontWeight.bold,
-                    color: AppColors.ink,
-                  ),
-                ),
-                const SizedBox(height: 8),
-                TextFormField(
-                  controller: _processNumberController,
-                  decoration: _inputDecoration('0000000-00.0000.0.00.0000'),
-                ),
-                const SizedBox(height: 20),
+                      // Título
+                      _LabeledField(
+                        label: 'Título do Processo',
+                        child: TextFormField(
+                          controller: _titleController,
+                          decoration: _inputDecoration(
+                            'Ex: Ação de Alimentos - Maria Silva',
+                          ),
+                          validator: (val) =>
+                              val == null || val.isEmpty ? 'Obrigatório' : null,
+                        ),
+                      ),
+                      const SizedBox(height: 16),
 
-                // Descrição (Opcional)
-                Text(
-                  'Descrição / Observações',
-                  style: AppTextStyles.body.copyWith(
-                    fontWeight: FontWeight.bold,
-                    color: AppColors.ink,
+                      // Área/Tipo
+                      _LabeledField(
+                        label: 'Área de Atuação',
+                        child: DropdownButtonFormField<String>(
+                          initialValue: _selectedCaseType,
+                          decoration: _inputDecoration('Selecione a área'),
+                          items: _caseTypes
+                              .map(
+                                (t) => DropdownMenuItem(
+                                  value: t['value'],
+                                  child: Text(t['label']!),
+                                ),
+                              )
+                              .toList(),
+                          onChanged: (val) => setState(() => _selectedCaseType = val),
+                          validator: (val) => val == null ? 'Obrigatório' : null,
+                        ),
+                      ),
+                      const SizedBox(height: 16),
+
+                      // Número do Processo (Opcional)
+                      _LabeledField(
+                        label: 'Número do Processo (Opcional)',
+                        child: TextFormField(
+                          controller: _processNumberController,
+                          decoration: _inputDecoration('0000000-00.0000.0.00.0000'),
+                        ),
+                      ),
+                      const SizedBox(height: 16),
+
+                      // Descrição (Opcional)
+                      _LabeledField(
+                        label: 'Descrição / Observações',
+                        child: TextFormField(
+                          controller: _descriptionController,
+                          decoration: _inputDecoration(
+                            'Detalhes adicionais sobre o caso...',
+                          ),
+                          maxLines: 4,
+                        ),
+                      ),
+                    ],
                   ),
                 ),
-                const SizedBox(height: 8),
-                TextFormField(
-                  controller: _descriptionController,
-                  decoration: _inputDecoration(
-                    'Detalhes adicionais sobre o caso...',
-                  ),
-                  maxLines: 4,
-                ),
-                const SizedBox(height: 40),
+                const SizedBox(height: 24),
 
                 // Botão Salvar
                 PrimaryButton(
@@ -256,8 +234,13 @@ class _LawyerCreateProcedureScreenState
   InputDecoration _inputDecoration(String hint) {
     return InputDecoration(
       hintText: hint,
+      hintStyle: AppTextStyles.body.copyWith(
+        color: AppColors.ink4,
+        fontSize: 14.5,
+      ),
       filled: true,
-      fillColor: AppColors.surface2,
+      fillColor: AppColors.background,
+      contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
       border: OutlineInputBorder(
         borderRadius: BorderRadius.circular(12),
         borderSide: const BorderSide(color: AppColors.border),
@@ -268,8 +251,43 @@ class _LawyerCreateProcedureScreenState
       ),
       focusedBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(12),
-        borderSide: const BorderSide(color: AppColors.yellow, width: 1.5),
+        borderSide: const BorderSide(color: AppColors.ink, width: 1.4),
       ),
+      errorBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12),
+        borderSide: const BorderSide(color: AppColors.error, width: 1.2),
+      ),
+      focusedErrorBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12),
+        borderSide: const BorderSide(color: AppColors.error, width: 1.4),
+      ),
+    );
+  }
+}
+
+class _LabeledField extends StatelessWidget {
+  final String label;
+  final Widget child;
+
+  const _LabeledField({required this.label, required this.child});
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          label,
+          style: AppTextStyles.caption.copyWith(
+            color: AppColors.ink2,
+            fontWeight: FontWeight.w700,
+            fontSize: 12,
+            letterSpacing: 0.3,
+          ),
+        ),
+        const SizedBox(height: 6),
+        child,
+      ],
     );
   }
 }
