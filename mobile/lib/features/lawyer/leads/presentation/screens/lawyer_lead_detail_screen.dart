@@ -316,7 +316,7 @@ class _LawyerLeadDetailScreenState extends ConsumerState<LawyerLeadDetailScreen>
         title: 'Converter Lead',
         message:
             'Deseja converter ${lead?.displayName ?? widget.name} em cliente?',
-        confirmLabel: 'Sim, Converter Agora',
+        confirmLabel: 'Converter',
         onCancel: () => Navigator.pop(context, false),
         onConfirm: () => Navigator.pop(context, true),
       ),

@@ -272,7 +272,7 @@ class _LawyerLeadTriageViewState extends ConsumerState<LawyerLeadTriageView>
       builder: (dialogContext) => ThemisAlertDialog(
         title: 'Converter Lead',
         message: 'Deseja converter ${lead.displayName} em cliente?',
-        confirmLabel: 'Sim, Converter Agora',
+        confirmLabel: 'Converter',
         onCancel: () => Navigator.pop(dialogContext, false),
         onConfirm: () => Navigator.pop(dialogContext, true),
       ),
