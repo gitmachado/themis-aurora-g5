@@ -433,7 +433,7 @@ class _LawyerLeadDetailScreenState extends ConsumerState<LawyerLeadDetailScreen>
                     iconColor: AppColors.error,
                     onTap: () {
                       Navigator.pop(context);
-                      _discardLead(lead);
+                      _showConfirmArchiveDialog(lead);
                     },
                   ),
                 const SizedBox(height: 12),
@@ -443,6 +443,36 @@ class _LawyerLeadDetailScreenState extends ConsumerState<LawyerLeadDetailScreen>
         );
       },
     );
+  }
+
+  Future<void> _showConfirmArchiveDialog(Lead? lead) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Arquivar Lead?'),
+        content: const Text(
+          'Deseja realmente arquivar este lead? Ele não aparecerá mais na sua lista de pendências.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('Cancelar'),
+          ),
+          ElevatedButton(
+            onPressed: () => Navigator.pop(context, true),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppColors.error,
+              foregroundColor: Colors.white,
+            ),
+            child: const Text('Arquivar'),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed == true && mounted) {
+      _discardLead(lead);
+    }
   }
 
   Future<void> _discardLead(Lead? lead) async {
