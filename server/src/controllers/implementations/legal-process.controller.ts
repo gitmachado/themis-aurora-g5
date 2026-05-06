@@ -157,4 +157,22 @@ export class LegalProcessController {
       next(error);
     }
   };
+
+  create: RequestHandler<any, LegalProcess, any> = async (
+    req: AuthRequest<any, LegalProcess, any>,
+    res: Response,
+    next: NextFunction
+  ) => {
+    try {
+      const user = req.user!;
+      const process = await this.legalProcessService.create({
+        ...req.body,
+        lawyerId: user.id
+      });
+      return res.status(201).json(process);
+    } catch (error) {
+      next(error);
+    }
+  };
 }
+

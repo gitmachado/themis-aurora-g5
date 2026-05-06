@@ -6,9 +6,10 @@ import { PushNotificationService } from '../../services/notifications/push_notif
 import { authMiddleware } from '../../middlewares/implementations/authMiddleware';
 import { roleMiddleware } from '../../middlewares/implementations/roleMiddleware';
 import { validate } from '../../middlewares/implementations/validationMiddleware';
-import { updateProcessStatusSchema } from '../../types/dtos/schemas';
+import { updateProcessStatusSchema, createProcessSchema } from '../../types/dtos/schemas';
 
 const router = Router();
+
 
 const legalProcessRepository = new LegalProcessRepository();
 const timelineRepository = new TimelineEventRepository();
@@ -222,4 +223,42 @@ router.post('/:id/request-document', authMiddleware, roleMiddleware(['LAWYER']),
  */
 router.post('/:id/schedule-event', authMiddleware, roleMiddleware(['LAWYER']), controller.scheduleEvent);
 
+/**
+ * @openapi
+ * /processes:
+
+ *   post:
+ *     summary: Cria um novo processo manualmente (Apenas Advogado)
+ *     tags: [Processos]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required: [clientId, title, caseType]
+ *             properties:
+ *               clientId:
+ *                 type: string
+ *               title:
+ *                 type: string
+ *               caseType:
+ *                 type: string
+ *               description:
+ *                 type: string
+ *               processNumber:
+ *                 type: string
+ *     responses:
+ *       201:
+ *         description: Processo criado com sucesso
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/LegalProcess'
+ */
+router.post('/', authMiddleware, roleMiddleware(['LAWYER']), validate(createProcessSchema), controller.create);
+
 export default router;
+
