@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../../../shared/constants/app_colors.dart';
 import '../../../../../../shared/constants/app_text_styles.dart';
 import '../../../../../../shared/widgets/layout/custom_app_bar.dart';
+import '../../../../../../shared/widgets/buttons/primary_button.dart';
 import '../../../../../../features/procedures/presentation/providers/procedure_providers.dart';
 import '../../../../../../features/lawyer/clients/presentation/providers/lawyer_client_providers.dart';
 
@@ -234,33 +235,10 @@ class _LawyerCreateProcedureScreenState
                 const SizedBox(height: 40),
 
                 // Botão Salvar
-                SizedBox(
-                  width: double.infinity,
-                  height: 56,
-                  child: ElevatedButton(
-                    onPressed: _isLoading ? null : _submit,
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: AppColors.yellow,
-                      foregroundColor: AppColors.ink,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      elevation: 0,
-                    ),
-                    child: _isLoading
-                        ? const SizedBox(
-                            height: 24,
-                            width: 24,
-                            child: CircularProgressIndicator(
-                              strokeWidth: 2,
-                              color: AppColors.ink,
-                            ),
-                          )
-                        : Text(
-                            'Criar Processo',
-                            style: AppTextStyles.h2.copyWith(fontSize: 16),
-                          ),
-                  ),
+                PrimaryButton(
+                  label: 'Criar Processo',
+                  isLoading: _isLoading,
+                  onPressed: _submit,
                 ),
                 const SizedBox(height: 40),
               ],
