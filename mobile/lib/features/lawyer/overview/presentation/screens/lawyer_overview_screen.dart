@@ -143,7 +143,7 @@ class LawyerOverviewScreen extends ConsumerWidget {
           onTap: () => layoutState?.setIndex(1),
         ),
         MetricCard(
-          title: 'Leads hoje',
+          title: 'Leads pendentes',
           value: '$leadCount',
           icon: Icons.people_alt_rounded,
           onTap: () => layoutState?.goToClientsHubPending(),
@@ -157,7 +157,7 @@ class LawyerOverviewScreen extends ConsumerWidget {
           onTap: () => Navigator.pushNamed(context, AppRouter.lawyerChatsRoute),
         ),
         MetricCard(
-          title: 'Docs p/ revisar',
+          title: 'Docs recentes',
           value: '$docsToReview',
           icon: Icons.description_outlined,
           onTap: () => Navigator.pushNamed(context, AppRouter.lawyerFilesRoute),
