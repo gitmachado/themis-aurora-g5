@@ -24,6 +24,15 @@ export async function checkUserByCpf(cpf: string): Promise<{
   return res.data;
 }
 
+export async function getUserByPhone(whatsappNumber: string): Promise<{
+  exists: boolean;
+  userId?: string;
+  name?: string;
+}> {
+  const res = await client.get(`/bot/users/by-phone/${whatsappNumber}`);
+  return res.data;
+}
+
 // ── Leads ──
 
 export async function getLeadByPhone(whatsappNumber: string): Promise<{
