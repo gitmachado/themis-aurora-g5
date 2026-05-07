@@ -5,6 +5,7 @@ import { BotConfig } from "../tools/config-loader.js";
 // Enum de steps da triagem (ordem do fluxo conversacional)
 export type TriageStep =
   | "NAME"
+  | "EMAIL"
   | "CPF"
   | "CASE_TYPE"
   | "DESCRIPTION"
@@ -12,9 +13,10 @@ export type TriageStep =
   | "AVAILABILITY"
   | "DONE";
 
-// Dados coletados sequencialmente durante a triagem
+// Dados coletados durante a triagem (memória de longo prazo do agente)
 export type TriageData = {
   name: string | null;
+  email: string | null;
   cpf: string | null;
   caseType: string | null;
   caseDescription: string | null;
@@ -26,6 +28,7 @@ export type TriageData = {
 // Valores padrão para inicialização do state
 export const INITIAL_TRIAGE: TriageData = {
   name: null,
+  email: null,
   cpf: null,
   caseType: null,
   caseDescription: null,
@@ -36,9 +39,6 @@ export const INITIAL_TRIAGE: TriageData = {
 
 export const INITIAL_CONFIG: BotConfig = {
   toneOfVoice: "formal",
-  serviceHoursStart: "09:00",
-  serviceHoursEnd: "23:59",
-  awayMessage: "Estamos fora do horário de atendimento. Retornaremos em breve.",
 };
 
 // State principal do LangGraph — "fonte da verdade" de cada conversa
@@ -52,7 +52,7 @@ export const ThemisState = Annotation.Root({
   // Histórico de mensagens com reducer de append inteligente
   messages: Annotation<BaseMessage[]>({
     reducer: (a, b) => {
-      // Se b for uma única mensagem que já existe no fim de a, ignora
+      // Se b for uma única mensagem que já existe no fim de a, ignora (dedup)
       if (b.length === 1 && a.length > 0) {
         const lastA = a[a.length - 1];
         const newB = b[0];
@@ -65,7 +65,7 @@ export const ThemisState = Annotation.Root({
     default: () => [],
   }),
 
-  // Dados coletados na triagem
+  // Dados coletados na triagem (memória do agente)
   triage: Annotation<TriageData>,
 
   // Controle de fluxo
@@ -75,10 +75,6 @@ export const ThemisState = Annotation.Root({
     default: () => false,
   }),
   handoffReason: Annotation<string | null>({
-    reducer: (a, b) => b,
-    default: () => null,
-  }),
-  interactionContext: Annotation<string | null>({
     reducer: (a, b) => b,
     default: () => null,
   }),

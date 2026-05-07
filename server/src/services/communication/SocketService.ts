@@ -10,6 +10,9 @@ interface JWTPayload {
   role: UserRole;
 }
 
+// Anexamos identidade do usuario ao Socket sem cast `as any` repetido.
+type AuthenticatedSocket = Socket & { userId?: string; userRole?: UserRole };
+
 export class SocketService {
   private static instance: SocketService;
   private io: SocketIOServer | null = null;
@@ -44,8 +47,9 @@ export class SocketService {
         const decoded = jwt.verify(token, secret) as JWTPayload;
         
         // Attach user info to socket
-        (socket as any).userId = decoded.sub;
-        (socket as any).userRole = decoded.role;
+        const authSocket = socket as AuthenticatedSocket;
+        authSocket.userId = decoded.sub;
+        authSocket.userRole = decoded.role;
         
         next();
       } catch (err) {
@@ -54,8 +58,7 @@ export class SocketService {
     });
 
     this.io.on('connection', (socket: Socket) => {
-      const userId = (socket as any).userId;
-      const userRole = (socket as any).userRole;
+      const { userId, userRole } = socket as AuthenticatedSocket;
 
       console.log(`[Socket] User connected: ${userId} (${userRole})`);
 

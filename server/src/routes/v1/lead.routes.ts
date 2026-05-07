@@ -2,12 +2,14 @@ import { Router } from 'express';
 import { LeadController } from '../../controllers/implementations/lead.controller';
 import { LeadService, AuthService, NotificationService, LegalProcessService, TimelineService } from '@services';
 import { PushNotificationService } from '../../services/notifications/push_notification_service';
+import { WhatsAppService } from '../../services/implementations/whatsapp.service';
 import {
   LeadRepository,
   UserRepository,
   NotificationRepository,
   LegalProcessRepository,
   TimelineEventRepository,
+  MessageRepository,
 } from '@repositories';
 import { authMiddleware } from '../../middlewares/implementations/authMiddleware';
 import { roleMiddleware } from '../../middlewares/implementations/roleMiddleware';
@@ -31,12 +33,16 @@ const legalProcessService = new LegalProcessService(
   timelineService,
   notificationService
 );
+const whatsAppService = new WhatsAppService();
+const messageRepository = new MessageRepository();
 const leadService = new LeadService(
   leadRepository,
   userRepository,
   authService,
   notificationService,
-  legalProcessService
+  legalProcessService,
+  whatsAppService,
+  messageRepository
 );
 
 const controller = new LeadController(leadService);

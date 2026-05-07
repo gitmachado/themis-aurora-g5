@@ -128,4 +128,26 @@ final class ProcedureRemoteDataSource {
       data: {'title': title, 'date': date.toIso8601String()},
     );
   }
+
+  Future<LegalProcessModel> createProcess({
+    required String clientId,
+    required String title,
+    required String caseType,
+    String? description,
+    String? processNumber,
+  }) async {
+    final json = await _apiClient.postJson(
+      '/processes',
+      data: {
+        'clientId': clientId,
+        'title': title,
+        'caseType': caseType,
+        // ignore: use_null_aware_elements
+        if (description != null) 'description': description,
+        // ignore: use_null_aware_elements
+        if (processNumber != null) 'processNumber': processNumber,
+      },
+    );
+    return LegalProcessModel.fromJson(json);
+  }
 }

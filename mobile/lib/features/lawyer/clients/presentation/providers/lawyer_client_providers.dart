@@ -35,6 +35,12 @@ final getLawyerClientByIdUseCaseProvider = Provider<GetLawyerClientByIdUseCase>(
   },
 );
 
+final deleteLawyerClientUseCaseProvider = Provider<DeleteLawyerClientUseCase>((
+  ref,
+) {
+  return DeleteLawyerClientUseCase(ref.watch(lawyerClientRepositoryProvider));
+});
+
 final myLawyerClientsProvider =
     AsyncNotifierProvider<LawyerClientsNotifier, List<LawyerClient>>(
       LawyerClientsNotifier.new,

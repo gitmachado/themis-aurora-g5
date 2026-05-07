@@ -5,6 +5,7 @@ import '../../../../../../features/procedures/domain/entities/legal_process.dart
 import '../../../../../../shared/constants/app_colors.dart';
 import '../../../../../../shared/constants/app_text_styles.dart';
 import '../../../../../../shared/widgets/cards/app_card.dart';
+import '../../../../procedures/presentation/procedure_display.dart';
 
 class NicheChart extends StatelessWidget {
   final List<LegalProcess> procedures;
@@ -56,7 +57,7 @@ class NicheChart extends StatelessWidget {
                     ],
                   ),
                 ),
-                const SizedBox(width: 32),
+                const SizedBox(width: 24),
                 Expanded(
                   child: Column(children: data.map(_buildLegendItem).toList()),
                 ),
@@ -70,9 +71,7 @@ class NicheChart extends StatelessWidget {
   List<_ChartItem> _buildData() {
     final counts = <String, int>{};
     for (final procedure in procedures) {
-      final label = procedure.caseType?.trim().isNotEmpty == true
-          ? procedure.caseType!.trim()
-          : 'Nao informado';
+      final label = procedure.caseTypeLabel;
       counts[label] = (counts[label] ?? 0) + 1;
     }
 
@@ -117,12 +116,15 @@ class NicheChart extends StatelessWidget {
           Expanded(
             child: Text(
               item.label,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
               style: AppTextStyles.caption.copyWith(
                 fontWeight: FontWeight.w600,
                 color: AppColors.textBody,
               ),
             ),
           ),
+          const SizedBox(width: 8),
           Text(
             '${(item.percentage * 100).round()}%',
             style: AppTextStyles.caption.copyWith(

@@ -1,6 +1,6 @@
 import { IUserRepository } from '../interfaces/user.repository';
 import type { User } from '@models';
-import { dbAll, dbGet, dbRun } from '../../config/database';
+import pool, { dbAll, dbGet, dbRun } from '../../config/database';
 
 export class UserRepository implements IUserRepository {
   private readonly userSelect = `
@@ -187,5 +187,64 @@ export class UserRepository implements IUserRepository {
 
   async delete(id: string): Promise<void> {
     await dbRun('DELETE FROM users WHERE id = $1', [id]);
+  }
+
+  async hardDeleteClient(id: string): Promise<void> {
+    const client = await pool.connect();
+    try {
+      await client.query('BEGIN');
+
+      const userRes = await client.query('SELECT whatsapp_number FROM users WHERE id = $1', [id]);
+      const whatsappNumber = userRes.rows[0]?.whatsapp_number;
+
+      // 1. Delete timeline events for all processes of this client
+      await client.query(
+        `DELETE FROM timeline_events 
+         WHERE legal_process_id IN (SELECT id FROM legal_processes WHERE client_id = $1)`,
+        [id]
+      );
+
+      // 2. Delete documents for all processes of this client
+      await client.query(
+        `DELETE FROM documents 
+         WHERE legal_process_id IN (SELECT id FROM legal_processes WHERE client_id = $1)`,
+        [id]
+      );
+
+      // 3. Delete the legal processes themselves
+      await client.query('DELETE FROM legal_processes WHERE client_id = $1', [id]);
+
+      // 4. Delete notifications
+      await client.query('DELETE FROM notifications WHERE user_id = $1', [id]);
+
+      if (whatsappNumber) {
+        // 5. Delete messages (even if sender is BOT or LAWYER but tied to this number)
+        await client.query('DELETE FROM messages WHERE whatsapp_number = $1 OR user_id = $2', [whatsappNumber, id]);
+
+        // 6. Delete leads
+        await client.query('DELETE FROM leads WHERE whatsapp_number = $1', [whatsappNumber]);
+
+        // 7. Wipe AI memory (LangGraph checkpoints)
+        // Ignoring errors if tables don't exist yet
+        try {
+          await client.query('DELETE FROM checkpoints WHERE thread_id = $1', [whatsappNumber]);
+          await client.query('DELETE FROM checkpoint_writes WHERE thread_id = $1', [whatsappNumber]);
+          await client.query('DELETE FROM checkpoint_blobs WHERE thread_id = $1', [whatsappNumber]);
+        } catch (e) {
+          // Checkpoint tables might not exist if AI hasn't initialized yet
+          console.warn('Could not delete AI checkpoints, possibly table does not exist:', e);
+        }
+      }
+
+      // 8. Finally delete the user
+      await client.query('DELETE FROM users WHERE id = $1', [id]);
+
+      await client.query('COMMIT');
+    } catch (e) {
+      await client.query('ROLLBACK');
+      throw e;
+    } finally {
+      client.release();
+    }
   }
 }

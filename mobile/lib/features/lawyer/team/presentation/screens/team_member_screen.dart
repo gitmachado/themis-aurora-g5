@@ -33,6 +33,7 @@ class _TeamMemberScreenState extends ConsumerState<TeamMemberScreen> {
       backgroundColor: AppColors.background,
       appBar: CustomAppBar(
         title: 'Perfil do Advogado',
+        backgroundColor: AppColors.surface, // Solid white, not transparent
         showBackButton: true,
         showDivider: false,
       ),

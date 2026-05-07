@@ -14,7 +14,7 @@ import '../../../../../../shared/utils/api_formatters.dart';
 import '../../../../../../shared/widgets/layout/custom_app_bar.dart';
 import '../../../../../../shared/widgets/layout/app_file_viewer.dart';
 import '../../../../../../shared/network/api_client.dart';
-import '../../../../../../shared/widgets/buttons/primary_button.dart';
+import '../../../../../../shared/widgets/buttons/whatsapp_button.dart';
 import '../../../../../../shared/widgets/buttons/app_badge.dart';
 import '../../../../../../shared/widgets/cards/labeled_field.dart';
 import '../../../../../../shared/widgets/cards/file_card.dart';
@@ -616,10 +616,8 @@ class _ClientProcedureTimelineScreenState
         top: false,
         child: Padding(
           padding: const EdgeInsets.fromLTRB(20, 16, 20, 16),
-          child: PrimaryButton(
+          child: WhatsAppButton(
             label: 'Dúvidas? Falar no WhatsApp',
-            icon: Icons.chat_bubble_outline_rounded,
-            backgroundColor: AppColors.success,
             onPressed: () => launchUrl(
               Uri.parse('https://wa.me/${AppConstants.officeWhatsApp}'),
               mode: LaunchMode.externalApplication,

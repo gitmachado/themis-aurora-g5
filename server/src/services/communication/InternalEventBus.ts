@@ -1,4 +1,5 @@
 import { EventEmitter } from 'events';
+import type { Notification, Message, Lead, LegalProcess } from '@models';
 
 /**
  * Centralized internal event bus to decouple services from the WebSocket implementation.
@@ -19,15 +20,15 @@ class InternalEventBus extends EventEmitter {
   }
 
   // Helper methods for typed events
-  public emitNotification(userId: string, notification: any): void {
+  public emitNotification(userId: string, notification: Notification): void {
     this.emit('notification:new', { userId, notification });
   }
 
-  public emitMessage(whatsappNumber: string, message: any): void {
+  public emitMessage(whatsappNumber: string, message: Message): void {
     this.emit('message:new', { whatsappNumber, message });
   }
 
-  public emitLeadUpdate(lead: any): void {
+  public emitLeadUpdate(lead: Lead): void {
     this.emit('lead:updated', { lead });
   }
 
@@ -43,7 +44,7 @@ class InternalEventBus extends EventEmitter {
     this.emit('lead:unlocked', { leadId, whatsappNumber });
   }
 
-  public emitProcedureUpdate(userId: string, procedure: any): void {
+  public emitProcedureUpdate(userId: string, procedure: LegalProcess): void {
     this.emit('procedure:updated', { userId, procedure });
   }
 }

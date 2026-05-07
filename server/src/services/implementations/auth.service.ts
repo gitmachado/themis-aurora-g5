@@ -148,9 +148,11 @@ export class AuthService implements IAuthService {
   }
 
   private generateToken(userId: string, role: UserRole): string {
+    // jsonwebtoken aceita number | StringValue (ms) em expiresIn — castamos
+    // para o tipo esperado por SignOptions sem perder a tipagem do retorno.
     return jwt.sign({ role }, this.jwtSecret, {
       subject: userId,
-      expiresIn: this.jwtExpiresIn as any,
+      expiresIn: this.jwtExpiresIn as jwt.SignOptions['expiresIn'],
     });
   }
 }

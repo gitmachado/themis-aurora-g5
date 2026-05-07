@@ -5,12 +5,14 @@ class AppNotificationButton extends StatelessWidget {
   final int notificationCount;
   final VoidCallback onTap;
   final double size;
+  final Color? badgeColor;
 
   const AppNotificationButton({
     super.key,
     required this.notificationCount,
     required this.onTap,
     this.size = 24,
+    this.badgeColor,
   });
 
   @override
@@ -37,8 +39,8 @@ class AppNotificationButton extends StatelessWidget {
             top: 0,
             child: Container(
               padding: const EdgeInsets.all(2),
-              decoration: const BoxDecoration(
-                color: AppColors.yellow,
+              decoration: BoxDecoration(
+                color: badgeColor ?? AppColors.yellow,
                 shape: BoxShape.circle,
               ),
               constraints: const BoxConstraints(minWidth: 14, minHeight: 14),

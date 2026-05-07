@@ -18,6 +18,7 @@ export interface Lead {
   status: LeadStatus;
   convertedUserId: string | null;
   assignedLawyerId: string | null;
+  assignedLawyerName: string | null;
   lawyerNotes: string | null;
   discardReason: string | null;
   isAIPaused: boolean;

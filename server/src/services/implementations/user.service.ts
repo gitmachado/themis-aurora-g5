@@ -86,6 +86,20 @@ export class UserService implements IUserService {
     return this.userRepository.delete(id);
   }
 
+  async hardDeleteClient(lawyerId: string, clientId: string): Promise<void> {
+    const client = await this.userRepository.findClientByLawyerId(lawyerId, clientId);
+    if (!client) {
+      // If not a client of this lawyer, check if client exists at all
+      const exists = await this.userRepository.findById(clientId);
+      if (!exists) {
+        throw new NotFoundError('Cliente não encontrado');
+      }
+      throw new UnauthorizedError('Você não tem permissão para deletar este cliente');
+    }
+
+    return this.userRepository.hardDeleteClient(clientId);
+  }
+
   async changePassword(
     id: string,
     newPassword: string,
