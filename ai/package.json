@@ -29,7 +29,6 @@
   "dependencies": {
     "@langchain/community": "0.3.30",
     "@langchain/core": "0.3.80",
-    "@langchain/google-genai": "0.2.18",
     "@langchain/langgraph": "0.2.45",
     "@langchain/langgraph-checkpoint-postgres": "0.0.1",
     "@langchain/openai": "^0.3.17",

@@ -4,6 +4,7 @@ import { IUserRepository } from '../../repositories/interfaces/user.repository';
 import { IAuthService } from '../interfaces/auth.service';
 import { INotificationService } from '../interfaces/notification.service';
 import { ILegalProcessService } from '../interfaces/legal-process.service';
+import { IWhatsAppService } from '../interfaces/whatsapp.service';
 import type { Lead, User } from '@models';
 import type { CreateLeadDTO, ConvertLeadDTO } from '@dtos';
 import { NotFoundError, BadRequestError } from './errors';
@@ -18,7 +19,8 @@ export class LeadService implements ILeadService {
     private readonly userRepository: IUserRepository,
     private readonly authService: IAuthService,
     private readonly notificationService: INotificationService,
-    private readonly legalProcessService: ILegalProcessService
+    private readonly legalProcessService: ILegalProcessService,
+    private readonly whatsAppService: IWhatsAppService
   ) {}
 
   async createFromWhatsapp(dto: CreateLeadDTO): Promise<Lead> {
@@ -42,6 +44,7 @@ export class LeadService implements ILeadService {
       status: 'PENDING',
       convertedUserId: null,
       assignedLawyerId: null,
+      assignedLawyerName: null,
       lawyerNotes: null,
       discardReason: null,
       isAIPaused: false,
@@ -124,7 +127,7 @@ export class LeadService implements ILeadService {
         lawyerAdminId: null,
         oabNumber: null,
         specialty: null,
-        mustChangePassword: false,
+        mustChangePassword: true,
       });
     }
 
@@ -147,11 +150,35 @@ export class LeadService implements ILeadService {
 
     // Push só depois do processo criado, para o cliente já encontrar contexto ao logar.
     if (tempPassword) {
+      // Envia credenciais via WhatsApp — o cliente ainda não tem o app
+      const loginEmail = lead.email || user.email;
+      const welcomeMessage = [
+        `⚖️ *Bem-vindo(a) ao Themis, ${user.name}!*`,
+        ``,
+        `Seu cadastro foi aprovado e um advogado já está cuidando do seu caso.`,
+        ``,
+        `Baixe nosso aplicativo para acompanhar tudo em tempo real:`,
+        `📧 *Login:* ${loginEmail}`,
+        `🔐 *Senha temporária:* ${tempPassword}`,
+        ``,
+        `⚠️ No primeiro acesso, você precisará criar uma nova senha.`,
+        ``,
+        `Qualquer dúvida, estou aqui! 😊`,
+      ].join('\n');
+
+      try {
+        await this.whatsAppService.sendText(lead.whatsappNumber, welcomeMessage);
+        console.log(`[LeadService] Credenciais enviadas via WhatsApp para ${lead.whatsappNumber}`);
+      } catch (waError) {
+        console.error('[LeadService] Erro ao enviar credenciais via WhatsApp:', waError);
+      }
+
+      // Push como fallback (caso já tenha o app instalado)
       await this.notificationService.sendPush(
         user.id,
         'Seu acesso ao Themis',
-        `Bem-vindo! Baixe nosso app e use a senha temporária: ${tempPassword}`
-      );
+        `Bem-vindo! Use a senha temporária: ${tempPassword}`
+      ).catch(() => {});
     }
 
     eventBus.emitLeadUpdate(updatedLead);

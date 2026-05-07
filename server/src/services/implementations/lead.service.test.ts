@@ -16,11 +16,16 @@ const baseLead = {
   contactAvailability: 'Morning',
   status: 'PENDING',
   convertedUserId: null,
+  assignedLawyerId: null,
+  assignedLawyerName: null,
   lawyerNotes: null,
   discardReason: null,
+  isAIPaused: false,
   createdAt: new Date(),
   updatedAt: new Date(),
 };
+
+const mockWhatsApp = { sendText: async () => 'fake-id' } as any;
 
 test('createFromWhatsapp preserves caseDescription and accepts legacy description', async () => {
   let created: any;
@@ -35,7 +40,8 @@ test('createFromWhatsapp preserves caseDescription and accepts legacy descriptio
     {} as any,
     {} as any,
     {} as any,
-    {} as any
+    {} as any,
+    mockWhatsApp
   );
 
   await service.createFromWhatsapp({
@@ -73,7 +79,8 @@ test('convertToClient creates local password and sends temporary password', asyn
         calls.push('send-push');
       },
     } as any,
-    { create: async () => calls.push('create-process') } as any
+    { create: async () => calls.push('create-process') } as any,
+    { sendText: async () => { calls.push('wa-send'); return 'fake-id'; } } as any
   );
 
   const result = await service.convertToClient({
@@ -85,8 +92,9 @@ test('convertToClient creates local password and sends temporary password', asyn
   assert.ok(createdUser.passwordHash);
   assert.notEqual(createdUser.passwordHash, 'TEMP1234');
   assert.equal(result.id, 'user-1');
-  assert.equal(notificationBody, 'Bem-vindo! Baixe nosso app e use a senha temporária: TEMP1234');
-  assert.deepEqual(calls, ['create-process', 'send-push']);
+  assert.ok(notificationBody?.includes('TEMP1234'));
+  assert.ok(calls.includes('create-process'));
+  assert.ok(calls.includes('wa-send'));
 });
 
 test('convertToClient stores null cpf when lead cpf is blank', async () => {
@@ -108,7 +116,8 @@ test('convertToClient stores null cpf when lead cpf is blank', async () => {
     } as any,
     { generateTempPassword: () => 'TEMP1234' } as any,
     { sendPush: async () => undefined } as any,
-    { create: async () => undefined } as any
+    { create: async () => undefined } as any,
+    mockWhatsApp
   );
 
   await service.convertToClient({

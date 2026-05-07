@@ -1,20 +1,25 @@
 import { ChatOpenAI } from "@langchain/openai";
 import { ToolMessage } from "@langchain/core/messages";
 import { ThemisStateType } from "../state.js";
-import { SYSTEM_PROMPT } from "../../config/prompts.js";
-import { PGVectorStore } from "@langchain/community/vectorstores/pgvector";
-import { OpenAIEmbeddings } from "@langchain/openai";
+import { AGENT_PROMPT } from "../../config/prompts.js";
 import { tools, toolsByName } from "../../tools/index.js";
+import { searchKnowledge } from "../../utils/vector-store.js";
+import { getProcessesByPhone } from "../../utils/backend-client.js";
 
-const DATABASE_URL = process.env.DATABASE_URL || "postgresql://postgres:postgres@localhost:5433/themis_db";
-
+/**
+ * Nó principal — Agente Unificado.
+ * Recebe a mensagem do usuário, busca contexto (RAG + processos),
+ * e decide como responder usando LLM + Tools.
+ */
 export async function routerNode(
   state: ThemisStateType
 ): Promise<Partial<ThemisStateType>> {
   const { whatsappNumber, messages, needsHandoff, triage } = state;
 
-  // 1. Blindagem de Handoff
-  if (needsHandoff === true) return { currentNode: "sync_node" };
+  // 1. Blindagem de Handoff — se IA está pausada, não processa
+  if (needsHandoff === true) {
+    return { currentNode: "sync_node" };
+  }
 
   const lastMessage = String(messages.at(-1)?.content ?? "").trim();
   
@@ -24,95 +29,114 @@ export async function routerNode(
     temperature: 0.1,
   }).bindTools(tools);
 
-  // 3. Busca de Conhecimento (RAG)
-  const embeddings = new OpenAIEmbeddings({ model: process.env.OPENAI_EMBEDDING_MODEL || "text-embedding-3-small" });
-  let knowledgeContext = "Nenhuma informação encontrada.";
-  try {
-    const vectorStore = await PGVectorStore.initialize(embeddings, { postgresConnectionOptions: { connectionString: DATABASE_URL }, tableName: "knowledge_embeddings" });
-    const docs = await vectorStore.similaritySearch(lastMessage, 3);
-    if (docs.length > 0) knowledgeContext = docs.map(d => d.pageContent).join("\n---\n");
-  } catch (err) {}
+  // 3. Busca de Conhecimento (RAG) — via singleton
+  const knowledgeContext = await searchKnowledge(lastMessage);
 
-  // 3.5 Dados de Processos (se for cliente)
+  // 4. Dados de Processos (se for cliente)
   let processContext = "Nenhum processo encontrado.";
   try {
-    const { getProcessesByPhone } = await import("../../utils/backend-client.js");
     const processes = await getProcessesByPhone(whatsappNumber);
-    if (processes.length > 0) processContext = JSON.stringify(processes);
-  } catch (err) { /* ignore */ }
+    if (processes.length > 0) {
+      processContext = JSON.stringify(processes);
+    }
+  } catch (err) {
+    console.warn("[Router Node] Erro ao buscar processos (continuando sem):", err);
+  }
 
-  // 4. Super Prompt de Agente Unificado
-  const agentPrompt = `Você é a Themis AI, a assistente virtual oficial do escritório Themis. ⚖️
+  // 5. Monta o prompt do agente com dados dinâmicos
+  const agentPrompt = AGENT_PROMPT
+    .replace("{triageName}", triage.name || "FALTANDO")
+    .replace("{triageEmail}", triage.email || "FALTANDO")
+    .replace("{triageCpf}", triage.cpf || "FALTANDO")
+    .replace("{whatsappNumber}", whatsappNumber)
+    .replace("{triageCaseType}", triage.caseType || "FALTANDO")
+    .replace("{triageDescription}", triage.caseDescription || "FALTANDO")
+    .replace("{triageUrgency}", triage.urgency || "FALTANDO")
+    .replace("{triageAvailability}", triage.contactAvailability || "FALTANDO")
+    .replace("{knowledgeContext}", knowledgeContext)
+    .replace("{processContext}", processContext);
 
-DIRETRIZES DE PERSONA:
-- Sempre se identifique como Themis AI do escritório Themis no primeiro contato.
-- Seja profissional, humana e extremamente honesta.
-
-SEGURANÇA (GUARDRAILS):
-1. IDENTIDADE: Se perguntarem se o escritório é de outra pessoa (ex: "É do José?"), esclareça gentilmente que você é a assistente oficial do escritório Themis.
-2. ESCOPO: Só fale sobre temas jurídicos relacionados à legislação brasileira. Se o usuário perguntar sobre leis de outros países ou assuntos aleatórios, informe gentilmente que seu foco e especialidade são exclusivos no Direito Brasileiro.
-
-TRIAGEM FLUIDA (PT-BR):
-1. Você deve coletar: Nome Completo, CPF, Tipo de Caso, Descrição do Caso e Disponibilidade de Contato.
-2. IMPORTANTE: Você JÁ POSSUI o número do WhatsApp do cliente no sistema. NUNCA peça o número de telefone dele.
-3. DETERMINAÇÃO DE URGÊNCIA E DESCRIÇÃO: Você NÃO deve perguntar a urgência ao cliente. Com base na descrição do caso, determine internamente se é Alta, Média ou Baixa. O campo 'Descrição' deve ser um resumo TÉCNICO e PROFISSIONAL escrito EM TERCEIRA PESSOA (Ex: "O cliente relata que...", "O interessado busca auxílio pois..."). Este resumo é apenas para registro interno e você NUNCA deve repetí-lo para o cliente.
-4. Só chame 'registrar_triagem' quando tiver as 5 informações (Nome, CPF, Tipo, Descrição e Disponibilidade). Passe a Descrição já formatada em terceira pessoa e a Urgência determinada internamente. Use o 'whatsappNumber' da memória.
-
-MEMÓRIA DE LONGO PRAZO:
-- Nome: ${triage.name || "FALTANDO"}
-- CPF: ${triage.cpf || "FALTANDO"}
-- WhatsApp do Cliente: ${whatsappNumber} (NUNCA PERGUNTE ESTE DADO)
-- Tipo Caso: ${triage.caseType || "FALTANDO"}
-- Descrição: ${triage.caseDescription || "FALTANDO"}
-- Urgência: ${triage.urgency || "FALTANDO"}
-- Disponibilidade: ${triage.contactAvailability || "FALTANDO"}
-
-CONHECIMENTO: ${knowledgeContext}
-PROCESSOS: ${processContext}`;
-
+  // 6. Histórico recente (janela deslizante)
   const history = messages.slice(-20).map((m: any) => ({
     role: (m._getType?.() === 'ai' || m.type === 'ai') ? 'assistant' : 'user',
-    content: m.content
+    content: String(m.content),
   }));
 
-  const response = await model.invoke([
-    { role: "system", content: agentPrompt },
-    ...history,
-  ]);
+  // 7. Invoca o modelo
+  let response;
+  try {
+    response = await model.invoke([
+      { role: "system", content: agentPrompt },
+      ...history,
+    ]);
+  } catch (err) {
+    console.error("[Router Node] Erro ao invocar LLM:", err);
+    const { AIMessage } = await import("@langchain/core/messages");
+    return {
+      currentNode: "sync_node",
+      messages: [new AIMessage("Desculpe, tive um probleminha técnico. Pode repetir o que disse?")],
+    };
+  }
 
-  // 5. Execução de Tools Reais
+  // 8. Execução de Tools Reais
   if (response.tool_calls && response.tool_calls.length > 0) {
-    const newMessages: any[] = [response];
+    const toolMessages: ToolMessage[] = [];
 
     console.log(`[Router Node] Executando ${response.tool_calls.length} tool(s)...`);
 
     for (const toolCall of response.tool_calls) {
       const toolFn = toolsByName[toolCall.name];
       if (toolFn) {
-        const args = { ...toolCall.args, whatsappNumber };
-        const result = await toolFn.invoke(args);
-        console.log(`[Router Node] Tool ${toolCall.name} retornou: ${result}`);
-        newMessages.push(new ToolMessage({
+        try {
+          const args = { ...toolCall.args, whatsappNumber };
+          const result = await toolFn.invoke(args);
+          console.log(`[Router Node] Tool ${toolCall.name} retornou: ${result}`);
+          toolMessages.push(new ToolMessage({
+            tool_call_id: toolCall.id!,
+            content: String(result),
+          }));
+        } catch (toolErr) {
+          console.error(`[Router Node] Erro na tool ${toolCall.name}:`, toolErr);
+          toolMessages.push(new ToolMessage({
+            tool_call_id: toolCall.id!,
+            content: "ERRO_TECNICO: Falha ao executar esta operação.",
+          }));
+        }
+      } else {
+        console.warn(`[Router Node] Tool desconhecida: ${toolCall.name}`);
+        toolMessages.push(new ToolMessage({
           tool_call_id: toolCall.id!,
-          content: result,
+          content: `ERRO: Tool '${toolCall.name}' não encontrada.`,
         }));
       }
     }
 
-    // Segunda chamada (Reflexão): a IA recebe o resultado da tool e gera o texto final.
-    const finalResponse = await model.invoke([
-      { role: "system", content: agentPrompt },
-      ...history,
-      ...newMessages
-    ]);
+    // 9. Reflexão: IA recebe o resultado das tools e gera o texto final
+    let finalResponse;
+    try {
+      finalResponse = await model.invoke([
+        { role: "system", content: agentPrompt },
+        ...history,
+        response,
+        ...toolMessages,
+      ]);
+    } catch (err) {
+      console.error("[Router Node] Erro na reflexão pós-tool:", err);
+      const { AIMessage } = await import("@langchain/core/messages");
+      return {
+        currentNode: "sync_node",
+        messages: [response, ...toolMessages, new AIMessage("Pronto! Seus dados foram processados. Como posso ajudar mais?")],
+      };
+    }
 
     return {
       currentNode: "sync_node",
-      messages: [response, ...newMessages.filter(m => m instanceof ToolMessage), finalResponse],
-      needsHandoff: state.needsHandoff, 
+      messages: [response, ...toolMessages, finalResponse],
+      needsHandoff: state.needsHandoff,
     };
   }
 
+  // 10. Resposta sem tools
   return {
     currentNode: "sync_node",
     messages: [response],

@@ -2,6 +2,7 @@ import { Router } from 'express';
 import { LeadController } from '../../controllers/implementations/lead.controller';
 import { LeadService, AuthService, NotificationService, LegalProcessService, TimelineService } from '@services';
 import { PushNotificationService } from '../../services/notifications/push_notification_service';
+import { WhatsAppService } from '../../services/implementations/whatsapp.service';
 import {
   LeadRepository,
   UserRepository,
@@ -31,12 +32,14 @@ const legalProcessService = new LegalProcessService(
   timelineService,
   notificationService
 );
+const whatsAppService = new WhatsAppService();
 const leadService = new LeadService(
   leadRepository,
   userRepository,
   authService,
   notificationService,
-  legalProcessService
+  legalProcessService,
+  whatsAppService
 );
 
 const controller = new LeadController(leadService);
