@@ -59,6 +59,11 @@ export interface ProcessData {
   currentStatus: string;
   lastMovementDate: string | null;
   lastNote: string | null;
+  recentTimeline?: {
+    date: string;
+    type: string;
+    content: string;
+  }[];
 }
 
 export async function getProcessesByPhone(whatsappNumber: string): Promise<ProcessData[]> {
@@ -69,6 +74,7 @@ export async function getProcessesByPhone(whatsappNumber: string): Promise<Proce
     currentStatus: p.status || p.currentStatus,
     lastMovementDate: p.lastUpdate || p.lastMovementDate || null,
     lastNote: p.lawyerNote || p.lastNote || null,
+    recentTimeline: p.recentTimeline || [],
   }));
 }
 

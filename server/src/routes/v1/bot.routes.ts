@@ -42,6 +42,7 @@ const controller = new BotController(
   configurationService,
   notificationService,
   leadRepository,
+  timelineService,
 );
 
 // ────────────────────────────────────────────────────
