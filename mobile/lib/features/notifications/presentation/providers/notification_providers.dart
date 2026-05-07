@@ -134,5 +134,7 @@ final unreadNotificationsCountProvider = Provider<int>((ref) {
 
 final handoffNotificationsCountProvider = Provider<int>((ref) {
   final notifications = ref.watch(myNotificationsProvider).valueOrNull ?? [];
-  return notifications.where((n) => n.type == 'HUMAN_SUPPORT' && !n.isRead).length;
+  return notifications
+      .where((n) => n.type == 'HUMAN_SUPPORT' && !n.isRead)
+      .length;
 });

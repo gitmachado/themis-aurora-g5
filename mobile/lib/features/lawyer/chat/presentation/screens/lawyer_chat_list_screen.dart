@@ -31,7 +31,7 @@ class LawyerChatListScreen extends ConsumerWidget {
         .map((n) => n.extraData?['whatsappNumber']?.toString())
         .whereType<String>()
         .toSet();
-    
+
     final unreadNotificationIds = notifications
         .where((n) => !n.isRead)
         .map((n) => n.id)
@@ -119,7 +119,12 @@ class LawyerChatListScreen extends ConsumerWidget {
                     // Sort by name for now
                     unifiedList.sort((a, b) => a.name.compareTo(b.name));
 
-                    return _buildClientList(context, unifiedList, unreadHandoffNumbers, unreadNotificationIds);
+                    return _buildClientList(
+                      context,
+                      unifiedList,
+                      unreadHandoffNumbers,
+                      unreadNotificationIds,
+                    );
                   },
                   loading: _buildLoadingList,
                   error: (error, _) => _buildErrorState(error),
@@ -191,7 +196,8 @@ class LawyerChatListScreen extends ConsumerWidget {
       itemCount: clients.length,
       itemBuilder: (context, index) {
         final client = clients[index];
-        final hasUnread = unreadNumbers.contains(client.whatsappNumber) ||
+        final hasUnread =
+            unreadNumbers.contains(client.whatsappNumber) ||
             unreadNotificationIds.contains(client.id);
 
         return Container(
@@ -253,8 +259,7 @@ class LawyerChatListScreen extends ConsumerWidget {
                   child: Text(
                     StringUtils.formatFirstAndLastName(client.name),
                     style: TextStyle(
-                      fontWeight:
-                          hasUnread ? FontWeight.w900 : FontWeight.bold,
+                      fontWeight: hasUnread ? FontWeight.w900 : FontWeight.bold,
                       color: AppColors.textPrimary,
                     ),
                   ),

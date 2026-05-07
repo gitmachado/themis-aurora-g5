@@ -263,10 +263,9 @@ class ThemisSegmentedControl extends StatelessWidget {
                       style: TextStyle(
                         fontSize: 10.5,
                         fontWeight: FontWeight.w900,
-                        color:
-                            selectedIndex == index
-                                ? AppColors.ink
-                                : AppColors.surface,
+                        color: selectedIndex == index
+                            ? AppColors.ink
+                            : AppColors.surface,
                         height: 1.1,
                       ),
                     ),

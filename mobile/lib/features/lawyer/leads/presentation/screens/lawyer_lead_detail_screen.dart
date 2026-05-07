@@ -95,7 +95,10 @@ class _LawyerLeadDetailScreenState extends ConsumerState<LawyerLeadDetailScreen>
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               if (leadAsync?.isLoading ?? false) ...[
-                                const LoadingSkeleton(height: 4, borderRadius: 2),
+                                const LoadingSkeleton(
+                                  height: 4,
+                                  borderRadius: 2,
+                                ),
                                 const SizedBox(height: 16),
                               ],
                               _buildInfoSection(
@@ -156,7 +159,9 @@ class _LawyerLeadDetailScreenState extends ConsumerState<LawyerLeadDetailScreen>
             ),
           ],
         ),
-        floatingActionButton: widget.isModal ? null : _buildFloatingActions(lead),
+        floatingActionButton: widget.isModal
+            ? null
+            : _buildFloatingActions(lead),
         floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
       ),
     );
@@ -387,9 +392,7 @@ class _LawyerLeadDetailScreenState extends ConsumerState<LawyerLeadDetailScreen>
                 Padding(
                   padding: const EdgeInsets.fromLTRB(24, 0, 24, 8),
                   child: Row(
-                    children: [
-                      Text('Ações do Lead', style: AppTextStyles.h2),
-                    ],
+                    children: [Text('Ações do Lead', style: AppTextStyles.h2)],
                   ),
                 ),
                 ThemisActionRow(

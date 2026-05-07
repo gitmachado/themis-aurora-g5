@@ -65,7 +65,9 @@ class _LawyerCreateProcedureScreenState
     setState(() => _isLoading = true);
 
     try {
-      await ref.read(procedureActionsProvider).createProcess(
+      await ref
+          .read(procedureActionsProvider)
+          .createProcess(
             clientId: _selectedClientId!,
             title: _titleController.text,
             caseType: _selectedCaseType!,
@@ -108,8 +110,10 @@ class _LawyerCreateProcedureScreenState
       ),
       child: Scaffold(
         backgroundColor: AppColors.background,
-        appBar:
-            const CustomAppBar(title: 'Novo Processo', showBackButton: true),
+        appBar: const CustomAppBar(
+          title: 'Novo Processo',
+          showBackButton: true,
+        ),
         body: SingleChildScrollView(
           padding: const EdgeInsets.fromLTRB(20, 8, 20, 32),
           child: Form(
@@ -139,15 +143,21 @@ class _LawyerCreateProcedureScreenState
                             items: clients
                                 .map(
                                   (c) => DropdownMenuItem(
-                                      value: c.id, child: Text(c.name)),
+                                    value: c.id,
+                                    child: Text(c.name),
+                                  ),
                                 )
                                 .toList(),
-                            onChanged: (val) => setState(() => _selectedClientId = val),
-                            validator: (val) => val == null ? 'Obrigatório' : null,
+                            onChanged: (val) =>
+                                setState(() => _selectedClientId = val),
+                            validator: (val) =>
+                                val == null ? 'Obrigatório' : null,
                           ),
-                          loading: () =>
-                              const LinearProgressIndicator(color: AppColors.yellow),
-                          error: (e, _) => Text('Erro ao carregar clientes: $e'),
+                          loading: () => const LinearProgressIndicator(
+                            color: AppColors.yellow,
+                          ),
+                          error: (e, _) =>
+                              Text('Erro ao carregar clientes: $e'),
                         ),
                       ),
                       const SizedBox(height: 16),
@@ -180,8 +190,10 @@ class _LawyerCreateProcedureScreenState
                                 ),
                               )
                               .toList(),
-                          onChanged: (val) => setState(() => _selectedCaseType = val),
-                          validator: (val) => val == null ? 'Obrigatório' : null,
+                          onChanged: (val) =>
+                              setState(() => _selectedCaseType = val),
+                          validator: (val) =>
+                              val == null ? 'Obrigatório' : null,
                         ),
                       ),
                       const SizedBox(height: 16),
@@ -191,7 +203,9 @@ class _LawyerCreateProcedureScreenState
                         label: 'Número do Processo (Opcional)',
                         child: TextFormField(
                           controller: _processNumberController,
-                          decoration: _inputDecoration('0000000-00.0000.0.00.0000'),
+                          decoration: _inputDecoration(
+                            '0000000-00.0000.0.00.0000',
+                          ),
                         ),
                       ),
                       const SizedBox(height: 16),

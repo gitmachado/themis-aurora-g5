@@ -104,10 +104,12 @@ class _LawyerChatHandoffScreenState
 
     // Mark notifications as read
     final notifications = ref.read(myNotificationsProvider).valueOrNull ?? [];
-    final unreadHandoffs = notifications.where((n) =>
-        n.type == 'HUMAN_SUPPORT' &&
-        !n.isRead &&
-        n.extraData?['whatsappNumber'] == widget.whatsappNumber);
+    final unreadHandoffs = notifications.where(
+      (n) =>
+          n.type == 'HUMAN_SUPPORT' &&
+          !n.isRead &&
+          n.extraData?['whatsappNumber'] == widget.whatsappNumber,
+    );
 
     for (var n in unreadHandoffs) {
       ref.read(notificationActionsProvider).markAsRead(n.id);

@@ -51,10 +51,7 @@ class _TeamAddScreenState extends ConsumerState<TeamAddScreen> {
       ),
       child: Scaffold(
         backgroundColor: AppColors.background,
-        appBar: CustomAppBar(
-          title: 'Adicionar Advogado',
-          showBackButton: true,
-        ),
+        appBar: CustomAppBar(title: 'Adicionar Advogado', showBackButton: true),
         body: SafeArea(
           top: false,
           child: SingleChildScrollView(
@@ -83,7 +80,9 @@ class _TeamAddScreenState extends ConsumerState<TeamAddScreen> {
                             controller: _nameController,
                             textInputAction: TextInputAction.next,
                             textCapitalization: TextCapitalization.words,
-                            decoration: _decoration(hint: 'Ex.: Dra. Ana Souza'),
+                            decoration: _decoration(
+                              hint: 'Ex.: Dra. Ana Souza',
+                            ),
                             validator: (value) {
                               final v = value?.trim() ?? '';
                               if (v.isEmpty) return 'Informe o nome completo';
@@ -100,11 +99,15 @@ class _TeamAddScreenState extends ConsumerState<TeamAddScreen> {
                             keyboardType: TextInputType.emailAddress,
                             textInputAction: TextInputAction.next,
                             autocorrect: false,
-                            decoration: _decoration(hint: 'nome@escritorio.com'),
+                            decoration: _decoration(
+                              hint: 'nome@escritorio.com',
+                            ),
                             validator: (value) {
                               final v = value?.trim() ?? '';
                               if (v.isEmpty) return 'Informe o e-mail';
-                              final regex = RegExp(r'^[^@\s]+@[^@\s]+\.[^@\s]+$');
+                              final regex = RegExp(
+                                r'^[^@\s]+@[^@\s]+\.[^@\s]+$',
+                              );
                               if (!regex.hasMatch(v)) return 'E-mail inválido';
                               return null;
                             },

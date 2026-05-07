@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../constants/app_colors.dart';
 import '../../../../features/auth/domain/entities/account.dart';
 import '../../../../features/auth/presentation/providers/auth_providers.dart';
 import '../../../../features/lawyer/overview/presentation/screens/lawyer_overview_screen.dart';
@@ -121,12 +122,13 @@ class LawyerMainLayoutState extends ConsumerState<LawyerMainLayout> {
         },
         child: Scaffold(
           body: IndexedStack(index: safeIndex, children: screens),
-        bottomNavigationBar: SafeArea(
-          top: false,
-          child: AppBottomNavigationBar(
-            currentIndex: safeIndex,
-            onTap: _onTabTapped,
-            items: navItems,
+          bottomNavigationBar: SafeArea(
+            top: false,
+            child: AppBottomNavigationBar(
+              currentIndex: safeIndex,
+              onTap: _onTabTapped,
+              items: navItems,
+            ),
           ),
         ),
       ),

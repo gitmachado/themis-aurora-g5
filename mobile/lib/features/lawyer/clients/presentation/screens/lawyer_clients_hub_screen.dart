@@ -31,12 +31,10 @@ class LawyerClientsHubScreen extends ConsumerStatefulWidget {
 
 class _LawyerClientsHubScreenState extends ConsumerState<LawyerClientsHubScreen>
     with SingleTickerProviderStateMixin {
-  late final TabController _tabController = TabController(
-    length: 3,
-    vsync: this,
-  )..addListener(() {
-    if (mounted) setState(() {});
-  });
+  late final TabController _tabController =
+      TabController(length: 3, vsync: this)..addListener(() {
+        if (mounted) setState(() {});
+      });
 
   @override
   void initState() {
@@ -72,11 +70,9 @@ class _LawyerClientsHubScreenState extends ConsumerState<LawyerClientsHubScreen>
 
   @override
   Widget build(BuildContext context) {
-    final pendingCount =
-        ref.watch(pendingLeadsProvider).maybeWhen(
-          data: (l) => l.length,
-          orElse: () => 0,
-        );
+    final pendingCount = ref
+        .watch(pendingLeadsProvider)
+        .maybeWhen(data: (l) => l.length, orElse: () => 0);
 
     return Scaffold(
       backgroundColor: AppColors.background,
@@ -114,7 +110,8 @@ class _LawyerClientsHubScreenState extends ConsumerState<LawyerClientsHubScreen>
           Expanded(
             child: TabBarView(
               controller: _tabController,
-              physics: const NeverScrollableScrollPhysics(), // Mantém o pedido de não deslizar arrastando
+              physics:
+                  const NeverScrollableScrollPhysics(), // Mantém o pedido de não deslizar arrastando
               children: const [
                 LawyerLeadTriageView(archived: false),
                 LawyerClientListView(),

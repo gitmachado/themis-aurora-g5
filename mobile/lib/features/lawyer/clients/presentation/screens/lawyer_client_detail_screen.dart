@@ -53,7 +53,8 @@ class LawyerClientDetailScreen extends ConsumerWidget {
             if (clientId != null && clientId!.isNotEmpty)
               IconButton(
                 icon: const Icon(Icons.delete_outline, color: AppColors.error),
-                onPressed: () => _showDeleteConfirmation(context, ref, clientId!),
+                onPressed: () =>
+                    _showDeleteConfirmation(context, ref, clientId!),
               ),
             IconButton(
               icon: const Icon(Icons.chat_outlined),
@@ -255,21 +256,34 @@ class LawyerClientDetailScreen extends ConsumerWidget {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx),
-            child: const Text('Cancelar', style: TextStyle(color: AppColors.ink)),
+            child: const Text(
+              'Cancelar',
+              style: TextStyle(color: AppColors.ink),
+            ),
           ),
           TextButton(
             onPressed: () {
               Navigator.pop(ctx);
               _deleteClient(context, ref, id);
             },
-            child: const Text('Excluir', style: TextStyle(color: AppColors.error, fontWeight: FontWeight.bold)),
+            child: const Text(
+              'Excluir',
+              style: TextStyle(
+                color: AppColors.error,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
           ),
         ],
       ),
     );
   }
 
-  Future<void> _deleteClient(BuildContext context, WidgetRef ref, String id) async {
+  Future<void> _deleteClient(
+    BuildContext context,
+    WidgetRef ref,
+    String id,
+  ) async {
     final useCase = ref.read(deleteLawyerClientUseCaseProvider);
     final result = await useCase(id);
 
