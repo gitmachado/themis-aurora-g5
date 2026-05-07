@@ -74,62 +74,68 @@ class _LawyerProcedureDetailScreenState
   Widget _buildContent(LegalProcess process) {
     final clientName = _clientNameFor(process);
 
-    return Scaffold(
-      backgroundColor: AppColors.background,
-      appBar: CustomAppBar(
-        backgroundColor: AppColors.surface,
-        showBackButton: true,
-        titleWidget: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Text(
-              process.processNumber ?? process.title,
-              style: const TextStyle(
-                color: AppColors.textPrimary,
-                fontSize: 16,
-                fontWeight: FontWeight.bold,
+    return AnnotatedRegion<SystemUiOverlayStyle>(
+      value: const SystemUiOverlayStyle(
+        systemNavigationBarColor: AppColors.white,
+        systemNavigationBarIconBrightness: Brightness.dark,
+      ),
+      child: Scaffold(
+        backgroundColor: AppColors.background,
+        appBar: CustomAppBar(
+          backgroundColor: AppColors.surface,
+          showBackButton: true,
+          titleWidget: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Text(
+                process.processNumber ?? process.title,
+                style: const TextStyle(
+                  color: AppColors.textPrimary,
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                ),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
               ),
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-            ),
-            Row(
-              children: [
-                Text(
-                  process.caseTypeLabel,
-                  style: AppTextStyles.caption.copyWith(fontSize: 12),
-                ),
-                const SizedBox(width: 8),
-                Text(
-                  'Atualizado em ${formatFullDateTime(process.updatedAt)}',
-                  style: AppTextStyles.caption.copyWith(
-                    fontSize: 11,
-                    color: AppColors.primary,
-                    fontWeight: FontWeight.w500,
+              Row(
+                children: [
+                  Text(
+                    process.caseTypeLabel,
+                    style: AppTextStyles.caption.copyWith(fontSize: 12),
                   ),
-                ),
-              ],
-            ),
+                  const SizedBox(width: 8),
+                  Text(
+                    'Atualizado em ${formatFullDateTime(process.updatedAt)}',
+                    style: AppTextStyles.caption.copyWith(
+                      fontSize: 11,
+                      color: AppColors.primary,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+          title: '',
+          bottom: _buildDetailTabs(),
+        ),
+        body: TabBarView(
+          controller: _tabController,
+          children: [
+            _buildTimelineTab(process.id),
+            _buildSummaryTab(process, clientName),
+            _buildFilesTab(process.id),
           ],
         ),
-        title: '',
-        bottom: _buildDetailTabs(),
-      ),
-      body: TabBarView(
-        controller: _tabController,
-        children: [
-          _buildTimelineTab(process.id),
-          _buildSummaryTab(process, clientName),
-          _buildFilesTab(process.id),
-        ],
-      ),
-      floatingActionButton: FloatingActionButton.extended(
-        heroTag: 'lawyer_procedure_detail_fab_${process.id}',
-        onPressed: () => _showActionsSheet(process),
-        backgroundColor: AppColors.yellow,
-        foregroundColor: AppColors.ink,
-        icon: const Icon(Icons.assignment_rounded),
-        label: const Text('Ações'),
+        floatingActionButton: FloatingActionButton.extended(
+          heroTag: 'lawyer_procedure_detail_fab_${process.id}',
+          onPressed: () => _showActionsSheet(process),
+          backgroundColor: AppColors.yellow,
+          foregroundColor: AppColors.ink,
+          icon: const Icon(Icons.assignment_rounded),
+          label: const Text('Ações'),
+        ),
       ),
     );
   }

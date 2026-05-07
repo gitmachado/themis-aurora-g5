@@ -70,89 +70,95 @@ class _LawyerLeadDetailScreenState extends ConsumerState<LawyerLeadDetailScreen>
         : ref.watch(leadDetailsProvider(widget.leadId!));
     final lead = leadAsync?.valueOrNull;
 
-    return Scaffold(
-      backgroundColor: AppColors.background,
-      body: Stack(
-        children: [
-          SafeArea(
-            top: false, // SliverAppBar handles top safe area
-            child: CustomScrollView(
-              slivers: [
-                _buildSliverAppBar(lead),
-                SliverToBoxAdapter(
-                  child: FadeTransition(
-                    opacity: _fadeAnimation,
-                    child: SlideTransition(
-                      position: _slideAnimation,
-                      child: Padding(
-                        padding: const EdgeInsets.all(24.0),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            if (leadAsync?.isLoading ?? false) ...[
-                              const LoadingSkeleton(height: 4, borderRadius: 2),
-                              const SizedBox(height: 16),
+    return AnnotatedRegion<SystemUiOverlayStyle>(
+      value: const SystemUiOverlayStyle(
+        systemNavigationBarColor: AppColors.white,
+        systemNavigationBarIconBrightness: Brightness.dark,
+      ),
+      child: Scaffold(
+        backgroundColor: AppColors.background,
+        body: Stack(
+          children: [
+            SafeArea(
+              top: false, // SliverAppBar handles top safe area
+              child: CustomScrollView(
+                slivers: [
+                  _buildSliverAppBar(lead),
+                  SliverToBoxAdapter(
+                    child: FadeTransition(
+                      opacity: _fadeAnimation,
+                      child: SlideTransition(
+                        position: _slideAnimation,
+                        child: Padding(
+                          padding: const EdgeInsets.all(24.0),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              if (leadAsync?.isLoading ?? false) ...[
+                                const LoadingSkeleton(height: 4, borderRadius: 2),
+                                const SizedBox(height: 16),
+                              ],
+                              _buildInfoSection(
+                                title: 'Dados do Lead',
+                                icon: Icons.person_search_outlined,
+                                children: [
+                                  _buildDetailItem(
+                                    'Nome Completo',
+                                    lead?.displayName ?? widget.name,
+                                  ),
+                                  _buildDetailItem(
+                                    'WhatsApp',
+                                    lead?.whatsappNumber ?? '--',
+                                  ),
+                                  _buildDetailItem('CPF', lead?.cpf ?? '--'),
+                                  _buildDetailItem(
+                                    'Disponibilidade',
+                                    lead?.availabilityLabel ?? '--',
+                                  ),
+                                ],
+                              ),
+                              const SizedBox(height: 24),
+                              _buildInfoSection(
+                                title: 'Relato do Caso',
+                                icon: Icons.description_outlined,
+                                children: [
+                                  _buildDetailItem(
+                                    'Tipo de Caso',
+                                    lead?.caseTypeLabel ?? widget.caseType,
+                                  ),
+                                  _buildDetailItem(
+                                    'Urgencia',
+                                    lead?.urgencyLabel ?? widget.urgency,
+                                    isBadge: true,
+                                  ),
+                                  _buildDetailItem(
+                                    'Descrição',
+                                    lead?.caseDescription?.isNotEmpty == true
+                                        ? lead!.caseDescription!
+                                        : 'Relato ainda não informado pelo bot.',
+                                    isBold: false,
+                                  ),
+                                ],
+                              ),
+                              SizedBox(
+                                height: widget.isModal
+                                    ? 32
+                                    : 140, // Padding reduzido em modal
+                              ),
                             ],
-                            _buildInfoSection(
-                              title: 'Dados do Lead',
-                              icon: Icons.person_search_outlined,
-                              children: [
-                                _buildDetailItem(
-                                  'Nome Completo',
-                                  lead?.displayName ?? widget.name,
-                                ),
-                                _buildDetailItem(
-                                  'WhatsApp',
-                                  lead?.whatsappNumber ?? '--',
-                                ),
-                                _buildDetailItem('CPF', lead?.cpf ?? '--'),
-                                _buildDetailItem(
-                                  'Disponibilidade',
-                                  lead?.availabilityLabel ?? '--',
-                                ),
-                              ],
-                            ),
-                            const SizedBox(height: 24),
-                            _buildInfoSection(
-                              title: 'Relato do Caso',
-                              icon: Icons.description_outlined,
-                              children: [
-                                _buildDetailItem(
-                                  'Tipo de Caso',
-                                  lead?.caseTypeLabel ?? widget.caseType,
-                                ),
-                                _buildDetailItem(
-                                  'Urgencia',
-                                  lead?.urgencyLabel ?? widget.urgency,
-                                  isBadge: true,
-                                ),
-                                _buildDetailItem(
-                                  'Descrição',
-                                  lead?.caseDescription?.isNotEmpty == true
-                                      ? lead!.caseDescription!
-                                      : 'Relato ainda não informado pelo bot.',
-                                  isBold: false,
-                                ),
-                              ],
-                            ),
-                            SizedBox(
-                              height: widget.isModal
-                                  ? 32
-                                  : 140, // Padding reduzido em modal
-                            ),
-                          ],
+                          ),
                         ),
                       ),
                     ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
+        floatingActionButton: widget.isModal ? null : _buildFloatingActions(lead),
+        floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
       ),
-      floatingActionButton: widget.isModal ? null : _buildFloatingActions(lead),
-      floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
     );
   }
 

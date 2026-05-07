@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../features/auth/domain/entities/account.dart';
 import '../../../../features/auth/presentation/providers/auth_providers.dart';
@@ -102,19 +103,24 @@ class LawyerMainLayoutState extends ConsumerState<LawyerMainLayout> {
     // Clamp the current index in case the role just flipped (e.g. logout/login).
     final safeIndex = currentIndex.clamp(0, screens.length - 1);
 
-    return PopScope(
-      canPop: false,
-      onPopInvokedWithResult: (didPop, result) {
-        if (didPop) return;
-        if (currentIndex > 0) {
-          setState(() {
-            currentIndex = 0;
-          });
-          currentIndexNotifier.value = 0;
-        }
-      },
-      child: Scaffold(
-        body: IndexedStack(index: safeIndex, children: screens),
+    return AnnotatedRegion<SystemUiOverlayStyle>(
+      value: const SystemUiOverlayStyle(
+        systemNavigationBarColor: AppColors.white,
+        systemNavigationBarIconBrightness: Brightness.dark,
+      ),
+      child: PopScope(
+        canPop: false,
+        onPopInvokedWithResult: (didPop, result) {
+          if (didPop) return;
+          if (currentIndex > 0) {
+            setState(() {
+              currentIndex = 0;
+            });
+            currentIndexNotifier.value = 0;
+          }
+        },
+        child: Scaffold(
+          body: IndexedStack(index: safeIndex, children: screens),
         bottomNavigationBar: SafeArea(
           top: false,
           child: AppBottomNavigationBar(

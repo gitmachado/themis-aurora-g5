@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../../../app/routes/app_router.dart';
@@ -38,59 +39,65 @@ class LawyerClientDetailScreen extends ConsumerWidget {
     final client = clientAsync?.valueOrNull ?? _fallbackClient();
     final procedures = ref.watch(myProceduresProvider);
 
-    return Scaffold(
-      backgroundColor: AppColors.background,
-      appBar: CustomAppBar(
-        title: 'Ficha do Cliente',
-        showBackButton: true,
-        actions: [
-          if (clientId != null && clientId!.isNotEmpty)
-            IconButton(
-              icon: const Icon(Icons.delete_outline, color: AppColors.error),
-              onPressed: () => _showDeleteConfirmation(context, ref, clientId!),
-            ),
-          IconButton(
-            icon: const Icon(Icons.chat_outlined),
-            onPressed: client.whatsappNumber.isEmpty
-                ? null
-                : () => Navigator.pushNamed(
-                    context,
-                    AppRouter.lawyerChatHandoffRoute,
-                    arguments: {
-                      'clientName': client.name,
-                      'whatsappNumber': client.whatsappNumber,
-                    },
-                  ),
-          ),
-        ],
+    return AnnotatedRegion<SystemUiOverlayStyle>(
+      value: const SystemUiOverlayStyle(
+        systemNavigationBarColor: AppColors.white,
+        systemNavigationBarIconBrightness: Brightness.dark,
       ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(24),
-        child: Column(
-          children: [
-            if (clientAsync?.isLoading ?? false) ...[
-              const LoadingSkeleton(height: 4, borderRadius: 2),
-              const SizedBox(height: 16),
-            ],
-            _buildProfileHeader(client),
-            const SizedBox(height: 24),
-            _buildInfoCard(client),
-            const SizedBox(height: 24),
-            procedures.when(
-              data: (items) => _buildProcedureHistory(context, items),
-              loading: () =>
-                  const LoadingSkeleton(height: 180, borderRadius: 16),
-              error: (error, _) => Text(
-                error.toString(),
-                style: AppTextStyles.body.copyWith(color: AppColors.error),
+      child: Scaffold(
+        backgroundColor: AppColors.background,
+        appBar: CustomAppBar(
+          title: 'Ficha do Cliente',
+          showBackButton: true,
+          actions: [
+            if (clientId != null && clientId!.isNotEmpty)
+              IconButton(
+                icon: const Icon(Icons.delete_outline, color: AppColors.error),
+                onPressed: () => _showDeleteConfirmation(context, ref, clientId!),
               ),
+            IconButton(
+              icon: const Icon(Icons.chat_outlined),
+              onPressed: client.whatsappNumber.isEmpty
+                  ? null
+                  : () => Navigator.pushNamed(
+                      context,
+                      AppRouter.lawyerChatHandoffRoute,
+                      arguments: {
+                        'clientName': client.name,
+                        'whatsappNumber': client.whatsappNumber,
+                      },
+                    ),
             ),
           ],
         ),
-      ),
-      bottomNavigationBar: Container(
-        height: MediaQuery.of(context).padding.bottom,
-        color: AppColors.white,
+        body: SingleChildScrollView(
+          padding: const EdgeInsets.all(24),
+          child: Column(
+            children: [
+              if (clientAsync?.isLoading ?? false) ...[
+                const LoadingSkeleton(height: 4, borderRadius: 2),
+                const SizedBox(height: 16),
+              ],
+              _buildProfileHeader(client),
+              const SizedBox(height: 24),
+              _buildInfoCard(client),
+              const SizedBox(height: 24),
+              procedures.when(
+                data: (items) => _buildProcedureHistory(context, items),
+                loading: () =>
+                    const LoadingSkeleton(height: 180, borderRadius: 16),
+                error: (error, _) => Text(
+                  error.toString(),
+                  style: AppTextStyles.body.copyWith(color: AppColors.error),
+                ),
+              ),
+            ],
+          ),
+        ),
+        bottomNavigationBar: Container(
+          height: MediaQuery.of(context).padding.bottom,
+          color: AppColors.white,
+        ),
       ),
     );
   }
