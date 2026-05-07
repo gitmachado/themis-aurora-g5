@@ -10,6 +10,7 @@
     "test:graph": "tsx src/test-graph.ts",
     "test:e2e-lead": "tsx src/tests/e2e-lead.ts",
     "test:e2e-rag": "tsx src/tests/e2e-status-rag-handoff.ts",
+    "test:stress-injection": "tsx src/tests/prompt-injection-stress.ts",
     "index:pdf": "tsx src/rag/indexer.ts",
     "build": "tsc",
     "start": "node dist/index.js",
