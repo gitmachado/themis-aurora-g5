@@ -12,7 +12,6 @@ import 'package:mobile/features/auth/presentation/providers/auth_providers.dart'
 import 'package:mobile/features/auth/presentation/screens/login_screen.dart';
 import 'package:mobile/shared/errors/failures.dart';
 import 'package:mobile/shared/network/api_client.dart';
-import 'package:mobile/shared/services/push_notification_service.dart';
 
 import '../../../helpers/fakes.dart';
 
