@@ -23,6 +23,6 @@ final class LawyerClientRemoteDataSource {
   }
 
   Future<void> deleteClient(String id) async {
-    await _apiClient.delete('/clients/$id');
+    await _apiClient.deleteVoid('/clients/$id');
   }
 }
