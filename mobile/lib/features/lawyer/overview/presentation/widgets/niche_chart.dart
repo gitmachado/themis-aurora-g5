@@ -5,6 +5,7 @@ import '../../../../../../features/procedures/domain/entities/legal_process.dart
 import '../../../../../../shared/constants/app_colors.dart';
 import '../../../../../../shared/constants/app_text_styles.dart';
 import '../../../../../../shared/widgets/cards/app_card.dart';
+import '../../../../procedures/presentation/procedure_display.dart';
 
 class NicheChart extends StatelessWidget {
   final List<LegalProcess> procedures;
@@ -70,9 +71,7 @@ class NicheChart extends StatelessWidget {
   List<_ChartItem> _buildData() {
     final counts = <String, int>{};
     for (final procedure in procedures) {
-      final label = procedure.caseType?.trim().isNotEmpty == true
-          ? procedure.caseType!.trim()
-          : 'Nao informado';
+      final label = procedure.caseTypeLabel;
       counts[label] = (counts[label] ?? 0) + 1;
     }
 
