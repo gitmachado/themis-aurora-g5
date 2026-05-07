@@ -41,7 +41,8 @@ test('createFromWhatsapp preserves caseDescription and accepts legacy descriptio
     {} as any,
     {} as any,
     {} as any,
-    mockWhatsApp
+    mockWhatsApp,
+    { create: async () => undefined } as any
   );
 
   await service.createFromWhatsapp({
@@ -80,7 +81,8 @@ test('convertToClient creates local password and sends temporary password', asyn
       },
     } as any,
     { create: async () => calls.push('create-process') } as any,
-    { sendText: async () => { calls.push('wa-send'); return 'fake-id'; } } as any
+    { sendText: async () => { calls.push('wa-send'); return 'fake-id'; } } as any,
+    { create: async () => calls.push('save-msg') } as any
   );
 
   const result = await service.convertToClient({
@@ -95,6 +97,7 @@ test('convertToClient creates local password and sends temporary password', asyn
   assert.ok(notificationBody?.includes('TEMP1234'));
   assert.ok(calls.includes('create-process'));
   assert.ok(calls.includes('wa-send'));
+  assert.ok(calls.includes('save-msg'));
 });
 
 test('convertToClient stores null cpf when lead cpf is blank', async () => {
@@ -117,7 +120,8 @@ test('convertToClient stores null cpf when lead cpf is blank', async () => {
     { generateTempPassword: () => 'TEMP1234' } as any,
     { sendPush: async () => undefined } as any,
     { create: async () => undefined } as any,
-    mockWhatsApp
+    mockWhatsApp,
+    { create: async () => undefined } as any
   );
 
   await service.convertToClient({

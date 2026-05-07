@@ -9,6 +9,7 @@ import {
   NotificationRepository,
   LegalProcessRepository,
   TimelineEventRepository,
+  MessageRepository,
 } from '@repositories';
 import { authMiddleware } from '../../middlewares/implementations/authMiddleware';
 import { roleMiddleware } from '../../middlewares/implementations/roleMiddleware';
@@ -33,13 +34,15 @@ const legalProcessService = new LegalProcessService(
   notificationService
 );
 const whatsAppService = new WhatsAppService();
+const messageRepository = new MessageRepository();
 const leadService = new LeadService(
   leadRepository,
   userRepository,
   authService,
   notificationService,
   legalProcessService,
-  whatsAppService
+  whatsAppService,
+  messageRepository
 );
 
 const controller = new LeadController(leadService);

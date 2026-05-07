@@ -1,6 +1,7 @@
 import { ILeadService } from '../interfaces/lead.service';
 import { ILeadRepository } from '../../repositories/interfaces/lead.repository';
 import { IUserRepository } from '../../repositories/interfaces/user.repository';
+import { IMessageRepository } from '../../repositories/interfaces/message.repository';
 import { IAuthService } from '../interfaces/auth.service';
 import { INotificationService } from '../interfaces/notification.service';
 import { ILegalProcessService } from '../interfaces/legal-process.service';
@@ -20,7 +21,8 @@ export class LeadService implements ILeadService {
     private readonly authService: IAuthService,
     private readonly notificationService: INotificationService,
     private readonly legalProcessService: ILegalProcessService,
-    private readonly whatsAppService: IWhatsAppService
+    private readonly whatsAppService: IWhatsAppService,
+    private readonly messageRepository: IMessageRepository
   ) {}
 
   async createFromWhatsapp(dto: CreateLeadDTO): Promise<Lead> {
@@ -169,8 +171,18 @@ export class LeadService implements ILeadService {
       try {
         await this.whatsAppService.sendText(lead.whatsappNumber, welcomeMessage);
         console.log(`[LeadService] Credenciais enviadas via WhatsApp para ${lead.whatsappNumber}`);
+        
+        // Salva a mensagem de boas-vindas no histórico para aparecer no app
+        await this.messageRepository.create({
+          whatsappNumber: lead.whatsappNumber,
+          content: welcomeMessage,
+          sender: 'BOT',
+          leadId: lead.id,
+          userId: user.id,
+          whatsappMessageId: null,
+        });
       } catch (waError) {
-        console.error('[LeadService] Erro ao enviar credenciais via WhatsApp:', waError);
+        console.error('[LeadService] Erro ao enviar/salvar credenciais:', waError);
       }
 
       // Push como fallback (caso já tenha o app instalado)
