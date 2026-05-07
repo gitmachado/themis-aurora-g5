@@ -66,11 +66,13 @@ export class LeadService implements ILeadService {
       throw new NotFoundError('Lead não encontrado');
     }
 
-    const normalizedData: Partial<Lead> = { ...data };
-    if (data.description && !data.caseDescription) {
-      normalizedData.caseDescription = data.description;
+    // Cliente legado (bot) ainda envia `description`; normalizamos para
+    // `caseDescription` e removemos a chave legada antes de persistir.
+    const { description: legacyDescription, ...rest } = data;
+    const normalizedData: Partial<Lead> = { ...rest };
+    if (legacyDescription && !data.caseDescription) {
+      normalizedData.caseDescription = legacyDescription;
     }
-    delete (normalizedData as any).description;
 
     const updatedLead = await this.leadRepository.update(id, normalizedData);
     
@@ -259,7 +261,7 @@ export class LeadService implements ILeadService {
       });
 
       if (!response.ok) {
-        const error = await response.json() as any;
+        const error = (await response.json()) as { error?: string };
         throw new Error(error.error || 'Falha ao retomar atendimento da IA');
       }
 
@@ -288,7 +290,7 @@ export class LeadService implements ILeadService {
       });
 
       if (!response.ok) {
-        const error = await response.json() as any;
+        const error = (await response.json()) as { error?: string };
         throw new Error(error.error || 'Falha ao iniciar handoff para humano');
       }
 
