@@ -37,13 +37,13 @@ async function bootstrap() {
       try {
         // Executa o indexador via CLI
         execSync(`tsx src/rag/indexer.ts "${fullPath}"`, { stdio: 'inherit' });
-      } catch (err) {
+      } catch (err: any) {
         console.error(`[AI Bootstrap] Erro ao indexar ${pdf}:`, err.message);
       }
     }
 
     console.log('[AI Bootstrap] ✅ Indexação concluída com sucesso!');
-  } catch (err) {
+  } catch (err: any) {
     console.warn('[AI Bootstrap] Erro ao verificar banco (tabela pode não existir ainda):', err.message);
   } finally {
     await client.end();
