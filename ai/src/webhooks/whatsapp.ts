@@ -8,6 +8,8 @@ import {
   containsPromptInjection,
   DEFAULT_GUARDRAIL_RESPONSE,
 } from "../utils/guardrails.js";
+import { downloadWhatsAppMedia } from "../utils/media-downloader.js";
+import { transcribeAudio } from "../utils/transcriber.js";
 
 export const whatsappRouter = Router();
 
@@ -44,16 +46,33 @@ whatsappRouter.post("/webhook", async (req, res) => {
 
     console.log(`[Webhook] Processando mensagem de ${whatsappNumber}, tipo: ${type}`);
 
-    // Ignora mensagens não-texto (áudio, imagem, vídeo, etc.)
-    if (type !== "text" || !message.text?.body) {
-      console.log(
-        `[Webhook] Mensagem não-texto ignorada (${type}) de ${whatsappNumber}`
+    // Resolve o corpo de texto — áudio é transcrito, demais não-texto são ignorados
+    let textBody: string;
+    if (type === "audio" && message.audio?.id) {
+      console.log(`[Webhook] Áudio recebido de ${whatsappNumber}, transcrevendo...`);
+      try {
+        const audioBuffer = await downloadWhatsAppMedia(message.audio.id);
+        textBody = await transcribeAudio(audioBuffer, message.audio.mime_type ?? "audio/ogg");
+        console.log(`[Webhook] Transcrição concluída para ${whatsappNumber}: "${textBody.substring(0, 60)}..."`);
+      } catch (transcriptionErr) {
+        console.error("[Webhook] Falha ao transcrever áudio:", transcriptionErr);
+        await sendWhatsAppMessage(
+          whatsappNumber,
+          "Não consegui entender o áudio. 😔 Poderia digitar sua mensagem?"
+        );
+        return;
+      }
+    } else if (type === "text" && message.text?.body) {
+      textBody = message.text.body;
+    } else {
+      console.log(`[Webhook] Tipo de mensagem não suportado (${type}) de ${whatsappNumber}`);
+      await sendWhatsAppMessage(
+        whatsappNumber,
+        "Por enquanto só processo mensagens de texto e áudio. Por favor, envie sua dúvida escrita ou em áudio. 😊"
       );
-      await sendWhatsAppMessage(whatsappNumber, "Por enquanto só processo mensagens de texto. Por favor, envie sua dúvida escrita. 😊");
       return;
     }
 
-    const textBody: string = message.text.body;
     const messageId: string = message.id;
 
     // Sincroniza mensagem do cliente com o backend imediatamente
