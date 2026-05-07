@@ -8,6 +8,7 @@ import '../../../../shared/constants/app_colors.dart';
 import '../../../../shared/constants/app_text_styles.dart';
 import '../../../../shared/constants/app_assets.dart';
 import '../../../../shared/widgets/buttons/primary_button.dart';
+import '../../../../shared/widgets/buttons/whatsapp_button.dart';
 import '../../domain/entities/auth_session.dart';
 import '../providers/auth_providers.dart';
 
@@ -253,13 +254,8 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
           ],
         ),
         const SizedBox(height: 24),
-        PrimaryButton(
+        WhatsAppButton(
           label: 'Receber acesso via Whatsapp',
-          icon: Icons.chat_bubble,
-          iconColor: const Color(0xFF25D366),
-          backgroundColor: AppColors.surface2,
-          foregroundColor: AppColors.textPrimary,
-          fontSize: 14,
           onPressed: _launchWhatsapp,
         ),
       ],
