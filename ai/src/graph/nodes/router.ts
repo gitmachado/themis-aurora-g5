@@ -29,8 +29,8 @@ export async function routerNode(
     temperature: 0.1,
   }).bindTools(tools);
 
-  // 3. Busca de Conhecimento (RAG) — via singleton
-  const knowledgeContext = await searchKnowledge(lastMessage);
+  // 3. Busca de Conhecimento (RAG) — REMOVIDO (IA agora usa a tool pesquisar_conhecimento)
+  const knowledgeContext = "Use a tool 'pesquisar_conhecimento' se precisar de informações do escritório.";
 
   // 4. Dados de Processos (se for cliente)
   let processContext = "Nenhum processo encontrado.";
@@ -53,7 +53,6 @@ export async function routerNode(
     .replace("{triageDescription}", triage.caseDescription || "FALTANDO")
     .replace("{triageUrgency}", triage.urgency || "FALTANDO")
     .replace("{triageAvailability}", triage.contactAvailability || "FALTANDO")
-    .replace("{knowledgeContext}", knowledgeContext)
     .replace("{processContext}", processContext);
 
   // 6. Histórico recente (janela deslizante)

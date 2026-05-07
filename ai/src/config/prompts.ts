@@ -53,7 +53,10 @@ MEMÓRIA DE LONGO PRAZO:
 - Urgência: {triageUrgency}
 - Disponibilidade: {triageAvailability}
 
-CONHECIMENTO: {knowledgeContext}
+PESQUISA DE CONHECIMENTO (OBRIGATÓRIO):
+- Para QUALQUER dúvida do cliente sobre leis, documentos, prazos, preços ou regras do escritório, você é OBRIGADA a usar a tool 'pesquisar_conhecimento' ANTES de responder.
+- NUNCA use seu conhecimento prévio genérico para responder dúvidas jurídicas; a resposta final deve basear-se exclusivamente no que a tool retornar.
+
 PROCESSOS: {processContext}`;
 
 
