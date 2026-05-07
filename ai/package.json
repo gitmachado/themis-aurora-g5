@@ -5,14 +5,16 @@
   "main": "index.js",
   "type": "module",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "test": "npm run test:e2e-lead",
+    "test:lite": "tsx src/test-lite.ts",
+    "test:graph": "tsx src/test-graph.ts",
+    "test:e2e-lead": "tsx src/tests/e2e-lead.ts",
+    "test:e2e-rag": "tsx src/tests/e2e-status-rag-handoff.ts",
+    "test:stress-injection": "tsx src/tests/prompt-injection-stress.ts",
+    "index:pdf": "tsx src/rag/indexer.ts",
     "build": "tsc",
     "start": "node dist/index.js",
-    "dev": "tsx --watch src/index.ts",
-    "test:graph": "tsx src/test-graph.ts",
-    "index:pdf": "tsx src/rag/indexer.ts",
-    "test:e2e-lead": "tsx src/tests/e2e-lead.ts",
-    "test:e2e-rag": "tsx src/tests/e2e-status-rag-handoff.ts"
+    "dev": "tsx --watch src/index.ts"
   },
   "keywords": [],
   "author": "",
@@ -28,7 +30,6 @@
   "dependencies": {
     "@langchain/community": "0.3.30",
     "@langchain/core": "0.3.80",
-    "@langchain/google-genai": "0.2.18",
     "@langchain/langgraph": "0.2.45",
     "@langchain/langgraph-checkpoint-postgres": "0.0.1",
     "@langchain/openai": "^0.3.17",

@@ -20,3 +20,14 @@ export const updateProcessStatusSchema = z.object({
     reason: z.string().optional(),
   }),
 });
+
+export const createProcessSchema = z.object({
+  body: z.object({
+    clientId: z.string().uuid(),
+    title: z.string().min(3),
+    description: z.string().optional(),
+    caseType: z.enum(['Labor', 'Civil', 'Family', 'Criminal', 'SocialSecurity']),
+    processNumber: z.string().optional(),
+  }),
+});
+

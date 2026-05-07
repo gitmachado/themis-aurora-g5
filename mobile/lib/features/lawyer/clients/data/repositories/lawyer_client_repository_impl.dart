@@ -20,4 +20,9 @@ final class LawyerClientRepositoryImpl implements LawyerClientRepository {
   Future<Either<Failure, LawyerClient>> getById(String id) {
     return guardRepository(() => _remoteDataSource.getById(id));
   }
+
+  @override
+  Future<Either<Failure, void>> deleteClient(String id) {
+    return guardRepository(() => _remoteDataSource.deleteClient(id));
+  }
 }

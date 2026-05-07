@@ -251,19 +251,46 @@ class _LawyerLeadTriageViewState extends ConsumerState<LawyerLeadTriageView>
               );
             },
             onAccept: () => _convertLead(lead),
-            onArchive: () async {
-              await ref
-                  .read(leadActionsProvider)
-                  .discard(lead.id, reason: 'Arquivado no app mobile');
-              if (!context.mounted) return;
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(content: Text('Lead ${lead.displayName} arquivado.')),
-              );
-            },
+            onArchive: () => _archiveLead(lead),
           );
         },
       ),
     );
+  }
+
+  Future<void> _archiveLead(Lead lead) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) => ThemisAlertDialog(
+        title: 'Arquivar Lead?',
+        message:
+            'Deseja realmente arquivar ${lead.displayName}? Ele não aparecerá mais na lista de pendências.',
+        confirmLabel: 'Arquivar',
+        isDestructive: true,
+        onCancel: () => Navigator.pop(dialogContext, false),
+        onConfirm: () => Navigator.pop(dialogContext, true),
+      ),
+    );
+
+    if (confirmed != true || !mounted) return;
+
+    try {
+      await ref
+          .read(leadActionsProvider)
+          .discard(lead.id, reason: 'Arquivado no app mobile');
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Lead ${lead.displayName} arquivado.')),
+      );
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Erro ao arquivar: $e'),
+          backgroundColor: AppColors.error,
+        ),
+      );
+    }
   }
 
   Future<void> _convertLead(Lead lead) async {
@@ -272,7 +299,7 @@ class _LawyerLeadTriageViewState extends ConsumerState<LawyerLeadTriageView>
       builder: (dialogContext) => ThemisAlertDialog(
         title: 'Converter Lead',
         message: 'Deseja converter ${lead.displayName} em cliente?',
-        confirmLabel: 'Sim, Converter Agora',
+        confirmLabel: 'Converter',
         onCancel: () => Navigator.pop(dialogContext, false),
         onConfirm: () => Navigator.pop(dialogContext, true),
       ),

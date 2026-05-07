@@ -17,6 +17,7 @@ export class LeadRepository implements ILeadRepository {
     status,
     converted_user_id as "convertedUserId",
     assigned_lawyer_id as "assignedLawyerId",
+    (SELECT name FROM users WHERE id = leads.assigned_lawyer_id) as "assignedLawyerName",
     lawyer_notes as "lawyerNotes",
     discard_reason as "discardReason",
     is_ai_paused as "isAIPaused",
