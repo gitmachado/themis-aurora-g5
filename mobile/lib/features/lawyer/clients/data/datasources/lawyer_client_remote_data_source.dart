@@ -21,4 +21,8 @@ final class LawyerClientRemoteDataSource {
     final json = await _apiClient.getJson('/clients/$id');
     return LawyerClientModel.fromJson(json);
   }
+
+  Future<void> deleteClient(String id) async {
+    await _apiClient.delete('/clients/$id');
+  }
 }

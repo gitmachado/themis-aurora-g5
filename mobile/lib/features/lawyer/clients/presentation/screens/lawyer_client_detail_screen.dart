@@ -44,6 +44,11 @@ class LawyerClientDetailScreen extends ConsumerWidget {
         title: 'Ficha do Cliente',
         showBackButton: true,
         actions: [
+          if (clientId != null && clientId!.isNotEmpty)
+            IconButton(
+              icon: const Icon(Icons.delete_outline, color: AppColors.error),
+              onPressed: () => _showDeleteConfirmation(context, ref, clientId!),
+            ),
           IconButton(
             icon: const Icon(Icons.chat_outlined),
             onPressed: client.whatsappNumber.isEmpty
@@ -230,5 +235,58 @@ class LawyerClientDetailScreen extends ConsumerWidget {
         ),
       ),
     );
+  }
+
+  void _showDeleteConfirmation(BuildContext context, WidgetRef ref, String id) {
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Excluir Cliente?'),
+        content: const Text(
+          'Esta ação é irreversível. O cliente e todo seu histórico (incluindo processos, documentos, mensagens e a memória da IA) serão permanentemente excluídos do sistema.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: const Text('Cancelar', style: TextStyle(color: AppColors.ink)),
+          ),
+          TextButton(
+            onPressed: () {
+              Navigator.pop(ctx);
+              _deleteClient(context, ref, id);
+            },
+            child: const Text('Excluir', style: TextStyle(color: AppColors.error, fontWeight: FontWeight.bold)),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Future<void> _deleteClient(BuildContext context, WidgetRef ref, String id) async {
+    final useCase = ref.read(deleteLawyerClientUseCaseProvider);
+    final result = await useCase(id);
+
+    if (context.mounted) {
+      result.fold(
+        (failure) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Erro ao excluir: ${failure.message}'),
+              backgroundColor: AppColors.error,
+            ),
+          );
+        },
+        (_) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Cliente excluído com sucesso.'),
+              backgroundColor: AppColors.primary,
+            ),
+          );
+          ref.read(myLawyerClientsProvider.notifier).refresh();
+          Navigator.of(context).pop();
+        },
+      );
+    }
   }
 }
