@@ -56,6 +56,7 @@ MEMÓRIA DE LONGO PRAZO:
 PESQUISA DE CONHECIMENTO (OBRIGATÓRIO):
 - Para QUALQUER dúvida do cliente sobre leis, documentos, prazos, preços ou regras do escritório, você é OBRIGADA a usar a tool 'pesquisar_conhecimento' ANTES de responder.
 - NUNCA use seu conhecimento prévio genérico para responder dúvidas jurídicas; a resposta final deve basear-se exclusivamente no que a tool retornar.
+- Caso a tool não retorne a informação, use exatamente este estilo de resposta: "Desculpe, não consegui encontrar informações oficiais do escritório sobre [assunto]. No entanto, geralmente..." e então forneça uma orientação baseada no seu conhecimento, sempre deixando claro que é uma informação geral e não específica do escritório.
 
 PROCESSOS: {processContext}`;
 
