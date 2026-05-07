@@ -79,17 +79,15 @@ class _FakeAuthRepository implements AuthRepository {
   Future<Either<Failure, Unit>> logout() async => const Right(unit);
 }
 
-Widget _buildSubject({
-  required _FakeAuthRepository repo,
-  FakeApiClient? api,
-}) {
+Widget _buildSubject({required _FakeAuthRepository repo, FakeApiClient? api}) {
   final apiClient = api ?? FakeApiClient();
   return ProviderScope(
     overrides: [
       apiClientProvider.overrideWithValue(apiClient),
       authRepositoryProvider.overrideWithValue(repo),
-      pushNotificationServiceProvider
-          .overrideWithValue(FakePushNotificationService(apiClient)),
+      pushNotificationServiceProvider.overrideWithValue(
+        FakePushNotificationService(apiClient),
+      ),
     ],
     child: MaterialApp(
       home: const LoginScreen(),
@@ -111,17 +109,12 @@ void main() {
   });
 
   group('LoginScreen', () {
-    testWidgets('renderiza titulo, campos e botoes principais', (
-      tester,
-    ) async {
+    testWidgets('renderiza titulo, campos e botoes principais', (tester) async {
       await tester.pumpWidget(_buildSubject(repo: _FakeAuthRepository()));
       await tester.pump();
 
       expect(find.text('Bem-vindo'), findsOneWidget);
-      expect(
-        find.text('Entre para acompanhar seus processos'),
-        findsOneWidget,
-      );
+      expect(find.text('Entre para acompanhar seus processos'), findsOneWidget);
       expect(find.text('Email'), findsOneWidget);
       expect(find.text('Senha'), findsOneWidget);
       expect(find.text('Entrar'), findsOneWidget);
@@ -196,15 +189,14 @@ void main() {
       expect(find.textContaining('Credenciais invalidas'), findsOneWidget);
     });
 
-    testWidgets(
-      'expoe links para Politica de Privacidade e Termos de Uso',
-      (tester) async {
-        await tester.pumpWidget(_buildSubject(repo: _FakeAuthRepository()));
-        await tester.pump();
+    testWidgets('expoe links para Politica de Privacidade e Termos de Uso', (
+      tester,
+    ) async {
+      await tester.pumpWidget(_buildSubject(repo: _FakeAuthRepository()));
+      await tester.pump();
 
-        expect(find.text('Política de Privacidade'), findsOneWidget);
-        expect(find.text('Termos de Uso'), findsOneWidget);
-      },
-    );
+      expect(find.text('Política de Privacidade'), findsOneWidget);
+      expect(find.text('Termos de Uso'), findsOneWidget);
+    });
   });
 }

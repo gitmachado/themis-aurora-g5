@@ -90,24 +90,23 @@ void main() {
       expect(find.text('Olá! Como posso ajudar?'), findsOneWidget);
     });
 
-    testWidgets(
-      'lida com whatsappNumber vazio sem disparar fetch',
-      (tester) async {
-        await tester.pumpWidget(
-          _wrap(
-            messages: const [],
+    testWidgets('lida com whatsappNumber vazio sem disparar fetch', (
+      tester,
+    ) async {
+      await tester.pumpWidget(
+        _wrap(
+          messages: const [],
+          whatsappNumber: '',
+          child: const LawyerChatHandoffScreen(
+            clientName: 'João Cliente',
             whatsappNumber: '',
-            child: const LawyerChatHandoffScreen(
-              clientName: 'João Cliente',
-              whatsappNumber: '',
-            ),
           ),
-        );
-        await tester.pumpAndSettle();
+        ),
+      );
+      await tester.pumpAndSettle();
 
-        // Renderiza o cabecalho mesmo sem numero (nao trava).
-        expect(find.text('João Cliente'), findsWidgets);
-      },
-    );
+      // Renderiza o cabecalho mesmo sem numero (nao trava).
+      expect(find.text('João Cliente'), findsWidgets);
+    });
   });
 }

@@ -71,10 +71,7 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      expect(
-        find.textContaining('Preencha os dados'),
-        findsOneWidget,
-      );
+      expect(find.textContaining('Preencha os dados'), findsOneWidget);
     });
 
     testWidgets(
@@ -112,30 +109,29 @@ void main() {
       },
     );
 
-    testWidgets(
-      'mostra LinearProgressIndicator enquanto clientes carregam',
-      (tester) async {
-        final completer = Completer<List<LawyerClient>>();
+    testWidgets('mostra LinearProgressIndicator enquanto clientes carregam', (
+      tester,
+    ) async {
+      final completer = Completer<List<LawyerClient>>();
 
-        await tester.pumpWidget(
-          _wrap(
-            const LawyerCreateProcedureScreen(),
-            overrides: [
-              myLawyerClientsProvider.overrideWith(
-                () => _PendingLawyerClientsNotifier(completer),
-              ),
-            ],
-          ),
-        );
-        await tester.pump();
+      await tester.pumpWidget(
+        _wrap(
+          const LawyerCreateProcedureScreen(),
+          overrides: [
+            myLawyerClientsProvider.overrideWith(
+              () => _PendingLawyerClientsNotifier(completer),
+            ),
+          ],
+        ),
+      );
+      await tester.pump();
 
-        expect(find.byType(LinearProgressIndicator), findsOneWidget);
+      expect(find.byType(LinearProgressIndicator), findsOneWidget);
 
-        // Resolve para evitar pendingFuture nos invariants.
-        completer.complete(const []);
-        await tester.pumpAndSettle();
-      },
-    );
+      // Resolve para evitar pendingFuture nos invariants.
+      completer.complete(const []);
+      await tester.pumpAndSettle();
+    });
 
     testWidgets('exibe campo de Titulo do Processo', (tester) async {
       await tester.pumpWidget(
