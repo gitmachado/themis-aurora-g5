@@ -26,7 +26,9 @@ export class DocumentService implements IDocumentService {
       throw new ValidationError(`Arquivo excede o limite de ${MAX_FILE_SIZE_BYTES / (1024 * 1024)}MB`);
     }
 
-    if (!ALLOWED_MIME_TYPES.includes(mimeType as any)) {
+    // ALLOWED_MIME_TYPES e um tuple readonly; o widening do mimeType
+    // recebido em tempo de execucao precisa de uma comparacao alargada.
+    if (!(ALLOWED_MIME_TYPES as readonly string[]).includes(mimeType)) {
       throw new ValidationError(`Formato de arquivo não permitido. Formatos aceitos: ${ALLOWED_MIME_TYPES.join(', ')}`);
     }
 

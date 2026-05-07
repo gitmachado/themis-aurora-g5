@@ -33,7 +33,10 @@ export class WhatsAppService implements IWhatsAppService {
         }),
       });
 
-      const data = await response.json() as any;
+      const data = (await response.json()) as {
+        error?: { message?: string };
+        messages?: Array<{ id?: string }>;
+      };
 
       if (!response.ok) {
         console.error(`[WhatsApp] Erro 401/Auth no envio para ${to}. Token inicia com: ${this.waAccessToken.substring(0, 7)}... ID: ${this.waPhoneNumberId}`);
