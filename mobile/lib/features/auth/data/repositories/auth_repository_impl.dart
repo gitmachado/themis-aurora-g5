@@ -1,9 +1,9 @@
+import 'package:flutter/foundation.dart';
 import 'package:fpdart/fpdart.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:mobile/shared/errors/failures.dart';
 import 'package:mobile/shared/errors/repository_guard.dart';
 
-import '../../../../shared/constants/app_constants.dart';
 import '../../../../shared/network/token_storage.dart';
 import '../../domain/entities/account.dart';
 import '../../domain/entities/auth_session.dart';
@@ -17,8 +17,22 @@ final class AuthRepositoryImpl implements AuthRepository {
   AuthRepositoryImpl({
     required AuthRemoteDataSource remoteDataSource,
     required TokenStorage tokenStorage,
-  }) : _remoteDataSource = remoteDataSource,
-       _tokenStorage = tokenStorage;
+  })  : _remoteDataSource = remoteDataSource,
+        _tokenStorage = tokenStorage;
+
+  bool _initialized = false;
+
+  Future<void> _ensureInitialized() async {
+    if (!_initialized) {
+      try {
+        await GoogleSignIn.instance.initialize();
+        _initialized = true;
+      } catch (e) {
+        // Se já estiver inicializado, o plugin pode lançar erro
+        _initialized = true;
+      }
+    }
+  }
 
   @override
   Future<Either<Failure, AuthSession>> login({
@@ -41,30 +55,14 @@ final class AuthRepositoryImpl implements AuthRepository {
     });
   }
 
-  bool _googleSignInInitialized = false;
-
-  Future<void> _ensureGoogleSignInInitialized() async {
-    if (!_googleSignInInitialized) {
-      try {
-        await GoogleSignIn.instance.initialize(
-          serverClientId: AppConstants.googleClientId,
-        );
-        _googleSignInInitialized = true;
-      } catch (e) {
-        // Se já estiver inicializado, o plugin pode lançar erro em algumas versões
-        _googleSignInInitialized = true;
-      }
-    }
-  }
-
   @override
   Future<Either<Failure, AuthSession>> signInWithGoogle() {
     return guardRepository(() async {
-      await _ensureGoogleSignInInitialized();
-      
       try {
-        final googleUser = await GoogleSignIn.instance.authenticate();
+        await _ensureInitialized();
         
+        // No google_sign_in 7.x, o método correto é authenticate()
+        final googleUser = await GoogleSignIn.instance.authenticate();
         final googleAuth = googleUser.authentication;
         final idToken = googleAuth.idToken;
 
@@ -82,6 +80,7 @@ final class AuthRepositoryImpl implements AuthRepository {
           account: account,
         );
       } catch (e) {
+        if (kDebugMode) print('[GoogleSignIn Error]: $e');
         if (e.toString().contains('canceled')) {
           throw const ServerFailure('Login cancelado pelo usuário');
         }
@@ -94,7 +93,7 @@ final class AuthRepositoryImpl implements AuthRepository {
   Future<Either<Failure, AuthSession?>> restoreSession() {
     return guardRepository(() async {
       final token = await _tokenStorage.readToken();
-      if (token == null || token.isEmpty) return null;
+      if (token == null) return null;
 
       final account = await _remoteDataSource.getAccount();
       return AuthSession(
@@ -108,18 +107,15 @@ final class AuthRepositoryImpl implements AuthRepository {
 
   @override
   Future<Either<Failure, Account>> getAccount() {
-    return guardRepository(_remoteDataSource.getAccount);
+    return guardRepository(() => _remoteDataSource.getAccount());
   }
 
   @override
   Future<Either<Failure, Account>> updateNotificationPreferences(
     Map<String, bool> notificationPreferences,
   ) {
-    return guardRepository(
-      () => _remoteDataSource.updateNotificationPreferences(
-        notificationPreferences,
-      ),
-    );
+    return guardRepository(() =>
+        _remoteDataSource.updateNotificationPreferences(notificationPreferences));
   }
 
   @override
@@ -127,12 +123,10 @@ final class AuthRepositoryImpl implements AuthRepository {
     required String filePath,
     required String fileName,
   }) {
-    return guardRepository(
-      () => _remoteDataSource.uploadAvatar(
-        filePath: filePath,
-        fileName: fileName,
-      ),
-    );
+    return guardRepository(() => _remoteDataSource.uploadAvatar(
+          filePath: filePath,
+          fileName: fileName,
+        ));
   }
 
   @override
@@ -140,20 +134,20 @@ final class AuthRepositoryImpl implements AuthRepository {
     required String newPassword,
     String? currentPassword,
   }) {
-    return guardRepository(
-      () => _remoteDataSource.changePassword(
-        newPassword: newPassword,
-        currentPassword: currentPassword,
-      ),
-    );
+    return guardRepository(() => _remoteDataSource.changePassword(
+          newPassword: newPassword,
+          currentPassword: currentPassword,
+        ));
   }
 
   @override
   Future<Either<Failure, Unit>> logout() {
-    return guardRepositoryUnit(() async {
+    return guardRepository(() async {
       await _tokenStorage.clearToken();
-      await _ensureGoogleSignInInitialized();
-      await GoogleSignIn.instance.signOut();
+      try {
+        await GoogleSignIn.instance.signOut();
+      } catch (_) {}
+      return unit;
     });
   }
 }

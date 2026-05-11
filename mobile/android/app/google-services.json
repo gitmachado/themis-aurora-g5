@@ -2,7 +2,7 @@
   "project_info": {
     "project_number": "726117555634",
     "project_id": "themis-1a8b1",
-    "storage_bucket": "themis-1a8b1.firebasestorage.app"
+    "storage_bucket": "themis-1a8b1.appspot.com"
   },
   "client": [
     {
@@ -14,7 +14,7 @@
       },
       "oauth_client": [
         {
-          "client_id": "726117555634-v9p8rcatfaghfnftuar0mpc3qkr1qc2i.apps.googleusercontent.com",
+          "client_id": "726117555634-alkikmg6f84hlkl9lkg008jqf1v24d9j.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {
             "package_name": "com.themis.mobile",
@@ -22,7 +22,7 @@
           }
         },
         {
-          "client_id": "726117555634-alkikmg6f84hlkl9lkg008jqf1v24d9j.apps.googleusercontent.com",
+          "client_id": "726117555634-v9p8rcatfaghfnftuar0mpc3qkr1qc2i.apps.googleusercontent.com",
           "client_type": 3
         }
       ],
@@ -33,7 +33,15 @@
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": []
+          "other_platform_oauth_client": [
+            {
+              "client_id": "726117555634-v9p8rcatfaghfnftuar0mpc3qkr1qc2i.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        },
+        "ads_service": {
+          "status": 1
         }
       }
     }
