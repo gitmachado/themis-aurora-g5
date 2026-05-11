@@ -17,8 +17,8 @@ final class AuthRepositoryImpl implements AuthRepository {
   AuthRepositoryImpl({
     required AuthRemoteDataSource remoteDataSource,
     required TokenStorage tokenStorage,
-  })  : _remoteDataSource = remoteDataSource,
-        _tokenStorage = tokenStorage;
+  }) : _remoteDataSource = remoteDataSource,
+       _tokenStorage = tokenStorage;
 
   bool _initialized = false;
 
@@ -60,7 +60,7 @@ final class AuthRepositoryImpl implements AuthRepository {
     return guardRepository(() async {
       try {
         await _ensureInitialized();
-        
+
         // No google_sign_in 7.x, o método correto é authenticate()
         final googleUser = await GoogleSignIn.instance.authenticate();
         final googleAuth = googleUser.authentication;
@@ -114,8 +114,11 @@ final class AuthRepositoryImpl implements AuthRepository {
   Future<Either<Failure, Account>> updateNotificationPreferences(
     Map<String, bool> notificationPreferences,
   ) {
-    return guardRepository(() =>
-        _remoteDataSource.updateNotificationPreferences(notificationPreferences));
+    return guardRepository(
+      () => _remoteDataSource.updateNotificationPreferences(
+        notificationPreferences,
+      ),
+    );
   }
 
   @override
@@ -123,10 +126,12 @@ final class AuthRepositoryImpl implements AuthRepository {
     required String filePath,
     required String fileName,
   }) {
-    return guardRepository(() => _remoteDataSource.uploadAvatar(
-          filePath: filePath,
-          fileName: fileName,
-        ));
+    return guardRepository(
+      () => _remoteDataSource.uploadAvatar(
+        filePath: filePath,
+        fileName: fileName,
+      ),
+    );
   }
 
   @override
@@ -134,10 +139,12 @@ final class AuthRepositoryImpl implements AuthRepository {
     required String newPassword,
     String? currentPassword,
   }) {
-    return guardRepository(() => _remoteDataSource.changePassword(
-          newPassword: newPassword,
-          currentPassword: currentPassword,
-        ));
+    return guardRepository(
+      () => _remoteDataSource.changePassword(
+        newPassword: newPassword,
+        currentPassword: currentPassword,
+      ),
+    );
   }
 
   @override

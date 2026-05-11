@@ -3,7 +3,8 @@ final class AppConstants {
 
   static const String apiBaseUrl = String.fromEnvironment(
     'THEMIS_API_BASE_URL',
-    defaultValue: 'https://embassy-stolen-loc-construction.trycloudflare.com/api/v1',
+    defaultValue:
+        'https://embassy-stolen-loc-construction.trycloudflare.com/api/v1',
   );
 
   static const String googleClientId =
