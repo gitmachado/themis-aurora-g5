@@ -6,9 +6,9 @@ import '../domain/entities/legal_process.dart';
 extension LegalProcessDisplay on LegalProcess {
   String get displayTitle => title;
 
-  String get displaySubtitle {
+  String? get displaySubtitle {
     final number = processNumber;
-    if (number == null || number.isEmpty) return 'Tramite $id';
+    if (number == null || number.isEmpty) return null;
     return 'Tramite: $number';
   }
 

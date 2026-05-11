@@ -1,6 +1,6 @@
 import { tool } from "@langchain/core/tools";
 import { z } from "zod";
-import { notifyLawyer, startHandoff } from "../utils/backend-client.js";
+import { notifyLawyer, getLeadByPhone, getUserByPhone } from "../utils/backend-client.js";
 
 /**
  * Tool para acionar um advogado humano.
@@ -10,8 +10,14 @@ import { notifyLawyer, startHandoff } from "../utils/backend-client.js";
 export const handoffTool = tool(
   async ({ reason, whatsappNumber }) => {
     try {
-      // REGRA: Agora a IA apenas notifica. Ela NÃO pausa a si mesma automaticamente.
-      // O advogado decide quando assumir o controle no App.
+      // Verifica se o usuário já tem a ficha (Lead ou Cliente)
+      const userCheck = await getUserByPhone(whatsappNumber);
+      const leadCheck = await getLeadByPhone(whatsappNumber);
+
+      if (!userCheck.exists && !leadCheck.exists) {
+        return "HANDOFF_NEGADO: O atendimento humano não pode ser acionado pois a ficha do lead não foi concluída. Informe o cliente educadamente que você precisa de mais alguns dados (nome, CPF, descrição do caso) para poder transferi-lo para um humano. Use a tool de registrar_triagem assim que tiver os dados.";
+      }
+
       await notifyLawyer({
         type: "HANDOFF",
         message: `SOLICITAÇÃO DE ATENDIMENTO: ${reason}`,

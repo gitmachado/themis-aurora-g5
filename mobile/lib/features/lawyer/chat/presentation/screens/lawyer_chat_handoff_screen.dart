@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../../../features/auth/presentation/providers/auth_providers.dart';
+import '../../../../../../features/notifications/presentation/providers/notification_providers.dart';
 import '../../../../../../features/lawyer/chat/domain/entities/chat_message.dart';
 import '../../../../../../features/lawyer/chat/presentation/providers/chat_providers.dart';
 import '../../../../../../features/lawyer/leads/presentation/screens/lawyer_lead_detail_screen.dart';
@@ -100,6 +101,19 @@ class _LawyerChatHandoffScreenState
 
     final notifier = ref.read(liveChatProvider(widget.whatsappNumber).notifier);
     final info = await notifier.getLeadInfo();
+
+    // Mark notifications as read
+    final notifications = ref.read(myNotificationsProvider).valueOrNull ?? [];
+    final unreadHandoffs = notifications.where(
+      (n) =>
+          n.type == 'HUMAN_SUPPORT' &&
+          !n.isRead &&
+          n.extraData?['whatsappNumber'] == widget.whatsappNumber,
+    );
+
+    for (var n in unreadHandoffs) {
+      ref.read(notificationActionsProvider).markAsRead(n.id);
+    }
 
     if (mounted) {
       setState(() {
@@ -368,7 +382,7 @@ class _LawyerChatHandoffScreenState
           const Icon(Icons.lock_person_rounded, color: Colors.amber, size: 20),
           const SizedBox(width: 12),
           Text(
-            'Este chat está sendo atendido por: $name',
+            'Responsável: $name',
             style: const TextStyle(
               color: Colors.brown,
               fontWeight: FontWeight.bold,

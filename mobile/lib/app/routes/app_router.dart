@@ -12,6 +12,7 @@ import '../../features/client/notifications/presentation/screens/client_notifica
 import '../../features/client/chat/presentation/screens/client_chat_mirror_screen.dart';
 // Lawyer
 import '../../features/lawyer/procedures/presentation/screens/lawyer_procedure_detail_screen.dart';
+import '../../features/lawyer/procedures/presentation/screens/lawyer_create_procedure_screen.dart';
 import '../../features/lawyer/profile/presentation/screens/lawyer_profile_screen.dart';
 import '../../features/lawyer/leads/presentation/screens/lawyer_lead_detail_screen.dart';
 import '../../features/lawyer/notifications/presentation/screens/lawyer_notification_screen.dart';
@@ -39,6 +40,7 @@ final class AppRouter {
   static const String lawyerTeamAddRoute = '/lawyer-team/add';
   static const String lawyerTeamMemberRoute = '/lawyer-team/member';
   static const String lawyerProcedureDetailRoute = '/lawyer-procedure-detail';
+  static const String lawyerProcedureCreateRoute = '/lawyer-procedure-create';
   static const String lawyerProfileRoute = '/lawyer-profile';
   static const String lawyerLeadDetailRoute = '/lawyer-lead-detail';
   static const String lawyerNotificationsRoute = '/lawyer-notifications';
@@ -185,6 +187,11 @@ final class AppRouter {
             : null;
         return MaterialPageRoute<void>(
           builder: (_) => LawyerProcedureDetailScreen(processId: processId),
+          settings: settings,
+        );
+      case lawyerProcedureCreateRoute:
+        return MaterialPageRoute<void>(
+          builder: (_) => const LawyerCreateProcedureScreen(),
           settings: settings,
         );
       case lawyerProfileRoute:

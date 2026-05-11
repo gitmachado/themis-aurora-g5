@@ -81,6 +81,10 @@ final scheduleEventUseCaseProvider = Provider<ScheduleEventUseCase>((ref) {
   return ScheduleEventUseCase(ref.watch(procedureRepositoryProvider));
 });
 
+final createProcedureUseCaseProvider = Provider<CreateProcedureUseCase>((ref) {
+  return CreateProcedureUseCase(ref.watch(procedureRepositoryProvider));
+});
+
 final myProceduresProvider =
     AsyncNotifierProvider<MyProceduresNotifier, List<LegalProcess>>(
       MyProceduresNotifier.new,
@@ -326,5 +330,27 @@ final class ProcedureActions {
         .getOrThrow();
     _ref.invalidate(procedureDetailsProvider(processId));
     _ref.invalidate(procedureTimelineProvider(processId));
+  }
+
+  Future<LegalProcess> createProcess({
+    required String clientId,
+    required String title,
+    required String caseType,
+    String? description,
+    String? processNumber,
+  }) async {
+    final process =
+        (await _ref
+                .read(createProcedureUseCaseProvider)
+                .call(
+                  clientId: clientId,
+                  title: title,
+                  caseType: caseType,
+                  description: description,
+                  processNumber: processNumber,
+                ))
+            .getOrThrow();
+    _ref.invalidate(myProceduresProvider);
+    return process;
   }
 }

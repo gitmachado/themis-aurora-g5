@@ -8,6 +8,7 @@ import 'package:mobile/features/auth/presentation/providers/auth_providers.dart'
 import 'package:mobile/shared/network/api_client.dart';
 import 'package:mobile/shared/widgets/layout/app_bottom_nav_bar.dart';
 import 'package:mobile/shared/network/websocket_client.dart';
+import 'package:mobile/shared/widgets/themis/themis_widgets.dart';
 
 import '../helpers/fakes.dart';
 
@@ -86,11 +87,22 @@ void main() {
       expect(find.text('Handoff humano'), findsOneWidget);
       expect(find.text('Maria Oliveira'), findsOneWidget);
 
-      // Hub Clientes → sub-aba Pendentes para chegar nos leads.
+      // Hub Clientes -> Landing na aba 'Leads' (index 0) por padrão
       await _tapNavLabel(tester, 'Clientes');
+      expect(find.text('Maria Oliveira'), findsOneWidget);
+
+      // Troca para a aba 'Clientes' (index 1) para ver os clientes convertidos
+      await tester.tap(
+        find.descendant(
+          of: find.byType(ThemisSegmentedControl),
+          matching: find.text('Clientes'),
+        ),
+      );
+      await tester.pumpAndSettle();
       expect(find.text('Lucas Silva'), findsOneWidget);
 
-      await tester.tap(find.text('Pendentes'));
+      // Volta para a aba 'Leads' (index 0) para prosseguir com a triagem da Maria
+      await tester.tap(find.text('Leads'));
       await tester.pumpAndSettle();
       expect(find.text('Maria Oliveira'), findsOneWidget);
 
@@ -103,9 +115,13 @@ void main() {
         findsOneWidget,
       );
 
-      await tester.tap(find.text('Converter'));
+      await tester.tap(find.text('Ações'));
       await tester.pumpAndSettle();
-      await tester.tap(find.text('Sim, Converter Agora'));
+      await tester.tap(find.text('Converter em Cliente'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Converter Lead'), findsOneWidget);
+      await tester.tap(find.text('Converter'));
       await tester.pumpAndSettle();
 
       expect(find.text('Cliente Convertido!'), findsOneWidget);
@@ -146,8 +162,15 @@ void main() {
 
       await _goBack(tester);
 
-      // Volta ao hub Clientes (default sub-aba Clientes) e abre a ficha.
+      // Volta ao hub Clientes e seleciona a aba 'Clientes' (index 1)
       await _tapNavLabel(tester, 'Clientes');
+      await tester.tap(
+        find.descendant(
+          of: find.byType(ThemisSegmentedControl),
+          matching: find.text('Clientes'),
+        ),
+      );
+      await tester.pumpAndSettle();
       expect(find.text('Lucas Silva'), findsOneWidget);
 
       await tester.tap(find.text('Lucas Silva').first);

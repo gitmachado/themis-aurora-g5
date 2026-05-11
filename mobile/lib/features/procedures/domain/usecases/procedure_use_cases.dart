@@ -160,3 +160,25 @@ final class ScheduleEventUseCase {
     );
   }
 }
+
+final class CreateProcedureUseCase {
+  final ProcedureRepository _repository;
+
+  const CreateProcedureUseCase(this._repository);
+
+  Future<Either<Failure, LegalProcess>> call({
+    required String clientId,
+    required String title,
+    required String caseType,
+    String? description,
+    String? processNumber,
+  }) {
+    return _repository.createProcess(
+      clientId: clientId,
+      title: title,
+      caseType: caseType,
+      description: description,
+      processNumber: processNumber,
+    );
+  }
+}

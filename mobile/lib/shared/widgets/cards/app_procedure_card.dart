@@ -6,7 +6,7 @@ import '../../widgets/cards/app_card.dart';
 
 class AppProcedureCard extends StatelessWidget {
   final String title;
-  final String subtitle;
+  final String? subtitle;
   final String? statusLabel;
   final BadgeType statusType;
   final String? lastUpdate;
@@ -17,7 +17,7 @@ class AppProcedureCard extends StatelessWidget {
   const AppProcedureCard({
     super.key,
     required this.title,
-    required this.subtitle,
+    this.subtitle,
     this.statusLabel,
     this.statusType = BadgeType.primary,
     this.lastUpdate,
@@ -58,11 +58,13 @@ class AppProcedureCard extends StatelessWidget {
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                     ),
-                    const SizedBox(height: 2),
-                    Text(
-                      subtitle,
-                      style: AppTextStyles.caption.copyWith(fontSize: 12),
-                    ),
+                    if (subtitle != null && subtitle!.isNotEmpty) ...[
+                      const SizedBox(height: 2),
+                      Text(
+                        subtitle!,
+                        style: AppTextStyles.caption.copyWith(fontSize: 12),
+                      ),
+                    ],
                   ],
                 ),
               ),

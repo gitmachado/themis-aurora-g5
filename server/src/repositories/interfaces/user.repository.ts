@@ -12,4 +12,5 @@ export interface IUserRepository {
   create(user: Omit<User, 'id' | 'createdAt' | 'updatedAt'>): Promise<User>;
   update(id: string, data: Partial<User>): Promise<User>;
   delete(id: string): Promise<void>;
+  hardDeleteClient(id: string): Promise<void>;
 }

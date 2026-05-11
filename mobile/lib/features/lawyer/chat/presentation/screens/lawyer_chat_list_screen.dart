@@ -25,14 +25,26 @@ class LawyerChatListScreen extends ConsumerWidget {
     final notifications =
         ref.watch(myNotificationsProvider).valueOrNull ?? const [];
 
-    // Extract handoffs and convert to "display items"
+    // Extract unread notification info for badges
+    final unreadHandoffNumbers = notifications
+        .where((n) => n.type == 'HUMAN_SUPPORT' && !n.isRead)
+        .map((n) => n.extraData?['whatsappNumber']?.toString())
+        .whereType<String>()
+        .toSet();
+
+    final unreadNotificationIds = notifications
+        .where((n) => !n.isRead)
+        .map((n) => n.id)
+        .toSet();
+
+    // Extract all handoffs (read or unread) to ensure they are in the list
     final handoffs = notifications
         .where((n) => n.type == 'HUMAN_SUPPORT')
         .map(
           (n) => LawyerClient(
-            id: n.extraData?['leadId'] ?? n.id,
-            name: n.extraData?['clientName'] ?? n.title,
-            whatsappNumber: n.extraData?['whatsappNumber'] ?? '',
+            id: n.extraData?['leadId']?.toString() ?? n.id,
+            name: n.extraData?['clientName']?.toString() ?? n.title,
+            whatsappNumber: n.extraData?['whatsappNumber']?.toString() ?? '',
             lastMessage: n.body,
             lastMessageAt: n.createdAt,
           ),
@@ -55,7 +67,7 @@ class LawyerChatListScreen extends ConsumerWidget {
         ),
         body: Column(
           children: [
-            _buildSummary(handoffs.length),
+            _buildSummary(unreadHandoffNumbers.length),
             Expanded(
               child: clientsAsync.when(
                 data: (clients) => allLeadsAsync.when(
@@ -93,8 +105,13 @@ class LawyerChatListScreen extends ConsumerWidget {
 
                     // 3. Handoffs
                     for (var h in handoffs) {
+                      // Se tem número, usa como chave única para mergear com leads/clients
                       if (h.whatsappNumber.isNotEmpty) {
                         unified[h.whatsappNumber] = h;
+                      } else {
+                        // Se não tem número (caso de teste ou erro), adiciona como entrada separada
+                        // usando o ID da notificação como chave para não sumir da lista
+                        unified['handoff-${h.id}'] = h;
                       }
                     }
 
@@ -102,7 +119,12 @@ class LawyerChatListScreen extends ConsumerWidget {
                     // Sort by name for now
                     unifiedList.sort((a, b) => a.name.compareTo(b.name));
 
-                    return _buildClientList(context, unifiedList);
+                    return _buildClientList(
+                      context,
+                      unifiedList,
+                      unreadHandoffNumbers,
+                      unreadNotificationIds,
+                    );
                   },
                   loading: _buildLoadingList,
                   error: (error, _) => _buildErrorState(error),
@@ -154,7 +176,12 @@ class LawyerChatListScreen extends ConsumerWidget {
     );
   }
 
-  Widget _buildClientList(BuildContext context, List<LawyerClient> clients) {
+  Widget _buildClientList(
+    BuildContext context,
+    List<LawyerClient> clients,
+    Set<String> unreadNumbers,
+    Set<String> unreadNotificationIds,
+  ) {
     if (clients.isEmpty) {
       return Center(
         child: Text(
@@ -169,35 +196,72 @@ class LawyerChatListScreen extends ConsumerWidget {
       itemCount: clients.length,
       itemBuilder: (context, index) {
         final client = clients[index];
+        final hasUnread =
+            unreadNumbers.contains(client.whatsappNumber) ||
+            unreadNotificationIds.contains(client.id);
+
         return Container(
           margin: const EdgeInsets.only(bottom: 12),
           decoration: BoxDecoration(
             color: AppColors.surface,
             borderRadius: BorderRadius.circular(16),
-            border: Border.all(color: AppColors.divider),
+            border: Border.all(
+              color: hasUnread ? AppColors.secondary : AppColors.divider,
+              width: hasUnread ? 1.5 : 1.0,
+            ),
+            boxShadow: hasUnread
+                ? [
+                    BoxShadow(
+                      color: AppColors.secondary.withValues(alpha: 0.1),
+                      blurRadius: 8,
+                      offset: const Offset(0, 2),
+                    ),
+                  ]
+                : null,
           ),
           child: ListTile(
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(16),
             ),
             contentPadding: const EdgeInsets.all(16),
-            leading: CircleAvatar(
-              radius: 24,
-              backgroundColor: AppColors.primaryOverlay,
-              child: Text(
-                client.name.isEmpty ? '?' : client.name[0].toUpperCase(),
-                style: const TextStyle(
-                  color: AppColors.primary,
-                  fontWeight: FontWeight.bold,
+            leading: Stack(
+              children: [
+                CircleAvatar(
+                  radius: 24,
+                  backgroundColor: AppColors.primaryOverlay,
+                  child: Text(
+                    client.name.isEmpty ? '?' : client.name[0].toUpperCase(),
+                    style: const TextStyle(
+                      color: AppColors.primary,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
                 ),
-              ),
+                if (hasUnread)
+                  Positioned(
+                    right: 0,
+                    top: 0,
+                    child: Container(
+                      width: 14,
+                      height: 14,
+                      decoration: BoxDecoration(
+                        color: AppColors.secondary,
+                        shape: BoxShape.circle,
+                        border: Border.all(color: Colors.white, width: 2),
+                      ),
+                    ),
+                  ),
+              ],
             ),
             title: Row(
               children: [
                 Expanded(
                   child: Text(
                     StringUtils.formatFirstAndLastName(client.name),
-                    style: const TextStyle(fontWeight: FontWeight.bold),
+                    style: TextStyle(
+                      fontWeight: hasUnread ? FontWeight.w900 : FontWeight.bold,
+                      color: AppColors.textPrimary,
+                    ),
                   ),
                 ),
                 _ChatPreviewTime(whatsappNumber: client.whatsappNumber),
@@ -207,8 +271,12 @@ class LawyerChatListScreen extends ConsumerWidget {
               whatsappNumber: client.whatsappNumber,
               fallbackLastMessage: client.lastMessage,
               fallbackLastMessageAt: client.lastMessageAt,
+              isBold: hasUnread,
             ),
-            trailing: const Icon(Icons.chevron_right_rounded),
+            trailing: Icon(
+              Icons.chevron_right_rounded,
+              color: hasUnread ? AppColors.secondaryDark : AppColors.ink2,
+            ),
             onTap: client.whatsappNumber.isEmpty
                 ? null
                 : () => Navigator.pushNamed(
@@ -291,11 +359,13 @@ class _ChatPreviewMessage extends ConsumerWidget {
   final String whatsappNumber;
   final String? fallbackLastMessage;
   final DateTime? fallbackLastMessageAt;
+  final bool isBold;
 
   const _ChatPreviewMessage({
     required this.whatsappNumber,
     this.fallbackLastMessage,
     this.fallbackLastMessageAt,
+    this.isBold = false,
   });
 
   @override
@@ -305,7 +375,10 @@ class _ChatPreviewMessage extends ConsumerWidget {
       children: [
         Text(
           whatsappNumber.isEmpty ? 'WhatsApp nao informado' : whatsappNumber,
-          style: AppTextStyles.caption.copyWith(color: AppColors.textCaption),
+          style: AppTextStyles.caption.copyWith(
+            color: isBold ? AppColors.secondaryDark : AppColors.textCaption,
+            fontWeight: isBold ? FontWeight.bold : null,
+          ),
         ),
         if (whatsappNumber.isNotEmpty)
           Consumer(
@@ -338,11 +411,12 @@ class _ChatPreviewMessage extends ConsumerWidget {
       padding: const EdgeInsets.only(top: 4),
       child: Text(
         content,
-        maxLines: 1,
+        maxLines: 2,
         overflow: TextOverflow.ellipsis,
         style: AppTextStyles.caption.copyWith(
-          color: AppColors.ink.withValues(alpha: 0.6),
+          color: isBold ? AppColors.ink : AppColors.ink.withValues(alpha: 0.6),
           fontSize: 13,
+          fontWeight: isBold ? FontWeight.w700 : null,
         ),
       ),
     );

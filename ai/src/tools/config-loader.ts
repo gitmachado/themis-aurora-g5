@@ -2,16 +2,10 @@ import { getBotConfig as fetchBotConfig } from '../utils/backend-client.js';
 
 export type BotConfig = {
   toneOfVoice: string;
-  serviceHoursStart: string;
-  serviceHoursEnd: string;
-  awayMessage: string;
 };
 
 const DEFAULT_CONFIG: BotConfig = {
-  toneOfVoice: "Profissional e acolhedor",
-  serviceHoursStart: "09:00",
-  serviceHoursEnd: "18:00",
-  awayMessage: "Nosso horário de atendimento é de seg a sex, 9h às 18h."
+  toneOfVoice: "Profissional e acolhedor"
 };
 
 let cachedConfig: BotConfig | null = null;
