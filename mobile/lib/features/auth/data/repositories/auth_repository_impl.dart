@@ -45,10 +45,15 @@ final class AuthRepositoryImpl implements AuthRepository {
 
   Future<void> _ensureGoogleSignInInitialized() async {
     if (!_googleSignInInitialized) {
-      await GoogleSignIn.instance.initialize(
-        serverClientId: AppConstants.googleClientId,
-      );
-      _googleSignInInitialized = true;
+      try {
+        await GoogleSignIn.instance.initialize(
+          serverClientId: AppConstants.googleClientId,
+        );
+        _googleSignInInitialized = true;
+      } catch (e) {
+        // Se já estiver inicializado, o plugin pode lançar erro em algumas versões
+        _googleSignInInitialized = true;
+      }
     }
   }
 
@@ -56,26 +61,32 @@ final class AuthRepositoryImpl implements AuthRepository {
   Future<Either<Failure, AuthSession>> signInWithGoogle() {
     return guardRepository(() async {
       await _ensureGoogleSignInInitialized();
-      final googleSignIn = GoogleSignIn.instance;
+      
+      try {
+        final googleUser = await GoogleSignIn.instance.authenticate();
+        
+        final googleAuth = googleUser.authentication;
+        final idToken = googleAuth.idToken;
 
-      final googleUser = await googleSignIn.authenticate();
+        if (idToken == null) {
+          throw const ServerFailure('Falha ao obter token do Google');
+        }
 
-      final googleAuth = googleUser.authentication;
-      final idToken = googleAuth.idToken;
+        final session = await _remoteDataSource.googleSignIn(idToken);
+        await _tokenStorage.saveToken(session.token);
 
-      if (idToken == null) {
-        throw const ServerFailure('Falha ao obter token do Google');
+        final account = await _remoteDataSource.getAccount();
+        return session.copyWith(
+          userId: account.id,
+          role: account.role,
+          account: account,
+        );
+      } catch (e) {
+        if (e.toString().contains('canceled')) {
+          throw const ServerFailure('Login cancelado pelo usuário');
+        }
+        rethrow;
       }
-
-      final session = await _remoteDataSource.googleSignIn(idToken);
-      await _tokenStorage.saveToken(session.token);
-
-      final account = await _remoteDataSource.getAccount();
-      return session.copyWith(
-        userId: account.id,
-        role: account.role,
-        account: account,
-      );
     });
   }
 

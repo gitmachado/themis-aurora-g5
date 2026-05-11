@@ -9,7 +9,7 @@ final class AppConstants {
   static const String googleClientId = String.fromEnvironment(
     'THEMIS_GOOGLE_CLIENT_ID',
     defaultValue:
-        '713885920352-n4ahv30vrjtp1548g2u9os3ui1t8lbci.apps.googleusercontent.com',
+        '726117555634-alkikmg6f84hlkl9lkg008jqf1v24d9j.apps.googleusercontent.com',
   );
 
   static const String officeWhatsApp = String.fromEnvironment(
