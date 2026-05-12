@@ -261,6 +261,35 @@ test('updateStatus skips lawyer notification when process has no assigned lawyer
   assert.equal(lawyerNotification, undefined, 'should send only the client notification');
 });
 
+test('updateStatus translates known status enums to PT-BR labels in the notification body', async () => {
+  const notifications: any[] = [];
+  const service = new LegalProcessService(
+    {
+      findById: async () => baseProcess,
+      update: async (_id: string, data: any) => ({ ...baseProcess, ...data }),
+    } as any,
+    {
+      addEvent: async () => undefined,
+    } as any,
+    {
+      send: async (n: any) => {
+        notifications.push(n);
+      },
+    } as any
+  );
+
+  await service.updateStatus({
+    legalProcessId: 'process-1',
+    newStatus: 'AWAITING_DOCUMENT',
+    updatedById: 'admin-99',
+  } as any);
+
+  const clientNotification = notifications.find((n) => n.userId === 'client-1');
+  assert.ok(clientNotification, 'client should receive a notification');
+  assert.match(clientNotification.body, /Aguardando documento/);
+  assert.doesNotMatch(clientNotification.body, /AWAITING_DOCUMENT/);
+});
+
 test('addNote throws NotFoundError when process does not exist', async () => {
   const service = new LegalProcessService(
     {
