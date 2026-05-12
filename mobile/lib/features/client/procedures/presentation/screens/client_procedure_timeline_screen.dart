@@ -1,6 +1,8 @@
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../../../../../../features/procedures/domain/entities/legal_process.dart';
 import '../../../../../../features/procedures/domain/entities/process_document.dart';
@@ -43,6 +45,8 @@ class _ClientProcedureTimelineScreenState
   )..addListener(() => setState(() {}));
 
   String _selectedFileFilter = 'Todos';
+  bool _isUploading = false;
+  double _uploadProgress = 0.0;
 
   @override
   void dispose() {
@@ -140,6 +144,34 @@ class _ClientProcedureTimelineScreenState
             ),
           ],
         ),
+        floatingActionButton: _tabController.index == 2
+            ? process.maybeWhen(
+                data: (data) => FloatingActionButton(
+                  heroTag: 'client_timeline_file_fab',
+                  onPressed: _isUploading
+                      ? null
+                      : () => _showUploadOptions(data),
+                  backgroundColor: _isUploading
+                      ? AppColors.textCaption
+                      : AppColors.yellow,
+                  child: _isUploading
+                      ? const SizedBox(
+                          width: 20,
+                          height: 20,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            color: AppColors.white,
+                          ),
+                        )
+                      : const Icon(
+                          Icons.upload_file_rounded,
+                          color: AppColors.ink,
+                          size: 28,
+                        ),
+                ),
+                orElse: () => null,
+              )
+            : null,
         bottomNavigationBar: _buildActionFooter(context),
       ),
     );
@@ -446,6 +478,13 @@ class _ClientProcedureTimelineScreenState
           : Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
+                if (_isUploading)
+                  LinearProgressIndicator(
+                    value: _uploadProgress,
+                    backgroundColor: AppColors.yellowSoft,
+                    color: AppColors.yellow,
+                    minHeight: 3,
+                  ),
                 if (showFilters)
                   Container(
                     width: double.infinity,
@@ -697,4 +736,332 @@ class _ClientProcedureTimelineScreenState
     ];
     return months[month - 1];
   }
+
+  Future<void> _showUploadOptions(LegalProcess process) async {
+    final source = await showModalBottomSheet<_UploadSource>(
+      context: context,
+      backgroundColor: AppColors.white,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (context) {
+        return SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.all(24),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Center(
+                  child: Container(
+                    width: 40,
+                    height: 4,
+                    decoration: BoxDecoration(
+                      color: AppColors.divider,
+                      borderRadius: BorderRadius.circular(2),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 24),
+                Text(
+                  'Enviar documento',
+                  style: AppTextStyles.h2.copyWith(fontSize: 18),
+                ),
+                const SizedBox(height: 24),
+                _buildUploadOption(
+                  Icons.camera_alt_outlined,
+                  'Tirar Foto',
+                  () => Navigator.pop(context, _UploadSource.camera),
+                ),
+                const SizedBox(height: 12),
+                _buildUploadOption(
+                  Icons.image_outlined,
+                  'Galeria de Fotos',
+                  () => Navigator.pop(context, _UploadSource.gallery),
+                ),
+                const SizedBox(height: 12),
+                _buildUploadOption(
+                  Icons.description_outlined,
+                  'Arquivos do Dispositivo',
+                  () => Navigator.pop(context, _UploadSource.files),
+                ),
+                const SizedBox(height: 24),
+                SizedBox(
+                  width: double.infinity,
+                  child: TextButton(
+                    onPressed: () => Navigator.pop(context),
+                    style: TextButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(vertical: 16),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(16),
+                        side: BorderSide(
+                          color: AppColors.divider.withValues(alpha: 0.5),
+                        ),
+                      ),
+                    ),
+                    child: Text(
+                      'Cancelar',
+                      style: AppTextStyles.body.copyWith(
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+
+    if (source == null) return;
+    await _pickAndUpload(process, source);
+  }
+
+  Widget _buildUploadOption(IconData icon, String label, VoidCallback onTap) {
+    return ListTile(
+      leading: Icon(icon, color: AppColors.primary),
+      title: Text(
+        label,
+        style: AppTextStyles.body.copyWith(fontWeight: FontWeight.w600),
+      ),
+      onTap: onTap,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12),
+        side: BorderSide(color: AppColors.divider.withValues(alpha: 0.5)),
+      ),
+    );
+  }
+
+  Future<void> _pickAndUpload(
+    LegalProcess process,
+    _UploadSource source,
+  ) async {
+    final confirmed = await _showUploadConfirmation(process);
+
+    if (confirmed != true) return;
+
+    final picked = await _pickFromSource(source);
+    if (picked == null) return;
+
+    const maxBytes = 10 * 1024 * 1024;
+    if (picked.size > maxBytes) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('O arquivo excede o limite de 10MB.')),
+      );
+      return;
+    }
+
+    setState(() {
+      _isUploading = true;
+      _uploadProgress = 0.0;
+    });
+
+    try {
+      await ref
+          .read(procedureActionsProvider)
+          .uploadDocument(
+            processId: process.id,
+            filePath: picked.path,
+            fileName: picked.name,
+            onSendProgress: (count, total) {
+              if (total > 0) {
+                setState(() => _uploadProgress = count / total);
+              }
+            },
+          );
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Arquivo enviado com sucesso.')),
+      );
+      ref.invalidate(procedureDocumentsProvider(process.id));
+    } catch (error) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(error.toString())));
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isUploading = false;
+          _uploadProgress = 0.0;
+        });
+      }
+    }
+  }
+
+  Future<_PickedFile?> _pickFromSource(_UploadSource source) async {
+    switch (source) {
+      case _UploadSource.camera:
+      case _UploadSource.gallery:
+        final picker = ImagePicker();
+        final image = await picker.pickImage(
+          source: source == _UploadSource.camera
+              ? ImageSource.camera
+              : ImageSource.gallery,
+          imageQuality: 85,
+        );
+        if (image == null) return null;
+        final length = await image.length();
+        return _PickedFile(path: image.path, name: image.name, size: length);
+      case _UploadSource.files:
+        final result = await FilePicker.pickFiles(
+          type: FileType.custom,
+          allowedExtensions: const [
+            'pdf',
+            'png',
+            'jpg',
+            'jpeg',
+            'heic',
+            'heif',
+            'doc',
+            'docx',
+            'xls',
+            'xlsx',
+          ],
+          withData: false,
+        );
+        final file = result?.files.single;
+        if (file == null || file.path == null) return null;
+        return _PickedFile(path: file.path!, name: file.name, size: file.size);
+    }
+  }
+
+  Future<bool?> _showUploadConfirmation(LegalProcess process) {
+    return showModalBottomSheet<bool>(
+      context: context,
+      backgroundColor: AppColors.background,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      ),
+      builder: (context) {
+        return SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.all(24),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(16),
+                  decoration: const BoxDecoration(
+                    color: AppColors.yellowSoft,
+                    shape: BoxShape.circle,
+                  ),
+                  child: const Icon(
+                    Icons.upload_file_rounded,
+                    color: AppColors.yellowDeep,
+                    size: 32,
+                  ),
+                ),
+                const SizedBox(height: 20),
+                Text('Confirmar Envio', style: AppTextStyles.h2),
+                const SizedBox(height: 8),
+                Text(
+                  'Você está prestes a adicionar um arquivo ao processo:',
+                  textAlign: TextAlign.center,
+                  style: AppTextStyles.body.copyWith(color: AppColors.ink3),
+                ),
+                const SizedBox(height: 12),
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 12,
+                  ),
+                  decoration: BoxDecoration(
+                    color: AppColors.white,
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(color: AppColors.divider),
+                  ),
+                  child: Row(
+                    children: [
+                      Icon(process.icon, color: AppColors.primary, size: 20),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              process.title,
+                              style: AppTextStyles.body.copyWith(
+                                fontWeight: FontWeight.bold,
+                                color: AppColors.ink,
+                              ),
+                            ),
+                            if (process.processNumber != null)
+                              Text(
+                                'Nº ${process.processNumber}',
+                                style: AppTextStyles.tiny.copyWith(
+                                  color: AppColors.ink3,
+                                  fontSize: 11,
+                                ),
+                              ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 24),
+                Row(
+                  children: [
+                    Expanded(
+                      child: TextButton(
+                        onPressed: () => Navigator.pop(context, false),
+                        style: TextButton.styleFrom(
+                          backgroundColor: AppColors.ink,
+                          foregroundColor: AppColors.white,
+                          padding: const EdgeInsets.symmetric(vertical: 16),
+                          textStyle: AppTextStyles.body.copyWith(
+                            fontWeight: FontWeight.bold,
+                          ),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                        ),
+                        child: const Text('Cancelar'),
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: ElevatedButton(
+                        onPressed: () => Navigator.pop(context, true),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: AppColors.yellow,
+                          foregroundColor: AppColors.ink,
+                          padding: const EdgeInsets.symmetric(vertical: 16),
+                          textStyle: AppTextStyles.body.copyWith(
+                            fontWeight: FontWeight.bold,
+                          ),
+                          elevation: 0,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                        ),
+                        child: const Text('Prosseguir'),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+}
+
+enum _UploadSource { camera, gallery, files }
+
+class _PickedFile {
+  final String path;
+  final String name;
+  final int size;
+
+  const _PickedFile({
+    required this.path,
+    required this.name,
+    required this.size,
+  });
 }
