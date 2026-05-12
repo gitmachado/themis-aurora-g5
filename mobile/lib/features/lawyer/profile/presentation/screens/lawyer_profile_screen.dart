@@ -412,7 +412,8 @@ class _LawyerProfileScreenState extends ConsumerState<LawyerProfileScreen>
             _buildActionTile(
               Icons.smart_toy_rounded,
               'Assistente IA Themis',
-              () => Navigator.pushNamed(context, AppRouter.lawyerAIManagerRoute),
+              () =>
+                  Navigator.pushNamed(context, AppRouter.lawyerAIManagerRoute),
             ),
           ],
         ),

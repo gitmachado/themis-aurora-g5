@@ -48,7 +48,8 @@ class LawyerChatState extends Equatable {
 class LawyerChatNotifier extends StateNotifier<LawyerChatState> {
   final SendLawyerMessageUseCase _sendLawyerMessageUseCase;
 
-  LawyerChatNotifier(this._sendLawyerMessageUseCase) : super(LawyerChatState.initial());
+  LawyerChatNotifier(this._sendLawyerMessageUseCase)
+    : super(LawyerChatState.initial());
 
   Future<void> sendMessage(String text) async {
     if (text.trim().isEmpty) return;
@@ -88,8 +89,8 @@ class LawyerChatNotifier extends StateNotifier<LawyerChatState> {
   }
 
   String _mapFailureToMessage(Failure failure) {
-    if (failure.message.contains('timeout') || 
-        failure.message.contains('demorou') || 
+    if (failure.message.contains('timeout') ||
+        failure.message.contains('demorou') ||
         failure.message.contains('tempo limite')) {
       return 'O assistente de IA demorou para responder. Por favor, tente novamente.';
     }
@@ -97,18 +98,25 @@ class LawyerChatNotifier extends StateNotifier<LawyerChatState> {
   }
 }
 
-final lawyerChatRemoteDataSourceProvider = Provider<LawyerChatRemoteDataSource>((ref) {
-  return LawyerChatRemoteDataSource(ref.watch(apiClientProvider));
-});
+final lawyerChatRemoteDataSourceProvider = Provider<LawyerChatRemoteDataSource>(
+  (ref) {
+    return LawyerChatRemoteDataSource(ref.watch(apiClientProvider));
+  },
+);
 
 final lawyerChatRepositoryProvider = Provider<ILawyerChatRepository>((ref) {
-  return LawyerChatRepositoryImpl(ref.watch(lawyerChatRemoteDataSourceProvider));
+  return LawyerChatRepositoryImpl(
+    ref.watch(lawyerChatRemoteDataSourceProvider),
+  );
 });
 
-final sendLawyerMessageUseCaseProvider = Provider<SendLawyerMessageUseCase>((ref) {
+final sendLawyerMessageUseCaseProvider = Provider<SendLawyerMessageUseCase>((
+  ref,
+) {
   return SendLawyerMessageUseCase(ref.watch(lawyerChatRepositoryProvider));
 });
 
-final lawyerChatProvider = StateNotifierProvider<LawyerChatNotifier, LawyerChatState>((ref) {
-  return LawyerChatNotifier(ref.watch(sendLawyerMessageUseCaseProvider));
-});
+final lawyerChatProvider =
+    StateNotifierProvider<LawyerChatNotifier, LawyerChatState>((ref) {
+      return LawyerChatNotifier(ref.watch(sendLawyerMessageUseCaseProvider));
+    });

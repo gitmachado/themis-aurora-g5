@@ -76,7 +76,10 @@ class _LawyerChatPageState extends ConsumerState<LawyerChatPage> {
         elevation: 0,
         scrolledUnderElevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios_new_rounded, color: AppColors.ink),
+          icon: const Icon(
+            Icons.arrow_back_ios_new_rounded,
+            color: AppColors.ink,
+          ),
           onPressed: () => Navigator.of(context).pop(),
         ),
         title: Row(
@@ -109,10 +112,7 @@ class _LawyerChatPageState extends ConsumerState<LawyerChatPage> {
         ),
         bottom: PreferredSize(
           preferredSize: const Size.fromHeight(1.0),
-          child: Container(
-            color: AppColors.border,
-            height: 1.0,
-          ),
+          child: Container(color: AppColors.border, height: 1.0),
         ),
       ),
       body: SafeArea(
@@ -123,7 +123,10 @@ class _LawyerChatPageState extends ConsumerState<LawyerChatPage> {
                   ? _buildEmptyState()
                   : ListView.builder(
                       controller: _scrollController,
-                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 20,
+                      ),
                       itemCount: chatState.messages.length,
                       itemBuilder: (context, index) {
                         final message = chatState.messages[index];
@@ -184,7 +187,10 @@ class _LawyerChatPageState extends ConsumerState<LawyerChatPage> {
                 child: OutlinedButton(
                   onPressed: () => _sendSuggestion(text),
                   style: OutlinedButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 16),
+                    padding: const EdgeInsets.symmetric(
+                      vertical: 14,
+                      horizontal: 16,
+                    ),
                     side: const BorderSide(color: AppColors.border),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12),
@@ -311,9 +317,7 @@ class _LawyerChatPageState extends ConsumerState<LawyerChatPage> {
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       decoration: BoxDecoration(
         color: AppColors.surface,
-        border: const Border(
-          top: BorderSide(color: AppColors.border),
-        ),
+        border: const Border(top: BorderSide(color: AppColors.border)),
       ),
       child: Row(
         children: [
@@ -329,7 +333,10 @@ class _LawyerChatPageState extends ConsumerState<LawyerChatPage> {
                 focusNode: _focusNode,
                 textInputAction: TextInputAction.send,
                 onSubmitted: (_) => _onSend(),
-                style: AppTextStyles.body.copyWith(fontSize: 15, color: AppColors.ink),
+                style: AppTextStyles.body.copyWith(
+                  fontSize: 15,
+                  color: AppColors.ink,
+                ),
                 decoration: InputDecoration(
                   hintText: 'Pergunte ao assistente...',
                   hintStyle: AppTextStyles.body.copyWith(

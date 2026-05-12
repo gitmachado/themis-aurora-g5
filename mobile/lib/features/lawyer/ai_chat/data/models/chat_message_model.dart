@@ -8,7 +8,8 @@ class ChatMessageModel extends ChatMessage {
   });
 
   factory ChatMessageModel.fromJson(Map<String, dynamic> json) {
-    final contentValue = json['reply'] as String? ?? json['content'] as String? ?? '';
+    final contentValue =
+        json['reply'] as String? ?? json['content'] as String? ?? '';
     final isFromUserValue = (json['isFromUser'] as bool?) ?? false;
     final timestampValue = json['timestamp'] != null
         ? DateTime.parse(json['timestamp'] as String)
