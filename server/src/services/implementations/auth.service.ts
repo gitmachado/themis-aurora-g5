@@ -135,6 +135,14 @@ export class AuthService implements IAuthService {
     }
   }
 
+  async logout(userId: string): Promise<void> {
+    const user = await this.userRepository.findById(userId);
+    if (!user) return;
+    if (user.fcmToken !== null) {
+      await this.userRepository.update(userId, { fcmToken: null });
+    }
+  }
+
   async validateToken(token: string): Promise<{ userId: string; role: UserRole }> {
     try {
       const decoded = jwt.verify(token, this.jwtSecret) as { sub: string; role: UserRole };
