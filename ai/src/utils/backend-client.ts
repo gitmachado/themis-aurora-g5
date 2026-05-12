@@ -87,6 +87,42 @@ export async function getProcessesByPhone(whatsappNumber: string): Promise<Proce
   }));
 }
 
+// Tipo esperado de retorno de getProcessById:
+export interface ProcessDetail {
+  id: string;
+  status: string;
+  cliente: { nome: string; email: string } | null;
+  recentTimeline: Array<{ data: string; descricao: string }>;
+}
+
+export async function getProcessesByLawyer(lawyerId: string): Promise<any[]> {
+  try {
+    const res = await client.get("/process", {
+      params: { lawyerId },
+    });
+    return res.data;
+  } catch (error: any) {
+    const status = error.response?.status || 500;
+    const message = error.response?.data?.message || error.message || "Erro desconhecido";
+    const err = new Error(message) as any;
+    err.status = status;
+    throw err;
+  }
+}
+
+export async function getProcessById(processId: string): Promise<ProcessDetail> {
+  try {
+    const res = await client.get(`/process/${processId}`);
+    return res.data;
+  } catch (error: any) {
+    const status = error.response?.status || 500;
+    const message = error.response?.data?.message || error.message || "Erro desconhecido";
+    const err = new Error(message) as any;
+    err.status = status;
+    throw err;
+  }
+}
+
 // ── Mensagens ──
 
 export async function syncMessage(data: {
