@@ -612,7 +612,10 @@ class _ClientFilesScreenState extends ConsumerState<ClientFilesScreen> {
     _UploadSource source,
   ) async {
     // Modal de confirmacao elegante
-    final selectedProcess = await _showUploadConfirmation(procedures, _selectedProcessId);
+    final selectedProcess = await _showUploadConfirmation(
+      procedures,
+      _selectedProcessId,
+    );
 
     if (selectedProcess == null) return;
 
@@ -726,7 +729,12 @@ class _ClientFilesScreenState extends ConsumerState<ClientFilesScreen> {
           builder: (context, setModalState) {
             return SafeArea(
               child: Padding(
-                padding: EdgeInsets.fromLTRB(24, 24, 24, MediaQuery.of(context).viewInsets.bottom + 24),
+                padding: EdgeInsets.fromLTRB(
+                  24,
+                  24,
+                  24,
+                  MediaQuery.of(context).viewInsets.bottom + 24,
+                ),
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
@@ -752,7 +760,10 @@ class _ClientFilesScreenState extends ConsumerState<ClientFilesScreen> {
                     ),
                     const SizedBox(height: 16),
                     Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 4,
+                      ),
                       decoration: BoxDecoration(
                         color: AppColors.white,
                         borderRadius: BorderRadius.circular(12),
@@ -762,18 +773,27 @@ class _ClientFilesScreenState extends ConsumerState<ClientFilesScreen> {
                         child: DropdownButton<LegalProcess>(
                           value: selectedProcess,
                           isExpanded: true,
-                          icon: const Icon(Icons.keyboard_arrow_down_rounded, color: AppColors.ink3),
+                          icon: const Icon(
+                            Icons.keyboard_arrow_down_rounded,
+                            color: AppColors.ink3,
+                          ),
                           items: procedures.map((p) {
                             return DropdownMenuItem<LegalProcess>(
                               value: p,
                               child: Row(
                                 children: [
-                                  Icon(p.icon, color: AppColors.primary, size: 20),
+                                  Icon(
+                                    p.icon,
+                                    color: AppColors.primary,
+                                    size: 20,
+                                  ),
                                   const SizedBox(width: 12),
                                   Expanded(
                                     child: Column(
-                                      crossAxisAlignment: CrossAxisAlignment.start,
-                                      mainAxisAlignment: MainAxisAlignment.center,
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.center,
                                       children: [
                                         Text(
                                           p.title,
@@ -830,7 +850,8 @@ class _ClientFilesScreenState extends ConsumerState<ClientFilesScreen> {
                         const SizedBox(width: 12),
                         Expanded(
                           child: ElevatedButton(
-                            onPressed: () => Navigator.pop(context, selectedProcess),
+                            onPressed: () =>
+                                Navigator.pop(context, selectedProcess),
                             style: ElevatedButton.styleFrom(
                               backgroundColor: AppColors.yellow,
                               foregroundColor: AppColors.ink,

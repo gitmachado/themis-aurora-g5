@@ -148,8 +148,12 @@ class _ClientProcedureTimelineScreenState
             ? process.maybeWhen(
                 data: (data) => FloatingActionButton(
                   heroTag: 'client_timeline_file_fab',
-                  onPressed: _isUploading ? null : () => _showUploadOptions(data),
-                  backgroundColor: _isUploading ? AppColors.textCaption : AppColors.yellow,
+                  onPressed: _isUploading
+                      ? null
+                      : () => _showUploadOptions(data),
+                  backgroundColor: _isUploading
+                      ? AppColors.textCaption
+                      : AppColors.yellow,
                   child: _isUploading
                       ? const SizedBox(
                           width: 20,
@@ -829,7 +833,10 @@ class _ClientProcedureTimelineScreenState
     );
   }
 
-  Future<void> _pickAndUpload(LegalProcess process, _UploadSource source) async {
+  Future<void> _pickAndUpload(
+    LegalProcess process,
+    _UploadSource source,
+  ) async {
     final confirmed = await _showUploadConfirmation(process);
 
     if (confirmed != true) return;
@@ -871,9 +878,9 @@ class _ClientProcedureTimelineScreenState
       ref.invalidate(procedureDocumentsProvider(process.id));
     } catch (error) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(error.toString())),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(error.toString())));
     } finally {
       if (mounted) {
         setState(() {
