@@ -10,6 +10,7 @@ import notificationRoutes from './v1/notification.routes';
 import timelineRoutes from './v1/timeline.routes';
 import botRoutes from './v1/bot.routes';
 import teamRoutes from './v1/team.routes';
+import aiRoutes from './v1/ai.routes';
 
 const router = Router();
 
@@ -24,5 +25,6 @@ router.use('/notifications', notificationRoutes);
 router.use('/timeline', timelineRoutes);
 router.use('/bot', botRoutes);
 router.use('/team', teamRoutes);
+router.use('/ai', aiRoutes);
 
 export default router;
