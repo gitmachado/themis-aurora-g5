@@ -148,7 +148,7 @@ test('updateStatus skips lawyer-note timeline event when note is omitted', async
 });
 
 test('updateStatus notifies the client about the status change', async () => {
-  let notification: any;
+  const notifications: any[] = [];
   const service = new LegalProcessService(
     {
       findById: async () => baseProcess,
@@ -159,7 +159,7 @@ test('updateStatus notifies the client about the status change', async () => {
     } as any,
     {
       send: async (n: any) => {
-        notification = n;
+        notifications.push(n);
       },
     } as any
   );
@@ -170,9 +170,95 @@ test('updateStatus notifies the client about the status change', async () => {
     updatedById: 'lawyer-1',
   } as any);
 
-  assert.equal(notification.userId, 'client-1');
-  assert.equal(notification.type, 'STATUS_CHANGED');
-  assert.match(notification.body, /IN_PROGRESS/);
+  const clientNotification = notifications.find((n) => n.userId === 'client-1');
+  assert.ok(clientNotification, 'client should receive a notification');
+  assert.equal(clientNotification.type, 'STATUS_CHANGED');
+  assert.match(clientNotification.body, /IN_PROGRESS/);
+});
+
+test('updateStatus notifies the assigned lawyer when someone else triggers the change', async () => {
+  const notifications: any[] = [];
+  const service = new LegalProcessService(
+    {
+      findById: async () => baseProcess,
+      update: async (_id: string, data: any) => ({ ...baseProcess, ...data }),
+    } as any,
+    {
+      addEvent: async () => undefined,
+    } as any,
+    {
+      send: async (n: any) => {
+        notifications.push(n);
+      },
+    } as any
+  );
+
+  await service.updateStatus({
+    legalProcessId: 'process-1',
+    newStatus: 'IN_PROGRESS',
+    updatedById: 'admin-99',
+  } as any);
+
+  const lawyerNotification = notifications.find((n) => n.userId === 'lawyer-1');
+  assert.ok(lawyerNotification, 'assigned lawyer should receive a notification');
+  assert.equal(lawyerNotification.type, 'STATUS_CHANGED');
+  assert.match(lawyerNotification.body, /IN_PROGRESS/);
+});
+
+test('updateStatus does not notify the lawyer when they triggered the change themselves', async () => {
+  const notifications: any[] = [];
+  const service = new LegalProcessService(
+    {
+      findById: async () => baseProcess,
+      update: async (_id: string, data: any) => ({ ...baseProcess, ...data }),
+    } as any,
+    {
+      addEvent: async () => undefined,
+    } as any,
+    {
+      send: async (n: any) => {
+        notifications.push(n);
+      },
+    } as any
+  );
+
+  await service.updateStatus({
+    legalProcessId: 'process-1',
+    newStatus: 'CLOSED',
+    updatedById: 'lawyer-1',
+  } as any);
+
+  const lawyerNotification = notifications.find((n) => n.userId === 'lawyer-1');
+  assert.equal(lawyerNotification, undefined, 'lawyer should not self-notify');
+});
+
+test('updateStatus skips lawyer notification when process has no assigned lawyer', async () => {
+  const notifications: any[] = [];
+  const service = new LegalProcessService(
+    {
+      findById: async () => ({ ...baseProcess, lawyerId: null }),
+      update: async (_id: string, data: any) => ({ ...baseProcess, lawyerId: null, ...data }),
+    } as any,
+    {
+      addEvent: async () => undefined,
+    } as any,
+    {
+      send: async (n: any) => {
+        notifications.push(n);
+      },
+    } as any
+  );
+
+  await service.updateStatus({
+    legalProcessId: 'process-1',
+    newStatus: 'IN_PROGRESS',
+    updatedById: 'admin-99',
+  } as any);
+
+  const lawyerNotification = notifications.find(
+    (n) => n.userId !== 'client-1'
+  );
+  assert.equal(lawyerNotification, undefined, 'should send only the client notification');
 });
 
 test('addNote throws NotFoundError when process does not exist', async () => {

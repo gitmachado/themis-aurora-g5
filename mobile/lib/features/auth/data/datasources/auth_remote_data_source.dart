@@ -28,6 +28,12 @@ final class AuthRemoteDataSource {
     return AuthSessionModel.fromJson(json);
   }
 
+  /// G5-75: tells the backend to wipe the user's server-side FCM token so
+  /// that any in-flight push notifications no longer reach the device.
+  Future<void> logout() async {
+    await _apiClient.postJson('/auth/logout', data: const <String, dynamic>{});
+  }
+
   Future<AccountModel> getAccount() async {
     final json = await _apiClient.getJson('/account');
     return AccountModel.fromJson(_normalizeAccountJson(json));

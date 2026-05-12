@@ -74,6 +74,16 @@ export class LegalProcessService implements ILegalProcessService {
       type: 'STATUS_CHANGED',
     });
 
+    // Side-effect: Notification for the assigned lawyer (skip if the lawyer triggered the change themselves)
+    if (updatedProcess.lawyerId && updatedProcess.lawyerId !== dto.updatedById) {
+      await this.notificationService.send({
+        userId: updatedProcess.lawyerId,
+        title: 'Status do processo atualizado',
+        body: `O processo "${updatedProcess.title}" mudou de status para: ${dto.newStatus}`,
+        type: 'STATUS_CHANGED',
+      });
+    }
+
     return updatedProcess;
   }
 
