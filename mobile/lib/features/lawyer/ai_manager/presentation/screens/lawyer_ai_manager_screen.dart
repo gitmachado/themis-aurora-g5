@@ -63,7 +63,7 @@ class _LawyerAIManagerScreenState extends State<LawyerAIManagerScreen> {
           style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
         ),
         style: ElevatedButton.styleFrom(
-          backgroundColor: const Color(0xFF1A237E),
+          backgroundColor: AppColors.ink,
           foregroundColor: AppColors.white,
           padding: const EdgeInsets.symmetric(vertical: 16),
           shape: RoundedRectangleBorder(

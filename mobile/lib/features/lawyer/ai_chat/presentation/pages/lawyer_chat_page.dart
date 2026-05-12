@@ -161,7 +161,7 @@ class _LawyerChatPageState extends ConsumerState<LawyerChatPage> {
               child: const Icon(
                 Icons.assistant_rounded,
                 size: 48,
-                color: Color(0xFF1A237E),
+                color: AppColors.ink,
               ),
             ),
             const SizedBox(height: 24),
@@ -197,7 +197,7 @@ class _LawyerChatPageState extends ConsumerState<LawyerChatPage> {
                       const Icon(
                         Icons.chat_bubble_outline_rounded,
                         size: 16,
-                        color: Color(0xFF1A237E),
+                        color: AppColors.ink,
                       ),
                       const SizedBox(width: 12),
                       Expanded(
@@ -224,7 +224,7 @@ class _LawyerChatPageState extends ConsumerState<LawyerChatPage> {
   Widget _buildChatBubble(ChatMessage message) {
     final isMe = message.isFromUser;
     final alignment = isMe ? Alignment.centerRight : Alignment.centerLeft;
-    final bubbleColor = isMe ? const Color(0xFF1A237E) : AppColors.surface2;
+    final bubbleColor = isMe ? AppColors.ink : AppColors.surface2;
     final textColor = isMe ? Colors.white : AppColors.textPrimary;
 
     final borderRadius = BorderRadius.only(
@@ -289,7 +289,7 @@ class _LawyerChatPageState extends ConsumerState<LawyerChatPage> {
               height: 14,
               child: CircularProgressIndicator(
                 strokeWidth: 2,
-                valueColor: AlwaysStoppedAnimation<Color>(Color(0xFF1A237E)),
+                valueColor: AlwaysStoppedAnimation<Color>(AppColors.ink),
               ),
             ),
             const SizedBox(width: 10),
@@ -348,7 +348,7 @@ class _LawyerChatPageState extends ConsumerState<LawyerChatPage> {
             child: Container(
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color: isLoading ? AppColors.ink4 : const Color(0xFF1A237E),
+                color: isLoading ? AppColors.ink4 : AppColors.ink,
                 shape: BoxShape.circle,
               ),
               child: const Icon(
