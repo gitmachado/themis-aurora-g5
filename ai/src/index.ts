@@ -2,6 +2,7 @@ import "dotenv/config";
 import express from "express";
 import { setupCheckpointer } from "./config/checkpointer.js";
 import { whatsappRouter } from "./webhooks/whatsapp.js";
+import { lawyerChatRouter } from "./routers/lawyer-chat.router.js";
 import { graph } from "./graph/index.js";
 import { sendWhatsAppMessage } from "./webhooks/send-message.js";
 import { syncMessage } from "./graph/nodes/sync.js";
@@ -11,6 +12,7 @@ const PORT = process.env.PORT || 3001;
 
 app.use(express.json());
 app.use(whatsappRouter);
+app.use(lawyerChatRouter);
 
 // ── Handoff Endpoints ──
 
