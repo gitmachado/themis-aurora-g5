@@ -56,14 +56,7 @@ class _ClientFilesScreenState extends ConsumerState<ClientFilesScreen> {
               .where((process) => process.clientId == account.id)
               .toList();
 
-    // Auto-selecionar o primeiro processo se nada estiver selecionado
-    if (_selectedProcessId == null && procedures.isNotEmpty) {
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (mounted && _selectedProcessId == null) {
-          setState(() => _selectedProcessId = procedures.first.id);
-        }
-      });
-    }
+    // _selectedProcessId null represents "Todos"
 
     return Scaffold(
       backgroundColor: AppColors.background,
@@ -121,6 +114,22 @@ class _ClientFilesScreenState extends ConsumerState<ClientFilesScreen> {
                         child: Row(
                           children: [
                             const SizedBox(width: 20),
+                            Padding(
+                              padding: const EdgeInsets.only(right: 10),
+                              child: _buildProcessTab(
+                                null,
+                                isSelected: _selectedProcessId == null,
+                                onTap: () {
+                                  setState(() => _selectedProcessId = null);
+                                  Scrollable.ensureVisible(
+                                    context,
+                                    duration: const Duration(milliseconds: 300),
+                                    curve: Curves.easeInOut,
+                                    alignment: 0.5,
+                                  );
+                                },
+                              ),
+                            ),
                             ...procedures.map(
                               (p) => Builder(
                                 builder: (context) => Padding(
@@ -230,10 +239,13 @@ class _ClientFilesScreenState extends ConsumerState<ClientFilesScreen> {
   }
 
   Widget _buildProcessTab(
-    LegalProcess process, {
+    LegalProcess? process, {
     required bool isSelected,
     required VoidCallback onTap,
   }) {
+    final title = process?.title ?? 'Todos';
+    final icon = process?.icon ?? Icons.all_inclusive_rounded;
+
     return GestureDetector(
       onTap: onTap,
       child: Container(
@@ -261,13 +273,13 @@ class _ClientFilesScreenState extends ConsumerState<ClientFilesScreen> {
           mainAxisSize: MainAxisSize.min,
           children: [
             Icon(
-              process.icon,
+              icon,
               size: 18,
               color: isSelected ? AppColors.white : AppColors.ink3,
             ),
             const SizedBox(width: 8),
             Text(
-              process.title,
+              title,
               style: AppTextStyles.body.copyWith(
                 color: isSelected ? AppColors.white : AppColors.ink2,
                 fontSize: 13,
@@ -599,15 +611,10 @@ class _ClientFilesScreenState extends ConsumerState<ClientFilesScreen> {
     List<LegalProcess> procedures,
     _UploadSource source,
   ) async {
-    final process = procedures.cast<LegalProcess>().firstWhere(
-      (p) => p.id == _selectedProcessId,
-      orElse: () => procedures.first,
-    );
-
     // Modal de confirmacao elegante
-    final confirmed = await _showUploadConfirmation(process);
+    final selectedProcess = await _showUploadConfirmation(procedures, _selectedProcessId);
 
-    if (confirmed != true) return;
+    if (selectedProcess == null) return;
 
     final picked = await _pickFromSource(source);
     if (picked == null) return;
@@ -631,7 +638,7 @@ class _ClientFilesScreenState extends ConsumerState<ClientFilesScreen> {
       await ref
           .read(procedureActionsProvider)
           .uploadDocument(
-            processId: process.id,
+            processId: selectedProcess.id,
             filePath: picked.path,
             fileName: picked.name,
             onSendProgress: (count, total) {
@@ -698,124 +705,154 @@ class _ClientFilesScreenState extends ConsumerState<ClientFilesScreen> {
     }
   }
 
-  Future<bool?> _showUploadConfirmation(LegalProcess process) {
-    return showModalBottomSheet<bool>(
+  Future<LegalProcess?> _showUploadConfirmation(
+    List<LegalProcess> procedures,
+    String? initialProcessId,
+  ) {
+    LegalProcess selectedProcess = procedures.firstWhere(
+      (p) => p.id == initialProcessId,
+      orElse: () => procedures.first,
+    );
+
+    return showModalBottomSheet<LegalProcess>(
       context: context,
       backgroundColor: AppColors.background,
+      isScrollControlled: true,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
       ),
       builder: (context) {
-        return SafeArea(
-          child: Padding(
-            padding: const EdgeInsets.all(24),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Container(
-                  padding: const EdgeInsets.all(16),
-                  decoration: BoxDecoration(
-                    color: AppColors.yellowSoft,
-                    shape: BoxShape.circle,
-                  ),
-                  child: const Icon(
-                    Icons.upload_file_rounded,
-                    color: AppColors.yellowDeep,
-                    size: 32,
-                  ),
-                ),
-                const SizedBox(height: 20),
-                Text('Confirmar Envio', style: AppTextStyles.h2),
-                const SizedBox(height: 8),
-                Text(
-                  'Voce esta prestes a adicionar um arquivo ao processo:',
-                  textAlign: TextAlign.center,
-                  style: AppTextStyles.body.copyWith(color: AppColors.ink3),
-                ),
-                const SizedBox(height: 12),
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 16,
-                    vertical: 12,
-                  ),
-                  decoration: BoxDecoration(
-                    color: AppColors.white,
-                    borderRadius: BorderRadius.circular(12),
-                    border: Border.all(color: AppColors.divider),
-                  ),
-                  child: Row(
-                    children: [
-                      Icon(process.icon, color: AppColors.primary, size: 20),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              process.title,
-                              style: AppTextStyles.body.copyWith(
-                                fontWeight: FontWeight.bold,
-                                color: AppColors.ink,
-                              ),
-                            ),
-                            if (process.processNumber != null)
-                              Text(
-                                'Nº ${process.processNumber}',
-                                style: AppTextStyles.tiny.copyWith(
-                                  color: AppColors.ink3,
-                                  fontSize: 11,
-                                ),
-                              ),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                const SizedBox(height: 24),
-                Row(
+        return StatefulBuilder(
+          builder: (context, setModalState) {
+            return SafeArea(
+              child: Padding(
+                padding: EdgeInsets.fromLTRB(24, 24, 24, MediaQuery.of(context).viewInsets.bottom + 24),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
                   children: [
-                    Expanded(
-                      child: TextButton(
-                        onPressed: () => Navigator.pop(context, false),
-                        style: TextButton.styleFrom(
-                          backgroundColor: AppColors.ink,
-                          foregroundColor: AppColors.white,
-                          padding: const EdgeInsets.symmetric(vertical: 16),
-                          textStyle: AppTextStyles.body.copyWith(
-                            fontWeight: FontWeight.bold,
-                          ),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                        ),
-                        child: const Text('Cancelar'),
+                    Container(
+                      padding: const EdgeInsets.all(16),
+                      decoration: const BoxDecoration(
+                        color: AppColors.yellowSoft,
+                        shape: BoxShape.circle,
+                      ),
+                      child: const Icon(
+                        Icons.upload_file_rounded,
+                        color: AppColors.yellowDeep,
+                        size: 32,
                       ),
                     ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: ElevatedButton(
-                        onPressed: () => Navigator.pop(context, true),
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: AppColors.yellow,
-                          foregroundColor: AppColors.ink,
-                          padding: const EdgeInsets.symmetric(vertical: 16),
-                          textStyle: AppTextStyles.body.copyWith(
-                            fontWeight: FontWeight.bold,
-                          ),
-                          elevation: 0,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12),
+                    const SizedBox(height: 20),
+                    Text('Confirmar Envio', style: AppTextStyles.h2),
+                    const SizedBox(height: 8),
+                    Text(
+                      'Selecione o processo de destino para este documento:',
+                      textAlign: TextAlign.center,
+                      style: AppTextStyles.body.copyWith(color: AppColors.ink3),
+                    ),
+                    const SizedBox(height: 16),
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+                      decoration: BoxDecoration(
+                        color: AppColors.white,
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(color: AppColors.divider),
+                      ),
+                      child: DropdownButtonHideUnderline(
+                        child: DropdownButton<LegalProcess>(
+                          value: selectedProcess,
+                          isExpanded: true,
+                          icon: const Icon(Icons.keyboard_arrow_down_rounded, color: AppColors.ink3),
+                          items: procedures.map((p) {
+                            return DropdownMenuItem<LegalProcess>(
+                              value: p,
+                              child: Row(
+                                children: [
+                                  Icon(p.icon, color: AppColors.primary, size: 20),
+                                  const SizedBox(width: 12),
+                                  Expanded(
+                                    child: Column(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      mainAxisAlignment: MainAxisAlignment.center,
+                                      children: [
+                                        Text(
+                                          p.title,
+                                          style: AppTextStyles.body.copyWith(
+                                            fontWeight: FontWeight.bold,
+                                            color: AppColors.ink,
+                                          ),
+                                          maxLines: 1,
+                                          overflow: TextOverflow.ellipsis,
+                                        ),
+                                        if (p.processNumber != null)
+                                          Text(
+                                            'Nº ${p.processNumber}',
+                                            style: AppTextStyles.tiny.copyWith(
+                                              color: AppColors.ink3,
+                                              fontSize: 11,
+                                            ),
+                                          ),
+                                      ],
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            );
+                          }).toList(),
+                          onChanged: (newProcess) {
+                            if (newProcess != null) {
+                              setModalState(() => selectedProcess = newProcess);
+                            }
+                          },
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 24),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: TextButton(
+                            onPressed: () => Navigator.pop(context, null),
+                            style: TextButton.styleFrom(
+                              backgroundColor: AppColors.ink,
+                              foregroundColor: AppColors.white,
+                              padding: const EdgeInsets.symmetric(vertical: 16),
+                              textStyle: AppTextStyles.body.copyWith(
+                                fontWeight: FontWeight.bold,
+                              ),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                            ),
+                            child: const Text('Cancelar'),
                           ),
                         ),
-                        child: const Text('Prosseguir'),
-                      ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: ElevatedButton(
+                            onPressed: () => Navigator.pop(context, selectedProcess),
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: AppColors.yellow,
+                              foregroundColor: AppColors.ink,
+                              padding: const EdgeInsets.symmetric(vertical: 16),
+                              elevation: 0,
+                              textStyle: AppTextStyles.body.copyWith(
+                                fontWeight: FontWeight.bold,
+                              ),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                            ),
+                            child: const Text('Confirmar'),
+                          ),
+                        ),
+                      ],
                     ),
                   ],
                 ),
-              ],
-            ),
-          ),
+              ),
+            );
+          },
         );
       },
     );
