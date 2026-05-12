@@ -48,4 +48,17 @@ export class AuthController {
       next(error);
     }
   };
+
+  logout: RequestHandler<any, { success: true }> = async (
+    req: AuthRequest<any, { success: true }>,
+    res: Response,
+    next: NextFunction
+  ) => {
+    try {
+      await this.authService.logout(req.user!.id);
+      return res.status(200).json({ success: true });
+    } catch (error) {
+      next(error);
+    }
+  };
 }

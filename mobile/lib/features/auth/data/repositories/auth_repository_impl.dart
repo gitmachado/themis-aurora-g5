@@ -1,3 +1,6 @@
+import 'dart:developer';
+
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:fpdart/fpdart.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:mobile/shared/errors/failures.dart';
@@ -140,6 +143,31 @@ final class AuthRepositoryImpl implements AuthRepository {
   @override
   Future<Either<Failure, Unit>> logout() {
     return guardRepositoryUnit(() async {
+      // G5-75: tell the server to wipe the FCM token first so a logged-out
+      // user keeps no push delivery target on the backend. Failures here
+      // must not block the local sign-out: the user expects logout to work
+      // even offline or with a flaky network.
+      try {
+        await _remoteDataSource.logout();
+      } catch (error, stack) {
+        log(
+          'Backend logout failed, proceeding with local sign-out',
+          error: error,
+          stackTrace: stack,
+        );
+      }
+
+      // Drop the device-side FCM token so Firebase rotates it on next sign-in.
+      try {
+        await FirebaseMessaging.instance.deleteToken();
+      } catch (error, stack) {
+        log(
+          'FirebaseMessaging.deleteToken failed during logout',
+          error: error,
+          stackTrace: stack,
+        );
+      }
+
       await _tokenStorage.clearToken();
       await _ensureGoogleSignInInitialized();
       await GoogleSignIn.instance.signOut();

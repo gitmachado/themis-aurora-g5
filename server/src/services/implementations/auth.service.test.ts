@@ -171,6 +171,51 @@ test('register hashes password and creates user with role CLIENT', async () => {
   assert.ok(result.token.length > 0);
 });
 
+test('logout clears the user fcmToken when one is present', async () => {
+  let updatePatch: any;
+  const service = new AuthService({
+    findById: async () => ({ ...baseUser, fcmToken: 'fcm-xyz' }),
+    update: async (_id: string, data: any) => {
+      updatePatch = data;
+      return { ...baseUser, ...data };
+    },
+  } as any);
+
+  await service.logout('user-1');
+
+  assert.deepEqual(updatePatch, { fcmToken: null });
+});
+
+test('logout is a no-op when user already has no fcmToken', async () => {
+  let updateCalled = false;
+  const service = new AuthService({
+    findById: async () => ({ ...baseUser, fcmToken: null }),
+    update: async () => {
+      updateCalled = true;
+      return baseUser;
+    },
+  } as any);
+
+  await service.logout('user-1');
+
+  assert.equal(updateCalled, false);
+});
+
+test('logout silently ignores unknown users (defensive)', async () => {
+  let updateCalled = false;
+  const service = new AuthService({
+    findById: async () => null,
+    update: async () => {
+      updateCalled = true;
+      return baseUser;
+    },
+  } as any);
+
+  await service.logout('ghost');
+
+  assert.equal(updateCalled, false);
+});
+
 test('generateTempPassword returns an 8-char uppercase string', () => {
   const service = new AuthService({} as any);
 

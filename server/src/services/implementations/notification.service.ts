@@ -6,6 +6,7 @@ import type { Notification } from '@models';
 import type { CreateNotificationDTO } from '@dtos';
 import { NotFoundError } from './errors';
 import { eventBus } from '../communication/InternalEventBus';
+import { isRoleAllowedForNotificationType } from './notification-routing';
 
 export class NotificationService implements INotificationService {
   constructor(
@@ -14,7 +15,26 @@ export class NotificationService implements INotificationService {
     private readonly pushNotificationService: PushNotificationService
   ) {}
 
-  async send(dto: CreateNotificationDTO): Promise<Notification> {
+  async send(dto: CreateNotificationDTO): Promise<Notification | null> {
+    // G5-75: never dispatch to a user that does not exist — protects against
+    // bot/AI/legacy flows that may have stale userIds in their state.
+    const targetUser = await this.userRepository.findById(dto.userId);
+    if (!targetUser) {
+      console.warn(
+        `[NotificationService] Skipping notification for unknown user "${dto.userId}" (type=${dto.type || 'SYSTEM'})`
+      );
+      return null;
+    }
+
+    // G5-75: enforce role-based routing so push alerts intended for lawyers
+    // (NEW_LEAD, HUMAN_SUPPORT, DOCUMENT_SENT) never reach clients and vice-versa.
+    if (!isRoleAllowedForNotificationType(dto.type, targetUser.role)) {
+      console.warn(
+        `[NotificationService] Blocked routing of "${dto.type}" to ${targetUser.role} user "${dto.userId}"`
+      );
+      return null;
+    }
+
     const notification = await this.notificationRepository.create({
       userId: dto.userId,
       title: dto.title,
@@ -27,10 +47,27 @@ export class NotificationService implements INotificationService {
     // Notify via Socket.io
     eventBus.emitNotification(dto.userId, notification);
 
-    // Integrated Push Trigger
-    await this.sendPush(dto.userId, dto.title, dto.body);
+    // Integrated Push Trigger (passes the already-loaded user to avoid a second lookup)
+    await this.sendPushToUser(targetUser, dto.title, dto.body);
 
     return notification;
+  }
+
+  private async sendPushToUser(
+    user: { fcmToken: string | null },
+    title: string,
+    body: string
+  ): Promise<void> {
+    if (!user.fcmToken) return;
+    try {
+      await this.pushNotificationService.sendPushNotification({
+        token: user.fcmToken,
+        title,
+        body,
+      });
+    } catch (error) {
+      console.error('[NotificationService] Error sending push notification:', error);
+    }
   }
 
   async sendPush(userId: string, title: string, body: string): Promise<void> {

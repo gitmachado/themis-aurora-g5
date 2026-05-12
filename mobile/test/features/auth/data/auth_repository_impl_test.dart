@@ -32,7 +32,8 @@ void main() {
         'email': 'lucas@example.com',
         'role': 'CLIENT',
         'notificationPreferences': {'documents': false},
-      };
+      }
+      ..jsonResponses['POST /auth/logout'] = const <String, dynamic>{};
     final tokenStorage = FakeTokenStorage();
     final repository = AuthRepositoryImpl(
       remoteDataSource: AuthRemoteDataSource(apiClient),
@@ -58,7 +59,7 @@ void main() {
       'email': 'lucas@example.com',
       'password': 'secret123',
     });
-    expect(apiClient.calls.last.path, '/account');
+    expect(apiClient.calls.last.path, '/auth/logout');
     expect(session.userId, 'account-user-id');
     expect(session.role, UserRole.client);
     expect(session.account?.cpf, '12345678900');
@@ -71,6 +72,7 @@ void main() {
       'GET /account',
       'PATCH /account/notification-preferences',
       'GET /account',
+      'POST /auth/logout',
     ]);
     expect(apiClient.calls[2].data, {
       'notificationPreferences': {'documents': false},
