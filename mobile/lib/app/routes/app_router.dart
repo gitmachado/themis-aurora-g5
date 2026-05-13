@@ -24,6 +24,7 @@ import '../../features/lawyer/chat/presentation/screens/lawyer_chat_handoff_scre
 import '../../features/lawyer/clients/presentation/screens/lawyer_client_detail_screen.dart';
 import '../../features/lawyer/team/presentation/screens/team_add_screen.dart';
 import '../../features/lawyer/team/presentation/screens/team_member_screen.dart';
+import '../../features/lawyer/schedule/presentation/screens/lawyer_schedule_screen.dart';
 import '../../shared/widgets/layout/client_main_layout.dart';
 import '../../shared/widgets/layout/lawyer_main_layout.dart';
 
@@ -49,6 +50,7 @@ final class AppRouter {
   static const String lawyerChatsRoute = '/lawyer-chats';
   static const String lawyerAIManagerRoute = '/lawyer-ai-manager';
   static const String lawyerChatHandoffRoute = '/lawyer-chat-handoff';
+  static const String lawyerScheduleRoute = '/lawyer-schedule';
   static const String procedureListRoute = '/procedure-list';
   static const String procedureTimelineRoute = '/procedure-timeline';
   static const String filesRoute = '/files';
@@ -234,6 +236,11 @@ final class AppRouter {
             clientName: args?['clientName'] as String? ?? 'Cliente',
             whatsappNumber: args?['whatsappNumber'] as String? ?? '',
           ),
+          settings: settings,
+        );
+      case lawyerScheduleRoute:
+        return MaterialPageRoute<void>(
+          builder: (_) => const LawyerScheduleScreen(),
           settings: settings,
         );
       case designSystemRoute:
