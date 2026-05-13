@@ -39,6 +39,10 @@ class LawyerOverviewScreen extends ConsumerWidget {
     return Scaffold(
       backgroundColor: AppColors.background,
       floatingActionButton: FloatingActionButton.extended(
+        // Explicit heroTag avoids the "multiple heroes share the same tag"
+        // error when other screens in the lawyer flow also expose a FAB
+        // (they all default to <default FloatingActionButton tag>).
+        heroTag: 'lawyer_overview_ai_fab',
         onPressed: () =>
             Navigator.pushNamed(context, AppRouter.lawyerAIChatRoute),
         backgroundColor: AppColors.ink,
