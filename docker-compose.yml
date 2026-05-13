@@ -30,6 +30,7 @@ services:
     environment:
       DB_HOST: postgres
       DB_PORT: 5432
+      AI_MODULE_URL: http://ai:3005
     ports:
       - "3000:3000"
     volumes:
