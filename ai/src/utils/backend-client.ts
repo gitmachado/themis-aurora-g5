@@ -13,6 +13,23 @@ const client: AxiosInstance = axios.create({
   timeout: 10000,
 });
 
+/**
+ * Re-lança erros do backend como Error com .status e a melhor mensagem
+ * disponível. O backend responde indistintamente com { error } (rotas REST
+ * novas) ou { message } (algumas rotas antigas), por isso checamos ambos.
+ */
+function throwHttp(error: any): never {
+  const status = error.response?.status || 500;
+  const message =
+    error.response?.data?.error ||
+    error.response?.data?.message ||
+    error.message ||
+    "Erro desconhecido";
+  const err = new Error(message) as any;
+  err.status = status;
+  throw err;
+}
+
 // ── Usuários ──
 
 export async function checkUserByCpf(cpf: string): Promise<{
@@ -102,11 +119,7 @@ export async function getProcessesByLawyer(lawyerId: string): Promise<any[]> {
     });
     return res.data;
   } catch (error: any) {
-    const status = error.response?.status || 500;
-    const message = error.response?.data?.message || error.message || "Erro desconhecido";
-    const err = new Error(message) as any;
-    err.status = status;
-    throw err;
+    throwHttp(error);
   }
 }
 
@@ -115,11 +128,7 @@ export async function getProcessById(processId: string): Promise<ProcessDetail> 
     const res = await client.get(`/process/${processId}`);
     return res.data;
   } catch (error: any) {
-    const status = error.response?.status || 500;
-    const message = error.response?.data?.message || error.message || "Erro desconhecido";
-    const err = new Error(message) as any;
-    err.status = status;
-    throw err;
+    throwHttp(error);
   }
 }
 
@@ -129,18 +138,6 @@ export async function getProcessById(processId: string): Promise<ProcessDetail> 
 // re-validates that `lawyerId` actually owns the target process, so a
 // hallucinated lawyerId here translates to a 404, not a silent cross-tenant
 // write.
-
-function throwHttp(error: any): never {
-  const status = error.response?.status || 500;
-  const message =
-    error.response?.data?.error ||
-    error.response?.data?.message ||
-    error.message ||
-    "Erro desconhecido";
-  const err = new Error(message) as any;
-  err.status = status;
-  throw err;
-}
 
 export async function updateProcessStatus(
   processId: string,
