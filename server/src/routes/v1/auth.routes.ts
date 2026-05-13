@@ -4,6 +4,7 @@ import { AuthService } from '../../services/implementations/auth.service';
 import { UserRepository } from '../../repositories/implementations/user.repository';
 import { validate } from '../../middlewares/implementations/validationMiddleware';
 import { loginSchema, registerSchema } from '../../types/dtos/schemas';
+import { authMiddleware } from '../../middlewares/implementations/authMiddleware';
 
 const router = Router();
 const userRepository = new UserRepository();
@@ -95,5 +96,25 @@ router.post('/register', validate(registerSchema), controller.register);
  *         description: Token inválido ou usuário não cadastrado
  */
 router.post('/google', controller.googleSignIn);
+
+/**
+ * @openapi
+ * /auth/logout:
+ *   post:
+ *     summary: Encerra a sessão do usuário e limpa o token FCM no servidor
+ *     description: |
+ *       Limpa o `fcmToken` armazenado para o usuário autenticado, evitando que
+ *       notificações push destinadas a ele sejam entregues no dispositivo após
+ *       o logout. O cliente é responsável por descartar o JWT local.
+ *     tags: [Autenticação]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Sessão encerrada com sucesso
+ *       401:
+ *         description: Token ausente ou inválido
+ */
+router.post('/logout', authMiddleware, controller.logout);
 
 export default router;
