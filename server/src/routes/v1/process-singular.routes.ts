@@ -48,10 +48,14 @@ router.get('/:id', apiKeyMiddleware, async (req: Request, res: Response, next: N
     // Load client info
     const clientUser = await userRepository.findById(process.clientId);
     
-    // Load timeline events
+    // Load timeline events. Cap at the 20 most recent so old processes don't
+    // bloat the AI context window (this endpoint feeds the lawyer-chat tool)
+    // and so the field actually matches its name (`recentTimeline`).
     const events = await timelineService.getByLegalProcess(id);
+    const RECENT_TIMELINE_LIMIT = 20;
     const recentTimeline = events
       .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime())
+      .slice(0, RECENT_TIMELINE_LIMIT)
       .map(e => ({
         data: e.createdAt.toISOString(),
         descricao: e.content,
