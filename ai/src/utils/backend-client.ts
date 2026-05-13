@@ -123,3 +123,39 @@ export async function getBotConfig(): Promise<{
   const res = await client.get("/bot/configurations");
   return res.data;
 }
+
+// ── Agenda/Compromissos ──
+
+export interface AvailableSlot {
+  time: string;
+  isoTime: string;
+}
+
+export async function getAvailableSlots(
+  lawyerId: string,
+  date: string
+): Promise<AvailableSlot[]> {
+  const res = await client.get(`/appointments/slots`, {
+    params: {
+      lawyerId,
+      date,
+    },
+  });
+  return res.data.slots || [];
+}
+
+export async function scheduleAppointment(data: {
+  lawyerId: string;
+  clientId: string;
+  title: string;
+  description: string;
+  type: "MEETING" | "DEADLINE" | "HEARING" | "OTHER";
+  scheduledAt: string;
+  durationMinutes: number;
+}): Promise<{ id: string; scheduledAt: string }> {
+  const res = await client.post("/appointments", data);
+  return {
+    id: res.data.id,
+    scheduledAt: res.data.scheduledAt,
+  };
+}
