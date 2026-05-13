@@ -53,8 +53,17 @@ export type NotificationType =
   | 'DOCUMENT_SENT'
   | 'DOCUMENT_REQUESTED'
   | 'NEW_NOTE'
-  | 'HUMAN_SUPPORT';
+  | 'HUMAN_SUPPORT'
+  | 'DEADLINE_WARNING'
+  | 'APPOINTMENT_SCHEDULED'
+  | 'APPOINTMENT_CHANGED';
 
 /** Who sent the message in the chat */
 export type MessageSender = 'BOT' | 'CLIENT' | 'LAWYER';
+
+/** Types of appointments in the schedule */
+export type AppointmentType = 'MEETING' | 'DEADLINE' | 'HEARING' | 'OTHER';
+
+/** Status of an appointment */
+export type AppointmentStatus = 'SCHEDULED' | 'COMPLETED' | 'CANCELED';
 

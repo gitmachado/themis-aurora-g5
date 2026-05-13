@@ -11,6 +11,9 @@ const ROUTING_RULES: Record<NotificationType, ReadonlyArray<UserRole>> = {
   DOCUMENT_REQUESTED: CLIENT_ONLY,
   NEW_NOTE: CLIENT_ONLY,
   STATUS_CHANGED: ANY_ROLE,
+  DEADLINE_WARNING: LAWYER_ONLY,
+  APPOINTMENT_SCHEDULED: ANY_ROLE,
+  APPOINTMENT_CHANGED: ANY_ROLE,
 };
 
 export function isRoleAllowedForNotificationType(
