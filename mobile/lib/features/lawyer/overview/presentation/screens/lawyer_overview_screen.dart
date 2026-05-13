@@ -38,6 +38,17 @@ class LawyerOverviewScreen extends ConsumerWidget {
 
     return Scaffold(
       backgroundColor: AppColors.background,
+      floatingActionButton: FloatingActionButton.extended(
+        onPressed: () =>
+            Navigator.pushNamed(context, AppRouter.lawyerAIChatRoute),
+        backgroundColor: AppColors.ink,
+        foregroundColor: AppColors.yellow,
+        icon: const Icon(Icons.smart_toy_rounded),
+        label: const Text(
+          'Themis IA',
+          style: TextStyle(fontWeight: FontWeight.bold),
+        ),
+      ),
       body: Column(
         children: [
           AppDashboardHeader(
