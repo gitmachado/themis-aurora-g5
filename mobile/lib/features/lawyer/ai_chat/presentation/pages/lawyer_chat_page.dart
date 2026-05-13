@@ -148,10 +148,7 @@ class _LawyerChatPageState extends ConsumerState<LawyerChatPage> {
         actions: [
           IconButton(
             tooltip: 'Limpar conversa',
-            icon: const Icon(
-              Icons.delete_sweep_outlined,
-              color: AppColors.ink,
-            ),
+            icon: const Icon(Icons.delete_sweep_outlined, color: AppColors.ink),
             onPressed: chatState.messages.isEmpty
                 ? null
                 : () => _confirmClearConversation(),
@@ -362,7 +359,7 @@ class _LawyerChatPageState extends ConsumerState<LawyerChatPage> {
                   ),
                   blockSpacing: 6,
                 ),
-                onTapLink: (_, href, __) async {
+                onTapLink: (_, href, _) async {
                   // Could plug url_launcher here if we want clickable links.
                 },
               ),
