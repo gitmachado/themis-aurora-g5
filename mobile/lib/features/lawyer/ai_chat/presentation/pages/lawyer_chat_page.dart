@@ -29,6 +29,10 @@ class _LawyerChatPageState extends ConsumerState<LawyerChatPage> {
   void _onSend() {
     final text = _textController.text.trim();
     if (text.isEmpty) return;
+    // Prevent concurrent sends if the user spams Enter while waiting:
+    // the visual send button already disables, but `onSubmitted` from the
+    // keyboard slipped through and could race the in-flight request.
+    if (ref.read(lawyerChatProvider).isLoading) return;
 
     _textController.clear();
     _focusNode.requestFocus();
@@ -119,7 +123,7 @@ class _LawyerChatPageState extends ConsumerState<LawyerChatPage> {
               width: 10,
               height: 10,
               decoration: const BoxDecoration(
-                color: Color(0xFF3F7D58), // Green online indicator
+                color: AppColors.success,
                 shape: BoxShape.circle,
               ),
             ),
@@ -425,8 +429,9 @@ class _LawyerChatPageState extends ConsumerState<LawyerChatPage> {
               child: TextField(
                 controller: _textController,
                 focusNode: _focusNode,
+                enabled: !isLoading,
                 textInputAction: TextInputAction.send,
-                onSubmitted: (_) => _onSend(),
+                onSubmitted: isLoading ? null : (_) => _onSend(),
                 style: AppTextStyles.body.copyWith(
                   fontSize: 15,
                   color: AppColors.ink,
@@ -444,20 +449,21 @@ class _LawyerChatPageState extends ConsumerState<LawyerChatPage> {
             ),
           ),
           const SizedBox(width: 8),
-          GestureDetector(
-            onTap: isLoading ? null : _onSend,
-            child: Container(
+          IconButton(
+            tooltip: 'Enviar',
+            onPressed: isLoading ? null : _onSend,
+            iconSize: 20,
+            // Forces a 48x48 minimum tap target per Material/WCAG guidance,
+            // and brings ripple feedback that GestureDetector lacked.
+            constraints: const BoxConstraints(minWidth: 48, minHeight: 48),
+            style: IconButton.styleFrom(
+              backgroundColor: AppColors.ink,
+              disabledBackgroundColor: AppColors.ink4,
+              foregroundColor: Colors.white,
+              shape: const CircleBorder(),
               padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                color: isLoading ? AppColors.ink4 : AppColors.ink,
-                shape: BoxShape.circle,
-              ),
-              child: const Icon(
-                Icons.send_rounded,
-                color: Colors.white,
-                size: 20,
-              ),
             ),
+            icon: const Icon(Icons.send_rounded),
           ),
         ],
       ),
