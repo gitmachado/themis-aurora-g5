@@ -84,16 +84,19 @@ router.post(
           return;
         }
 
+        // Network/DNS/connection failure: upstream is unreachable, not a timeout.
+        // Use 502 so troubleshooting (logs, dashboards) can tell the failure modes apart.
         console.error(`[AI Route] Erro ao conectar com o serviço de IA (${aiChatUrl}):`, fetchError);
-        res.status(504).json({ error: 'O assistente IA demorou demais para responder. Tente novamente.' });
+        res.status(502).json({ error: 'O assistente IA está indisponível no momento. Tente novamente em instantes.' });
         return;
       } finally {
         clearTimeout(timeoutId);
       }
 
       if (!response.ok) {
-        console.error(`[AI Route] Resposta inválida do módulo IA (${response.status}): ${response.statusText}`);
-        res.status(504).json({ error: 'O assistente IA demorou demais para responder. Tente novamente.' });
+        // Upstream replied but with an error status — treat as bad gateway.
+        console.error(`[AI Route] Resposta invalida do modulo IA (${response.status}): ${response.statusText}`);
+        res.status(502).json({ error: 'O assistente IA retornou um erro. Tente novamente em instantes.' });
         return;
       }
 
@@ -101,8 +104,8 @@ router.post(
       const reply = responseData.reply;
 
       if (!reply) {
-        console.error('[AI Route] Resposta vazia ou inválida recebida do módulo IA:', responseData);
-        res.status(504).json({ error: 'O assistente IA demorou demais para responder. Tente novamente.' });
+        console.error('[AI Route] Resposta vazia ou invalida recebida do modulo IA:', responseData);
+        res.status(502).json({ error: 'O assistente IA retornou uma resposta vazia. Tente novamente.' });
         return;
       }
 
