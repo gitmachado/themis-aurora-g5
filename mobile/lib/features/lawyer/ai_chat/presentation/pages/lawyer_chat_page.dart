@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_markdown/flutter_markdown.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:mobile/shared/constants/app_colors.dart';
 import 'package:mobile/shared/constants/app_text_styles.dart';
@@ -36,6 +37,36 @@ class _LawyerChatPageState extends ConsumerState<LawyerChatPage> {
 
   void _sendSuggestion(String text) {
     ref.read(lawyerChatProvider.notifier).sendMessage(text);
+  }
+
+  Future<void> _confirmClearConversation() async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        backgroundColor: AppColors.surface,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        title: const Text('Limpar conversa'),
+        content: const Text(
+          'Tem certeza que deseja apagar todas as mensagens desta conversa? '
+          'Essa ação não pode ser desfeita.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(dialogContext).pop(false),
+            child: const Text('Cancelar'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.of(dialogContext).pop(true),
+            style: TextButton.styleFrom(foregroundColor: AppColors.error),
+            child: const Text('Limpar'),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed == true && mounted) {
+      ref.read(lawyerChatProvider.notifier).clearConversation();
+    }
   }
 
   @override
@@ -110,6 +141,18 @@ class _LawyerChatPageState extends ConsumerState<LawyerChatPage> {
             ),
           ],
         ),
+        actions: [
+          IconButton(
+            tooltip: 'Limpar conversa',
+            icon: const Icon(
+              Icons.delete_sweep_outlined,
+              color: AppColors.ink,
+            ),
+            onPressed: chatState.messages.isEmpty
+                ? null
+                : () => _confirmClearConversation(),
+          ),
+        ],
         bottom: PreferredSize(
           preferredSize: const Size.fromHeight(1.0),
           child: Container(color: AppColors.border, height: 1.0),
@@ -260,14 +303,65 @@ class _LawyerChatPageState extends ConsumerState<LawyerChatPage> {
               ),
           ],
         ),
-        child: Text(
-          message.content,
-          style: AppTextStyles.body.copyWith(
-            color: textColor,
-            fontSize: 15,
-            height: 1.35,
-          ),
-        ),
+        child: isMe
+            ? Text(
+                message.content,
+                style: AppTextStyles.body.copyWith(
+                  color: textColor,
+                  fontSize: 15,
+                  height: 1.35,
+                ),
+              )
+            : MarkdownBody(
+                data: message.content,
+                selectable: true,
+                styleSheet: MarkdownStyleSheet(
+                  p: AppTextStyles.body.copyWith(
+                    color: textColor,
+                    fontSize: 15,
+                    height: 1.35,
+                  ),
+                  strong: AppTextStyles.body.copyWith(
+                    color: textColor,
+                    fontSize: 15,
+                    height: 1.35,
+                    fontWeight: FontWeight.w700,
+                  ),
+                  em: AppTextStyles.body.copyWith(
+                    color: textColor,
+                    fontSize: 15,
+                    height: 1.35,
+                    fontStyle: FontStyle.italic,
+                  ),
+                  listBullet: AppTextStyles.body.copyWith(
+                    color: textColor,
+                    fontSize: 15,
+                    height: 1.35,
+                  ),
+                  h1: AppTextStyles.h2.copyWith(color: textColor, fontSize: 18),
+                  h2: AppTextStyles.h2.copyWith(color: textColor, fontSize: 17),
+                  h3: AppTextStyles.h2.copyWith(color: textColor, fontSize: 16),
+                  code: AppTextStyles.body.copyWith(
+                    color: textColor,
+                    fontSize: 14,
+                    fontFamily: 'monospace',
+                    backgroundColor: AppColors.surface,
+                  ),
+                  codeblockDecoration: BoxDecoration(
+                    color: AppColors.surface,
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  blockquote: AppTextStyles.body.copyWith(
+                    color: AppColors.ink3,
+                    fontSize: 15,
+                    fontStyle: FontStyle.italic,
+                  ),
+                  blockSpacing: 6,
+                ),
+                onTapLink: (_, href, __) async {
+                  // Could plug url_launcher here if we want clickable links.
+                },
+              ),
       ),
     );
   }

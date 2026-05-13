@@ -88,6 +88,10 @@ class LawyerChatNotifier extends StateNotifier<LawyerChatState> {
     state = state.copyWith(clearError: true);
   }
 
+  void clearConversation() {
+    state = LawyerChatState.initial();
+  }
+
   String _mapFailureToMessage(Failure failure) {
     if (failure.message.contains('timeout') ||
         failure.message.contains('demorou') ||
