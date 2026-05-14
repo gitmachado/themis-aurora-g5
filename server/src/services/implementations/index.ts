@@ -1,3 +1,4 @@
+export * from './appointment.service';
 export * from './auth.service';
 export * from './configuration.service';
 export * from './document.service';

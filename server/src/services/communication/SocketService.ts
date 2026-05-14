@@ -124,6 +124,47 @@ export class SocketService {
     eventBus.on('procedure:updated', ({ userId, procedure }) => {
       this.io?.to(`user:${userId}`).emit('procedure:updated', procedure);
     });
+
+    // Appointment events
+    eventBus.on('appointment:created', ({ userId, appointment }) => {
+      this.io?.to(`user:${userId}`).emit('appointment:created', appointment);
+    });
+
+    eventBus.on('appointment:updated', ({ userId, appointment }) => {
+      this.io?.to(`user:${userId}`).emit('appointment:updated', appointment);
+    });
+
+    eventBus.on('appointment:deleted', ({ userId, appointmentId }) => {
+      this.io?.to(`user:${userId}`).emit('appointment:deleted', { appointmentId });
+    });
+
+    eventBus.on('appointment:approved', ({ lawyerId, appointment }) => {
+      this.io?.to(`user:${lawyerId}`).emit('appointment:approved', appointment);
+    });
+
+    eventBus.on('appointment:rejected', ({ lawyerId, appointmentId }) => {
+      this.io?.to(`user:${lawyerId}`).emit('appointment:rejected', { appointmentId });
+    });
+
+    eventBus.on('pending:appointments:updated', ({ lawyerId }) => {
+      this.io?.to(`user:${lawyerId}`).emit('pending:appointments:updated', {});
+    });
+
+    eventBus.on('deadline:reminder', ({ userId, appointment }) => {
+      this.io?.to(`user:${userId}`).emit('deadline:reminder', appointment);
+    });
+
+    eventBus.on('reschedule:requested', ({ lawyerId, suggestion }) => {
+      this.io?.to(`user:${lawyerId}`).emit('reschedule:requested', suggestion);
+    });
+
+    eventBus.on('reschedule:accepted', ({ lawyerId, appointment }) => {
+      this.io?.to(`user:${lawyerId}`).emit('reschedule:accepted', appointment);
+    });
+
+    eventBus.on('reschedule:rejected', ({ lawyerId, suggestionId }) => {
+      this.io?.to(`user:${lawyerId}`).emit('reschedule:rejected', { suggestionId });
+    });
   }
 
   public getIO(): SocketIOServer | null {

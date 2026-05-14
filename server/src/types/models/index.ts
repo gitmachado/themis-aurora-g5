@@ -1,3 +1,4 @@
+export * from './src/appointment.model';
 export * from './src/configuration.model';
 export * from './src/document.model';
 export * from './src/lead.model';
