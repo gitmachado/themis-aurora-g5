@@ -214,17 +214,36 @@ export class UserRepository implements IUserRepository {
       // 3. Delete the legal processes themselves
       await client.query('DELETE FROM legal_processes WHERE client_id = $1', [id]);
 
-      // 4. Delete notifications
+      // 4. Delete reschedule suggestions and appointments
+      // First get all appointment IDs for this client
+      const appointmentRes = await client.query(
+        'SELECT id FROM appointments WHERE client_id = $1',
+        [id]
+      );
+      const appointmentIds = appointmentRes.rows.map((row) => row.id);
+
+      // Delete reschedule suggestions for these appointments
+      if (appointmentIds.length > 0) {
+        await client.query(
+          `DELETE FROM ai_reschedule_suggestions WHERE appointment_id = ANY($1)`,
+          [appointmentIds]
+        );
+      }
+
+      // Delete appointments for this client
+      await client.query('DELETE FROM appointments WHERE client_id = $1', [id]);
+
+      // 5. Delete notifications
       await client.query('DELETE FROM notifications WHERE user_id = $1', [id]);
 
       if (whatsappNumber) {
-        // 5. Delete messages (even if sender is BOT or LAWYER but tied to this number)
+        // 6. Delete messages (even if sender is BOT or LAWYER but tied to this number)
         await client.query('DELETE FROM messages WHERE whatsapp_number = $1 OR user_id = $2', [whatsappNumber, id]);
 
-        // 6. Delete leads
+        // 7. Delete leads
         await client.query('DELETE FROM leads WHERE whatsapp_number = $1', [whatsappNumber]);
 
-        // 7. Wipe AI memory (LangGraph checkpoints)
+        // 8. Wipe AI memory (LangGraph checkpoints)
         // Ignoring errors if tables don't exist yet
         try {
           await client.query('DELETE FROM checkpoints WHERE thread_id = $1', [whatsappNumber]);
@@ -236,7 +255,7 @@ export class UserRepository implements IUserRepository {
         }
       }
 
-      // 8. Finally delete the user
+      // 9. Finally delete the user
       await client.query('DELETE FROM users WHERE id = $1', [id]);
 
       await client.query('COMMIT');
