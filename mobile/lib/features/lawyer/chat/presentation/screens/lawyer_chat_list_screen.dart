@@ -60,10 +60,20 @@ class LawyerChatListScreen extends ConsumerWidget {
       ),
       child: Scaffold(
         backgroundColor: AppColors.background,
-        appBar: const CustomAppBar(
+        appBar: CustomAppBar(
           title: 'Mensagens',
           showBackButton: true,
           backgroundColor: Colors.white,
+          actions: [
+            IconButton(
+              icon: const Icon(Icons.smart_toy_rounded, color: AppColors.ink),
+              tooltip: 'Assistente Themis AI',
+              onPressed: () => Navigator.pushNamed(
+                context,
+                AppRouter.lawyerAIChatRoute,
+              ),
+            ),
+          ],
         ),
         body: Column(
           children: [

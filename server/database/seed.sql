@@ -11,6 +11,7 @@ SET client_encoding = 'UTF8';
 
 -- Limpa tudo (ordem da CASCADE não importa). Mantém schema_migrations.
 TRUNCATE TABLE
+  appointments,
   knowledge_embeddings,
   notifications,
   messages,
@@ -285,3 +286,42 @@ INSERT INTO notifications (user_id, type, title, body, is_read, created_at)
 VALUES
   ('33333333-3333-4333-8333-333333333333', 'STATUS_CHANGED',     'Processo em análise',    'Seu processo "Ação de Divórcio Consensual" agora está em análise.', FALSE, NOW() - INTERVAL '5 days'),
   ('33333333-3333-4333-8333-333333333333', 'DOCUMENT_REQUESTED', 'Documento solicitado',   'Por favor envie a certidão de casamento atualizada.',                FALSE, NOW() - INTERVAL '3 days');
+
+-- -----------------------------------------------------------------------------
+-- 8. Appointments (Agenda do advogado)
+-- -----------------------------------------------------------------------------
+INSERT INTO appointments (id, lawyer_id, client_id, process_id, title, description, type, scheduled_at, duration_minutes)
+VALUES
+  (
+    'bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbb1',
+    '11111111-1111-4111-8111-111111111111',
+    '33333333-3333-4333-8333-333333333333',
+    'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa1',
+    'Reunião de Alinhamento com João',
+    'Discutir os termos da partilha de bens.',
+    'MEETING',
+    NOW() + INTERVAL '1 day',
+    60
+  ),
+  (
+    'bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbb2',
+    '11111111-1111-4111-8111-111111111111',
+    NULL,
+    'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa1',
+    'Prazo: Contestação de Provas',
+    'Protocolar os documentos finais da vara familiar.',
+    'DEADLINE',
+    NOW() + INTERVAL '2 days',
+    120
+  ),
+  (
+    'bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbb3',
+    '22222222-2222-4222-8222-222222222222',
+    '33333333-3333-4333-8333-333333333333',
+    'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa2',
+    'Audiência Trabalhista',
+    'Vara do Trabalho - conciliação.',
+    'HEARING',
+    NOW() + INTERVAL '3 days',
+    60
+  );

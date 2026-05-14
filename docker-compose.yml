@@ -10,6 +10,7 @@ services:
       - postgres_data:/var/lib/postgresql/data
       - ./server/database/schema.sql:/docker-entrypoint-initdb.d/01-schema.sql:ro
       - ./server/database/seed.sql:/docker-entrypoint-initdb.d/02-seed.sql:ro
+      - ./server/database/migrations/202605131600_add_appointment_approval_workflow.sql:/docker-entrypoint-initdb.d/03-add_appointment_approval_workflow.sql:ro
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB"]
       interval: 5s

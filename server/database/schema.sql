@@ -121,7 +121,7 @@ CREATE TABLE IF NOT EXISTS messages (
 CREATE TABLE IF NOT EXISTS notifications (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-    type TEXT NOT NULL CHECK (type IN ('NEW_LEAD', 'STATUS_CHANGED', 'DOCUMENT_SENT', 'HUMAN_SUPPORT', 'DOCUMENT_REQUESTED', 'NEW_NOTE')),
+    type TEXT NOT NULL CHECK (type IN ('NEW_LEAD', 'STATUS_CHANGED', 'DOCUMENT_SENT', 'HUMAN_SUPPORT', 'DOCUMENT_REQUESTED', 'NEW_NOTE', 'APPOINTMENT_SCHEDULED', 'APPOINTMENT_PENDING')),
     title TEXT NOT NULL,
     body TEXT NOT NULL,
     is_read BOOLEAN DEFAULT FALSE,
@@ -173,3 +173,25 @@ CREATE TABLE IF NOT EXISTS knowledge_embeddings (
 CREATE INDEX IF NOT EXISTS idx_knowledge_embedding_hnsw
 ON knowledge_embeddings
 USING hnsw (embedding vector_cosine_ops);
+
+-- 10. Appointments
+CREATE TABLE IF NOT EXISTS appointments (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    lawyer_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    client_id UUID REFERENCES users(id) ON DELETE SET NULL,
+    process_id UUID REFERENCES legal_processes(id) ON DELETE SET NULL,
+    title VARCHAR(255) NOT NULL,
+    description TEXT,
+    type VARCHAR(20) NOT NULL CHECK (type IN ('MEETING', 'DEADLINE', 'HEARING', 'OTHER')),
+    scheduled_at TIMESTAMPTZ NOT NULL,
+    duration_minutes INTEGER DEFAULT 60,
+    status VARCHAR(20) NOT NULL DEFAULT 'SCHEDULED' CHECK (status IN ('SCHEDULED', 'COMPLETED', 'CANCELED', 'PENDING_APPROVAL')),
+    reminded BOOLEAN NOT NULL DEFAULT FALSE,
+    client_name VARCHAR(255),
+    client_whatsapp_number VARCHAR(20),
+    created_at TIMESTAMPTZ DEFAULT NOW(),
+    updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+DROP TRIGGER IF EXISTS update_appointments_updated_at ON appointments;
+CREATE TRIGGER update_appointments_updated_at BEFORE UPDATE ON appointments FOR EACH ROW EXECUTE PROCEDURE update_updated_at_column();

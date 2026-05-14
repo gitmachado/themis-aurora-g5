@@ -1,3 +1,4 @@
+export * from './appointment.schema';
 export * from './auth.schema';
 export * from './lead.schema';
 export * from './process.schema';

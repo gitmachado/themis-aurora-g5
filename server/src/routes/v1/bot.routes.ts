@@ -1,6 +1,7 @@
-import { Router } from 'express';
+import { Router, Request, Response, NextFunction } from 'express';
 import { BotController } from '../../controllers/implementations/bot.controller';
 import { UserService, LegalProcessService, NotificationService } from '@services';
+import { AppointmentService } from '../../services/implementations/appointment.service';
 import { ConfigurationService } from '../../services/implementations/configuration.service';
 import { PushNotificationService } from '../../services/notifications/push_notification_service';
 import {
@@ -9,6 +10,7 @@ import {
   NotificationRepository,
   TimelineEventRepository,
   LeadRepository,
+  AppointmentRepository,
 } from '@repositories';
 import { ConfigurationRepository } from '../../repositories/implementations/configuration.repository';
 import { TimelineService } from '../../services/implementations/timeline.service';
@@ -23,6 +25,7 @@ const timelineRepository = new TimelineEventRepository();
 const notificationRepository = new NotificationRepository();
 const configurationRepository = new ConfigurationRepository();
 const leadRepository = new LeadRepository();
+const appointmentRepository = new AppointmentRepository();
 
 // Services
 const userService = new UserService(userRepository);
@@ -35,6 +38,7 @@ const legalProcessService = new LegalProcessService(
   notificationService
 );
 const configurationService = new ConfigurationService(configurationRepository);
+const appointmentService = new AppointmentService(appointmentRepository, timelineService, notificationService);
 
 const controller = new BotController(
   userService,
@@ -43,6 +47,7 @@ const controller = new BotController(
   notificationService,
   leadRepository,
   timelineService,
+  appointmentService,
 );
 
 // ────────────────────────────────────────────────────
@@ -250,6 +255,130 @@ router.post('/handoff/start', apiKeyMiddleware, controller.startHandoff);
  *       - apiKeyAuth: []
  */
 router.post('/handoff/resume', apiKeyMiddleware, controller.resumeAI);
+
+/**
+ * @openapi
+ * /bot/appointments/slots:
+ *   get:
+ *     summary: Consulta horários disponíveis de um advogado (uso exclusivo do Bot)
+ *     tags: [Bot Integration]
+ *     security:
+ *       - apiKeyAuth: []
+ *     parameters:
+ *       - name: lawyerId
+ *         in: query
+ *         required: true
+ *         schema: { type: string }
+ *       - name: date
+ *         in: query
+ *         required: true
+ *         schema: { type: string, format: date }
+ *       - name: slotDurationMinutes
+ *         in: query
+ *         schema: { type: integer, default: 15 }
+ */
+router.get('/appointments/slots', apiKeyMiddleware, async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const { lawyerId, date, slotDurationMinutes } = req.query;
+    if (!lawyerId || !date) {
+      return res.status(400).json({ error: 'lawyerId and date are required' });
+    }
+    const slots = await appointmentService.getAvailableSlots(
+      lawyerId as string,
+      new Date(date as string),
+      slotDurationMinutes ? parseInt(slotDurationMinutes as string) : 30
+    );
+    return res.status(200).json({
+      slots: slots.map(s => ({
+        time: s.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit', timeZone: 'America/Sao_Paulo' }),
+        isoTime: s.toISOString(),
+      })),
+    });
+  } catch (error) {
+    next(error);
+  }
+});
+
+/**
+ * @openapi
+ * /bot/appointments/by-phone/{whatsappNumber}:
+ *   get:
+ *     summary: Lista agendamentos abertos (não concluídos/cancelados) por número de WhatsApp
+ *     tags: [Bot Integration]
+ *     security:
+ *       - apiKeyAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: whatsappNumber
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Lista de agendamentos abertos
+ */
+router.get('/appointments/by-phone/:whatsappNumber', apiKeyMiddleware, async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const whatsappNumber = Array.isArray(req.params.whatsappNumber)
+      ? req.params.whatsappNumber[0]
+      : req.params.whatsappNumber;
+    if (!whatsappNumber) {
+      return res.status(400).json({ error: 'whatsappNumber is required' });
+    }
+
+    // Get all appointments for this phone number where status is not COMPLETED or CANCELED
+    const appointments = await appointmentRepository.findByClientWhatsapp(whatsappNumber);
+    const openAppointments = appointments.filter(
+      a => a.status !== 'COMPLETED' && a.status !== 'CANCELED'
+    );
+
+    return res.status(200).json({
+      hasOpenAppointments: openAppointments.length > 0,
+      count: openAppointments.length,
+      appointments: openAppointments.map(a => ({
+        id: a.id,
+        title: a.title,
+        scheduledAt: a.scheduledAt,
+        status: a.status,
+        type: a.type,
+      })),
+    });
+  } catch (error) {
+    next(error);
+  }
+});
+
+/**
+ * @openapi
+ * /bot/appointments:
+ *   post:
+ *     summary: Cria um agendamento pelo Bot (uso exclusivo da IA)
+ *     tags: [Bot Integration]
+ *     security:
+ *       - apiKeyAuth: []
+ */
+router.post('/appointments', apiKeyMiddleware, async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const { lawyerId, clientId, title, description, type, scheduledAt, durationMinutes, createdByAI, clientName, clientWhatsappNumber } = req.body;
+    if (!lawyerId || !title || !scheduledAt) {
+      return res.status(400).json({ error: 'lawyerId, title, and scheduledAt are required' });
+    }
+    const appointment = await appointmentService.create({
+      clientId: clientId || null,
+      title,
+      description: description || '',
+      type: type || 'MEETING',
+      scheduledAt,
+      durationMinutes: durationMinutes || 30,
+      createdByAI: createdByAI ?? true,
+      clientName: clientName || null,
+      clientWhatsappNumber: clientWhatsappNumber || null,
+    }, lawyerId);
+    return res.status(201).json(appointment);
+  } catch (error) {
+    next(error);
+  }
+});
 
 /**
  * @openapi

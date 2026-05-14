@@ -16,6 +16,11 @@ export const roleMiddleware = (allowedRoles: string[]) => {
         throw new ForbiddenError('Usuário não autenticado');
       }
 
+      // SYSTEM role tem acesso a tudo (para IA fazer agendamentos)
+      if (req.user.role === 'SYSTEM') {
+        return next();
+      }
+
       const effective = new Set(allowedRoles);
       if (effective.has('LAWYER')) {
         effective.add('LAWYER_ADMIN');
