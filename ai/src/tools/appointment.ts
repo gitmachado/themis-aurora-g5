@@ -10,13 +10,19 @@ const DEFAULT_LAWYER_ID = process.env.DEFAULT_LAWYER_ID || "11111111-1111-1111-1
  * pois o lead já contém todas as informações do cliente.
  */
 export const appointmentTool = tool(
-  async ({ action, date, title, description, time, durationMinutes, triageData, whatsappNumber }) => {
+  async ({ action, date, title, description, time, durationMinutes, triageData, whatsappNumber }: any) => {
     const effectiveLawyerId = DEFAULT_LAWYER_ID;
     try {
       if (action === "check_availability") {
+        if (!date) {
+          return "Para verificar disponibilidade, preciso da data. Use o formato YYYY-MM-DD.";
+        }
         return await handleCheckAvailability(effectiveLawyerId, date);
       } else if (action === "check_open_appointments") {
-        return await handleCheckOpenAppointments(whatsappNumber || "");
+        if (!whatsappNumber) {
+          return "ERRO: Número do WhatsApp não encontrado no sistema.";
+        }
+        return await handleCheckOpenAppointments(whatsappNumber);
       } else if (action === "schedule") {
         const triageValidation = validateTriageDataForScheduling(triageData);
         if (!triageValidation.valid) {
@@ -52,7 +58,8 @@ O WhatsApp do cliente já está registrado — NÃO é necessário informá-lo.`
     schema: z.object({
       action: z.enum(["check_availability", "check_open_appointments", "schedule"])
         .describe("Ação a executar: verificar disponibilidade ou agendar"),
-      date: z.string().describe("Data no formato YYYY-MM-DD. Use a data real de hoje — nunca invente datas do passado."),
+      date: z.string().optional()
+        .describe("Data no formato YYYY-MM-DD. Necessária para 'check_availability' e 'schedule'. Não é necessária para 'check_open_appointments'."),
       title: z.string().nullable().optional()
         .describe("Título do compromisso (ex: 'Consulta inicial - Direito Trabalhista'). Se não informado, será 'Consulta inicial'."),
       description: z.string().nullable().optional()
@@ -71,8 +78,8 @@ O WhatsApp do cliente já está registrado — NÃO é necessário informá-lo.`
         whatsappNumber: z.string().nullable().optional(),
       }).nullable().optional()
         .describe("Dados de triagem do cliente já coletados — automaticamente compilado pelo agente"),
-      whatsappNumber: z.string().nullable().optional()
-        .describe("WhatsApp do cliente (injetado pelo router)"),
+      whatsappNumber: z.string()
+        .describe("WhatsApp do cliente (injetado automaticamente pelo router)"),
     }),
   }
 );
