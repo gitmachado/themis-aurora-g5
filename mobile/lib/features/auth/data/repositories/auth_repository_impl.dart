@@ -182,7 +182,6 @@ final class AuthRepositoryImpl implements AuthRepository {
       try {
         await GoogleSignIn.instance.signOut();
       } catch (_) {}
-      return unit;
     });
   }
 }
