@@ -4,11 +4,15 @@ import { HumanMessage } from "@langchain/core/messages";
 import { graph } from "../graph/index.js";
 import { INITIAL_TRIAGE, INITIAL_CONFIG } from "../graph/state.js";
 import { getBotConfig } from "../tools/config-loader.js";
-import { containsPromptInjection, DEFAULT_GUARDRAIL_RESPONSE } from "../utils/guardrails.js";
-import { validateMessageType } from "../utils/message-validator.js";
+import {
+  containsPromptInjection,
+  DEFAULT_GUARDRAIL_RESPONSE,
+} from "../utils/guardrails.js";
+import { downloadWhatsAppMedia } from "../utils/media-downloader.js";
+import { transcribeAudio } from "../utils/transcriber.js";
 import { syncMessage } from "../graph/nodes/sync.js";
 import { getLeadByPhone, notifyLawyer } from "../utils/backend-client.js";
-import { FALLBACK_ERROR_MESSAGE, NON_TEXT_MESSAGE } from "../config/prompts.js";
+import { FALLBACK_ERROR_MESSAGE } from "../config/prompts.js";
 
 export const whatsappRouter = Router();
 
@@ -44,17 +48,33 @@ whatsappRouter.post("/webhook", async (req, res) => {
 
     console.log(`[Webhook] Processando mensagem de ${whatsappNumber}, tipo: ${type}`);
 
-    // 1. Barreira de tipo de mensagem — rejeita áudio, imagem, etc.
-    const validation = validateMessageType(type);
-    if (!validation.isValid) {
-      console.log(`[Webhook] Mensagem não-texto ignorada (${type}) de ${whatsappNumber}`);
-      await sendWhatsAppMessage(whatsappNumber, NON_TEXT_MESSAGE);
+    // Resolve o corpo de texto — áudio é transcrito, demais não-texto são ignorados
+    let textBody: string;
+    if (type === "audio" && message.audio?.id) {
+      console.log(`[Webhook] Áudio recebido de ${whatsappNumber}, transcrevendo...`);
+      try {
+        const audioBuffer = await downloadWhatsAppMedia(message.audio.id);
+        textBody = await transcribeAudio(audioBuffer, message.audio.mime_type ?? "audio/ogg");
+        console.log(`[Webhook] Transcrição concluída para ${whatsappNumber}: "${textBody.substring(0, 60)}..."`);
+      } catch (transcriptionErr) {
+        console.error("[Webhook] Falha ao transcrever áudio:", transcriptionErr);
+        await sendWhatsAppMessage(
+          whatsappNumber,
+          "Não consegui entender o áudio. 😔 Poderia digitar sua mensagem?"
+        );
+        return;
+      }
+    } else if (type === "text" && message.text?.body) {
+      textBody = message.text.body;
+    } else {
+      console.log(`[Webhook] Tipo de mensagem não suportado (${type}) de ${whatsappNumber}`);
+      await sendWhatsAppMessage(
+        whatsappNumber,
+        "Por enquanto só processo mensagens de texto e áudio. Por favor, envie sua dúvida escrita ou em áudio. 😊"
+      );
       return;
     }
 
-    if (!message.text?.body) return;
-
-    const textBody: string = message.text.body;
     const messageId: string = message.id;
 
     // 2. Sincroniza mensagem do cliente com o backend imediatamente
