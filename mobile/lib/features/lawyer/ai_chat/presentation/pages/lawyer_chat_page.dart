@@ -389,7 +389,7 @@ class _LawyerChatPageState extends ConsumerState<LawyerChatPage> {
               children: [
                 const Spacer(),
                 Text(
-                  formatTime(message.createdAt),
+                  formatTime(message.timestamp),
                   style: AppTextStyles.caption.copyWith(
                     fontSize: 9.5,
                     color: secondaryTextColor,
