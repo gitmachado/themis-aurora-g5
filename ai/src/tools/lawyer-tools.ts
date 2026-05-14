@@ -108,7 +108,6 @@ export const atualizar_status_processo = tool(
         .describe("O novo status do processo"),
       lawyerNote: z
         .string()
-        .nullable()
         .optional()
         .describe("Nota opcional do advogado descrevendo a mudança"),
     }),
@@ -265,22 +264,18 @@ export const consultar_minha_agenda = tool(
       lawyerId: z.string().describe("O ID do advogado atual (do system prompt)"),
       startDate: z
         .string()
-        .nullable()
         .optional()
         .describe("Data inicial em ISO 8601 (ex: 2026-05-14T00:00:00Z)"),
       endDate: z
         .string()
-        .nullable()
         .optional()
         .describe("Data final em ISO 8601 (ex: 2026-05-21T23:59:59Z)"),
       type: z
         .enum(APPOINTMENT_TYPES)
-        .nullable()
         .optional()
         .describe("Tipo de compromisso para filtrar"),
       status: z
         .enum(APPOINTMENT_STATUSES)
-        .nullable()
         .optional()
         .describe("Status para filtrar"),
     }),
@@ -373,22 +368,18 @@ export const criar_compromisso = tool(
       durationMinutes: z
         .number()
         .int()
-        .nullable()
         .optional()
         .describe("Duração em minutos (padrão: 30)"),
       description: z
         .string()
-        .nullable()
         .optional()
         .describe("Descrição adicional do compromisso"),
       clientId: z
         .string()
-        .nullable()
         .optional()
         .describe("ID do cliente relacionado (opcional)"),
       processId: z
         .string()
-        .nullable()
         .optional()
         .describe("ID do processo relacionado (opcional)"),
     }),
@@ -434,28 +425,23 @@ export const atualizar_compromisso = tool(
       appointmentId: z.string().describe("O ID do compromisso a atualizar"),
       title: z
         .string()
-        .nullable()
         .optional()
         .describe("Novo título"),
       description: z
         .string()
-        .nullable()
         .optional()
         .describe("Nova descrição"),
       scheduledAt: z
         .string()
-        .nullable()
         .optional()
         .describe("Nova data/hora em ISO 8601"),
       durationMinutes: z
         .number()
         .int()
-        .nullable()
         .optional()
         .describe("Nova duração em minutos"),
       status: z
         .enum(APPOINTMENT_STATUSES)
-        .nullable()
         .optional()
         .describe("Novo status"),
     }),
