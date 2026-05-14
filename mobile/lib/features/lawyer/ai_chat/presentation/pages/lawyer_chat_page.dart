@@ -3,6 +3,7 @@ import 'package:flutter_markdown/flutter_markdown.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:mobile/shared/constants/app_colors.dart';
 import 'package:mobile/shared/constants/app_text_styles.dart';
+import 'package:mobile/shared/utils/api_formatters.dart';
 import '../../domain/entities/chat_message.dart';
 import '../providers/lawyer_chat_provider.dart';
 
@@ -284,14 +285,19 @@ class _LawyerChatPageState extends ConsumerState<LawyerChatPage> {
       bottomRight: Radius.circular(isMe ? 4 : 16),
     );
 
+    final isDark = isMe;
+    final secondaryTextColor = isDark
+        ? Colors.white.withValues(alpha: 0.7)
+        : AppColors.ink3;
+
     return Align(
       alignment: alignment,
       child: Container(
         margin: const EdgeInsets.only(bottom: 12),
         constraints: BoxConstraints(
-          maxWidth: MediaQuery.of(context).size.width * 0.75,
+          maxWidth: MediaQuery.of(context).size.width * 0.78,
         ),
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
         decoration: BoxDecoration(
           color: bubbleColor,
           borderRadius: borderRadius,
@@ -304,65 +310,95 @@ class _LawyerChatPageState extends ConsumerState<LawyerChatPage> {
               ),
           ],
         ),
-        child: isMe
-            ? Text(
-                message.content,
-                style: AppTextStyles.body.copyWith(
-                  color: textColor,
-                  fontSize: 15,
-                  height: 1.35,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Padding(
+              padding: const EdgeInsets.only(bottom: 4),
+              child: Text(
+                isMe ? 'ADVOGADO' : 'THEMIS AI',
+                style: TextStyle(
+                  fontSize: 9,
+                  fontWeight: FontWeight.w800,
+                  color: secondaryTextColor,
+                  letterSpacing: 0.5,
                 ),
-              )
-            : MarkdownBody(
-                data: message.content,
-                selectable: true,
-                styleSheet: MarkdownStyleSheet(
-                  p: AppTextStyles.body.copyWith(
-                    color: textColor,
-                    fontSize: 15,
-                    height: 1.35,
-                  ),
-                  strong: AppTextStyles.body.copyWith(
-                    color: textColor,
-                    fontSize: 15,
-                    height: 1.35,
-                    fontWeight: FontWeight.w700,
-                  ),
-                  em: AppTextStyles.body.copyWith(
-                    color: textColor,
-                    fontSize: 15,
-                    height: 1.35,
-                    fontStyle: FontStyle.italic,
-                  ),
-                  listBullet: AppTextStyles.body.copyWith(
-                    color: textColor,
-                    fontSize: 15,
-                    height: 1.35,
-                  ),
-                  h1: AppTextStyles.h2.copyWith(color: textColor, fontSize: 18),
-                  h2: AppTextStyles.h2.copyWith(color: textColor, fontSize: 17),
-                  h3: AppTextStyles.h2.copyWith(color: textColor, fontSize: 16),
-                  code: AppTextStyles.body.copyWith(
-                    color: textColor,
-                    fontSize: 14,
-                    fontFamily: 'monospace',
-                    backgroundColor: AppColors.surface,
-                  ),
-                  codeblockDecoration: BoxDecoration(
-                    color: AppColors.surface,
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  blockquote: AppTextStyles.body.copyWith(
-                    color: AppColors.ink3,
-                    fontSize: 15,
-                    fontStyle: FontStyle.italic,
-                  ),
-                  blockSpacing: 6,
-                ),
-                onTapLink: (_, href, _) async {
-                  // Could plug url_launcher here if we want clickable links.
-                },
               ),
+            ),
+            isMe
+                ? Text(
+                    message.content,
+                    style: AppTextStyles.body.copyWith(
+                      color: textColor,
+                      fontSize: 14.5,
+                      height: 1.4,
+                    ),
+                  )
+                : MarkdownBody(
+                    data: message.content,
+                    selectable: true,
+                    styleSheet: MarkdownStyleSheet(
+                      p: AppTextStyles.body.copyWith(
+                        color: textColor,
+                        fontSize: 14.5,
+                        height: 1.4,
+                      ),
+                      strong: AppTextStyles.body.copyWith(
+                        color: textColor,
+                        fontSize: 14.5,
+                        height: 1.4,
+                        fontWeight: FontWeight.w700,
+                      ),
+                      em: AppTextStyles.body.copyWith(
+                        color: textColor,
+                        fontSize: 14.5,
+                        height: 1.4,
+                        fontStyle: FontStyle.italic,
+                      ),
+                      listBullet: AppTextStyles.body.copyWith(
+                        color: textColor,
+                        fontSize: 14.5,
+                        height: 1.4,
+                      ),
+                      h1: AppTextStyles.h2.copyWith(color: textColor, fontSize: 18),
+                      h2: AppTextStyles.h2.copyWith(color: textColor, fontSize: 17),
+                      h3: AppTextStyles.h2.copyWith(color: textColor, fontSize: 16),
+                      code: AppTextStyles.body.copyWith(
+                        color: textColor,
+                        fontSize: 13,
+                        fontFamily: 'monospace',
+                        backgroundColor: AppColors.surface,
+                      ),
+                      codeblockDecoration: BoxDecoration(
+                        color: AppColors.surface,
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      blockquote: AppTextStyles.body.copyWith(
+                        color: AppColors.ink3,
+                        fontSize: 14.5,
+                        fontStyle: FontStyle.italic,
+                      ),
+                      blockSpacing: 6,
+                    ),
+                    onTapLink: (_, href, _) async {},
+                  ),
+            const SizedBox(height: 6),
+            Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Spacer(),
+                Text(
+                  formatTime(message.createdAt),
+                  style: AppTextStyles.caption.copyWith(
+                    fontSize: 9.5,
+                    color: secondaryTextColor,
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
       ),
     );
   }
