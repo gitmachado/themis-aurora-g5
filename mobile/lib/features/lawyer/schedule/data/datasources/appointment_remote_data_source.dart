@@ -101,15 +101,12 @@ final class AppointmentRemoteDataSource {
   Future<List<Map<String, dynamic>>> getRescheduleSuggestions(
     String id,
   ) async {
-    final response = await _apiClient.get(
+    final response = await _apiClient.getJson(
       '/appointments/$id/reschedule-suggestions',
     );
 
-    if (response is Map) {
-      final items = response['items'] as List?;
-      return items?.map((item) => Map<String, dynamic>.from(item as Map)).toList() ?? [];
-    }
-    return [];
+    final items = response['items'] as List?;
+    return items?.map((item) => Map<String, dynamic>.from(item as Map)).toList() ?? [];
   }
 
   Future<AppointmentModel> acceptRescheduleSuggestion(
