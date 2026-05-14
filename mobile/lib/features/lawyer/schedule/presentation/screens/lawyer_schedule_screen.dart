@@ -46,9 +46,63 @@ class LawyerScheduleScreen extends ConsumerWidget {
 
     return Scaffold(
       backgroundColor: AppColors.background,
-      appBar: const CustomAppBar(
+      appBar: CustomAppBar(
         title: 'Agenda',
         showBackButton: true,
+        actions: [
+          Consumer(
+            builder: (context, ref, _) {
+              final showHistory = ref.watch(showHistoryProvider);
+              return Padding(
+                padding: const EdgeInsets.only(right: 16),
+                child: Center(
+                  child: GestureDetector(
+                    onTap: () {
+                      ref.read(showHistoryProvider.notifier).state = !showHistory;
+                    },
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 12,
+                        vertical: 6,
+                      ),
+                      decoration: BoxDecoration(
+                        color: showHistory
+                            ? AppColors.primary.withValues(alpha: 0.15)
+                            : AppColors.ink4.withValues(alpha: 0.1),
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(
+                            showHistory
+                                ? Icons.history_rounded
+                                : Icons.event_rounded,
+                            size: 14,
+                            color: showHistory
+                                ? AppColors.primary
+                                : AppColors.ink3,
+                          ),
+                          const SizedBox(width: 6),
+                          Text(
+                            showHistory ? 'Histórico' : 'Ativos',
+                            style: AppTextStyles.caption.copyWith(
+                              color: showHistory
+                                  ? AppColors.primary
+                                  : AppColors.ink3,
+                              fontWeight: FontWeight.bold,
+                              fontSize: 12,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+              );
+            },
+          ),
+        ],
       ),
       body: SafeArea(
         child: Stack(
@@ -279,72 +333,16 @@ class LawyerScheduleScreen extends ConsumerWidget {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Padding(
-                                padding: const EdgeInsets.only(left: 4, bottom: 12),
-                                child: Text(
-                                  'EVENTOS',
-                                  style: AppTextStyles.tiny.copyWith(
-                                    color: AppColors.ink3,
-                                    fontWeight: FontWeight.bold,
-                                    letterSpacing: 0.5,
-                                  ),
-                                ),
+                          Padding(
+                            padding: const EdgeInsets.only(left: 4, bottom: 12),
+                            child: Text(
+                              'EVENTOS',
+                              style: AppTextStyles.tiny.copyWith(
+                                color: AppColors.ink3,
+                                fontWeight: FontWeight.bold,
+                                letterSpacing: 0.5,
                               ),
-                              Consumer(
-                                builder: (context, ref, _) {
-                                  final showHistory = ref.watch(showHistoryProvider);
-                                  return Padding(
-                                    padding: const EdgeInsets.only(right: 4),
-                                    child: GestureDetector(
-                                      onTap: () {
-                                        ref.read(showHistoryProvider.notifier).state =
-                                            !showHistory;
-                                      },
-                                      child: Container(
-                                        padding: const EdgeInsets.symmetric(
-                                          horizontal: 8,
-                                          vertical: 4,
-                                        ),
-                                        decoration: BoxDecoration(
-                                          color: showHistory
-                                              ? AppColors.primary.withValues(alpha: 0.1)
-                                              : AppColors.ink4.withValues(alpha: 0.1),
-                                          borderRadius: BorderRadius.circular(6),
-                                        ),
-                                        child: Row(
-                                          mainAxisSize: MainAxisSize.min,
-                                          children: [
-                                            Icon(
-                                              showHistory
-                                                  ? Icons.visibility_rounded
-                                                  : Icons.visibility_off_rounded,
-                                              size: 12,
-                                              color: showHistory
-                                                  ? AppColors.primary
-                                                  : AppColors.ink3,
-                                            ),
-                                            const SizedBox(width: 4),
-                                            Text(
-                                              showHistory ? 'Histórico' : 'Ativos',
-                                              style: AppTextStyles.tiny.copyWith(
-                                                color: showHistory
-                                                    ? AppColors.primary
-                                                    : AppColors.ink3,
-                                                fontWeight: FontWeight.bold,
-                                                fontSize: 10,
-                                              ),
-                                            ),
-                                          ],
-                                        ),
-                                      ),
-                                    ),
-                                  );
-                                },
-                              ),
-                            ],
+                            ),
                           ),
                           for (final appointment in appointmentsByDate) ...[
                             AppointmentCard(

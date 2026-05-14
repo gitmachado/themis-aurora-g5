@@ -7,12 +7,14 @@ class ScheduleCalendarStrip extends StatefulWidget {
   final DateTime selectedDate;
   final List<Appointment> appointments;
   final ValueChanged<DateTime> onDateSelected;
+  final String currentMode;
 
   const ScheduleCalendarStrip({
     super.key,
     required this.selectedDate,
     required this.appointments,
     required this.onDateSelected,
+    required this.currentMode,
   });
 
   @override
@@ -34,28 +36,45 @@ class _ScheduleCalendarStripState extends State<ScheduleCalendarStrip> {
   @override
   void didUpdateWidget(ScheduleCalendarStrip oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (oldWidget.selectedDate != widget.selectedDate) {
+    if (oldWidget.selectedDate != widget.selectedDate ||
+        oldWidget.currentMode != widget.currentMode) {
       _scrollToSelectedDate();
     }
   }
 
   void _scrollToSelectedDate() {
-    final startOfWeek = _getStartOfWeek(widget.selectedDate);
-    final dayIndex = widget.selectedDate.difference(startOfWeek).inDays;
-    final offset = dayIndex * 70.0;
-    _scrollController.animateTo(
-      offset,
-      duration: const Duration(milliseconds: 300),
-      curve: Curves.easeInOut,
+    if (!_scrollController.hasClients) return;
+    final baseDate = DateTime.now();
+    final startDate = DateTime(baseDate.year, baseDate.month, baseDate.day)
+        .subtract(const Duration(days: 60));
+    final targetDate = DateTime(
+      widget.selectedDate.year,
+      widget.selectedDate.month,
+      widget.selectedDate.day,
     );
-  }
-
-  DateTime _getStartOfWeek(DateTime date) {
-    return date.subtract(Duration(days: date.weekday - 1));
+    final dayIndex = targetDate.difference(startDate).inDays;
+    if (dayIndex >= 0 && dayIndex < 300) {
+      final days = List.generate(300, (i) => startDate.add(Duration(days: i)));
+      int monthsCount = 0;
+      for (int i = 0; i <= dayIndex; i++) {
+        if (i == 0 || days[i].day == 1) {
+          monthsCount++;
+        }
+      }
+      final screenWidth = MediaQuery.of(context).size.width;
+      final itemCenterX = 16.0 + (monthsCount * 62.0) + (dayIndex * 62.0) + 27.0;
+      final offset = itemCenterX - (screenWidth / 2);
+      _scrollController.animateTo(
+        offset.clamp(0.0, _scrollController.position.maxScrollExtent),
+        duration: const Duration(milliseconds: 300),
+        curve: Curves.easeInOut,
+      );
+    }
   }
 
   bool _hasAppointmentOnDate(DateTime date) {
     return widget.appointments.any((app) =>
+        app.status == 'SCHEDULED' &&
         app.scheduledAt.year == date.year &&
         app.scheduledAt.month == date.month &&
         app.scheduledAt.day == date.day);
@@ -69,8 +88,10 @@ class _ScheduleCalendarStripState extends State<ScheduleCalendarStrip> {
 
   @override
   Widget build(BuildContext context) {
-    final startOfWeek = _getStartOfWeek(DateTime.now());
-    final days = List.generate(7, (i) => startOfWeek.add(Duration(days: i)));
+    final baseDate = DateTime.now();
+    final startDate = DateTime(baseDate.year, baseDate.month, baseDate.day)
+        .subtract(const Duration(days: 60));
+    final days = List.generate(300, (i) => startDate.add(Duration(days: i)));
 
     return SizedBox(
       height: 88,
@@ -82,8 +103,40 @@ class _ScheduleCalendarStripState extends State<ScheduleCalendarStrip> {
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
           child: Row(
             children: [
-              for (final date in days) ...[
-                _buildDayButton(date),
+              for (int i = 0; i < days.length; i++) ...[
+                if (i == 0 || days[i].day == 1) ...[
+                  Container(
+                    width: 54,
+                    height: 72,
+                    margin: const EdgeInsets.only(right: 8),
+                    alignment: Alignment.center,
+                    decoration: BoxDecoration(
+                      color: AppColors.yellow,
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        const Icon(
+                          Icons.calendar_month_rounded,
+                          size: 16,
+                          color: AppColors.ink,
+                        ),
+                        const SizedBox(height: 2),
+                        Text(
+                          _getMonthShortName(days[i].month).toUpperCase(),
+                          style: AppTextStyles.tiny.copyWith(
+                            color: AppColors.ink,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 10,
+                          ),
+                          textAlign: TextAlign.center,
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+                _buildDayButton(days[i]),
                 const SizedBox(width: 8),
               ],
             ],
@@ -94,17 +147,34 @@ class _ScheduleCalendarStripState extends State<ScheduleCalendarStrip> {
   }
 
   Widget _buildDayButton(DateTime date) {
-    final isSelected = date.year == widget.selectedDate.year &&
-        date.month == widget.selectedDate.month &&
-        date.day == widget.selectedDate.day;
+    final selected = widget.selectedDate;
+    bool isSelected = false;
+
+    if (widget.currentMode == 'week') {
+      final startOfWeek = DateTime(selected.year, selected.month, selected.day)
+          .subtract(Duration(days: selected.weekday - 1));
+      final endOfWeek = startOfWeek.add(const Duration(days: 6));
+      final d = DateTime(date.year, date.month, date.day);
+      isSelected = d.isAfter(startOfWeek.subtract(const Duration(days: 1))) &&
+          d.isBefore(endOfWeek.add(const Duration(days: 1)));
+    } else if (widget.currentMode == 'month') {
+      isSelected = date.year == selected.year && date.month == selected.month;
+    } else {
+      isSelected = date.year == selected.year &&
+          date.month == selected.month &&
+          date.day == selected.day;
+    }
+
     final hasAppointments = _hasAppointmentOnDate(date);
 
     return GestureDetector(
       onTap: () => widget.onDateSelected(date),
       child: Container(
         width: 54,
+        height: 72,
+        alignment: Alignment.center,
         decoration: BoxDecoration(
-          color: isSelected ? AppColors.ink : Colors.transparent,
+          color: isSelected ? AppColors.ink : AppColors.white,
           borderRadius: BorderRadius.circular(12),
           border: Border.all(
             color: isSelected ? Colors.transparent : AppColors.line,
@@ -119,6 +189,7 @@ class _ScheduleCalendarStripState extends State<ScheduleCalendarStrip> {
                 color: isSelected ? AppColors.white : AppColors.ink3,
                 fontWeight: FontWeight.w600,
               ),
+              textAlign: TextAlign.center,
             ),
             const SizedBox(height: 4),
             Text(
@@ -128,19 +199,19 @@ class _ScheduleCalendarStripState extends State<ScheduleCalendarStrip> {
                 fontWeight: FontWeight.bold,
                 fontSize: 16,
               ),
+              textAlign: TextAlign.center,
             ),
-            const SizedBox(height: 4),
-            if (hasAppointments)
+            if (hasAppointments) ...[
+              const SizedBox(height: 4),
               Container(
                 width: 4,
                 height: 4,
-                decoration: BoxDecoration(
-                  color: isSelected ? AppColors.yellow : AppColors.yellow,
+                decoration: const BoxDecoration(
+                  color: AppColors.yellow,
                   shape: BoxShape.circle,
                 ),
-              )
-            else
-              const SizedBox(width: 4, height: 4),
+              ),
+            ],
           ],
         ),
       ),
@@ -156,4 +227,19 @@ class _ScheduleCalendarStripState extends State<ScheduleCalendarStrip> {
     'Sab',
     'Dom',
   ][weekday - 1];
+
+  String _getMonthShortName(int month) => const [
+    'Jan',
+    'Fev',
+    'Mar',
+    'Abr',
+    'Mai',
+    'Jun',
+    'Jul',
+    'Ago',
+    'Set',
+    'Out',
+    'Nov',
+    'Dez',
+  ][month - 1];
 }
