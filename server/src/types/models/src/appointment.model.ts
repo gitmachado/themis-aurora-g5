@@ -17,6 +17,8 @@ export interface Appointment {
   approvedByLawyerId: string | null;
   approvedAt: Date | null;
   aiOriginalData: Record<string, any> | null;
+  clientName: string | null;
+  clientWhatsappNumber: string | null;
   createdAt: Date;
   updatedAt: Date;
 }

@@ -47,6 +47,7 @@ const controller = new BotController(
   notificationService,
   leadRepository,
   timelineService,
+  appointmentService,
 );
 
 // ────────────────────────────────────────────────────
@@ -309,7 +310,7 @@ router.get('/appointments/slots', apiKeyMiddleware, async (req: Request, res: Re
  */
 router.post('/appointments', apiKeyMiddleware, async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const { lawyerId, clientId, title, description, type, scheduledAt, durationMinutes, createdByAI } = req.body;
+    const { lawyerId, clientId, title, description, type, scheduledAt, durationMinutes, createdByAI, clientName, clientWhatsappNumber } = req.body;
     if (!lawyerId || !title || !scheduledAt) {
       return res.status(400).json({ error: 'lawyerId, title, and scheduledAt are required' });
     }
@@ -321,6 +322,8 @@ router.post('/appointments', apiKeyMiddleware, async (req: Request, res: Respons
       scheduledAt,
       durationMinutes: durationMinutes || 30,
       createdByAI: createdByAI ?? true,
+      clientName: clientName || null,
+      clientWhatsappNumber: clientWhatsappNumber || null,
     }, lawyerId);
     return res.status(201).json(appointment);
   } catch (error) {

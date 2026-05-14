@@ -10,19 +10,25 @@ const DEFAULT_LAWYER_ID = process.env.DEFAULT_LAWYER_ID || "11111111-1111-1111-1
  * pois o lead já contém todas as informações do cliente.
  */
 export const appointmentTool = tool(
-  async ({ action, date, title, description, time, durationMinutes }) => {
+  async ({ action, date, title, description, time, durationMinutes, triageData }) => {
     const effectiveLawyerId = DEFAULT_LAWYER_ID;
     try {
       if (action === "check_availability") {
         return await handleCheckAvailability(effectiveLawyerId, date);
       } else if (action === "schedule") {
+        const triageValidation = validateTriageDataForScheduling(triageData);
+        if (!triageValidation.valid) {
+          return triageValidation.message;
+        }
+
         return await handleScheduleAppointment(
           effectiveLawyerId,
           date,
           time ?? undefined,
           title ?? "Consulta inicial",
           description ?? undefined,
-          durationMinutes ?? 30
+          durationMinutes ?? 30,
+          triageData
         );
       }
       return "Ação desconhecida. Use 'check_availability' ou 'schedule'.";
@@ -52,6 +58,16 @@ O WhatsApp do cliente já está registrado — NÃO é necessário informá-lo.`
         .describe("Horário no formato HH:mm (ex: 14:30) — necessário para 'schedule'"),
       durationMinutes: z.number().nullable().optional()
         .describe("Duração em minutos (padrão: 30)"),
+      triageData: z.object({
+        name: z.string().nullable().optional(),
+        email: z.string().nullable().optional(),
+        cpf: z.string().nullable().optional(),
+        caseType: z.string().nullable().optional(),
+        caseDescription: z.string().nullable().optional(),
+        contactAvailability: z.string().nullable().optional(),
+        whatsappNumber: z.string().nullable().optional(),
+      }).nullable().optional()
+        .describe("Dados de triagem do cliente já coletados — automaticamente compilado pelo agente"),
     }),
   }
 );
@@ -75,13 +91,53 @@ async function handleCheckAvailability(lawyerId: string, date: string): Promise<
   }
 }
 
+function validateTriageDataForScheduling(triageData: any): { valid: boolean; message: string } {
+  if (!triageData) {
+    return {
+      valid: false,
+      message: "AGENDAMENTO_NEGADO: Dados do cliente não encontrados. Você precisa completar a triagem do cliente primeiro (nome, email, CPF, tipo de caso, descrição e disponibilidade) antes de agendar uma consulta.",
+    };
+  }
+
+  const missingFields: string[] = [];
+
+  if (!triageData.name || triageData.name.trim().length < 2) {
+    missingFields.push("nome do cliente");
+  }
+  if (!triageData.email || !triageData.email.includes("@")) {
+    missingFields.push("email do cliente");
+  }
+  if (!triageData.cpf) {
+    missingFields.push("CPF do cliente");
+  }
+  if (!triageData.caseType) {
+    missingFields.push("tipo de caso");
+  }
+  if (!triageData.caseDescription) {
+    missingFields.push("descrição do caso");
+  }
+  if (!triageData.contactAvailability) {
+    missingFields.push("disponibilidade de contato");
+  }
+
+  if (missingFields.length > 0) {
+    return {
+      valid: false,
+      message: `AGENDAMENTO_NEGADO: Faltam informações obrigatórias: ${missingFields.join(", ")}. Colete esses dados com o cliente antes de tentar agendar a consulta.`,
+    };
+  }
+
+  return { valid: true, message: "" };
+}
+
 async function handleScheduleAppointment(
   lawyerId: string,
   date: string,
   time: string | undefined,
   title: string,
   description: string | undefined,
-  durationMinutes: number
+  durationMinutes: number,
+  triageData: any
 ): Promise<string> {
   if (!time) {
     return "Para agendar, preciso que o cliente escolha um horário (formato HH:mm). Pergunte qual horário ele prefere.";
@@ -100,6 +156,8 @@ async function handleScheduleAppointment(
       scheduledAt: isoDateTime,
       durationMinutes,
       createdByAI: true,
+      clientName: triageData?.name || null,
+      clientWhatsappNumber: triageData?.whatsappNumber || null,
     });
 
     return `✅ Consulta pré-reservada para ${date} às ${time} (${durationMinutes} min). Informe ao cliente que o advogado revisará e ele receberá confirmação via WhatsApp.`;

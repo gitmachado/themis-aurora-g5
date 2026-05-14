@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../../../shared/constants/app_colors.dart';
 import '../../../../../../shared/constants/app_text_styles.dart';
 import '../../../../../../shared/widgets/buttons/app_badge.dart';
 import '../../../../../../shared/widgets/cards/app_card.dart';
 import '../../domain/entities/appointment.dart';
+import '../../../../../../features/procedures/presentation/providers/procedure_providers.dart';
 
-class AppointmentCard extends StatelessWidget {
+class AppointmentCard extends ConsumerWidget {
   final Appointment appointment;
   final VoidCallback? onTap;
 
@@ -16,9 +18,16 @@ class AppointmentCard extends StatelessWidget {
   });
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final isCompleted = appointment.status == 'COMPLETED';
     final isCanceled = appointment.status == 'CANCELED';
+    final procedures = ref.watch(myProceduresProvider).valueOrNull ?? const [];
+    final processName = appointment.processId != null
+        ? procedures
+            .where((p) => p.id == appointment.processId)
+            .map((p) => p.title)
+            .firstOrNull ?? 'Processo Vinculado'
+        : null;
 
     return AppCard(
       onTap: !isCanceled ? onTap : null,
@@ -103,7 +112,7 @@ class AppointmentCard extends StatelessWidget {
                         overflow: TextOverflow.ellipsis,
                       ),
                     ],
-                    if (appointment.processId != null) ...[
+                    if (appointment.processId != null && processName != null) ...[
                       const SizedBox(height: 6),
                       Row(
                         children: [
@@ -115,7 +124,7 @@ class AppointmentCard extends StatelessWidget {
                           const SizedBox(width: 4),
                           Expanded(
                             child: Text(
-                              'Processo Vinculado',
+                              processName,
                               style: AppTextStyles.caption.copyWith(
                                 fontSize: 11,
                                 color: AppColors.primary,
@@ -219,7 +228,9 @@ class AppointmentCard extends StatelessWidget {
   String _formatTime() {
     final time = appointment.scheduledAt;
     final endTime = appointment.endTime;
-    return '${time.hour.toString().padLeft(2, '0')}:${time.minute.toString().padLeft(2, '0')} - ${endTime.hour.toString().padLeft(2, '0')}:${endTime.minute.toString().padLeft(2, '0')}';
+    final day = time.day.toString().padLeft(2, '0');
+    final month = time.month.toString().padLeft(2, '0');
+    return '$day/$month às ${time.hour.toString().padLeft(2, '0')}:${time.minute.toString().padLeft(2, '0')} - ${endTime.hour.toString().padLeft(2, '0')}:${endTime.minute.toString().padLeft(2, '0')}';
   }
 
   bool _showCountdown() {

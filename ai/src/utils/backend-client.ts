@@ -185,6 +185,8 @@ export async function scheduleAppointment(data: {
   scheduledAt: string;
   durationMinutes: number;
   createdByAI?: boolean;
+  clientName?: string | null;
+  clientWhatsappNumber?: string | null;
 }): Promise<{ id: string; scheduledAt: string }> {
   const res = await client.post("/bot/appointments", data);
   return {

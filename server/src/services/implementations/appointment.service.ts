@@ -49,6 +49,8 @@ export class AppointmentService implements IAppointmentService {
         scheduledAt: scheduledAtDate,
         durationMinutes,
       } : undefined,
+      clientName: dto.clientName || null,
+      clientWhatsappNumber: dto.clientWhatsappNumber || null,
     });
 
     if (dto.processId) {

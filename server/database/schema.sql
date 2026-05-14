@@ -187,6 +187,8 @@ CREATE TABLE IF NOT EXISTS appointments (
     duration_minutes INTEGER DEFAULT 60,
     status VARCHAR(20) NOT NULL DEFAULT 'SCHEDULED' CHECK (status IN ('SCHEDULED', 'COMPLETED', 'CANCELED', 'PENDING_APPROVAL')),
     reminded BOOLEAN NOT NULL DEFAULT FALSE,
+    client_name VARCHAR(255),
+    client_whatsapp_number VARCHAR(20),
     created_at TIMESTAMPTZ DEFAULT NOW(),
     updated_at TIMESTAMPTZ DEFAULT NOW()
 );

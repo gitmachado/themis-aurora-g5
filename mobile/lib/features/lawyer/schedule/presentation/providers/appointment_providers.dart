@@ -110,6 +110,7 @@ final appointmentsByDateProvider = Provider<List<Appointment>>((ref) {
   final selectedDate = ref.watch(selectedDateProvider);
   final mode = ref.watch(scheduleViewModeProvider);
   final showHistory = ref.watch(showHistoryProvider);
+  final now = DateTime.now();
 
   return appointments.where((appointment) {
     // Filter by history visibility
@@ -138,7 +139,11 @@ final appointmentsByDateProvider = Provider<List<Appointment>>((ref) {
           appDate.day == selectedDate.day;
     }
   }).toList()
-    ..sort((a, b) => a.scheduledAt.compareTo(b.scheduledAt));
+    ..sort((a, b) {
+      final diffA = a.scheduledAt.difference(now).abs();
+      final diffB = b.scheduledAt.difference(now).abs();
+      return diffA.compareTo(diffB);
+    });
 });
 
 // Only history (completed/canceled)
@@ -146,6 +151,7 @@ final appointmentHistoryProvider = Provider<List<Appointment>>((ref) {
   final appointments = ref.watch(appointmentsProvider).valueOrNull ?? const [];
   final selectedDate = ref.watch(selectedDateProvider);
   final mode = ref.watch(scheduleViewModeProvider);
+  final now = DateTime.now();
 
   return appointments.where((appointment) {
     if (!appointment.isCompleted && !appointment.isCanceled) {
@@ -170,7 +176,11 @@ final appointmentHistoryProvider = Provider<List<Appointment>>((ref) {
           appDate.day == selectedDate.day;
     }
   }).toList()
-    ..sort((a, b) => b.scheduledAt.compareTo(a.scheduledAt));
+    ..sort((a, b) {
+      final diffA = a.scheduledAt.difference(now).abs();
+      final diffB = b.scheduledAt.difference(now).abs();
+      return diffA.compareTo(diffB);
+    });
 });
 
 // Pending appointments list

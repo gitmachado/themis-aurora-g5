@@ -10,6 +10,7 @@ export class AppointmentRepository implements IAppointmentRepository {
     status, reminded, created_by_ai as "createdByAI",
     ai_created_at as "aiCreatedAt", approved_by_lawyer_id as "approvedByLawyerId",
     approved_at as "approvedAt", ai_original_data as "aiOriginalData",
+    client_name as "clientName", client_whatsapp_number as "clientWhatsappNumber",
     created_at as "createdAt", updated_at as "updatedAt"
   `;
 
@@ -111,15 +112,17 @@ export class AppointmentRepository implements IAppointmentRepository {
       reminded,
       createdByAI,
       aiCreatedAt,
-      aiOriginalData
+      aiOriginalData,
+      clientName,
+      clientWhatsappNumber
     } = appointment;
 
     const result = await dbGet<Appointment>(
       `INSERT INTO appointments
        (lawyer_id, client_id, process_id, title, description, type,
         scheduled_at, duration_minutes, status, reminded, created_by_ai,
-        ai_created_at, ai_original_data)
-       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)
+        ai_created_at, ai_original_data, client_name, client_whatsapp_number)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15)
        RETURNING ${this.appointmentSelect}`,
       [
         lawyerId,
@@ -134,7 +137,9 @@ export class AppointmentRepository implements IAppointmentRepository {
         reminded,
         createdByAI || false,
         aiCreatedAt || null,
-        aiOriginalData || null
+        aiOriginalData || null,
+        clientName || null,
+        clientWhatsappNumber || null
       ]
     );
 

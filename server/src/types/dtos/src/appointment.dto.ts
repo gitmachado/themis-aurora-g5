@@ -11,6 +11,8 @@ export interface CreateAppointmentDTO {
   status?: AppointmentStatus;
   createdByAI?: boolean;
   aiOriginalData?: any;
+  clientName?: string;
+  clientWhatsappNumber?: string;
 }
 
 export interface UpdateAppointmentDTO {
@@ -40,6 +42,8 @@ export interface AppointmentResponseDTO {
   durationMinutes: number | null;
   status: AppointmentStatus;
   reminded: boolean;
+  clientName: string | null;
+  clientWhatsappNumber: string | null;
   createdAt: Date;
   updatedAt: Date;
 }
