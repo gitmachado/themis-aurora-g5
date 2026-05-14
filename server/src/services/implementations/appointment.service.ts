@@ -105,11 +105,20 @@ export class AppointmentService implements IAppointmentService {
       }
     }
 
-    const updated = await this.appointmentRepository.update(id, {
+    const updateData: any = {
       ...dto,
-      scheduledAt: scheduledAtDate ?? dto.scheduledAt,
       updatedAt: new Date(),
-    });
+    };
+
+    // Only include scheduledAt in update if it was provided
+    if (scheduledAtDate !== undefined || dto.scheduledAt !== undefined) {
+      updateData.scheduledAt = scheduledAtDate ?? dto.scheduledAt;
+    } else {
+      // Remove scheduledAt from update if not provided
+      delete updateData.scheduledAt;
+    }
+
+    const updated = await this.appointmentRepository.update(id, updateData);
 
     if (appointment.clientId && (dto.scheduledAt || dto.status)) {
       const changeMessage = dto.status
