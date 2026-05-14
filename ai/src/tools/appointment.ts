@@ -104,12 +104,12 @@ async function handleCheckOpenAppointments(whatsappNumber: string): Promise<stri
       const statusList = result.appointments
         .map((a: any) => `• ${a.title} (${a.status}) — ${a.scheduledAt ? new Date(a.scheduledAt).toLocaleDateString('pt-BR') : 'sem data'}`)
         .join('\n');
-      const response = `REUNIAO_ABERTA: Este cliente já possui ${result.count} reunião(ões) pendente(s):\n${statusList}\n\nNão é permitido agendar nova reunião. Faça HANDOFF para atendimento humano.`;
+      const response = `🚫 REUNIAO_ABERTA: Este cliente já possui ${result.count} reunião(ões) pendente(s):\n${statusList}\n\nNão é permitido agendar nova reunião. Responda que há reunião pendente e ofereça handoff.`;
       console.log(`[Tool: Appointment] Retornando BLOQUEIO (reunião aberta)`);
       return response;
     }
 
-    const response = `NENHUMA_REUNIAO_ABERTA: Este cliente não tem reuniões abertas. Pode prosseguir com o agendamento.`;
+    const response = `✅ NENHUMA_REUNIAO_ABERTA: Cliente não tem reuniões abertas. PROSSIGA IMEDIATAMENTE: Chame check_availability para hoje (veja {currentDate} no contexto) e apresente os horários na mesma mensagem.`;
     console.log(`[Tool: Appointment] Retornando SUCESSO (sem reunião aberta)`);
     return response;
   } catch (err: any) {
@@ -120,9 +120,12 @@ async function handleCheckOpenAppointments(whatsappNumber: string): Promise<stri
 
 async function handleCheckAvailability(lawyerId: string, date: string): Promise<string> {
   try {
+    console.log(`[Tool: Appointment] CHECK_AVAILABILITY iniciado para ${date}`);
     const slots = await getAvailableSlots(lawyerId, date);
+    console.log(`[Tool: Appointment] Slots encontrados: ${slots.length}`);
 
     if (slots.length === 0) {
+      console.warn(`[Tool: Appointment] Nenhum slot disponível em ${date}`);
       return `Não há horários disponíveis em ${date}. Sugira outra data ao cliente.`;
     }
 
@@ -130,9 +133,12 @@ async function handleCheckAvailability(lawyerId: string, date: string): Promise<
     const step = Math.max(1, Math.floor(slots.length / 4));
     const picked = [0, step, step * 2, step * 3].filter(i => i < slots.length);
     const suggestions = picked.map(i => slots[i].time);
+    const response = `✅ HORARIOS_DISPONIVEIS: ${suggestions.join(", ")}. Use esses horários na sua resposta ao cliente (exemplo: "Temos 09:00, 11:30, 14:00, 16:30 disponíveis para hoje").`;
 
-    return `Horários disponíveis em ${date}: ${suggestions.join(", ")}. O advogado atende das 09h às 18h. Apresente essas opções de forma concisa e pergunte qual o cliente prefere.`;
+    console.log(`[Tool: Appointment] Retornando horários:`, suggestions);
+    return response;
   } catch (err: any) {
+    console.error(`[Tool: Appointment] ERRO ao consultar disponibilidade:`, err);
     throw new Error(`Falha ao consultar disponibilidade: ${err.message}`);
   }
 }

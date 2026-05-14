@@ -195,7 +195,17 @@ export async function routerNode(
 
     // Garantir que finalResponse tem conteúdo
     if (!finalResponse.content || String(finalResponse.content).trim().length === 0) {
-      console.warn(`[Router Node] ⚠️ Resposta vazia gerada pelo LLM! Usando fallback.`);
+      console.warn(`[Router Node] ⚠️ Resposta vazia gerada pelo LLM!`);
+      console.warn(`[Router Node] Tool calls na resposta?`, (finalResponse as any).tool_calls?.length);
+      if ((finalResponse as any).tool_calls && (finalResponse as any).tool_calls.length > 0) {
+        console.warn(`[Router Node] ✅ LLM tentou chamar tools (responses vazias são normais neste caso)`);
+        return {
+          currentNode: "sync_node",
+          messages: [response, ...toolMessages, finalResponse],
+          needsHandoff: state.needsHandoff,
+        };
+      }
+      console.warn(`[Router Node] Usando fallback...`);
       const { AIMessage } = await import("@langchain/core/messages");
       finalResponse = new AIMessage("Deixa eu verificar os horários disponíveis para você...");
     }
