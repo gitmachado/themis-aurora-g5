@@ -207,11 +207,14 @@ class ProcedureTimelineNotifier
 }
 
 final procedureDocumentsProvider =
-    AsyncNotifierProvider.family<ProcedureDocumentsNotifier, List<ProcessDocument>, String>(
-      ProcedureDocumentsNotifier.new,
-    );
+    AsyncNotifierProvider.family<
+      ProcedureDocumentsNotifier,
+      List<ProcessDocument>,
+      String
+    >(ProcedureDocumentsNotifier.new);
 
-class ProcedureDocumentsNotifier extends FamilyAsyncNotifier<List<ProcessDocument>, String> {
+class ProcedureDocumentsNotifier
+    extends FamilyAsyncNotifier<List<ProcessDocument>, String> {
   StreamSubscription? _subscription;
 
   @override
@@ -225,7 +228,8 @@ class ProcedureDocumentsNotifier extends FamilyAsyncNotifier<List<ProcessDocumen
   void _listenToEvents(String processId) {
     _subscription?.cancel();
     _subscription = ref.read(webSocketClientProvider).events.listen((event) {
-      if (event.type == 'document:uploaded' || event.type == 'document:deleted') {
+      if (event.type == 'document:uploaded' ||
+          event.type == 'document:deleted') {
         refresh();
       }
     });

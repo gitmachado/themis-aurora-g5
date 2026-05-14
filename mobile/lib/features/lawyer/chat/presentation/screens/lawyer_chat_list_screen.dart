@@ -68,10 +68,8 @@ class LawyerChatListScreen extends ConsumerWidget {
             IconButton(
               icon: const Icon(Icons.smart_toy_rounded, color: AppColors.ink),
               tooltip: 'Assistente Themis AI',
-              onPressed: () => Navigator.pushNamed(
-                context,
-                AppRouter.lawyerAIChatRoute,
-              ),
+              onPressed: () =>
+                  Navigator.pushNamed(context, AppRouter.lawyerAIChatRoute),
             ),
           ],
         ),

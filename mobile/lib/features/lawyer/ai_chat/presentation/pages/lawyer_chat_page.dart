@@ -377,9 +377,18 @@ class _LawyerChatPageState extends ConsumerState<LawyerChatPage> {
                         fontSize: 14.5,
                         height: 1.4,
                       ),
-                      h1: AppTextStyles.h2.copyWith(color: textColor, fontSize: 18),
-                      h2: AppTextStyles.h2.copyWith(color: textColor, fontSize: 17),
-                      h3: AppTextStyles.h2.copyWith(color: textColor, fontSize: 16),
+                      h1: AppTextStyles.h2.copyWith(
+                        color: textColor,
+                        fontSize: 18,
+                      ),
+                      h2: AppTextStyles.h2.copyWith(
+                        color: textColor,
+                        fontSize: 17,
+                      ),
+                      h3: AppTextStyles.h2.copyWith(
+                        color: textColor,
+                        fontSize: 16,
+                      ),
                       code: AppTextStyles.body.copyWith(
                         color: textColor,
                         fontSize: 13,

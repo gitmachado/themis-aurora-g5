@@ -716,9 +716,7 @@ class _ClientFilesScreenState extends ConsumerState<ClientFilesScreen> {
 
     late LegalProcess selectedProcess;
     try {
-      selectedProcess = procedures.firstWhere(
-        (p) => p.id == initialProcessId,
-      );
+      selectedProcess = procedures.firstWhere((p) => p.id == initialProcessId);
     } catch (e) {
       selectedProcess = procedures.first;
     }
