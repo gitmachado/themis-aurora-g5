@@ -44,7 +44,18 @@ export async function routerNode(
   }
 
   // 5. Monta o prompt do agente com dados dinâmicos
+  const now = new Date();
+  const todayStr = now.toLocaleDateString('pt-BR', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+  const todayISO = now.toISOString().split('T')[0];
+  // Calcula o próximo sábado
+  const daysUntilSaturday = (6 - now.getDay() + 7) % 7 || 7;
+  const nextSat = new Date(now);
+  nextSat.setDate(now.getDate() + daysUntilSaturday);
+  const nextSaturdayISO = nextSat.toISOString().split('T')[0];
+
   const agentPrompt = AGENT_PROMPT
+    .replace("{currentDate}", `${todayStr} (${todayISO})`)
+    .replace("{nextSaturday}", nextSaturdayISO)
     .replace("{triageName}", triage.name || "FALTANDO")
     .replace("{triageEmail}", triage.email || "FALTANDO")
     .replace("{triageCpf}", triage.cpf || "FALTANDO")
@@ -81,7 +92,6 @@ export async function routerNode(
   if (response.tool_calls && response.tool_calls.length > 0) {
     const toolMessages: ToolMessage[] = [];
 
-    console.log(`[Router Node] Executando ${response.tool_calls.length} tool(s)...`);
 
     for (const toolCall of response.tool_calls) {
       const toolFn = toolsByName[toolCall.name];
@@ -89,7 +99,6 @@ export async function routerNode(
         try {
           const args = { ...toolCall.args, whatsappNumber };
           const result = await toolFn.invoke(args);
-          console.log(`[Router Node] Tool ${toolCall.name} retornou: ${result}`);
           toolMessages.push(new ToolMessage({
             tool_call_id: toolCall.id!,
             content: String(result),

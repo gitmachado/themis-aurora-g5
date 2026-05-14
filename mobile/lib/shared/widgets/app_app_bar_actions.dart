@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../features/notifications/presentation/providers/notification_providers.dart';
+import '../../features/lawyer/schedule/presentation/providers/appointment_providers.dart';
 import '../constants/app_colors.dart';
 import 'layout/app_notification_button.dart';
 
@@ -24,10 +25,15 @@ class AppAppBarActions extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    // Ativa a escuta de agendamentos via websocket
+    ref.watch(appointmentsProvider);
+
     final int unreadCount =
         notificationCount ?? ref.watch(unreadNotificationsCountProvider);
     final int handoffCount =
         chatCount ?? ref.watch(handoffNotificationsCountProvider);
+    final int pendingCount =
+        ref.watch(pendingAppointmentsCountProvider).valueOrNull ?? 0;
 
     return Row(
       mainAxisSize: MainAxisSize.min,
@@ -36,7 +42,7 @@ class AppAppBarActions extends ConsumerWidget {
           _buildActionIcon(
             context,
             icon: Icons.calendar_today_rounded,
-            count: 0,
+            count: pendingCount,
             onTap: () => Navigator.pushNamed(context, '/lawyer-schedule'),
           ),
           const SizedBox(width: 4),

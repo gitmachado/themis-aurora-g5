@@ -125,26 +125,6 @@ router.get('/', authMiddleware, controller.list.bind(controller));
 
 /**
  * @openapi
- * /appointments/{id}:
- *   get:
- *     summary: Obter compromisso por ID
- *     tags: [Agenda]
- *     security:
- *       - BearerAuth: []
- *     parameters:
- *       - name: id
- *         in: path
- *         required: true
- *         schema:
- *           type: string
- *     responses:
- *       200:
- *         description: Compromisso encontrado
- *       404:
- *         description: Compromisso não encontrado
- */
-/**
- * @openapi
  * /appointments/pending:
  *   get:
  *     summary: Listar compromissos pendentes de aprovação
@@ -157,7 +137,34 @@ router.get('/', authMiddleware, controller.list.bind(controller));
  */
 router.get('/pending', authMiddleware, approvalController.getPendingApprovals.bind(approvalController));
 
+/**
+ * @openapi
+ * /appointments/slots:
+ *   get:
+ *     summary: Obter horários disponíveis em um dia
+ *     tags: [Agenda]
+ *     security:
+ *       - BearerAuth: []
+ */
+router.get(
+  '/slots',
+  authMiddleware,
+  controller.getAvailableSlots.bind(controller)
+);
+
+router.get('/by-process/:processId', authMiddleware, controller.getByProcessId.bind(controller));
+
+/**
+ * @openapi
+ * /appointments/{id}:
+ *   get:
+ *     summary: Obter compromisso por ID
+ *     tags: [Agenda]
+ *     security:
+ *       - BearerAuth: []
+ */
 router.get('/:id', authMiddleware, controller.getById.bind(controller));
+
 
 /**
  * @openapi
@@ -235,59 +242,7 @@ router.post(
   controller.checkConflicts.bind(controller)
 );
 
-/**
- * @openapi
- * /appointments/slots:
- *   get:
- *     summary: Obter horários disponíveis em um dia
- *     tags: [Agenda]
- *     security:
- *       - BearerAuth: []
- *     parameters:
- *       - name: date
- *         in: query
- *         required: true
- *         schema:
- *           type: string
- *           format: date
- *       - name: slotDurationMinutes
- *         in: query
- *         schema:
- *           type: integer
- *           default: 60
- *       - name: lawyerId
- *         in: query
- *         schema:
- *           type: string
- *     responses:
- *       200:
- *         description: Lista de horários disponíveis
- */
-router.get(
-  '/slots',
-  authMiddleware,
-  controller.getAvailableSlots.bind(controller)
-);
 
-/**
- * @openapi
- * /appointments/by-process/{processId}:
- *   get:
- *     summary: Obter compromissos de um processo
- *     tags: [Agenda]
- *     security:
- *       - BearerAuth: []
- *     parameters:
- *       - name: processId
- *         in: path
- *         required: true
- *         schema:
- *           type: string
- *     responses:
- *       200:
- *         description: Lista de compromissos do processo
- */
-router.get('/by-process/:processId', authMiddleware, controller.getByProcessId.bind(controller));
 
 /**
  * @openapi

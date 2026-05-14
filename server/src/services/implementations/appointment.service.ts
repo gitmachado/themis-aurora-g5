@@ -175,13 +175,17 @@ export class AppointmentService implements IAppointmentService {
   async getAvailableSlots(
     lawyerId: string,
     date: Date,
-    slotDurationMinutes: number = 60
+    slotDurationMinutes: number = 30
   ): Promise<Date[]> {
-    const startOfDay = new Date(date);
-    startOfDay.setHours(9, 0, 0, 0);
+    // Extrair ano/mês/dia sem conversão de timezone
+    const year = date.getUTCFullYear();
+    const month = date.getUTCMonth();
+    const day = date.getUTCDate();
 
-    const endOfDay = new Date(date);
-    endOfDay.setHours(18, 0, 0, 0);
+    // Criar datas no horário de Brasília (UTC-3)
+    // 09:00 BRT = 12:00 UTC, 18:00 BRT = 21:00 UTC
+    const startOfDay = new Date(Date.UTC(year, month, day, 12, 0, 0)); // 09:00 BRT
+    const endOfDay = new Date(Date.UTC(year, month, day, 21, 0, 0));   // 18:00 BRT
 
     const appointments = await this.appointmentRepository.findByLawyerId(
       lawyerId,

@@ -33,21 +33,18 @@ whatsappRouter.post("/webhook", async (req, res) => {
   try {
     const message = req.body?.entry?.[0]?.changes?.[0]?.value?.messages?.[0];
     
-    if (message) {
-      console.log(`[Webhook] Mensagem recebida de ${message.from}: ${message.text?.body || "(sem texto)"}`);
-    }
+
 
     if (!message) return;
 
     const whatsappNumber: string = message.from;
     const type: string = message.type;
 
-    console.log(`[Webhook] Processando mensagem de ${whatsappNumber}, tipo: ${type}`);
+
 
     // 1. Barreira de tipo de mensagem — rejeita áudio, imagem, etc.
     const validation = validateMessageType(type);
     if (!validation.isValid) {
-      console.log(`[Webhook] Mensagem não-texto ignorada (${type}) de ${whatsappNumber}`);
       await sendWhatsAppMessage(whatsappNumber, NON_TEXT_MESSAGE);
       return;
     }
@@ -115,13 +112,10 @@ whatsappRouter.post("/webhook", async (req, res) => {
       handoffReason: null,
       config,
     };
-
-    console.log(`[Webhook] Invocando grafo para ${whatsappNumber}... (Handoff: ${finalNeedsHandoff})`);
     const result = await graph.invoke(
       hasExistingState ? { messages: [new HumanMessage(textBody)], needsHandoff: finalNeedsHandoff } : initialState,
       graphConfig
     );
-    console.log(`[Webhook] Grafo finalizado para ${whatsappNumber}.`);
 
     // 8. Envia resposta do bot ao cliente
     const botMessages = result.messages || [];
@@ -133,12 +127,7 @@ whatsappRouter.post("/webhook", async (req, res) => {
       
       if (isAI) {
         await sendWhatsAppMessage(whatsappNumber, String(lastMessage.content));
-        console.log(`[Webhook] Resposta enviada para ${whatsappNumber}: ${String(lastMessage.content).substring(0, 80)}...`);
-      } else {
-        console.log(`[Webhook] Última mensagem não é AI (${(lastMessage as any).type}), pulando envio.`);
       }
-    } else {
-      console.log(`[Webhook] Grafo não retornou mensagens para enviar.`);
     }
   } catch (err) {
     console.error("[Webhook] Erro CRÍTICO ao processar mensagem:", err);

@@ -3,12 +3,15 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../../app/routes/app_router.dart';
 import '../../../../../shared/constants/app_colors.dart';
 import '../../../../../shared/constants/app_text_styles.dart';
+import '../../../../../shared/utils/string_utils.dart';
 import '../../../../../shared/widgets/layout/custom_app_bar.dart';
+import '../../../clients/presentation/providers/lawyer_client_providers.dart';
+import '../../../leads/presentation/providers/lead_providers.dart';
 import '../../domain/entities/appointment.dart';
 import '../providers/appointment_providers.dart';
 
 class LawyerAppointmentApprovalScreen extends ConsumerWidget {
-  const LawyerAppointmentApprovalScreen({Key? key}) : super(key: key);
+  const LawyerAppointmentApprovalScreen({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -23,7 +26,9 @@ class LawyerAppointmentApprovalScreen extends ConsumerWidget {
       ),
       body: pendingAsync.when(
         data: (pending) => _buildContent(context, ref, pending),
-        loading: () => const Center(child: CircularProgressIndicator(color: AppColors.primary)),
+        loading: () => const Center(
+          child: CircularProgressIndicator(color: AppColors.primary),
+        ),
         error: (err, st) => Center(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
@@ -31,9 +36,14 @@ class LawyerAppointmentApprovalScreen extends ConsumerWidget {
               Text('Erro ao carregar: $err', style: AppTextStyles.body),
               const SizedBox(height: 16),
               ElevatedButton(
-                style: ElevatedButton.styleFrom(backgroundColor: AppColors.primary),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppColors.primary,
+                ),
                 onPressed: () => ref.refresh(pendingAppointmentsProvider),
-                child: Text('Tentar Novamente', style: AppTextStyles.body.copyWith(color: AppColors.white)),
+                child: Text(
+                  'Tentar Novamente',
+                  style: AppTextStyles.body.copyWith(color: AppColors.white),
+                ),
               ),
             ],
           ),
@@ -42,7 +52,11 @@ class LawyerAppointmentApprovalScreen extends ConsumerWidget {
     );
   }
 
-  Widget _buildContent(BuildContext context, WidgetRef ref, List<Appointment> pendingAppointments) {
+  Widget _buildContent(
+    BuildContext context,
+    WidgetRef ref,
+    List<Appointment> pendingAppointments,
+  ) {
     if (pendingAppointments.isEmpty) {
       return RefreshIndicator(
         onRefresh: () => ref.refresh(pendingAppointmentsProvider.future),
@@ -56,7 +70,11 @@ class LawyerAppointmentApprovalScreen extends ConsumerWidget {
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    const Icon(Icons.edit_calendar_rounded, size: 64, color: AppColors.ink4),
+                    const Icon(
+                      Icons.edit_calendar_rounded,
+                      size: 64,
+                      color: AppColors.ink4,
+                    ),
                     const SizedBox(height: 16),
                     Text(
                       'Nenhum agendamento pendente',
@@ -76,10 +94,11 @@ class LawyerAppointmentApprovalScreen extends ConsumerWidget {
       color: AppColors.primary,
       child: ListView.builder(
         physics: const AlwaysScrollableScrollPhysics(),
+        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
         itemCount: pendingAppointments.length,
         itemBuilder: (context, index) {
           final appointment = pendingAppointments[index];
-          return _buildAppointmentCard(context, appointment);
+          return _buildAppointmentCard(context, ref, appointment);
         },
       ),
     );
@@ -87,15 +106,97 @@ class LawyerAppointmentApprovalScreen extends ConsumerWidget {
 
   Widget _buildAppointmentCard(
     BuildContext context,
+    WidgetRef ref,
     Appointment appointment,
   ) {
-    return Card(
-      margin: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-      elevation: 0,
-      color: AppColors.white,
+    final clients = ref.watch(myLawyerClientsProvider).valueOrNull ?? [];
+    final leads = ref.watch(allLeadsProvider).valueOrNull ?? [];
+
+    String clientName = '';
+    String whatsappNumber = '';
+
+    // 1. Tenta buscar pelo ID direto
+    if (appointment.clientId != null && appointment.clientId!.isNotEmpty) {
+      final c = clients.where((item) => item.id == appointment.clientId).firstOrNull;
+      if (c != null) {
+        clientName = c.name;
+        whatsappNumber = c.whatsappNumber;
+      } else {
+        final l = leads.where((item) => item.id == appointment.clientId).firstOrNull;
+        if (l != null) {
+          clientName = l.name ?? '';
+          whatsappNumber = l.whatsappNumber;
+        }
+      }
+    }
+
+    // 2. Se não achou por ID, tenta buscar pelo nome contido no título ou descrição
+    if (clientName.isEmpty) {
+      final combined = [
+        ...clients.map((c) => (name: c.name, phone: c.whatsappNumber)),
+        ...leads.map((l) => (name: l.name ?? '', phone: l.whatsappNumber)),
+      ];
+      for (final item in combined) {
+        if (item.name.isNotEmpty &&
+            (appointment.title.toLowerCase().contains(item.name.toLowerCase()) ||
+                (appointment.description ?? '').toLowerCase().contains(item.name.toLowerCase()))) {
+          clientName = item.name;
+          whatsappNumber = item.phone;
+          break;
+        }
+      }
+    }
+
+    // 3. Checa aiOriginalData se ainda vazio
+    if (clientName.isEmpty && appointment.aiOriginalData != null) {
+      final aiData = appointment.aiOriginalData!;
+      if (aiData.containsKey('clientName')) {
+        clientName = aiData['clientName'].toString();
+      } else if (aiData.containsKey('whatsappNumber')) {
+        whatsappNumber = aiData['whatsappNumber'].toString();
+      }
+    }
+
+    // 4. Fallback final extraindo do título com regex ou usando o próprio título
+    if (clientName.isEmpty) {
+      final reg = RegExp(
+        r'(?:com|-)\s+([A-Za-zÀ-ÖØ-öø-ÿ]+(?:\s+[A-Za-zÀ-ÖØ-öø-ÿ]+)*)',
+        caseSensitive: false,
+      );
+      final match = reg.firstMatch(appointment.title);
+      if (match != null && match.group(1) != null) {
+        clientName = match.group(1)!.trim();
+      } else {
+        if (appointment.title.length > 3 &&
+            !appointment.title.toLowerCase().startsWith('consulta')) {
+          clientName = appointment.title;
+        } else {
+          clientName = 'Cliente IA';
+        }
+      }
+    }
+
+    if (whatsappNumber.isEmpty) {
+      whatsappNumber = 'Não informado';
+    }
+
+    return Container(
+      margin: const EdgeInsets.only(bottom: 12),
+      decoration: BoxDecoration(
+        color: AppColors.surface,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: AppColors.yellow, width: 1.5),
+        boxShadow: [
+          BoxShadow(
+            color: AppColors.yellow.withValues(alpha: 0.1),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
       child: ListTile(
-        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        contentPadding: const EdgeInsets.all(16),
         onTap: () {
           Navigator.pushNamed(
             context,
@@ -103,20 +204,110 @@ class LawyerAppointmentApprovalScreen extends ConsumerWidget {
             arguments: appointment,
           );
         },
-        leading: Container(
-          padding: const EdgeInsets.all(10),
-          decoration: BoxDecoration(
-            color: AppColors.yellow.withValues(alpha: 0.2),
-            shape: BoxShape.circle,
+        leading: Stack(
+          children: [
+            CircleAvatar(
+              radius: 24,
+              backgroundColor: AppColors.yellow.withValues(alpha: 0.2),
+              child: Text(
+                StringUtils.getInitials(clientName),
+                style: const TextStyle(
+                  color: AppColors.ink,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
+            Positioned(
+              right: 0,
+              top: 0,
+              child: Container(
+                width: 14,
+                height: 14,
+                decoration: BoxDecoration(
+                  color: AppColors.yellow,
+                  shape: BoxShape.circle,
+                  border: Border.all(color: Colors.white, width: 2),
+                ),
+              ),
+            ),
+          ],
+        ),
+        title: Row(
+          children: [
+            Expanded(
+              child: Text(
+                StringUtils.formatFirstAndLastName(clientName),
+                style: const TextStyle(
+                  fontWeight: FontWeight.w900,
+                  color: AppColors.textPrimary,
+                ),
+              ),
+            ),
+            Text(
+              _formatDateTime(appointment.scheduledAt),
+              style: AppTextStyles.caption.copyWith(
+                color: AppColors.textCaption,
+                fontSize: 11,
+              ),
+            ),
+          ],
+        ),
+        subtitle: Padding(
+          padding: const EdgeInsets.only(top: 6),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  const Icon(
+                    Icons.phone_android_rounded,
+                    size: 14,
+                    color: AppColors.ink3,
+                  ),
+                  const SizedBox(width: 4),
+                  Text(
+                    whatsappNumber,
+                    style: AppTextStyles.caption.copyWith(
+                      color: AppColors.ink2,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 4),
+              Row(
+                children: [
+                  const Icon(
+                    Icons.edit_calendar_rounded,
+                    size: 14,
+                    color: AppColors.yellow,
+                  ),
+                  const SizedBox(width: 4),
+                  Expanded(
+                    child: Text(
+                      appointment.title,
+                      style: AppTextStyles.caption.copyWith(
+                        color: AppColors.ink,
+                        fontWeight: FontWeight.w500,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+                ],
+              ),
+            ],
           ),
-          child: const Icon(Icons.edit_calendar_rounded, color: AppColors.ink),
         ),
-        title: Text(appointment.title, style: AppTextStyles.body.copyWith(fontWeight: FontWeight.bold)),
-        subtitle: Text(
-          _formatDateTime(appointment.scheduledAt),
-          style: AppTextStyles.caption.copyWith(color: AppColors.ink3),
+        trailing: const Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              Icons.chevron_right_rounded,
+              color: AppColors.ink2,
+            ),
+          ],
         ),
-        trailing: const Icon(Icons.arrow_forward_ios_rounded, size: 16, color: AppColors.ink3),
       ),
     );
   }

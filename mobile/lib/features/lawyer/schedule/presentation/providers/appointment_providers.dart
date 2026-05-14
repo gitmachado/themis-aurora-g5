@@ -68,6 +68,8 @@ class AppointmentsNotifier extends AsyncNotifier<List<Appointment>> {
           event.type == 'appointment:deleted' ||
           event.type == 'connected') {
         refresh();
+        ref.invalidate(pendingAppointmentsProvider);
+        ref.invalidate(pendingAppointmentsCountProvider);
       }
     });
   }

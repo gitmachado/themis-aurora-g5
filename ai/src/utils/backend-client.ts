@@ -11,7 +11,8 @@ const JWT_SECRET = process.env.JWT_SECRET || "development_secret_key_change_me";
 function generateSystemToken(): string {
   return jwt.sign(
     {
-      id: "ai-system",
+      sub: "11111111-1111-4111-8111-111111111111",
+      id: "11111111-1111-4111-8111-111111111111",
       email: "ai@themis.local",
       role: "SYSTEM",
     },
@@ -33,6 +34,7 @@ const client: AxiosInstance = axios.create({
 client.interceptors.request.use((config) => {
   const token = generateSystemToken();
   config.headers.Authorization = `Bearer ${token}`;
+  config.headers["x-api-key"] = process.env.BOT_API_KEY || "development_bot_key_change_me";
   return config;
 });
 
@@ -158,10 +160,11 @@ export async function getAvailableSlots(
   lawyerId: string,
   date: string
 ): Promise<AvailableSlot[]> {
-  const res = await client.get(`/appointments/slots`, {
+  const res = await client.get(`/bot/appointments/slots`, {
     params: {
       lawyerId,
       date,
+      slotDurationMinutes: 30,
     },
   });
   return res.data.slots || [];
@@ -177,7 +180,7 @@ export async function scheduleAppointment(data: {
   durationMinutes: number;
   createdByAI?: boolean;
 }): Promise<{ id: string; scheduledAt: string }> {
-  const res = await client.post("/appointments", data);
+  const res = await client.post("/bot/appointments", data);
   return {
     id: res.data.id,
     scheduledAt: res.data.scheduledAt,

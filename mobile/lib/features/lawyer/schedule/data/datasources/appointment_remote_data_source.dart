@@ -53,12 +53,16 @@ final class AppointmentRemoteDataSource {
   // ===== NEW: Appointment Approval Workflow =====
 
   Future<List<AppointmentModel>> getPendingAppointments() async {
-    final list = await _apiClient.getList('/appointments/pending');
-    return list
-        .map((json) => AppointmentModel.fromJson(
-              Map<String, dynamic>.from(json as Map),
-            ))
-        .toList();
+    final response = await _apiClient.getJson('/appointments/pending');
+    final items = response['items'] as List?;
+    return items
+            ?.map(
+              (json) => AppointmentModel.fromJson(
+                Map<String, dynamic>.from(json as Map),
+              ),
+            )
+            .toList() ??
+        [];
   }
 
   Future<AppointmentModel> approveAppointment(
