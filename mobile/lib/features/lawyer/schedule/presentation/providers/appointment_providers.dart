@@ -62,6 +62,7 @@ class AppointmentsNotifier extends AsyncNotifier<List<Appointment>> {
 
   @override
   Future<List<Appointment>> build() async {
+    ref.watch(webSocketClientProvider); // Cria dependência reativa
     _listenToEvents();
     ref.onDispose(() => _subscription?.cancel());
     return _fetch();
@@ -69,7 +70,7 @@ class AppointmentsNotifier extends AsyncNotifier<List<Appointment>> {
 
   void _listenToEvents() {
     _subscription?.cancel();
-    _subscription = ref.watch(webSocketClientProvider).events.listen((event) {
+    _subscription = ref.read(webSocketClientProvider).events.listen((event) {
       if (event.type == 'appointment:created' ||
           event.type == 'appointment:updated' ||
           event.type == 'appointment:deleted' ||
@@ -96,7 +97,6 @@ class AppointmentsNotifier extends AsyncNotifier<List<Appointment>> {
   }
 
   Future<void> refresh() async {
-    state = const AsyncLoading();
     try {
       state = AsyncValue.data(await _fetch());
     } catch (e, st) {

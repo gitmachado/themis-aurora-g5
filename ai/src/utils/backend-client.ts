@@ -322,3 +322,112 @@ export async function scheduleAppointment(data: {
     scheduledAt: res.data.scheduledAt,
   };
 }
+
+// ── Agenda/Compromissos (Autenticado) ──
+// Estas rotas usam autenticação JWT do advogado
+
+export interface AppointmentData {
+  id: string;
+  title: string;
+  description?: string;
+  type: string;
+  status: string;
+  scheduledAt: string;
+  durationMinutes: number;
+  clientId?: string;
+  processId?: string;
+  clientName?: string;
+  clientWhatsappNumber?: string;
+  createdByAI: boolean;
+  createdAt: string;
+  updatedAt?: string;
+}
+
+export async function getMyAppointments(
+  lawyerId: string,
+  filters?: {
+    startDate?: string;
+    endDate?: string;
+    type?: string;
+    status?: string;
+  }
+): Promise<AppointmentData[]> {
+  try {
+    const params: any = {};
+    if (filters?.startDate) params.startDate = filters.startDate;
+    if (filters?.endDate) params.endDate = filters.endDate;
+    if (filters?.type) params.type = filters.type;
+    if (filters?.status) params.status = filters.status;
+
+    const res = await client.get("/appointments", { params });
+    return res.data.items || res.data || [];
+  } catch (error: any) {
+    throwHttp(error);
+  }
+}
+
+export async function getAppointmentById(appointmentId: string): Promise<AppointmentData> {
+  try {
+    const res = await client.get(`/appointments/${appointmentId}`);
+    return res.data;
+  } catch (error: any) {
+    throwHttp(error);
+  }
+}
+
+export async function createAppointment(
+  lawyerId: string,
+  data: {
+    title: string;
+    type: "MEETING" | "DEADLINE" | "HEARING" | "OTHER";
+    scheduledAt: string;
+    durationMinutes?: number;
+    description?: string;
+    clientId?: string;
+    processId?: string;
+    createdByAI?: boolean;
+  }
+): Promise<{ id: string; scheduledAt: string }> {
+  try {
+    const payload = {
+      ...data,
+      durationMinutes: data.durationMinutes || 30,
+      createdByAI: data.createdByAI || true,
+    };
+    const res = await client.post("/appointments", payload);
+    return {
+      id: res.data.id,
+      scheduledAt: res.data.scheduledAt,
+    };
+  } catch (error: any) {
+    throwHttp(error);
+  }
+}
+
+export async function updateAppointment(
+  appointmentId: string,
+  data: {
+    title?: string;
+    description?: string;
+    scheduledAt?: string;
+    durationMinutes?: number;
+    status?: string;
+  }
+): Promise<AppointmentData> {
+  try {
+    const res = await client.patch(`/appointments/${appointmentId}`, data);
+    return res.data;
+  } catch (error: any) {
+    throwHttp(error);
+  }
+}
+
+export async function cancelAppointment(appointmentId: string): Promise<void> {
+  try {
+    await client.patch(`/appointments/${appointmentId}`, {
+      status: "CANCELED",
+    });
+  } catch (error: any) {
+    throwHttp(error);
+  }
+}

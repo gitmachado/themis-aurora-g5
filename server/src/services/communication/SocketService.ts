@@ -121,6 +121,14 @@ export class SocketService {
       this.io?.to('lobby:lawyers').emit('lead:unlocked', { leadId, whatsappNumber });
     });
 
+    eventBus.on('lead:deleted', ({ leadId }) => {
+      this.io?.to('lobby:lawyers').emit('lead:deleted', { leadId });
+    });
+
+    eventBus.on('leads:reset', () => {
+      this.io?.to('lobby:lawyers').emit('leads:reset', {});
+    });
+
     eventBus.on('procedure:updated', ({ userId, procedure }) => {
       this.io?.to(`user:${userId}`).emit('procedure:updated', procedure);
     });
@@ -164,6 +172,14 @@ export class SocketService {
 
     eventBus.on('reschedule:rejected', ({ lawyerId, suggestionId }) => {
       this.io?.to(`user:${lawyerId}`).emit('reschedule:rejected', { suggestionId });
+    });
+
+    eventBus.on('document:uploaded', ({ userId, document }) => {
+      this.io?.to(`user:${userId}`).emit('document:uploaded', document);
+    });
+
+    eventBus.on('document:deleted', ({ userId, documentId, processId }) => {
+      this.io?.to(`user:${userId}`).emit('document:deleted', { documentId, processId });
     });
   }
 

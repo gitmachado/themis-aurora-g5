@@ -38,21 +38,6 @@ class LawyerOverviewScreen extends ConsumerWidget {
 
     return Scaffold(
       backgroundColor: AppColors.background,
-      floatingActionButton: FloatingActionButton.extended(
-        // Explicit heroTag avoids the "multiple heroes share the same tag"
-        // error when other screens in the lawyer flow also expose a FAB
-        // (they all default to <default FloatingActionButton tag>).
-        heroTag: 'lawyer_overview_ai_fab',
-        onPressed: () =>
-            Navigator.pushNamed(context, AppRouter.lawyerAIChatRoute),
-        backgroundColor: AppColors.ink,
-        foregroundColor: AppColors.yellow,
-        icon: const Icon(Icons.smart_toy_rounded),
-        label: const Text(
-          'Themis IA',
-          style: TextStyle(fontWeight: FontWeight.bold),
-        ),
-      ),
       body: Column(
         children: [
           AppDashboardHeader(

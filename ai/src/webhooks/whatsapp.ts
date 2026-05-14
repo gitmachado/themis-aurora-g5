@@ -5,7 +5,9 @@ import { graph } from "../graph/index.js";
 import { INITIAL_TRIAGE, INITIAL_CONFIG } from "../graph/state.js";
 import { getBotConfig } from "../tools/config-loader.js";
 import { containsPromptInjection, DEFAULT_GUARDRAIL_RESPONSE } from "../utils/guardrails.js";
-import { validateMessageType } from "../utils/message-validator.js";
+import { downloadWhatsAppMedia } from "../utils/media-downloader.js";
+import { transcribeAudio } from "../utils/transcriber.js";
+import { describeImage } from "../utils/image-describer.js";
 import { syncMessage } from "../graph/nodes/sync.js";
 import { getLeadByPhone, notifyLawyer } from "../utils/backend-client.js";
 import { FALLBACK_ERROR_MESSAGE, NON_TEXT_MESSAGE } from "../config/prompts.js";
@@ -40,18 +42,52 @@ whatsappRouter.post("/webhook", async (req, res) => {
     const whatsappNumber: string = message.from;
     const type: string = message.type;
 
+    // 1. Resolve o corpo de texto — áudio é transcrito, imagens descritas
+    let textBody: string;
+    let messageType: "TEXT" | "IMAGE" | "DOCUMENT" = "TEXT";
 
-
-    // 1. Barreira de tipo de mensagem — rejeita áudio, imagem, etc.
-    const validation = validateMessageType(type);
-    if (!validation.isValid) {
-      await sendWhatsAppMessage(whatsappNumber, NON_TEXT_MESSAGE);
+    if (type === "audio" && message.audio?.id) {
+      console.log(`[Webhook] Áudio recebido de ${whatsappNumber}, transcrevendo...`);
+      try {
+        const audioBuffer = await downloadWhatsAppMedia(message.audio.id);
+        textBody = await transcribeAudio(audioBuffer, message.audio.mime_type ?? "audio/ogg");
+        messageType = "DOCUMENT";
+        console.log(`[Webhook] Transcrição concluída para ${whatsappNumber}: "${textBody.substring(0, 60)}..."`);
+      } catch (transcriptionErr) {
+        console.error("[Webhook] Falha ao transcrever áudio:", transcriptionErr);
+        await sendWhatsAppMessage(
+          whatsappNumber,
+          "Não consegui entender o áudio. 😔 Poderia digitar sua mensagem?"
+        );
+        return;
+      }
+    } else if (type === "image" && message.image?.id) {
+      console.log(`[Webhook] Imagem recebida de ${whatsappNumber}, descrevendo...`);
+      try {
+        const imageBuffer = await downloadWhatsAppMedia(message.image.id);
+        textBody = await describeImage(imageBuffer, message.image.mime_type ?? "image/jpeg", message.image.caption);
+        messageType = "IMAGE";
+        console.log(`[Webhook] Descrição de imagem concluída para ${whatsappNumber}: "${textBody.substring(0, 60)}..."`);
+      } catch (imageErr) {
+        console.error("[Webhook] Falha ao descrever imagem:", imageErr);
+        await sendWhatsAppMessage(
+          whatsappNumber,
+          "Não consegui processar a imagem. 😔 Poderia descrever sua dúvida em texto ou áudio?"
+        );
+        return;
+      }
+    } else if (type === "text" && message.text?.body) {
+      textBody = message.text.body;
+      messageType = "TEXT";
+    } else {
+      console.log(`[Webhook] Tipo de mensagem não suportado (${type}) de ${whatsappNumber}`);
+      await sendWhatsAppMessage(
+        whatsappNumber,
+        "Por enquanto processo mensagens de texto, áudio e imagem. Por favor, envie sua dúvida nestes formatos. 😊"
+      );
       return;
     }
 
-    if (!message.text?.body) return;
-
-    const textBody: string = message.text.body;
     const messageId: string = message.id;
 
     // 2. Sincroniza mensagem do cliente com o backend imediatamente
@@ -60,7 +96,7 @@ whatsappRouter.post("/webhook", async (req, res) => {
         whatsappNumber,
         content: textBody,
         senderRole: "CLIENT",
-        messageType: "TEXT",
+        messageType,
         whatsappMessageId: messageId,
       });
     } catch (syncErr) {

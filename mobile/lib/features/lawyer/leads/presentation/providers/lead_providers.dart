@@ -65,6 +65,7 @@ class PendingLeadsNotifier extends AsyncNotifier<List<Lead>> {
 
   @override
   Future<List<Lead>> build() async {
+    ref.watch(webSocketClientProvider); // Cria dependência reativa
     _listenToEvents();
     ref.onDispose(() => _subscription?.cancel());
     return _fetch();
@@ -72,10 +73,12 @@ class PendingLeadsNotifier extends AsyncNotifier<List<Lead>> {
 
   void _listenToEvents() {
     _subscription?.cancel();
-    _subscription = ref.watch(webSocketClientProvider).events.listen((event) {
+    _subscription = ref.read(webSocketClientProvider).events.listen((event) {
       if (event.type == 'lead:updated' ||
           event.type == 'lead:locked' ||
           event.type == 'lead:unlocked' ||
+          event.type == 'lead:deleted' ||
+          event.type == 'leads:reset' ||
           event.type == 'connected') {
         refresh();
       }
@@ -87,7 +90,6 @@ class PendingLeadsNotifier extends AsyncNotifier<List<Lead>> {
   }
 
   Future<void> refresh() async {
-    state = const AsyncLoading();
     try {
       final leads = await _fetch();
       state = AsyncValue.data(leads);
@@ -106,6 +108,7 @@ class AllLeadsNotifier extends AsyncNotifier<List<Lead>> {
 
   @override
   Future<List<Lead>> build() async {
+    ref.watch(webSocketClientProvider); // Cria dependência reativa
     _listenToEvents();
     ref.onDispose(() => _subscription?.cancel());
     return _fetch();
@@ -113,10 +116,12 @@ class AllLeadsNotifier extends AsyncNotifier<List<Lead>> {
 
   void _listenToEvents() {
     _subscription?.cancel();
-    _subscription = ref.watch(webSocketClientProvider).events.listen((event) {
+    _subscription = ref.read(webSocketClientProvider).events.listen((event) {
       if (event.type == 'lead:updated' ||
           event.type == 'lead:locked' ||
           event.type == 'lead:unlocked' ||
+          event.type == 'lead:deleted' ||
+          event.type == 'leads:reset' ||
           event.type == 'connected') {
         refresh();
       }
@@ -128,7 +133,6 @@ class AllLeadsNotifier extends AsyncNotifier<List<Lead>> {
   }
 
   Future<void> refresh() async {
-    state = const AsyncLoading();
     try {
       final leads = await _fetch();
       state = AsyncValue.data(leads);

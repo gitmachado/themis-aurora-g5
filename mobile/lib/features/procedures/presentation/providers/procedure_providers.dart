@@ -95,6 +95,7 @@ class MyProceduresNotifier extends AsyncNotifier<List<LegalProcess>> {
 
   @override
   Future<List<LegalProcess>> build() async {
+    ref.watch(webSocketClientProvider); // Cria dependência reativa
     _listenToEvents();
     ref.onDispose(() => _subscription?.cancel());
     return _fetch();
@@ -102,7 +103,7 @@ class MyProceduresNotifier extends AsyncNotifier<List<LegalProcess>> {
 
   void _listenToEvents() {
     _subscription?.cancel();
-    _subscription = ref.watch(webSocketClientProvider).events.listen((event) {
+    _subscription = ref.read(webSocketClientProvider).events.listen((event) {
       if (event.type == 'procedure:updated' || event.type == 'connected') {
         // Recarrega a lista completa quando houver qualquer atualização ou reconexão
         refresh();
@@ -135,6 +136,7 @@ class ProcedureDetailsNotifier
 
   @override
   Future<LegalProcess> build(String arg) async {
+    ref.watch(webSocketClientProvider); // Cria dependência reativa
     _listenToEvents();
     ref.onDispose(() => _subscription?.cancel());
     return _fetch();
@@ -142,7 +144,7 @@ class ProcedureDetailsNotifier
 
   void _listenToEvents() {
     _subscription?.cancel();
-    _subscription = ref.watch(webSocketClientProvider).events.listen((event) {
+    _subscription = ref.read(webSocketClientProvider).events.listen((event) {
       if ((event.type == 'procedure:updated' && event.data['id'] == arg) ||
           event.type == 'connected') {
         refresh();
@@ -173,6 +175,7 @@ class ProcedureTimelineNotifier
 
   @override
   Future<List<TimelineEvent>> build(String arg) async {
+    ref.watch(webSocketClientProvider); // Cria dependência reativa
     _listenToEvents();
     ref.onDispose(() => _subscription?.cancel());
     return _fetch();
@@ -180,7 +183,7 @@ class ProcedureTimelineNotifier
 
   void _listenToEvents() {
     _subscription?.cancel();
-    _subscription = ref.watch(webSocketClientProvider).events.listen((event) {
+    _subscription = ref.read(webSocketClientProvider).events.listen((event) {
       final processId = arg;
       // Se o evento for de atualização de processo e o ID bater, ou se reconectar
       if ((event.type == 'procedure:updated' &&
@@ -204,14 +207,50 @@ class ProcedureTimelineNotifier
 }
 
 final procedureDocumentsProvider =
-    FutureProvider.family<List<ProcessDocument>, String>((
-      ref,
-      processId,
-    ) async {
-      return (await ref.watch(getProcedureDocumentsUseCaseProvider)(
-        processId,
-      )).getOrThrow();
+    AsyncNotifierProvider.family<
+      ProcedureDocumentsNotifier,
+      List<ProcessDocument>,
+      String
+    >(ProcedureDocumentsNotifier.new);
+
+class ProcedureDocumentsNotifier
+    extends FamilyAsyncNotifier<List<ProcessDocument>, String> {
+  StreamSubscription? _subscription;
+
+  @override
+  Future<List<ProcessDocument>> build(String processId) async {
+    ref.watch(webSocketClientProvider); // Cria dependência reativa
+    _listenToEvents(processId);
+    ref.onDispose(() => _subscription?.cancel());
+    return _fetch(processId);
+  }
+
+  void _listenToEvents(String processId) {
+    _subscription?.cancel();
+    _subscription = ref.read(webSocketClientProvider).events.listen((event) {
+      if (event.type == 'document:uploaded' ||
+          event.type == 'document:deleted') {
+        refresh();
+      }
     });
+  }
+
+  Future<List<ProcessDocument>> _fetch(String processId) async {
+    return (await ref.read(getProcedureDocumentsUseCaseProvider)(
+      processId,
+    )).getOrThrow();
+  }
+
+  Future<void> refresh() async {
+    final processId = arg;
+    try {
+      final documents = await _fetch(processId);
+      state = AsyncValue.data(documents);
+    } catch (e, st) {
+      state = AsyncValue.error(e, st);
+    }
+  }
+}
 
 final myDocumentsProvider = FutureProvider<List<ProcessDocument>>((ref) async {
   return (await ref.watch(getMyDocumentsUseCaseProvider)()).getOrThrow();

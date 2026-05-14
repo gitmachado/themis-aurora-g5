@@ -1,5 +1,7 @@
+import 'dart:async';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:mobile/shared/errors/either_failure_extensions.dart';
+import '../../../../../../shared/network/websocket_client.dart';
 
 import '../../../../../../shared/network/api_client.dart';
 import '../../data/datasources/team_remote_data_source.dart';
@@ -50,16 +52,37 @@ final teamListProvider =
     );
 
 class TeamListNotifier extends AsyncNotifier<List<TeamMember>> {
+  StreamSubscription? _subscription;
+
   @override
-  Future<List<TeamMember>> build() => _fetch();
+  Future<List<TeamMember>> build() async {
+    ref.watch(webSocketClientProvider); // Cria dependência reativa
+    _listenToEvents();
+    ref.onDispose(() => _subscription?.cancel());
+    return _fetch();
+  }
+
+  void _listenToEvents() {
+    _subscription?.cancel();
+    _subscription = ref.read(webSocketClientProvider).events.listen((event) {
+      // Refresh on reconnect to ensure fresh data
+      if (event.type == 'connected') {
+        refresh();
+      }
+    });
+  }
 
   Future<List<TeamMember>> _fetch() async {
     return (await ref.read(listTeamUseCaseProvider)()).getOrThrow();
   }
 
   Future<void> refresh() async {
-    state = const AsyncLoading();
-    state = await AsyncValue.guard(_fetch);
+    try {
+      final members = await _fetch();
+      state = AsyncValue.data(members);
+    } catch (e, st) {
+      state = AsyncValue.error(e, st);
+    }
   }
 
   /// Adiciona um advogado e atualiza a lista localmente sem refetch.
