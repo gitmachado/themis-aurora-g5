@@ -89,6 +89,7 @@ class _LawyerScheduleScreenState extends State<LawyerScheduleScreen>
       appBar: const CustomAppBar(
         title: 'Agenda',
         showBackButton: true,
+        showDivider: false,
       ),
       body: SafeArea(
         child: Column(
