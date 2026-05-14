@@ -42,13 +42,16 @@ whatsappRouter.post("/webhook", async (req, res) => {
     const whatsappNumber: string = message.from;
     const type: string = message.type;
 
-    // 1. Resolve o corpo de texto — áudio é transcrito, demais não-texto são ignorados
+    // 1. Resolve o corpo de texto — áudio é transcrito, imagens descritas
     let textBody: string;
+    let messageType: "TEXT" | "AUDIO" | "IMAGE" = "TEXT";
+
     if (type === "audio" && message.audio?.id) {
       console.log(`[Webhook] Áudio recebido de ${whatsappNumber}, transcrevendo...`);
       try {
         const audioBuffer = await downloadWhatsAppMedia(message.audio.id);
         textBody = await transcribeAudio(audioBuffer, message.audio.mime_type ?? "audio/ogg");
+        messageType = "AUDIO";
         console.log(`[Webhook] Transcrição concluída para ${whatsappNumber}: "${textBody.substring(0, 60)}..."`);
       } catch (transcriptionErr) {
         console.error("[Webhook] Falha ao transcrever áudio:", transcriptionErr);
@@ -63,6 +66,7 @@ whatsappRouter.post("/webhook", async (req, res) => {
       try {
         const imageBuffer = await downloadWhatsAppMedia(message.image.id);
         textBody = await describeImage(imageBuffer, message.image.mime_type ?? "image/jpeg", message.image.caption);
+        messageType = "IMAGE";
         console.log(`[Webhook] Descrição de imagem concluída para ${whatsappNumber}: "${textBody.substring(0, 60)}..."`);
       } catch (imageErr) {
         console.error("[Webhook] Falha ao descrever imagem:", imageErr);
@@ -74,6 +78,7 @@ whatsappRouter.post("/webhook", async (req, res) => {
       }
     } else if (type === "text" && message.text?.body) {
       textBody = message.text.body;
+      messageType = "TEXT";
     } else {
       console.log(`[Webhook] Tipo de mensagem não suportado (${type}) de ${whatsappNumber}`);
       await sendWhatsAppMessage(
@@ -91,7 +96,7 @@ whatsappRouter.post("/webhook", async (req, res) => {
         whatsappNumber,
         content: textBody,
         senderRole: "CLIENT",
-        messageType: "TEXT",
+        messageType: messageType as "TEXT" | "AUDIO" | "IMAGE",
         whatsappMessageId: messageId,
       });
     } catch (syncErr) {
