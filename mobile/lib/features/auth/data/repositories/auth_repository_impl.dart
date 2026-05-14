@@ -1,12 +1,12 @@
 import 'dart:developer';
 
 import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:flutter/foundation.dart';
 import 'package:fpdart/fpdart.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:mobile/shared/errors/failures.dart';
 import 'package:mobile/shared/errors/repository_guard.dart';
 
-import '../../../../shared/constants/app_constants.dart';
 import '../../../../shared/network/token_storage.dart';
 import '../../domain/entities/account.dart';
 import '../../domain/entities/auth_session.dart';
@@ -22,6 +22,20 @@ final class AuthRepositoryImpl implements AuthRepository {
     required TokenStorage tokenStorage,
   }) : _remoteDataSource = remoteDataSource,
        _tokenStorage = tokenStorage;
+
+  bool _initialized = false;
+
+  Future<void> _ensureInitialized() async {
+    if (!_initialized) {
+      try {
+        await GoogleSignIn.instance.initialize();
+        _initialized = true;
+      } catch (e) {
+        // Se já estiver inicializado, o plugin pode lançar erro
+        _initialized = true;
+      }
+    }
+  }
 
   @override
   Future<Either<Failure, AuthSession>> login({
@@ -44,41 +58,37 @@ final class AuthRepositoryImpl implements AuthRepository {
     });
   }
 
-  bool _googleSignInInitialized = false;
-
-  Future<void> _ensureGoogleSignInInitialized() async {
-    if (!_googleSignInInitialized) {
-      await GoogleSignIn.instance.initialize(
-        serverClientId: AppConstants.googleClientId,
-      );
-      _googleSignInInitialized = true;
-    }
-  }
-
   @override
   Future<Either<Failure, AuthSession>> signInWithGoogle() {
     return guardRepository(() async {
-      await _ensureGoogleSignInInitialized();
-      final googleSignIn = GoogleSignIn.instance;
+      try {
+        await _ensureInitialized();
 
-      final googleUser = await googleSignIn.authenticate();
+        // No google_sign_in 7.x, o método correto é authenticate()
+        final googleUser = await GoogleSignIn.instance.authenticate();
+        final googleAuth = googleUser.authentication;
+        final idToken = googleAuth.idToken;
 
-      final googleAuth = googleUser.authentication;
-      final idToken = googleAuth.idToken;
+        if (idToken == null) {
+          throw const ServerFailure('Falha ao obter token do Google');
+        }
 
-      if (idToken == null) {
-        throw const ServerFailure('Falha ao obter token do Google');
+        final session = await _remoteDataSource.googleSignIn(idToken);
+        await _tokenStorage.saveToken(session.token);
+
+        final account = await _remoteDataSource.getAccount();
+        return session.copyWith(
+          userId: account.id,
+          role: account.role,
+          account: account,
+        );
+      } catch (e) {
+        if (kDebugMode) print('[GoogleSignIn Error]: $e');
+        if (e.toString().contains('canceled')) {
+          throw const ServerFailure('Login cancelado pelo usuário');
+        }
+        rethrow;
       }
-
-      final session = await _remoteDataSource.googleSignIn(idToken);
-      await _tokenStorage.saveToken(session.token);
-
-      final account = await _remoteDataSource.getAccount();
-      return session.copyWith(
-        userId: account.id,
-        role: account.role,
-        account: account,
-      );
     });
   }
 
@@ -86,7 +96,7 @@ final class AuthRepositoryImpl implements AuthRepository {
   Future<Either<Failure, AuthSession?>> restoreSession() {
     return guardRepository(() async {
       final token = await _tokenStorage.readToken();
-      if (token == null || token.isEmpty) return null;
+      if (token == null) return null;
 
       final account = await _remoteDataSource.getAccount();
       return AuthSession(
@@ -100,7 +110,7 @@ final class AuthRepositoryImpl implements AuthRepository {
 
   @override
   Future<Either<Failure, Account>> getAccount() {
-    return guardRepository(_remoteDataSource.getAccount);
+    return guardRepository(() => _remoteDataSource.getAccount());
   }
 
   @override
@@ -169,8 +179,9 @@ final class AuthRepositoryImpl implements AuthRepository {
       }
 
       await _tokenStorage.clearToken();
-      await _ensureGoogleSignInInitialized();
-      await GoogleSignIn.instance.signOut();
+      try {
+        await GoogleSignIn.instance.signOut();
+      } catch (_) {}
     });
   }
 }

@@ -22,6 +22,14 @@
           }
         },
         {
+          "client_id": "726117555634-t0l169f42jmcsglngomg17au99u7t6t2.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.themis.mobile",
+            "certificate_hash": "73e91510dd262216d9229991b6f954f8e1ff03db"
+          }
+        },
+        {
           "client_id": "726117555634-v9p8rcatfaghfnftuar0mpc3qkr1qc2i.apps.googleusercontent.com",
           "client_type": 3
         }
@@ -39,6 +47,9 @@
               "client_type": 3
             }
           ]
+        },
+        "ads_service": {
+          "status": 1
         }
       }
     }
