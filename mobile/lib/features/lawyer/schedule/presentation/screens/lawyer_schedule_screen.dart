@@ -546,14 +546,14 @@ class _CreateAppointmentSheetState
             ),
             const SizedBox(height: 20),
             Text(
-              'Novo Compromisso',
+              'Novo evento',
               style: AppTextStyles.h2,
             ),
             const SizedBox(height: 24),
             TextField(
               controller: _titleController,
               decoration: InputDecoration(
-                hintText: 'Título do compromisso',
+                hintText: 'Título do evento',
                 filled: true,
                 fillColor: AppColors.surface2,
                 border: OutlineInputBorder(
@@ -693,7 +693,7 @@ class _CreateAppointmentSheetState
                 ),
                 onPressed: _createAppointment,
                 child: Text(
-                  'Criar Compromisso',
+                  'Criar evento',
                   style: AppTextStyles.body.copyWith(
                     color: AppColors.white,
                     fontWeight: FontWeight.bold,
@@ -758,7 +758,7 @@ class _CreateAppointmentSheetState
       if (mounted) {
         Navigator.pop(context);
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Compromisso criado com sucesso')),
+          const SnackBar(content: Text('Evento criado com sucesso')),
         );
       }
     } catch (e) {

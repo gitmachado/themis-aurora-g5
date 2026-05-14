@@ -16,4 +16,9 @@ abstract interface class AppointmentRepository {
     String id,
     String status,
   );
+
+  Future<Either<Failure, Appointment>> update(
+    String id,
+    Map<String, dynamic> data,
+  );
 }

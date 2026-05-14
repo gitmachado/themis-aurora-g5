@@ -37,3 +37,15 @@ final class UpdateAppointmentStatusUseCase {
   ) =>
       _repository.updateStatus(id, status);
 }
+
+final class UpdateAppointmentUseCase {
+  final AppointmentRepository _repository;
+
+  const UpdateAppointmentUseCase(this._repository);
+
+  Future<Either<Failure, Appointment>> call(
+    String id,
+    Map<String, dynamic> data,
+  ) =>
+      _repository.update(id, data);
+}

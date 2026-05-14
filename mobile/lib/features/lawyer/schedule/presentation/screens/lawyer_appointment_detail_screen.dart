@@ -34,7 +34,7 @@ class _LawyerAppointmentDetailScreenState
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
-            content: Text('Compromisso marcado como concluído!'),
+            content: Text('Evento marcado como concluído!'),
             backgroundColor: Colors.green,
           ),
         );
@@ -60,7 +60,7 @@ class _LawyerAppointmentDetailScreenState
     final confirm = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Cancelar compromisso?'),
+        title: const Text('Cancelar evento?'),
         content: const Text(
           'Esta ação não pode ser desfeita. Tem certeza?',
         ),
@@ -86,7 +86,7 @@ class _LawyerAppointmentDetailScreenState
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
-            content: Text('Compromisso cancelado'),
+            content: Text('Evento cancelado'),
             backgroundColor: AppColors.error,
           ),
         );
@@ -119,12 +119,20 @@ class _LawyerAppointmentDetailScreenState
       ),
       child: Scaffold(
         backgroundColor: AppColors.background,
-        appBar: const CustomAppBar(
-          title: 'Detalhes do Compromisso',
+        appBar: CustomAppBar(
+          title: 'Detalhes do Evento',
           showBackButton: true,
+          actions: target != null && target.status == 'SCHEDULED'
+              ? [
+                  IconButton(
+                    icon: const Icon(Icons.edit_rounded, color: AppColors.ink),
+                    onPressed: () => _showEditSheet(target),
+                  ),
+                ]
+              : null,
         ),
         body: target == null
-            ? const Center(child: Text('Compromisso não encontrado'))
+            ? const Center(child: Text('Evento não encontrado'))
             : SafeArea(
                 child: SingleChildScrollView(
                   padding: const EdgeInsets.all(24),
@@ -427,5 +435,316 @@ class _LawyerAppointmentDetailScreenState
     final start = target.scheduledAt;
     final end = target.endTime;
     return '${start.hour.toString().padLeft(2, '0')}:${start.minute.toString().padLeft(2, '0')} - ${end.hour.toString().padLeft(2, '0')}:${end.minute.toString().padLeft(2, '0')}';
+  }
+
+  void _showEditSheet(Appointment target) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) => EditAppointmentSheet(appointment: target),
+    );
+  }
+}
+
+class EditAppointmentSheet extends ConsumerStatefulWidget {
+  final Appointment appointment;
+
+  const EditAppointmentSheet({
+    super.key,
+    required this.appointment,
+  });
+
+  @override
+  ConsumerState<EditAppointmentSheet> createState() =>
+      _EditAppointmentSheetState();
+}
+
+class _EditAppointmentSheetState extends ConsumerState<EditAppointmentSheet> {
+  late TextEditingController _titleController;
+  late TextEditingController _descriptionController;
+  late String _selectedType;
+  late DateTime _selectedDateTime;
+  String? _selectedProcessId;
+
+  @override
+  void initState() {
+    super.initState();
+    final target = widget.appointment;
+    _titleController = TextEditingController(text: target.title);
+    _descriptionController = TextEditingController(text: target.description ?? '');
+    _selectedType = target.type;
+    _selectedDateTime = target.scheduledAt;
+    _selectedProcessId = target.processId;
+  }
+
+  @override
+  void dispose() {
+    _titleController.dispose();
+    _descriptionController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final procedures = ref.watch(myProceduresProvider).valueOrNull ?? const [];
+
+    return Container(
+      decoration: const BoxDecoration(
+        color: AppColors.surface,
+        borderRadius: BorderRadius.only(
+          topLeft: Radius.circular(28),
+          topRight: Radius.circular(28),
+        ),
+      ),
+      padding: EdgeInsets.only(
+        left: 24,
+        right: 24,
+        top: 12,
+        bottom: MediaQuery.of(context).viewInsets.bottom +
+            MediaQuery.of(context).padding.bottom +
+            24,
+      ),
+      child: SingleChildScrollView(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Center(
+              child: Container(
+                width: 40,
+                height: 4,
+                decoration: BoxDecoration(
+                  color: AppColors.divider,
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              ),
+            ),
+            const SizedBox(height: 20),
+            Text(
+              'Editar Evento',
+              style: AppTextStyles.h2,
+            ),
+            const SizedBox(height: 24),
+            TextField(
+              controller: _titleController,
+              decoration: InputDecoration(
+                hintText: 'Título do evento',
+                filled: true,
+                fillColor: AppColors.surface2,
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(14),
+                  borderSide: const BorderSide(color: AppColors.line),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(14),
+                  borderSide: const BorderSide(
+                    color: AppColors.yellow,
+                    width: 2,
+                  ),
+                ),
+              ),
+            ),
+            const SizedBox(height: 16),
+            TextField(
+              controller: _descriptionController,
+              maxLines: 3,
+              decoration: InputDecoration(
+                hintText: 'Descrição (opcional)',
+                filled: true,
+                fillColor: AppColors.surface2,
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(14),
+                  borderSide: const BorderSide(color: AppColors.line),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(14),
+                  borderSide: const BorderSide(
+                    color: AppColors.yellow,
+                    width: 2,
+                  ),
+                ),
+              ),
+            ),
+            const SizedBox(height: 16),
+            DropdownButtonFormField<String>(
+              value: _selectedType,
+              decoration: InputDecoration(
+                labelText: 'Tipo',
+                filled: true,
+                fillColor: AppColors.surface2,
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(14),
+                  borderSide: const BorderSide(color: AppColors.line),
+                ),
+              ),
+              items: const [
+                DropdownMenuItem(value: 'MEETING', child: Text('Reunião')),
+                DropdownMenuItem(value: 'DEADLINE', child: Text('Prazo')),
+                DropdownMenuItem(value: 'HEARING', child: Text('Audiência')),
+                DropdownMenuItem(value: 'OTHER', child: Text('Outro')),
+              ],
+              onChanged: (value) {
+                if (value != null) {
+                  setState(() => _selectedType = value);
+                }
+              },
+            ),
+            if (procedures.isNotEmpty) ...[
+              const SizedBox(height: 16),
+              DropdownButtonFormField<String?>(
+                value: _selectedProcessId,
+                decoration: InputDecoration(
+                  labelText: 'Vincular a Processo (opcional)',
+                  filled: true,
+                  fillColor: AppColors.surface2,
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(14),
+                    borderSide: const BorderSide(color: AppColors.line),
+                  ),
+                ),
+                items: [
+                  const DropdownMenuItem(value: null, child: Text('Nenhum')),
+                  ...procedures.map(
+                    (p) => DropdownMenuItem(
+                      value: p.id,
+                      child: Text(
+                        p.title,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                  ),
+                ],
+                onChanged: (value) {
+                  setState(() => _selectedProcessId = value);
+                },
+                isExpanded: true,
+              ),
+            ],
+            const SizedBox(height: 16),
+            GestureDetector(
+              onTap: () => _pickDateTime(),
+              child: Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: AppColors.surface2,
+                  borderRadius: BorderRadius.circular(14),
+                  border: Border.all(color: AppColors.line),
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Data e Hora',
+                          style: AppTextStyles.caption.copyWith(
+                            color: AppColors.ink3,
+                          ),
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          '${_selectedDateTime.day}/${_selectedDateTime.month}/${_selectedDateTime.year} ${_selectedDateTime.hour}:${_selectedDateTime.minute.toString().padLeft(2, '0')}',
+                          style: AppTextStyles.body,
+                        ),
+                      ],
+                    ),
+                    const Icon(Icons.edit_calendar_rounded),
+                  ],
+                ),
+              ),
+            ),
+            const SizedBox(height: 24),
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppColors.ink,
+                  padding: const EdgeInsets.symmetric(vertical: 14),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(999),
+                  ),
+                ),
+                onPressed: _updateAppointment,
+                child: Text(
+                  'Salvar Alterações',
+                  style: AppTextStyles.body.copyWith(
+                    color: AppColors.white,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Future<void> _pickDateTime() async {
+    final date = await showDatePicker(
+      context: context,
+      initialDate: _selectedDateTime,
+      firstDate: DateTime.now().subtract(const Duration(days: 365)),
+      lastDate: DateTime.now().add(const Duration(days: 365)),
+    );
+
+    if (!mounted || date == null) return;
+
+    final time = await showTimePicker(
+      context: context,
+      initialTime: TimeOfDay.fromDateTime(_selectedDateTime),
+    );
+
+    if (mounted && time != null) {
+      setState(() {
+        _selectedDateTime = DateTime(
+          date.year,
+          date.month,
+          date.day,
+          time.hour,
+          time.minute,
+        );
+      });
+    }
+  }
+
+  void _updateAppointment() async {
+    if (_titleController.text.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('O título é obrigatório')),
+      );
+      return;
+    }
+
+    try {
+      await ref.read(appointmentActionsProvider).update(
+        widget.appointment.id,
+        {
+          'title': _titleController.text,
+          'description': _descriptionController.text,
+          if (_selectedProcessId != null) 'processId': _selectedProcessId,
+          'type': _selectedType,
+          'scheduledAt': _selectedDateTime.toIso8601String(),
+          'durationMinutes': widget.appointment.durationMinutes,
+        },
+      );
+
+      if (mounted) {
+        Navigator.pop(context); // Fecha sheet
+        Navigator.pop(context); // Retorna da tela de detalhes
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Evento atualizado com sucesso')),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Erro ao atualizar: $e')),
+        );
+      }
+    }
   }
 }

@@ -35,6 +35,10 @@ final updateAppointmentStatusUseCaseProvider = Provider<UpdateAppointmentStatusU
   return UpdateAppointmentStatusUseCase(ref.watch(appointmentRepositoryProvider));
 });
 
+final updateAppointmentUseCaseProvider = Provider<UpdateAppointmentUseCase>((ref) {
+  return UpdateAppointmentUseCase(ref.watch(appointmentRepositoryProvider));
+});
+
 // Selected date
 final selectedDateProvider = StateProvider<DateTime>((ref) {
   return DateTime.now();
@@ -186,6 +190,12 @@ final class AppointmentActions {
 
   Future<void> cancel(String id) async {
     final result = await _ref.read(updateAppointmentStatusUseCaseProvider).call(id, 'CANCELED');
+    result.getOrThrow();
+    _ref.invalidate(appointmentsProvider);
+  }
+
+  Future<void> update(String id, Map<String, dynamic> data) async {
+    final result = await _ref.read(updateAppointmentUseCaseProvider).call(id, data);
     result.getOrThrow();
     _ref.invalidate(appointmentsProvider);
   }

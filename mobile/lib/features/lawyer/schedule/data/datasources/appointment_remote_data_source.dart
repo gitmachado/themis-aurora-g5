@@ -38,4 +38,15 @@ final class AppointmentRemoteDataSource {
     );
     return AppointmentModel.fromJson(json);
   }
+
+  Future<AppointmentModel> updateAppointment(
+    String id,
+    Map<String, dynamic> data,
+  ) async {
+    final json = await _apiClient.patchJson(
+      '/appointments/$id',
+      data: data,
+    );
+    return AppointmentModel.fromJson(json);
+  }
 }

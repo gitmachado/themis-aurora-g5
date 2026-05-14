@@ -37,4 +37,12 @@ final class AppointmentRepositoryImpl implements AppointmentRepository {
   ) {
     return guardRepository(() => _remoteDataSource.updateAppointmentStatus(id, status));
   }
+
+  @override
+  Future<Either<Failure, Appointment>> update(
+    String id,
+    Map<String, dynamic> data,
+  ) {
+    return guardRepository(() => _remoteDataSource.updateAppointment(id, data));
+  }
 }
