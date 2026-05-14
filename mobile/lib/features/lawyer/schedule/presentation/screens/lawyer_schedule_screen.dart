@@ -89,11 +89,14 @@ class _LawyerScheduleScreenState extends ConsumerState<LawyerScheduleScreen>
       'Sábado',
       'Domingo',
     ];
+    // ignore: unused_local_variable
     final selectedWeekdayName = shortWeekdays[selectedDate.weekday - 1];
+    // ignore: unused_local_variable
     final isToday =
         selectedDate.year == now.year &&
         selectedDate.month == now.month &&
         selectedDate.day == now.day;
+    // ignore: unused_local_variable
     final isTomorrow =
         selectedDate.year == tomorrow.year &&
         selectedDate.month == tomorrow.month &&
