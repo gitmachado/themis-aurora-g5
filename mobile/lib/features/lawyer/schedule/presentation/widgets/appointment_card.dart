@@ -79,6 +79,34 @@ class AppointmentCard extends ConsumerWidget {
                         ),
                       ],
                     ),
+                    if (appointment.clientName != null || appointment.clientWhatsappNumber != null) ...[
+                      const SizedBox(height: 6),
+                      Row(
+                        children: [
+                          Icon(
+                            Icons.person_rounded,
+                            size: 13,
+                            color: AppColors.textCaption,
+                          ),
+                          const SizedBox(width: 4),
+                          Expanded(
+                            child: Text(
+                              [
+                                if (appointment.clientName != null)
+                                  appointment.clientName!,
+                                if (appointment.clientWhatsappNumber != null)
+                                  _formatWhatsApp(appointment.clientWhatsappNumber!),
+                              ].join(' • '),
+                              style: AppTextStyles.caption.copyWith(
+                                color: AppColors.textCaption,
+                              ),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
                     const SizedBox(height: 8),
                     Row(
                       children: [
@@ -249,5 +277,13 @@ class AppointmentCard extends ConsumerWidget {
     } else {
       return '🔴 VENCENDO AGORA';
     }
+  }
+
+  String _formatWhatsApp(String number) {
+    final clean = number.replaceAll(RegExp(r'\D'), '');
+    if (clean.length == 11) {
+      return '(${clean.substring(0, 2)}) ${clean.substring(2, 7)}-${clean.substring(7)}';
+    }
+    return number;
   }
 }

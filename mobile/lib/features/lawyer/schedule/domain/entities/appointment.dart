@@ -15,6 +15,8 @@ class Appointment extends Equatable {
   final Map<String, dynamic>? aiOriginalData;
   final DateTime createdAt;
   final DateTime? updatedAt;
+  final String? clientName;
+  final String? clientWhatsappNumber;
 
   const Appointment({
     required this.id,
@@ -31,6 +33,8 @@ class Appointment extends Equatable {
     this.aiOriginalData,
     required this.createdAt,
     this.updatedAt,
+    this.clientName,
+    this.clientWhatsappNumber,
   });
 
   factory Appointment.fromModel(dynamic model) {
@@ -50,6 +54,8 @@ class Appointment extends Equatable {
       aiOriginalData: model.aiOriginalData as Map<String, dynamic>?,
       createdAt: model.createdAt as DateTime,
       updatedAt: model.updatedAt as DateTime?,
+      clientName: model.clientName as String?,
+      clientWhatsappNumber: model.clientWhatsappNumber as String?,
     );
   }
 
@@ -105,5 +111,7 @@ class Appointment extends Equatable {
     aiOriginalData,
     createdAt,
     updatedAt,
+    clientName,
+    clientWhatsappNumber,
   ];
 }

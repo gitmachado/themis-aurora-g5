@@ -19,6 +19,8 @@ final class AppointmentModel extends Appointment {
     super.updatedAt,
     super.createdByAI,
     super.aiOriginalData,
+    super.clientName,
+    super.clientWhatsappNumber,
   });
 
   factory AppointmentModel.fromJson(Map<String, dynamic> json) {
@@ -37,6 +39,8 @@ final class AppointmentModel extends Appointment {
       updatedAt: _dateTime(json['updatedAt'])?.toLocal(),
       createdByAI: json['created_by_ai'] as bool? ?? false,
       aiOriginalData: json['ai_original_data'] as Map<String, dynamic>?,
+      clientName: json['clientName'] as String?,
+      clientWhatsappNumber: json['clientWhatsappNumber'] as String?,
     );
   }
 
@@ -55,5 +59,7 @@ final class AppointmentModel extends Appointment {
     'updatedAt': updatedAt?.toUtc().toIso8601String(),
     'created_by_ai': createdByAI,
     'ai_original_data': aiOriginalData,
+    'clientName': clientName,
+    'clientWhatsappNumber': clientWhatsappNumber,
   };
 }
