@@ -193,6 +193,13 @@ export async function routerNode(
       };
     }
 
+    // Garantir que finalResponse tem conteúdo
+    if (!finalResponse.content || String(finalResponse.content).trim().length === 0) {
+      console.warn(`[Router Node] ⚠️ Resposta vazia gerada pelo LLM! Usando fallback.`);
+      const { AIMessage } = await import("@langchain/core/messages");
+      finalResponse = new AIMessage("Deixa eu verificar os horários disponíveis para você...");
+    }
+
     console.log(`[Router Node] 📤 Retornando ao sync_node com resposta`);
     return {
       currentNode: "sync_node",
