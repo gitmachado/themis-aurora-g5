@@ -47,6 +47,9 @@
               "client_type": 3
             }
           ]
+        },
+        "ads_service": {
+          "status": 1
         }
       }
     }
