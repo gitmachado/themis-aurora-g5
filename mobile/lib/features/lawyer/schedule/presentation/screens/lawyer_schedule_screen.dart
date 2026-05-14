@@ -46,63 +46,9 @@ class LawyerScheduleScreen extends ConsumerWidget {
 
     return Scaffold(
       backgroundColor: AppColors.background,
-      appBar: CustomAppBar(
+      appBar: const CustomAppBar(
         title: 'Agenda',
         showBackButton: true,
-        actions: [
-          Consumer(
-            builder: (context, ref, _) {
-              final showHistory = ref.watch(showHistoryProvider);
-              return Padding(
-                padding: const EdgeInsets.only(right: 16),
-                child: Center(
-                  child: GestureDetector(
-                    onTap: () {
-                      ref.read(showHistoryProvider.notifier).state = !showHistory;
-                    },
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 12,
-                        vertical: 6,
-                      ),
-                      decoration: BoxDecoration(
-                        color: showHistory
-                            ? AppColors.primary.withValues(alpha: 0.15)
-                            : AppColors.ink4.withValues(alpha: 0.1),
-                        borderRadius: BorderRadius.circular(20),
-                      ),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Icon(
-                            showHistory
-                                ? Icons.history_rounded
-                                : Icons.event_rounded,
-                            size: 14,
-                            color: showHistory
-                                ? AppColors.primary
-                                : AppColors.ink3,
-                          ),
-                          const SizedBox(width: 6),
-                          Text(
-                            showHistory ? 'Histórico' : 'Ativos',
-                            style: AppTextStyles.caption.copyWith(
-                              color: showHistory
-                                  ? AppColors.primary
-                                  : AppColors.ink3,
-                              fontWeight: FontWeight.bold,
-                              fontSize: 12,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                ),
-              );
-            },
-          ),
-        ],
       ),
       body: SafeArea(
         child: Stack(
@@ -139,6 +85,33 @@ class LawyerScheduleScreen extends ConsumerWidget {
               ),
             Column(
               children: [
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    'Histórico',
+                    style: AppTextStyles.body.copyWith(
+                      fontWeight: FontWeight.w600,
+                      color: AppColors.ink,
+                    ),
+                  ),
+                  Consumer(
+                    builder: (context, ref, _) {
+                      final showHistory = ref.watch(showHistoryProvider);
+                      return Switch.adaptive(
+                        value: showHistory,
+                        onChanged: (val) {
+                          ref.read(showHistoryProvider.notifier).state = val;
+                        },
+                        activeTrackColor: AppColors.yellow,
+                      );
+                    },
+                  ),
+                ],
+              ),
+            ),
             Padding(
               padding: const EdgeInsets.only(top: 8),
               child: ScheduleCalendarStrip(
