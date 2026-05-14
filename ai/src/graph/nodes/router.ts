@@ -4,7 +4,7 @@ import { ThemisStateType } from "../state.js";
 import { AGENT_PROMPT } from "../../config/prompts.js";
 import { tools, toolsByName } from "../../tools/index.js";
 import { searchKnowledge } from "../../utils/vector-store.js";
-import { getProcessesByPhone } from "../../utils/backend-client.js";
+import { getProcessesByPhone, getLeadByPhone } from "../../utils/backend-client.js";
 
 /**
  * Nó principal — Agente Unificado.
@@ -14,7 +14,7 @@ import { getProcessesByPhone } from "../../utils/backend-client.js";
 export async function routerNode(
   state: ThemisStateType
 ): Promise<Partial<ThemisStateType>> {
-  const { whatsappNumber, messages, needsHandoff, triage } = state;
+  let { whatsappNumber, messages, needsHandoff, triage } = state;
 
   // 1. Blindagem de Handoff — se IA está pausada, não processa
   if (needsHandoff === true) {
@@ -22,17 +22,40 @@ export async function routerNode(
   }
 
   const lastMessage = String(messages.at(-1)?.content ?? "").trim();
-  
-  // 2. Modelo vinculado com as Tools modulares
+
+  // 2. NOVO: Carregar Lead Existente se Triage está vazia
+  // Soluciona o problema de perda de contexto entre mensagens
+  if (!triage.name && whatsappNumber) {
+    try {
+      const existingLead = await getLeadByPhone(whatsappNumber);
+      if (existingLead) {
+        triage = {
+          name: existingLead.name,
+          email: existingLead.email,
+          cpf: existingLead.cpf,
+          caseType: existingLead.caseType,
+          caseDescription: existingLead.caseDescription,
+          urgency: existingLead.urgency,
+          contactAvailability: existingLead.contactAvailability,
+          currentStep: "DONE",
+        };
+        console.log(`[Router Node] Lead ${existingLead.name} carregado do banco para restaurar contexto.`);
+      }
+    } catch (err) {
+      console.warn("[Router Node] Erro ao buscar lead existente (continuando sem):", err);
+    }
+  }
+
+  // 3. Modelo vinculado com as Tools modulares
   const model = new ChatOpenAI({
     model: process.env.OPENAI_MODEL || "gpt-4o-mini",
     temperature: 0.1,
   }).bindTools(tools);
 
-  // 3. Busca de Conhecimento (RAG) — REMOVIDO (IA agora usa a tool pesquisar_conhecimento)
+  // 4. Busca de Conhecimento (RAG) — REMOVIDO (IA agora usa a tool pesquisar_conhecimento)
   const knowledgeContext = "Use a tool 'pesquisar_conhecimento' se precisar de informações do escritório.";
 
-  // 4. Dados de Processos (se for cliente)
+  // 5. Dados de Processos (se for cliente)
   let processContext = "Nenhum processo encontrado.";
   try {
     const processes = await getProcessesByPhone(whatsappNumber);
@@ -43,7 +66,7 @@ export async function routerNode(
     console.warn("[Router Node] Erro ao buscar processos (continuando sem):", err);
   }
 
-  // 5. Monta o prompt do agente com dados dinâmicos
+  // 6. Monta o prompt do agente com dados dinâmicos
   const now = new Date();
   const todayStr = now.toLocaleDateString('pt-BR', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
   const todayISO = now.toISOString().split('T')[0];
@@ -66,13 +89,13 @@ export async function routerNode(
     .replace("{triageAvailability}", triage.contactAvailability || "FALTANDO")
     .replace("{processContext}", processContext);
 
-  // 6. Histórico recente (janela deslizante)
+  // 7. Histórico recente (janela deslizante)
   const history = messages.slice(-20).map((m: any) => ({
     role: (m._getType?.() === 'ai' || m.type === 'ai') ? 'assistant' : 'user',
     content: String(m.content),
   }));
 
-  // 7. Invoca o modelo
+  // 8. Invoca o modelo
   let response;
   try {
     response = await model.invoke([
@@ -88,7 +111,7 @@ export async function routerNode(
     };
   }
 
-  // 8. Execução de Tools Reais
+  // 9. Execução de Tools Reais
   if (response.tool_calls && response.tool_calls.length > 0) {
     const toolMessages: ToolMessage[] = [];
 
@@ -119,7 +142,7 @@ export async function routerNode(
       }
     }
 
-    // 9. Reflexão: IA recebe o resultado das tools e gera o texto final
+    // 10. Reflexão: IA recebe o resultado das tools e gera o texto final
     let finalResponse;
     try {
       finalResponse = await model.invoke([
