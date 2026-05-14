@@ -173,16 +173,19 @@ export async function routerNode(
     }
 
     // 11. Reflexão: IA recebe o resultado das tools e gera o texto final
+    console.log(`[Router Node] 🔄 Iniciando reflexão pós-tool. Tool responses:`, toolMessages.map(m => String(m.content).substring(0, 100)));
     let finalResponse;
     try {
+      console.log(`[Router Node] 🤖 Invocando LLM para reflexão...`);
       finalResponse = await model.invoke([
         { role: "system", content: agentPrompt },
         ...history,
         response,
         ...toolMessages,
       ]);
+      console.log(`[Router Node] ✅ Reflexão concluída. Resposta: "${String(finalResponse.content).substring(0, 150)}..."`);
     } catch (err) {
-      console.error("[Router Node] Erro na reflexão pós-tool:", err);
+      console.error("[Router Node] ❌ Erro na reflexão pós-tool:", err);
       const { AIMessage } = await import("@langchain/core/messages");
       return {
         currentNode: "sync_node",
@@ -190,6 +193,7 @@ export async function routerNode(
       };
     }
 
+    console.log(`[Router Node] 📤 Retornando ao sync_node com resposta`);
     return {
       currentNode: "sync_node",
       messages: [response, ...toolMessages, finalResponse],

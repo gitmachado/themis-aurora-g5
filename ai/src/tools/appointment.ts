@@ -61,7 +61,7 @@ O WhatsApp do cliente já está registrado — NÃO é necessário informá-lo.`
     schema: z.object({
       action: z.enum(["check_availability", "check_open_appointments", "schedule"])
         .describe("Ação a executar: verificar disponibilidade ou agendar"),
-      date: z.string().optional()
+      date: z.string().nullable().optional()
         .describe("Data no formato YYYY-MM-DD. Necessária para 'check_availability' e 'schedule'. Não é necessária para 'check_open_appointments'."),
       title: z.string().nullable().optional()
         .describe("Título do compromisso (ex: 'Consulta inicial - Direito Trabalhista'). Se não informado, será 'Consulta inicial'."),
