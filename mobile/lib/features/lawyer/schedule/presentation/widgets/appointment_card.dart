@@ -17,8 +17,11 @@ class AppointmentCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isCompleted = appointment.status == 'COMPLETED';
+    final isCanceled = appointment.status == 'CANCELED';
+
     return AppCard(
-      onTap: onTap,
+      onTap: !isCanceled ? onTap : null,
       hasBorder: true,
       child: IntrinsicHeight(
         child: Row(
@@ -26,7 +29,7 @@ class AppointmentCard extends StatelessWidget {
             Container(
               width: 4,
               decoration: BoxDecoration(
-                color: _colorForType(),
+                color: _colorForStatus(),
                 borderRadius: const BorderRadius.only(
                   topLeft: Radius.circular(20),
                   bottomLeft: Radius.circular(20),
@@ -46,14 +49,25 @@ class AppointmentCard extends StatelessWidget {
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Text(
-                                appointment.title,
-                                style: AppTextStyles.body.copyWith(
-                                  fontWeight: FontWeight.w600,
-                                  color: AppColors.ink,
-                                ),
-                                maxLines: 2,
-                                overflow: TextOverflow.ellipsis,
+                              Row(
+                                children: [
+                                  Expanded(
+                                    child: Text(
+                                      appointment.title,
+                                      style: AppTextStyles.body.copyWith(
+                                        fontWeight: FontWeight.w600,
+                                        color: isCanceled ? AppColors.ink3 : AppColors.ink,
+                                        decoration: isCanceled
+                                            ? TextDecoration.lineThrough
+                                            : TextDecoration.none,
+                                      ),
+                                      maxLines: 2,
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
+                                  ),
+                                  const SizedBox(width: 8),
+                                  _buildStatusIcon(),
+                                ],
                               ),
                               const SizedBox(height: 4),
                               Text(
@@ -62,24 +76,68 @@ class AppointmentCard extends StatelessWidget {
                                   color: AppColors.textCaption,
                                 ),
                               ),
+                              if (appointment.clientId != null) ...[
+                                const SizedBox(height: 4),
+                                Row(
+                                  children: [
+                                    Icon(
+                                      Icons.person_outline_rounded,
+                                      size: 12,
+                                      color: AppColors.ink3,
+                                    ),
+                                    const SizedBox(width: 4),
+                                    Expanded(
+                                      child: Text(
+                                        '${appointment.durationMinutes} min',
+                                        style: AppTextStyles.caption.copyWith(
+                                          fontSize: 11,
+                                          color: AppColors.ink3,
+                                        ),
+                                        maxLines: 1,
+                                        overflow: TextOverflow.ellipsis,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ],
                             ],
                           ),
                         ),
                         const SizedBox(width: 12),
-                        AppBadge(
-                          label: appointment.typeLabel.toUpperCase(),
-                          type: _badgeTypeForType(),
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.end,
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            AppBadge(
+                              label: appointment.typeLabel.toUpperCase(),
+                              type: _badgeTypeForType(),
+                            ),
+                          ],
                         ),
                       ],
                     ),
-                    if (appointment.isDeadline && _showCountdown())
+                    if ((appointment.isDeadline || appointment.isHearing) &&
+                        _showCountdown() &&
+                        !isCompleted &&
+                        !isCanceled)
                       Padding(
                         padding: const EdgeInsets.only(top: 8),
-                        child: Text(
-                          _countdownText(),
-                          style: AppTextStyles.tiny.copyWith(
-                            color: AppColors.error,
-                            fontWeight: FontWeight.bold,
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 8,
+                            vertical: 4,
+                          ),
+                          decoration: BoxDecoration(
+                            color: AppColors.error.withValues(alpha: 0.1),
+                            borderRadius: BorderRadius.circular(6),
+                          ),
+                          child: Text(
+                            _countdownText(),
+                            style: AppTextStyles.tiny.copyWith(
+                              color: AppColors.error,
+                              fontWeight: FontWeight.bold,
+                              fontSize: 11,
+                            ),
                           ),
                         ),
                       ),
@@ -91,6 +149,46 @@ class AppointmentCard extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  Widget _buildStatusIcon() {
+    if (appointment.status == 'COMPLETED') {
+      return Container(
+        padding: const EdgeInsets.all(4),
+        decoration: BoxDecoration(
+          color: AppColors.success.withValues(alpha: 0.15),
+          shape: BoxShape.circle,
+        ),
+        child: const Icon(
+          Icons.check_circle_rounded,
+          size: 16,
+          color: Colors.green,
+        ),
+      );
+    } else if (appointment.status == 'CANCELED') {
+      return Container(
+        padding: const EdgeInsets.all(4),
+        decoration: BoxDecoration(
+          color: AppColors.error.withValues(alpha: 0.15),
+          shape: BoxShape.circle,
+        ),
+        child: const Icon(
+          Icons.cancel_rounded,
+          size: 16,
+          color: AppColors.error,
+        ),
+      );
+    }
+    return const SizedBox.shrink();
+  }
+
+  Color _colorForStatus() {
+    if (appointment.status == 'COMPLETED') {
+      return Colors.green;
+    } else if (appointment.status == 'CANCELED') {
+      return AppColors.error;
+    }
+    return _colorForType();
   }
 
   Color _colorForType() => switch (appointment.type) {

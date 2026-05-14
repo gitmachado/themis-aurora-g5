@@ -91,13 +91,22 @@ class AppointmentsNotifier extends AsyncNotifier<List<Appointment>> {
 // View mode
 final scheduleViewModeProvider = StateProvider<String>((ref) => 'today');
 
-// Filtered appointments by selected date and view mode
+// Show history (completed/canceled)
+final showHistoryProvider = StateProvider<bool>((ref) => false);
+
+// Filtered appointments by selected date and view mode (excludes history by default)
 final appointmentsByDateProvider = Provider<List<Appointment>>((ref) {
   final appointments = ref.watch(appointmentsProvider).valueOrNull ?? const [];
   final selectedDate = ref.watch(selectedDateProvider);
   final mode = ref.watch(scheduleViewModeProvider);
+  final showHistory = ref.watch(showHistoryProvider);
 
   return appointments.where((appointment) {
+    // Filter by history visibility
+    if (!showHistory && (appointment.isCompleted || appointment.isCanceled)) {
+      return false;
+    }
+
     final appDate = appointment.scheduledAt;
     if (mode == 'week') {
       final startOfWeek = DateTime(
@@ -118,6 +127,38 @@ final appointmentsByDateProvider = Provider<List<Appointment>>((ref) {
     }
   }).toList()
     ..sort((a, b) => a.scheduledAt.compareTo(b.scheduledAt));
+});
+
+// Only history (completed/canceled)
+final appointmentHistoryProvider = Provider<List<Appointment>>((ref) {
+  final appointments = ref.watch(appointmentsProvider).valueOrNull ?? const [];
+  final selectedDate = ref.watch(selectedDateProvider);
+  final mode = ref.watch(scheduleViewModeProvider);
+
+  return appointments.where((appointment) {
+    if (!appointment.isCompleted && !appointment.isCanceled) {
+      return false;
+    }
+
+    final appDate = appointment.scheduledAt;
+    if (mode == 'week') {
+      final startOfWeek = DateTime(
+        selectedDate.year,
+        selectedDate.month,
+        selectedDate.day,
+      ).subtract(Duration(days: selectedDate.weekday - 1));
+      final endOfWeek = startOfWeek.add(const Duration(days: 7));
+      return appDate.isAfter(startOfWeek.subtract(const Duration(milliseconds: 1))) &&
+          appDate.isBefore(endOfWeek);
+    } else if (mode == 'month') {
+      return appDate.year == selectedDate.year && appDate.month == selectedDate.month;
+    } else {
+      return appDate.year == selectedDate.year &&
+          appDate.month == selectedDate.month &&
+          appDate.day == selectedDate.day;
+    }
+  }).toList()
+    ..sort((a, b) => b.scheduledAt.compareTo(a.scheduledAt));
 });
 
 // Appointments actions
