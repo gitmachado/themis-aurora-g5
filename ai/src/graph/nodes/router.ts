@@ -28,15 +28,15 @@ export async function routerNode(
   if (!triage.name && whatsappNumber) {
     try {
       const existingLead = await getLeadByPhone(whatsappNumber);
-      if (existingLead) {
+      if (existingLead?.exists) {
         triage = {
-          name: existingLead.name,
-          email: existingLead.email,
-          cpf: existingLead.cpf,
-          caseType: existingLead.caseType,
-          caseDescription: existingLead.caseDescription,
-          urgency: existingLead.urgency,
-          contactAvailability: existingLead.contactAvailability,
+          name: existingLead.name ?? null,
+          email: existingLead.email ?? null,
+          cpf: existingLead.cpf ?? null,
+          caseType: existingLead.caseType ?? null,
+          caseDescription: existingLead.caseDescription ?? null,
+          urgency: existingLead.urgency ?? null,
+          contactAvailability: existingLead.contactAvailability ?? null,
           currentStep: "DONE",
         };
         console.log(`[Router Node] Lead ${existingLead.name} carregado do banco para restaurar contexto.`);

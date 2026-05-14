@@ -99,6 +99,12 @@ export class BotController {
         id: lead.id,
         status: lead.status,
         name: lead.name,
+        email: lead.email,
+        cpf: lead.cpf,
+        caseType: lead.caseType,
+        caseDescription: lead.caseDescription,
+        urgency: lead.urgency,
+        contactAvailability: lead.contactAvailability,
         isAIPaused: lead.isAIPaused,
       });
     } catch (error) {

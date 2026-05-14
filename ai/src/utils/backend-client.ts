@@ -65,6 +65,12 @@ export async function getLeadByPhone(whatsappNumber: string): Promise<{
   id?: string;
   status?: string;
   name?: string;
+  email?: string;
+  cpf?: string;
+  caseType?: string;
+  caseDescription?: string;
+  urgency?: string;
+  contactAvailability?: string;
   isAIPaused?: boolean;
 }> {
   const res = await client.get(`/bot/leads/by-phone/${whatsappNumber}`);
