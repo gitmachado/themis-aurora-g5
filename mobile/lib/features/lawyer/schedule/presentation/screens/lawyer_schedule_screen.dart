@@ -6,16 +6,54 @@ import '../../../../../../shared/constants/app_text_styles.dart';
 import '../../../../../../shared/widgets/cards/app_card.dart';
 import '../../../../../../shared/widgets/layout/custom_app_bar.dart';
 import '../../../../../../shared/widgets/layout/loading_skeleton.dart';
+import '../../../../../../shared/widgets/themis/themis_widgets.dart';
 import '../../../../../../app/routes/app_router.dart';
 import '../providers/appointment_providers.dart';
 import '../widgets/appointment_card.dart';
 import '../widgets/schedule_calendar_strip.dart';
 
-class LawyerScheduleScreen extends ConsumerWidget {
+class LawyerScheduleScreen extends StatefulWidget {
   const LawyerScheduleScreen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  State<LawyerScheduleScreen> createState() =>
+      _LawyerScheduleScreenState();
+}
+
+class _LawyerScheduleScreenState extends State<LawyerScheduleScreen>
+    with SingleTickerProviderStateMixin {
+  late final TabController _tabController =
+      TabController(length: 2, vsync: this);
+
+  @override
+  void dispose() {
+    _tabController.dispose();
+    super.dispose();
+  }
+
+  void _onFilterChanged(int index, WidgetRef ref) {
+    ref.read(showHistoryProvider.notifier).state = index == 1;
+    _tabController.animateTo(index);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Consumer(
+      builder: (context, ref, _) {
+        // Sync tab controller with provider
+        final showHistory = ref.watch(showHistoryProvider);
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (_tabController.index != (showHistory ? 1 : 0)) {
+            _tabController.index = showHistory ? 1 : 0;
+          }
+        });
+
+        return _buildContent(context, ref);
+      },
+    );
+  }
+
+  Widget _buildContent(BuildContext context, WidgetRef ref) {
     final appointments = ref.watch(appointmentsProvider);
     final appointmentsByDate = ref.watch(appointmentsByDateProvider);
     final selectedDate = ref.watch(selectedDateProvider);
@@ -87,29 +125,11 @@ class LawyerScheduleScreen extends ConsumerWidget {
               children: [
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(
-                    'Histórico',
-                    style: AppTextStyles.body.copyWith(
-                      fontWeight: FontWeight.w600,
-                      color: AppColors.ink,
-                    ),
-                  ),
-                  Consumer(
-                    builder: (context, ref, _) {
-                      final showHistory = ref.watch(showHistoryProvider);
-                      return Switch.adaptive(
-                        value: showHistory,
-                        onChanged: (val) {
-                          ref.read(showHistoryProvider.notifier).state = val;
-                        },
-                        activeTrackColor: AppColors.yellow,
-                      );
-                    },
-                  ),
-                ],
+              child: ThemisSegmentedControl(
+                labels: const ['Pendentes', 'Processados'],
+                selectedIndex: _tabController.index,
+                controller: _tabController,
+                onChanged: (index) => _onFilterChanged(index, ref),
               ),
             ),
             Padding(
