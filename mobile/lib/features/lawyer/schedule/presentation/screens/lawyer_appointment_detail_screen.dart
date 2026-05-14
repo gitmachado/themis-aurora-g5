@@ -9,6 +9,7 @@ import '../../../../../../shared/widgets/buttons/primary_button.dart';
 import '../../../../../../shared/widgets/layout/custom_app_bar.dart';
 import '../../domain/entities/appointment.dart';
 import '../providers/appointment_providers.dart';
+import '../../../../../../features/procedures/presentation/providers/procedure_providers.dart';
 
 class LawyerAppointmentDetailScreen extends ConsumerStatefulWidget {
   final Appointment? appointment;

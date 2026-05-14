@@ -173,3 +173,30 @@ CREATE TABLE IF NOT EXISTS knowledge_embeddings (
 CREATE INDEX IF NOT EXISTS idx_knowledge_embedding_hnsw
 ON knowledge_embeddings
 USING hnsw (embedding vector_cosine_ops);
+
+-- 10. Appointments
+CREATE TABLE IF NOT EXISTS appointments (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    lawyer_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    client_id UUID REFERENCES users(id) ON DELETE SET NULL,
+    process_id UUID REFERENCES legal_processes(id) ON DELETE SET NULL,
+    title VARCHAR(255) NOT NULL,
+    description TEXT,
+    type VARCHAR(20) NOT NULL CHECK (type IN ('MEETING', 'DEADLINE', 'HEARING', 'OTHER')),
+    scheduled_at TIMESTAMPTZ NOT NULL,
+    duration_minutes INTEGER DEFAULT 60,
+    status VARCHAR(20) NOT NULL DEFAULT 'SCHEDULED' CHECK (status IN ('SCHEDULED', 'COMPLETED', 'CANCELED')),
+    reminded BOOLEAN NOT NULL DEFAULT FALSE,
+    created_at TIMESTAMPTZ DEFAULT NOW(),
+    updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE INDEX IF NOT EXISTS idx_appointments_lawyer_id ON appointments(lawyer_id);
+CREATE INDEX IF NOT EXISTS idx_appointments_client_id ON appointments(client_id);
+CREATE INDEX IF NOT EXISTS idx_appointments_process_id ON appointments(process_id);
+CREATE INDEX IF NOT EXISTS idx_appointments_scheduled_at ON appointments(scheduled_at);
+CREATE INDEX IF NOT EXISTS idx_appointments_type_status ON appointments(type, status);
+CREATE INDEX IF NOT EXISTS idx_appointments_lawyer_scheduled ON appointments(lawyer_id, scheduled_at);
+
+DROP TRIGGER IF EXISTS update_appointments_updated_at ON appointments;
+CREATE TRIGGER update_appointments_updated_at BEFORE UPDATE ON appointments FOR EACH ROW EXECUTE PROCEDURE update_updated_at_column();

@@ -103,7 +103,7 @@ class _LawyerScheduleScreenState extends State<LawyerScheduleScreen>
               ),
             ),
             Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 24),
+              padding: const EdgeInsets.only(left: 24, right: 24, top: 12),
               child: Align(
                 alignment: Alignment.centerLeft,
                 child: Padding(

@@ -32,7 +32,14 @@ class AppAppBarActions extends ConsumerWidget {
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
-        if (showChat)
+        if (showChat) ...[
+          _buildActionIcon(
+            context,
+            icon: Icons.calendar_today_rounded,
+            count: 0,
+            onTap: () => Navigator.pushNamed(context, '/lawyer-schedule'),
+          ),
+          const SizedBox(width: 4),
           _buildActionIcon(
             context,
             icon: Icons.chat_bubble_outline_rounded,
@@ -41,6 +48,7 @@ class AppAppBarActions extends ConsumerWidget {
                 onChatTap ??
                 () => Navigator.pushNamed(context, '/lawyer-chats'),
           ),
+        ],
         const SizedBox(width: 8),
         AppNotificationButton(
           notificationCount: unreadCount,

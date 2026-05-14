@@ -25,6 +25,8 @@ import '../../features/lawyer/clients/presentation/screens/lawyer_client_detail_
 import '../../features/lawyer/team/presentation/screens/team_add_screen.dart';
 import '../../features/lawyer/team/presentation/screens/team_member_screen.dart';
 import '../../features/lawyer/schedule/presentation/screens/lawyer_schedule_screen.dart';
+import '../../features/lawyer/schedule/presentation/screens/lawyer_appointment_detail_screen.dart';
+import '../../features/lawyer/schedule/domain/entities/appointment.dart';
 import '../../shared/widgets/layout/client_main_layout.dart';
 import '../../shared/widgets/layout/lawyer_main_layout.dart';
 
@@ -51,6 +53,7 @@ final class AppRouter {
   static const String lawyerAIManagerRoute = '/lawyer-ai-manager';
   static const String lawyerChatHandoffRoute = '/lawyer-chat-handoff';
   static const String lawyerScheduleRoute = '/lawyer-schedule';
+  static const String lawyerAppointmentDetailRoute = '/lawyer-appointment-detail';
   static const String procedureListRoute = '/procedure-list';
   static const String procedureTimelineRoute = '/procedure-timeline';
   static const String filesRoute = '/files';
@@ -241,6 +244,12 @@ final class AppRouter {
       case lawyerScheduleRoute:
         return MaterialPageRoute<void>(
           builder: (_) => const LawyerScheduleScreen(),
+          settings: settings,
+        );
+      case lawyerAppointmentDetailRoute:
+        final appointment = settings.arguments as Appointment?;
+        return MaterialPageRoute<void>(
+          builder: (_) => LawyerAppointmentDetailScreen(appointment: appointment),
           settings: settings,
         );
       case designSystemRoute:
