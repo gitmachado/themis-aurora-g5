@@ -7,6 +7,11 @@ import {
   addProcessNote,
   requestProcessDocument,
   scheduleProcessEvent,
+  getMyAppointments,
+  getAppointmentById,
+  createAppointment,
+  updateAppointment,
+  cancelAppointment,
 } from "../utils/backend-client.js";
 
 const LEGAL_PROCESS_STATUSES = [
@@ -213,6 +218,270 @@ export const agendar_evento_processo = tool(
   }
 );
 
+// ── Agenda/Compromissos ──
+
+const APPOINTMENT_TYPES = ["MEETING", "DEADLINE", "HEARING", "OTHER"] as const;
+const APPOINTMENT_STATUSES = ["SCHEDULED", "COMPLETED", "CANCELED", "PENDING_APPROVAL"] as const;
+
+/**
+ * Tool para consultar compromissos da agenda do advogado.
+ */
+export const consultar_minha_agenda = tool(
+  async ({ lawyerId, startDate, endDate, type, status }) => {
+    try {
+      const appointments = await getMyAppointments(lawyerId, {
+        startDate,
+        endDate,
+        type,
+        status,
+      });
+      if (!appointments || appointments.length === 0) {
+        return "Nenhum compromisso encontrado para o período especificado.";
+      }
+      const formatted = appointments.map((a) => ({
+        id: a.id,
+        titulo: a.title,
+        tipo: a.type,
+        data_hora: a.scheduledAt,
+        duracao_minutos: a.durationMinutes,
+        status: a.status,
+        cliente: a.clientName || "N/A",
+        descricao: a.description || "",
+      }));
+      return JSON.stringify(formatted, null, 2);
+    } catch (err: any) {
+      const status = err.status || 500;
+      const message = err.message || "Erro desconhecido";
+      console.error(`[Tool: ConsultarMinhaAgenda] Erro HTTP ${status}: ${message}`);
+      return "Não foi possível consultar a agenda no momento.";
+    }
+  },
+  {
+    name: "consultar_minha_agenda",
+    description:
+      "Consulta os compromissos da agenda do advogado com filtros opcionais por período, tipo (MEETING/DEADLINE/HEARING/OTHER) e status (SCHEDULED/COMPLETED/CANCELED/PENDING_APPROVAL).",
+    schema: z.object({
+      lawyerId: z.string().describe("O ID do advogado atual (do system prompt)"),
+      startDate: z
+        .string()
+        .optional()
+        .describe("Data inicial em ISO 8601 (ex: 2026-05-14T00:00:00Z)"),
+      endDate: z
+        .string()
+        .optional()
+        .describe("Data final em ISO 8601 (ex: 2026-05-21T23:59:59Z)"),
+      type: z
+        .enum(APPOINTMENT_TYPES)
+        .optional()
+        .describe("Tipo de compromisso para filtrar"),
+      status: z
+        .enum(APPOINTMENT_STATUSES)
+        .optional()
+        .describe("Status para filtrar"),
+    }),
+  }
+);
+
+/**
+ * Tool para detalhar um compromisso específico.
+ */
+export const detalhar_compromisso = tool(
+  async ({ appointmentId }) => {
+    try {
+      const appointment = await getAppointmentById(appointmentId);
+      const formatted = {
+        id: appointment.id,
+        titulo: appointment.title,
+        descricao: appointment.description,
+        tipo: appointment.type,
+        status: appointment.status,
+        data_hora: appointment.scheduledAt,
+        duracao_minutos: appointment.durationMinutes,
+        cliente_id: appointment.clientId,
+        cliente_nome: appointment.clientName,
+        cliente_whatsapp: appointment.clientWhatsappNumber,
+        processo_id: appointment.processId,
+        criada_por_ia: appointment.createdByAI,
+        criada_em: appointment.createdAt,
+        atualizada_em: appointment.updatedAt,
+      };
+      return JSON.stringify(formatted, null, 2);
+    } catch (err: any) {
+      const status = err.status || 500;
+      const message = err.message || "Erro desconhecido";
+      if (status === 404) {
+        return "Compromisso não encontrado.";
+      }
+      console.error(`[Tool: DetalharCompromisso] Erro HTTP ${status}: ${message}`);
+      return "Não foi possível obter os detalhes do compromisso no momento.";
+    }
+  },
+  {
+    name: "detalhar_compromisso",
+    description: "Obtém todos os detalhes de um compromisso específico pelo seu ID.",
+    schema: z.object({
+      appointmentId: z.string().describe("O ID do compromisso a detalhar"),
+    }),
+  }
+);
+
+/**
+ * Tool para criar um novo compromisso.
+ */
+export const criar_compromisso = tool(
+  async ({ lawyerId, title, type, scheduledAt, durationMinutes, description, clientId, processId }) => {
+    try {
+      const result = await createAppointment(lawyerId, {
+        title,
+        type,
+        scheduledAt,
+        durationMinutes: durationMinutes || 30,
+        description,
+        clientId,
+        processId,
+        createdByAI: true,
+      });
+      return `✅ Compromisso criado com sucesso! ID: ${result.id} | Data: ${result.scheduledAt}`;
+    } catch (err: any) {
+      const status = err.status || 500;
+      const message = err.message || "Erro desconhecido";
+      if (status === 400) {
+        return `Erro ao criar compromisso: ${message}. Verifique se a data está em formato ISO 8601 e se há conflito de horário.`;
+      }
+      console.error(`[Tool: CriarCompromisso] Erro HTTP ${status}: ${message}`);
+      return "Não foi possível criar o compromisso no momento.";
+    }
+  },
+  {
+    name: "criar_compromisso",
+    description:
+      "Cria um novo compromisso na agenda. Sempre confirmar título, tipo, data/hora e duração com o advogado ANTES de executar. Data deve estar em ISO 8601.",
+    schema: z.object({
+      lawyerId: z.string().describe("O ID do advogado atual (do system prompt)"),
+      title: z.string().min(3).describe("Título/assunto do compromisso"),
+      type: z
+        .enum(APPOINTMENT_TYPES)
+        .describe("Tipo: MEETING (reunião), DEADLINE (prazo), HEARING (audiência) ou OTHER"),
+      scheduledAt: z
+        .string()
+        .describe("Data e hora em ISO 8601 (ex: 2026-05-20T14:30:00Z)"),
+      durationMinutes: z
+        .number()
+        .int()
+        .optional()
+        .describe("Duração em minutos (padrão: 30)"),
+      description: z
+        .string()
+        .optional()
+        .describe("Descrição adicional do compromisso"),
+      clientId: z
+        .string()
+        .optional()
+        .describe("ID do cliente relacionado (opcional)"),
+      processId: z
+        .string()
+        .optional()
+        .describe("ID do processo relacionado (opcional)"),
+    }),
+  }
+);
+
+/**
+ * Tool para atualizar um compromisso.
+ */
+export const atualizar_compromisso = tool(
+  async ({ appointmentId, title, description, scheduledAt, durationMinutes, status }) => {
+    try {
+      const updated = await updateAppointment(appointmentId, {
+        title,
+        description,
+        scheduledAt,
+        durationMinutes,
+        status,
+      });
+      let changes = [];
+      if (title) changes.push(`Título: ${title}`);
+      if (scheduledAt) changes.push(`Data/hora: ${scheduledAt}`);
+      if (durationMinutes) changes.push(`Duração: ${durationMinutes}min`);
+      if (status) changes.push(`Status: ${status}`);
+      if (description) changes.push(`Descrição atualizada`);
+
+      return `✅ Compromisso atualizado com sucesso!\nAlterações: ${changes.join(" | ")}`;
+    } catch (err: any) {
+      const status = err.status || 500;
+      const message = err.message || "Erro desconhecido";
+      if (status === 404) {
+        return "Compromisso não encontrado.";
+      }
+      console.error(`[Tool: AtualizarCompromisso] Erro HTTP ${status}: ${message}`);
+      return "Não foi possível atualizar o compromisso no momento.";
+    }
+  },
+  {
+    name: "atualizar_compromisso",
+    description:
+      "Atualiza campos de um compromisso existente. Confirmar quais campos serão alterados ANTES de executar.",
+    schema: z.object({
+      appointmentId: z.string().describe("O ID do compromisso a atualizar"),
+      title: z
+        .string()
+        .optional()
+        .describe("Novo título"),
+      description: z
+        .string()
+        .optional()
+        .describe("Nova descrição"),
+      scheduledAt: z
+        .string()
+        .optional()
+        .describe("Nova data/hora em ISO 8601"),
+      durationMinutes: z
+        .number()
+        .int()
+        .optional()
+        .describe("Nova duração em minutos"),
+      status: z
+        .enum(APPOINTMENT_STATUSES)
+        .optional()
+        .describe("Novo status"),
+    }),
+  }
+);
+
+/**
+ * Tool para cancelar um compromisso.
+ */
+export const cancelar_compromisso = tool(
+  async ({ appointmentId, appointmentTitle, appointmentDate }) => {
+    try {
+      await cancelAppointment(appointmentId);
+      return `✅ Compromisso "${appointmentTitle}" (${appointmentDate}) cancelado com sucesso.`;
+    } catch (err: any) {
+      const status = err.status || 500;
+      const message = err.message || "Erro desconhecido";
+      if (status === 404) {
+        return "Compromisso não encontrado.";
+      }
+      console.error(`[Tool: CancelarCompromisso] Erro HTTP ${status}: ${message}`);
+      return "Não foi possível cancelar o compromisso no momento.";
+    }
+  },
+  {
+    name: "cancelar_compromisso",
+    description:
+      "Cancela um compromisso na agenda. Sempre informar título e data do compromisso e pedir confirmação ANTES de executar.",
+    schema: z.object({
+      appointmentId: z.string().describe("O ID do compromisso a cancelar"),
+      appointmentTitle: z
+        .string()
+        .describe("Título do compromisso (para confirmação)"),
+      appointmentDate: z
+        .string()
+        .describe("Data/hora do compromisso (para confirmação)"),
+    }),
+  }
+);
+
 export const lawyerTools = [
   consultar_meus_processos,
   detalhar_processo,
@@ -220,4 +489,9 @@ export const lawyerTools = [
   adicionar_nota_processo,
   solicitar_documento_processo,
   agendar_evento_processo,
+  consultar_minha_agenda,
+  detalhar_compromisso,
+  criar_compromisso,
+  atualizar_compromisso,
+  cancelar_compromisso,
 ];
