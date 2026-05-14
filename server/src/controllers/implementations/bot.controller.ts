@@ -1,6 +1,7 @@
 import { Request, Response, NextFunction, RequestHandler } from 'express';
 import { IUserService } from '@services';
 import { ILegalProcessService } from '@services';
+import { ITimelineService } from '../../services/interfaces/timeline.service';
 import { IConfigurationService } from '../../services/interfaces/configuration.service';
 import { INotificationService } from '@services';
 import { NotFoundError } from '../../services/implementations/errors';
@@ -18,6 +19,7 @@ export class BotController {
     private readonly configurationService: IConfigurationService,
     private readonly notificationService: INotificationService,
     private readonly leadRepository: ILeadRepository,
+    private readonly timelineService: ITimelineService,
   ) {}
 
   /**
@@ -122,17 +124,33 @@ export class BotController {
 
       const processes = await this.legalProcessService.getByClientId(user.id);
 
-      return res.status(200).json({
-        processes: processes.map((p: LegalProcess) => ({
-          id: p.id,
-          title: p.title,
-          caseType: p.caseType,
-          processNumber: p.processNumber,
-          status: p.currentStatus,
-          lastUpdate: p.lastMovementDate,
-          lawyerNote: p.lastNote,
-        })),
-      });
+      const processesWithTimeline = await Promise.all(
+        processes.map(async (p: LegalProcess) => {
+          const events = await this.timelineService.getByLegalProcess(p.id);
+          // Sort descending by date and take the top 3
+          const recentTimeline = events
+            .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime())
+            .slice(0, 3)
+            .map(e => ({
+              date: e.createdAt.toISOString(),
+              type: e.type,
+              content: e.content,
+            }));
+
+          return {
+            id: p.id,
+            title: p.title,
+            caseType: p.caseType,
+            processNumber: p.processNumber,
+            status: p.currentStatus,
+            lastUpdate: p.lastMovementDate,
+            lawyerNote: p.lastNote,
+            recentTimeline,
+          };
+        })
+      );
+
+      return res.status(200).json({ processes: processesWithTimeline });
     } catch (error) {
       next(error);
     }

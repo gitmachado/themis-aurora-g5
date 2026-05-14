@@ -70,103 +70,100 @@ class _LawyerLeadDetailScreenState extends ConsumerState<LawyerLeadDetailScreen>
         : ref.watch(leadDetailsProvider(widget.leadId!));
     final lead = leadAsync?.valueOrNull;
 
-    return Scaffold(
-      backgroundColor: AppColors.background,
-      body: Stack(
-        children: [
-          SafeArea(
-            top: false, // SliverAppBar handles top safe area
-            child: CustomScrollView(
-              slivers: [
-                _buildSliverAppBar(lead),
-                SliverToBoxAdapter(
-                  child: FadeTransition(
-                    opacity: _fadeAnimation,
-                    child: SlideTransition(
-                      position: _slideAnimation,
-                      child: Padding(
-                        padding: const EdgeInsets.all(24.0),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            if (leadAsync?.isLoading ?? false) ...[
-                              const LoadingSkeleton(height: 4, borderRadius: 2),
-                              const SizedBox(height: 16),
+    return AnnotatedRegion<SystemUiOverlayStyle>(
+      value: const SystemUiOverlayStyle(
+        systemNavigationBarColor: AppColors.white,
+        systemNavigationBarIconBrightness: Brightness.dark,
+      ),
+      child: Scaffold(
+        backgroundColor: AppColors.background,
+        body: Stack(
+          children: [
+            SafeArea(
+              top: false, // SliverAppBar handles top safe area
+              child: CustomScrollView(
+                slivers: [
+                  _buildSliverAppBar(lead),
+                  SliverToBoxAdapter(
+                    child: FadeTransition(
+                      opacity: _fadeAnimation,
+                      child: SlideTransition(
+                        position: _slideAnimation,
+                        child: Padding(
+                          padding: const EdgeInsets.all(24.0),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              if (leadAsync?.isLoading ?? false) ...[
+                                const LoadingSkeleton(
+                                  height: 4,
+                                  borderRadius: 2,
+                                ),
+                                const SizedBox(height: 16),
+                              ],
+                              _buildInfoSection(
+                                title: 'Dados do Lead',
+                                icon: Icons.person_search_outlined,
+                                children: [
+                                  _buildDetailItem(
+                                    'Nome Completo',
+                                    lead?.displayName ?? widget.name,
+                                  ),
+                                  _buildDetailItem(
+                                    'WhatsApp',
+                                    lead?.whatsappNumber ?? '--',
+                                  ),
+                                  _buildDetailItem('CPF', lead?.cpf ?? '--'),
+                                  _buildDetailItem(
+                                    'Disponibilidade',
+                                    lead?.availabilityLabel ?? '--',
+                                  ),
+                                ],
+                              ),
+                              const SizedBox(height: 24),
+                              _buildInfoSection(
+                                title: 'Relato do Caso',
+                                icon: Icons.description_outlined,
+                                children: [
+                                  _buildDetailItem(
+                                    'Tipo de Caso',
+                                    lead?.caseTypeLabel ?? widget.caseType,
+                                  ),
+                                  _buildDetailItem(
+                                    'Urgencia',
+                                    lead?.urgencyLabel ?? widget.urgency,
+                                    isBadge: true,
+                                  ),
+                                  _buildDetailItem(
+                                    'Descrição',
+                                    lead?.caseDescription?.isNotEmpty == true
+                                        ? lead!.caseDescription!
+                                        : 'Relato ainda não informado pelo bot.',
+                                    isBold: false,
+                                  ),
+                                ],
+                              ),
+                              SizedBox(
+                                height: widget.isModal
+                                    ? 32
+                                    : 140, // Padding reduzido em modal
+                              ),
                             ],
-                            _buildInfoSection(
-                              title: 'Dados do Lead',
-                              icon: Icons.person_search_outlined,
-                              children: [
-                                _buildDetailItem(
-                                  'Nome Completo',
-                                  lead?.displayName ?? widget.name,
-                                ),
-                                _buildDetailItem(
-                                  'WhatsApp',
-                                  lead?.whatsappNumber ?? '--',
-                                ),
-                                _buildDetailItem('CPF', lead?.cpf ?? '--'),
-                                _buildDetailItem(
-                                  'Disponibilidade',
-                                  lead?.availabilityLabel ?? '--',
-                                ),
-                              ],
-                            ),
-                            const SizedBox(height: 24),
-                            _buildInfoSection(
-                              title: 'Relato do Caso',
-                              icon: Icons.description_outlined,
-                              children: [
-                                _buildDetailItem(
-                                  'Tipo de Caso',
-                                  lead?.caseTypeLabel ?? widget.caseType,
-                                ),
-                                _buildDetailItem(
-                                  'Urgencia',
-                                  lead?.urgencyLabel ?? widget.urgency,
-                                  isBadge: true,
-                                ),
-                                _buildDetailItem(
-                                  'Descrição',
-                                  lead?.caseDescription?.isNotEmpty == true
-                                      ? lead!.caseDescription!
-                                      : 'Relato ainda não informado pelo bot.',
-                                  isBold: false,
-                                ),
-                              ],
-                            ),
-                            SizedBox(
-                              height: widget.isModal
-                                  ? 32
-                                  : 140, // Padding reduzido em modal
-                            ),
-                          ],
+                          ),
                         ),
                       ),
                     ),
                   ),
-                ),
-              ],
-            ),
-          ),
-          // Cobertura rígida da barra de navegação/botão
-          if (!widget.isModal)
-            Positioned(
-              bottom: 0,
-              left: 0,
-              right: 0,
-              child: Container(
-                height:
-                    MediaQuery.of(context).padding.bottom +
-                    45, // Ajustado para sumir no meio do botão
-                color: AppColors.background,
+                ],
               ),
             ),
-        ],
+          ],
+        ),
+        floatingActionButton: widget.isModal
+            ? null
+            : _buildFloatingActions(lead),
+        floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
       ),
-      extendBody: !widget.isModal,
-      floatingActionButton: widget.isModal ? null : _buildFloatingActions(lead),
-      floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
     );
   }
 
@@ -316,7 +313,7 @@ class _LawyerLeadDetailScreenState extends ConsumerState<LawyerLeadDetailScreen>
         title: 'Converter Lead',
         message:
             'Deseja converter ${lead?.displayName ?? widget.name} em cliente?',
-        confirmLabel: 'Sim, Converter Agora',
+        confirmLabel: 'Converter',
         onCancel: () => Navigator.pop(context, false),
         onConfirm: () => Navigator.pop(context, true),
       ),
@@ -361,97 +358,119 @@ class _LawyerLeadDetailScreenState extends ConsumerState<LawyerLeadDetailScreen>
       return null;
     }
 
+    return FloatingActionButton.extended(
+      heroTag: 'lawyer_lead_detail_fab_${lead?.id ?? widget.leadId}',
+      onPressed: () => _showActionsSheet(lead),
+      backgroundColor: AppColors.yellow,
+      foregroundColor: AppColors.ink,
+      icon: const Icon(Icons.assignment_rounded),
+      label: const Text('Ações'),
+    );
+  }
+
+  void _showActionsSheet(Lead? lead) {
     final showArchiveAction = lead == null || lead.status == 'PENDING';
 
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 24),
-      child: Row(
-        children: [
-          if (showArchiveAction) ...[
-            Expanded(
-              child: OutlinedButton(
-                onPressed: () => _discardLead(lead),
-                style: OutlinedButton.styleFrom(
-                  backgroundColor: AppColors.white.withValues(alpha: 0.9),
-                  foregroundColor: AppColors.error,
-                  side: const BorderSide(color: AppColors.error),
-                  minimumSize: const Size(0, 56),
-                  elevation: 2,
-                  shadowColor: Colors.black.withValues(alpha: 0.1),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(999),
+    showModalBottomSheet<void>(
+      context: context,
+      showDragHandle: true,
+      backgroundColor: AppColors.white,
+      isScrollControlled: true,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      ),
+      builder: (context) {
+        return AnnotatedRegion<SystemUiOverlayStyle>(
+          value: const SystemUiOverlayStyle(
+            systemNavigationBarColor: AppColors.white,
+            systemNavigationBarIconBrightness: Brightness.dark,
+          ),
+          child: SafeArea(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(24, 0, 24, 8),
+                  child: Row(
+                    children: [Text('Ações do Lead', style: AppTextStyles.h2)],
                   ),
                 ),
-                child: const Text('Arquivar'),
-              ),
-            ),
-            const SizedBox(width: 12),
-          ],
-          Expanded(
-            child: ElevatedButton.icon(
-              onPressed: () => _convertLead(lead),
-              icon: const Icon(Icons.check_circle_outline, size: 20),
-              label: const Text('Converter'),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.primary,
-                foregroundColor: Colors.white,
-                minimumSize: const Size(0, 56),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(999),
+                ThemisActionRow(
+                  icon: Icons.check_circle_outline,
+                  label: 'Converter em Cliente',
+                  iconBackground: AppColors.primary.withValues(alpha: 0.1),
+                  iconColor: AppColors.primary,
+                  onTap: () {
+                    Navigator.pop(context);
+                    _convertLead(lead);
+                  },
                 ),
-                elevation: 4,
-                textStyle: const TextStyle(
-                  fontWeight: FontWeight.bold,
-                  fontSize: 16,
+                ThemisActionRow(
+                  icon: Icons.support_agent_rounded,
+                  label: 'Abrir Chat (Suporte)',
+                  iconBackground: AppColors.yellowSoft,
+                  iconColor: AppColors.yellowDeep,
+                  onTap: () {
+                    Navigator.pop(context);
+                    final targetLead = lead;
+                    if (targetLead != null) {
+                      Navigator.pushNamed(
+                        context,
+                        AppRouter.lawyerChatHandoffRoute,
+                        arguments: {
+                          'clientName': targetLead.displayName,
+                          'whatsappNumber': targetLead.whatsappNumber,
+                        },
+                      );
+                    } else if (widget.leadId != null) {
+                      Navigator.pushNamed(
+                        context,
+                        AppRouter.lawyerChatHandoffRoute,
+                        arguments: {
+                          'clientName': widget.name,
+                          'whatsappNumber': '',
+                        },
+                      );
+                    }
+                  },
                 ),
-              ),
+                if (showArchiveAction)
+                  ThemisActionRow(
+                    icon: Icons.archive_outlined,
+                    label: 'Arquivar Lead',
+                    iconBackground: AppColors.error.withValues(alpha: 0.1),
+                    iconColor: AppColors.error,
+                    onTap: () {
+                      Navigator.pop(context);
+                      _showConfirmArchiveDialog(lead);
+                    },
+                  ),
+                const SizedBox(height: 12),
+              ],
             ),
           ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: ElevatedButton.icon(
-              onPressed: () {
-                final targetLead = lead;
-                if (targetLead != null) {
-                  Navigator.pushNamed(
-                    context,
-                    AppRouter.lawyerChatHandoffRoute,
-                    arguments: {
-                      'clientName': targetLead.displayName,
-                      'whatsappNumber': targetLead.whatsappNumber,
-                    },
-                  );
-                } else if (widget.leadId != null) {
-                  Navigator.pushNamed(
-                    context,
-                    AppRouter.lawyerChatHandoffRoute,
-                    arguments: {
-                      'clientName': widget.name,
-                      'whatsappNumber': '',
-                    },
-                  );
-                }
-              },
-              icon: const Icon(Icons.support_agent_rounded, size: 20),
-              label: const Text('Chat'),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.yellow,
-                foregroundColor: AppColors.ink,
-                minimumSize: const Size(0, 56),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(999),
-                ),
-                elevation: 4,
-                textStyle: const TextStyle(
-                  fontWeight: FontWeight.bold,
-                  fontSize: 16,
-                ),
-              ),
-            ),
-          ),
-        ],
+        );
+      },
+    );
+  }
+
+  Future<void> _showConfirmArchiveDialog(Lead? lead) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) => ThemisAlertDialog(
+        title: 'Arquivar Lead?',
+        message:
+            'Deseja realmente arquivar este lead? Ele não aparecerá mais na sua lista de pendências.',
+        confirmLabel: 'Arquivar',
+        isDestructive: true,
+        onCancel: () => Navigator.pop(dialogContext, false),
+        onConfirm: () => Navigator.pop(dialogContext, true),
       ),
     );
+
+    if (confirmed == true && mounted) {
+      _discardLead(lead);
+    }
   }
 
   Future<void> _discardLead(Lead? lead) async {

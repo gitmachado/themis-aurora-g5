@@ -174,6 +174,7 @@ class ThemisSegmentedControl extends StatelessWidget {
   final int selectedIndex;
   final ValueChanged<int> onChanged;
   final TabController? controller;
+  final Map<int, int>? badges;
 
   const ThemisSegmentedControl({
     super.key,
@@ -181,6 +182,7 @@ class ThemisSegmentedControl extends StatelessWidget {
     required this.selectedIndex,
     required this.onChanged,
     this.controller,
+    this.badges,
     Animation<double>?
     animation, // Mantido para compatibilidade, mas ignorado se houver controller
   });
@@ -225,18 +227,54 @@ class ThemisSegmentedControl extends StatelessWidget {
         padding: EdgeInsets.zero,
         labelPadding: EdgeInsets.zero,
         indicatorPadding: EdgeInsets.zero,
-        tabs: labels
-            .map(
-              (label) => Tab(
-                child: Text(
-                  label,
-                  maxLines: 1,
-                  softWrap: false,
-                  overflow: TextOverflow.fade,
+        tabs: List.generate(labels.length, (index) {
+          final label = labels[index];
+          final badgeCount = badges?[index];
+          final hasBadge = badgeCount != null && badgeCount > 0;
+
+          return Tab(
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Flexible(
+                  child: Text(
+                    label,
+                    maxLines: 1,
+                    softWrap: false,
+                    overflow: TextOverflow.fade,
+                  ),
                 ),
-              ),
-            )
-            .toList(),
+                if (hasBadge) ...[
+                  const SizedBox(width: 6),
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 6,
+                      vertical: 1.5,
+                    ),
+                    decoration: BoxDecoration(
+                      color: selectedIndex == index
+                          ? AppColors.yellow
+                          : AppColors.ink3,
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Text(
+                      badgeCount > 99 ? '99+' : '$badgeCount',
+                      style: TextStyle(
+                        fontSize: 10.5,
+                        fontWeight: FontWeight.w900,
+                        color: selectedIndex == index
+                            ? AppColors.ink
+                            : AppColors.surface,
+                        height: 1.1,
+                      ),
+                    ),
+                  ),
+                ],
+              ],
+            ),
+          );
+        }),
       ),
     );
   }

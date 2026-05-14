@@ -10,6 +10,9 @@ import {
 } from "../utils/guardrails.js";
 import { downloadWhatsAppMedia } from "../utils/media-downloader.js";
 import { transcribeAudio } from "../utils/transcriber.js";
+import { syncMessage } from "../graph/nodes/sync.js";
+import { getLeadByPhone, notifyLawyer } from "../utils/backend-client.js";
+import { FALLBACK_ERROR_MESSAGE } from "../config/prompts.js";
 
 export const whatsappRouter = Router();
 
@@ -32,8 +35,7 @@ whatsappRouter.post("/webhook", async (req, res) => {
   res.sendStatus(200);
 
   try {
-    const message =
-      req.body?.entry?.[0]?.changes?.[0]?.value?.messages?.[0];
+    const message = req.body?.entry?.[0]?.changes?.[0]?.value?.messages?.[0];
     
     if (message) {
       console.log(`[Webhook] Mensagem recebida de ${message.from}: ${message.text?.body || "(sem texto)"}`);
@@ -75,10 +77,8 @@ whatsappRouter.post("/webhook", async (req, res) => {
 
     const messageId: string = message.id;
 
-    // Sincroniza mensagem do cliente com o backend imediatamente
+    // 2. Sincroniza mensagem do cliente com o backend imediatamente
     try {
-      console.log(`[Webhook] Sincronizando mensagem de ${whatsappNumber} no backend...`);
-      const { syncMessage } = await import("../graph/nodes/sync.js");
       await syncMessage({
         whatsappNumber,
         content: textBody,
@@ -86,41 +86,43 @@ whatsappRouter.post("/webhook", async (req, res) => {
         messageType: "TEXT",
         whatsappMessageId: messageId,
       });
-      console.log(`[Webhook] Sincronização concluída para ${whatsappNumber}.`);
     } catch (syncErr) {
       console.error("[Webhook] Erro ao sincronizar mensagem do cliente:", syncErr);
     }
 
-    // Guardrail — bloqueia tentativas de prompt injection
+    // 3. Guardrail — bloqueia tentativas de prompt injection
     if (containsPromptInjection(textBody)) {
       console.warn(`[GUARDRAIL] Injeção detectada de ${whatsappNumber}`);
       await sendWhatsAppMessage(whatsappNumber, DEFAULT_GUARDRAIL_RESPONSE);
       return;
     }
 
-    // Carrega config do escritório
-    const config = await getBotConfig().catch((err) => {
-      console.warn(`[Webhook] Falha ao carregar config, usando padrão.`);
+    // 4. Carrega config do escritório
+    const config = await getBotConfig().catch(() => {
+      console.warn("[Webhook] Falha ao carregar config, usando padrão.");
       return INITIAL_CONFIG;
     });
 
-    // Sincroniza o estado de pausa do banco de dados com a IA
-    const { getLeadByPhone } = await import("../utils/backend-client.js");
-    let isPausedInDB: boolean | null = null;
-    try {
-      const lead = await getLeadByPhone(whatsappNumber);
-      isPausedInDB = lead?.isAIPaused ?? false;
-    } catch (dbErr: any) {
-      console.error("[Webhook] Erro ao consultar estado de pausa no banco:", dbErr.message);
-    }
+    // 5. Verificação de horário de atendimento foi removida (atendimento 24h)
 
+    // 6. Sincroniza estado de pausa do banco de dados com a IA
     const graphConfig = { configurable: { thread_id: whatsappNumber } };
     const currentState = await graph.getState(graphConfig);
     const hasExistingState = currentState?.values && Object.keys(currentState.values).length > 0;
 
-    let finalNeedsHandoff = isPausedInDB ?? (hasExistingState ? currentState.values.needsHandoff : false);
+    // Se a consulta ao banco falhar, MANTÉM o estado anterior (nunca força false)
+    let finalNeedsHandoff = hasExistingState ? currentState.values.needsHandoff : false;
+    try {
+      const lead = await getLeadByPhone(whatsappNumber);
+      if (lead?.isAIPaused !== undefined) {
+        finalNeedsHandoff = lead.isAIPaused;
+      }
+    } catch (dbErr: any) {
+      console.error("[Webhook] Erro ao consultar estado de pausa no banco (mantendo estado anterior):", dbErr.message);
+      // Não altera finalNeedsHandoff — mantém o estado do grafo
+    }
 
-    // Monta estado inicial (caso seja a primeira mensagem)
+    // 7. Monta estado e invoca o grafo
     const initialState = {
       whatsappNumber,
       userType: "UNKNOWN" as const,
@@ -128,10 +130,9 @@ whatsappRouter.post("/webhook", async (req, res) => {
       leadId: null,
       messages: [new HumanMessage(textBody)],
       triage: INITIAL_TRIAGE,
-      currentNode: "greeting_node",
+      currentNode: "router_node",
       needsHandoff: finalNeedsHandoff,
       handoffReason: null,
-      interactionContext: null,
       config,
     };
 
@@ -142,7 +143,7 @@ whatsappRouter.post("/webhook", async (req, res) => {
     );
     console.log(`[Webhook] Grafo finalizado para ${whatsappNumber}.`);
 
-    // Envia resposta do bot ao cliente
+    // 8. Envia resposta do bot ao cliente
     const botMessages = result.messages || [];
     const lastMessage = botMessages.at(-1);
 
@@ -151,9 +152,8 @@ whatsappRouter.post("/webhook", async (req, res) => {
                    (lastMessage as any).type === 'ai';
       
       if (isAI) {
-        console.log(`[Webhook] Tentando enviar resposta WhatsApp para ${whatsappNumber}...`);
         await sendWhatsAppMessage(whatsappNumber, String(lastMessage.content));
-        console.log(`[Webhook] Resposta enviada com sucesso para ${whatsappNumber}: ${String(lastMessage.content).substring(0, 50)}...`);
+        console.log(`[Webhook] Resposta enviada para ${whatsappNumber}: ${String(lastMessage.content).substring(0, 80)}...`);
       } else {
         console.log(`[Webhook] Última mensagem não é AI (${(lastMessage as any).type}), pulando envio.`);
       }
@@ -165,10 +165,8 @@ whatsappRouter.post("/webhook", async (req, res) => {
     try {
       const message = req.body?.entry?.[0]?.changes?.[0]?.value?.messages?.[0];
       if (message?.from) {
-        const fallbackMsg = "Desculpe, nosso sistema de atendimento automático passou por uma instabilidade momentânea. 🛠️\n\nJá notifiquei nossa equipe e um advogado especialista entrará em contato com você o quanto antes por aqui!";
-        await sendWhatsAppMessage(message.from, fallbackMsg);
+        await sendWhatsAppMessage(message.from, FALLBACK_ERROR_MESSAGE);
         
-        const { notifyLawyer } = await import("../utils/backend-client.js");
         await notifyLawyer({
           type: "EMERGENCY_HANDOFF",
           message: `ERRO CRÍTICO NA IA: O bot travou ao processar mensagem de ${message.from}. Erro: ${err instanceof Error ? err.message : String(err)}`,

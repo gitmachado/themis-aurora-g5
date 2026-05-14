@@ -9,6 +9,19 @@ import { Document, User } from '@models';
 
 type RequestUser = Pick<User, 'id' | 'role'>;
 
+// Multer popula `req.file` em uploads single-file. Re-declaramos localmente
+// para nao depender do ambient type @types/multer no escopo do controller.
+type MulterFile = {
+  path: string;
+  originalname: string;
+  mimetype: string;
+  size: number;
+};
+
+// Payload legado do mobile pode chegar com `processId` ao inves do nome novo
+// `legalProcessId`. Mantemos compat com o cliente antigo via union explicita.
+type UploadBody = { legalProcessId?: string; processId?: string };
+
 export class DocumentController {
   constructor(
     private readonly documentService: IDocumentService,
@@ -22,12 +35,13 @@ export class DocumentController {
     next: NextFunction
   ) => {
     try {
-      const file = (req as any).file;
+      const file = (req as unknown as { file?: MulterFile }).file;
       if (!file) {
         throw new ValidationError('Nenhum arquivo enviado');
       }
 
-      const legalProcessId = req.body.legalProcessId || (req.body as any).processId;
+      const body = req.body as UploadBody;
+      const legalProcessId = body.legalProcessId || body.processId;
       if (!legalProcessId) {
         throw new ValidationError('ID do processo é obrigatório');
       }
@@ -64,7 +78,7 @@ export class DocumentController {
         throw error;
       }
     } catch (error) {
-      const file = (req as any).file;
+      const file = (req as unknown as { file?: MulterFile }).file;
       if (file) {
         await this.cleanupTempFile(file);
       }

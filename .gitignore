@@ -137,3 +137,10 @@ html_to_flutter
 # Firebase Admin Service Account Key
 @omniconnect-aurora-g5-firebase-adminsdk-fbsvc-8d1b3f9702
 omniconnect-aurora-g5-firebase-adminsdk-fbsvc-8d1b3f9702.json
+
+# Snippets de debug ad-hoc — nao versionar consultas de inspecao manual
+check_*.sql
+
+# Outputs de execucao de testes — nao versionar logs de runs locais
+test_output.txt
+stress_test_output.txt

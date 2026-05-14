@@ -19,8 +19,11 @@ export class LocalFileStorageProvider implements IStorageProvider {
 
     try {
       await fs.promises.rename(file.path, filePath);
-    } catch (err: any) {
-      if (err.code === 'EXDEV') {
+    } catch (err) {
+      // EXDEV: cross-device link nao permitido (ex: tmp em outro filesystem).
+      // Caimos no caminho copy + unlink para esses casos.
+      const code = (err as NodeJS.ErrnoException).code;
+      if (code === 'EXDEV') {
         await fs.promises.copyFile(file.path, filePath);
         await fs.promises.unlink(file.path).catch(() => undefined);
       } else {

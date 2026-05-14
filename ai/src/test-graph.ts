@@ -14,18 +14,7 @@ if (!message) {
 }
 
 async function main() {
-  // Importação dinâmica — graph/index.ts só existe após T17
-  let graph: any;
-  try {
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    // @ts-ignore — graph/index.ts criado na T17
-    const mod = await import("./graph/index.js");
-    graph = mod.graph;
-  } catch {
-    console.error("Erro: grafo não encontrado. Implemente T17 (src/graph/index.ts) primeiro.");
-    process.exit(1);
-  }
-
+  const { graph } = await import("./graph/index.js");
   await setupCheckpointer();
 
   const config = await getBotConfig().catch(() => INITIAL_CONFIG);

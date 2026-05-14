@@ -39,8 +39,8 @@ class _LawyerProfileScreenState extends ConsumerState<LawyerProfileScreen>
   ValueNotifier<int>? _tabNotifier;
   int _profileIndex = LawyerMainLayoutState.profileIndex;
 
-  static const _headerHeight = 220.0;
-  static const _sheetOverlap = 60.0;
+  static const _headerHeight = 180.0;
+  static const _sheetOverlap = 50.0;
 
   @override
   void initState() {
@@ -132,11 +132,13 @@ class _LawyerProfileScreenState extends ConsumerState<LawyerProfileScreen>
       backgroundColor: AppColors.yellow,
       extendBodyBehindAppBar: true,
       appBar: CustomAppBar(
-        title: 'Meu Perfil',
+        title: 'Perfil',
         showBackButton: false,
         showDivider: false,
         backgroundColor: Colors.transparent,
-        actions: [AppAppBarActions(showChat: false)],
+        actions: [
+          AppAppBarActions(showChat: false, badgeColor: AppColors.white),
+        ],
       ),
       body: cachedAccount != null
           ? _buildBody(cachedAccount)

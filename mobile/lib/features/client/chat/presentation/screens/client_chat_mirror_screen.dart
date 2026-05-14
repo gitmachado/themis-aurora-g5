@@ -10,6 +10,7 @@ import '../../../../../../shared/constants/app_colors.dart';
 import '../../../../../../shared/constants/app_text_styles.dart';
 import '../../../../../../shared/constants/app_assets.dart';
 import '../../../../../../shared/utils/api_formatters.dart';
+import '../../../../../../shared/widgets/buttons/whatsapp_button.dart';
 import '../../../../../../shared/widgets/layout/custom_app_bar.dart';
 import '../../../../../../shared/widgets/layout/loading_skeleton.dart';
 import '../widgets/chat_bubble.dart';
@@ -577,43 +578,11 @@ class _ClientChatMirrorScreenState
         top: false,
         child: Padding(
           padding: const EdgeInsets.fromLTRB(20, 12, 20, 12),
-          child: SizedBox(
-            width: double.infinity,
-            child: Material(
-              color: const Color(0xFF25D366),
-              borderRadius: BorderRadius.circular(14),
-              child: InkWell(
-                borderRadius: BorderRadius.circular(14),
-                onTap: () => launchUrl(
-                  Uri.parse('https://wa.me/558487922092'),
-                  mode: LaunchMode.externalApplication,
-                ),
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 20,
-                    vertical: 14,
-                  ),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      const Icon(
-                        Icons.chat_bubble_rounded,
-                        color: Colors.white,
-                        size: 18,
-                      ),
-                      const SizedBox(width: 10),
-                      Text(
-                        'Continuar no WhatsApp',
-                        style: AppTextStyles.body.copyWith(
-                          color: Colors.white,
-                          fontWeight: FontWeight.w700,
-                          fontSize: 15,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
+          child: WhatsAppButton(
+            label: 'Continuar no WhatsApp',
+            onPressed: () => launchUrl(
+              Uri.parse('https://wa.me/558487922092'),
+              mode: LaunchMode.externalApplication,
             ),
           ),
         ),

@@ -1,9 +1,11 @@
 import { ILeadService } from '../interfaces/lead.service';
 import { ILeadRepository } from '../../repositories/interfaces/lead.repository';
 import { IUserRepository } from '../../repositories/interfaces/user.repository';
+import { IMessageRepository } from '../../repositories/interfaces/message.repository';
 import { IAuthService } from '../interfaces/auth.service';
 import { INotificationService } from '../interfaces/notification.service';
 import { ILegalProcessService } from '../interfaces/legal-process.service';
+import { IWhatsAppService } from '../interfaces/whatsapp.service';
 import type { Lead, User } from '@models';
 import type { CreateLeadDTO, ConvertLeadDTO } from '@dtos';
 import { NotFoundError, BadRequestError } from './errors';
@@ -18,7 +20,9 @@ export class LeadService implements ILeadService {
     private readonly userRepository: IUserRepository,
     private readonly authService: IAuthService,
     private readonly notificationService: INotificationService,
-    private readonly legalProcessService: ILegalProcessService
+    private readonly legalProcessService: ILegalProcessService,
+    private readonly whatsAppService: IWhatsAppService,
+    private readonly messageRepository: IMessageRepository
   ) {}
 
   async createFromWhatsapp(dto: CreateLeadDTO): Promise<Lead> {
@@ -42,6 +46,7 @@ export class LeadService implements ILeadService {
       status: 'PENDING',
       convertedUserId: null,
       assignedLawyerId: null,
+      assignedLawyerName: null,
       lawyerNotes: null,
       discardReason: null,
       isAIPaused: false,
@@ -61,11 +66,13 @@ export class LeadService implements ILeadService {
       throw new NotFoundError('Lead não encontrado');
     }
 
-    const normalizedData: Partial<Lead> = { ...data };
-    if (data.description && !data.caseDescription) {
-      normalizedData.caseDescription = data.description;
+    // Cliente legado (bot) ainda envia `description`; normalizamos para
+    // `caseDescription` e removemos a chave legada antes de persistir.
+    const { description: legacyDescription, ...rest } = data;
+    const normalizedData: Partial<Lead> = { ...rest };
+    if (legacyDescription && !data.caseDescription) {
+      normalizedData.caseDescription = legacyDescription;
     }
-    delete (normalizedData as any).description;
 
     const updatedLead = await this.leadRepository.update(id, normalizedData);
     
@@ -124,7 +131,7 @@ export class LeadService implements ILeadService {
         lawyerAdminId: null,
         oabNumber: null,
         specialty: null,
-        mustChangePassword: false,
+        mustChangePassword: true,
       });
     }
 
@@ -147,11 +154,45 @@ export class LeadService implements ILeadService {
 
     // Push só depois do processo criado, para o cliente já encontrar contexto ao logar.
     if (tempPassword) {
+      // Envia credenciais via WhatsApp — o cliente ainda não tem o app
+      const loginEmail = lead.email || user.email;
+      const welcomeMessage = [
+        `⚖️ *Bem-vindo(a) ao Themis, ${user.name}!*`,
+        ``,
+        `Seu cadastro foi aprovado e um advogado já está cuidando do seu caso.`,
+        ``,
+        `Baixe nosso aplicativo para acompanhar tudo em tempo real:`,
+        `📧 *Login:* ${loginEmail}`,
+        `🔐 *Senha temporária:* ${tempPassword}`,
+        ``,
+        `⚠️ No primeiro acesso, você precisará criar uma nova senha.`,
+        ``,
+        `Qualquer dúvida, estou aqui! 😊`,
+      ].join('\n');
+
+      try {
+        await this.whatsAppService.sendText(lead.whatsappNumber, welcomeMessage);
+        console.log(`[LeadService] Credenciais enviadas via WhatsApp para ${lead.whatsappNumber}`);
+        
+        // Salva a mensagem de boas-vindas no histórico para aparecer no app
+        await this.messageRepository.create({
+          whatsappNumber: lead.whatsappNumber,
+          content: welcomeMessage,
+          sender: 'BOT',
+          leadId: lead.id,
+          userId: user.id,
+          whatsappMessageId: null,
+        });
+      } catch (waError) {
+        console.error('[LeadService] Erro ao enviar/salvar credenciais:', waError);
+      }
+
+      // Push como fallback (caso já tenha o app instalado)
       await this.notificationService.sendPush(
         user.id,
         'Seu acesso ao Themis',
-        `Bem-vindo! Baixe nosso app e use a senha temporária: ${tempPassword}`
-      );
+        `Bem-vindo! Use a senha temporária: ${tempPassword}`
+      ).catch(() => {});
     }
 
     eventBus.emitLeadUpdate(updatedLead);
@@ -220,7 +261,7 @@ export class LeadService implements ILeadService {
       });
 
       if (!response.ok) {
-        const error = await response.json() as any;
+        const error = (await response.json()) as { error?: string };
         throw new Error(error.error || 'Falha ao retomar atendimento da IA');
       }
 
@@ -249,7 +290,7 @@ export class LeadService implements ILeadService {
       });
 
       if (!response.ok) {
-        const error = await response.json() as any;
+        const error = (await response.json()) as { error?: string };
         throw new Error(error.error || 'Falha ao iniciar handoff para humano');
       }
 

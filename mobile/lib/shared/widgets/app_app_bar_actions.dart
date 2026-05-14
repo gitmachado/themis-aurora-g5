@@ -10,6 +10,7 @@ class AppAppBarActions extends ConsumerWidget {
   final bool showChat;
   final VoidCallback? onNotificationTap;
   final VoidCallback? onChatTap;
+  final Color? badgeColor;
 
   const AppAppBarActions({
     super.key,
@@ -18,6 +19,7 @@ class AppAppBarActions extends ConsumerWidget {
     this.showChat = true,
     this.onNotificationTap,
     this.onChatTap,
+    this.badgeColor,
   });
 
   @override
@@ -51,6 +53,7 @@ class AppAppBarActions extends ConsumerWidget {
                 Navigator.pushNamed(context, route);
               },
           size: 22,
+          badgeColor: badgeColor,
         ),
         const SizedBox(width: 12),
       ],
@@ -81,8 +84,8 @@ class AppAppBarActions extends ConsumerWidget {
             top: 0,
             child: Container(
               padding: const EdgeInsets.all(2),
-              decoration: const BoxDecoration(
-                color: AppColors.yellow,
+              decoration: BoxDecoration(
+                color: badgeColor ?? AppColors.yellow,
                 shape: BoxShape.circle,
               ),
               constraints: const BoxConstraints(minWidth: 14, minHeight: 14),

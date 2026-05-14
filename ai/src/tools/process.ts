@@ -21,7 +21,7 @@ export const processStatusTool = tool(
   },
   {
     name: "consultar_processos",
-    description: "Busca informações sobre os processos jurídicos do cliente no banco de dados do escritório.",
+    description: "Busca informações sobre os processos jurídicos do cliente no banco de dados do escritório. O resultado incluirá o 'recentTimeline' (linha do tempo recente), que você deve ler e usar para explicar ao cliente, de forma simples e acolhedora, a história recente e os últimos andamentos do caso.",
     schema: z.object({
       whatsappNumber: z.string().describe("O número do WhatsApp do cliente"),
     }),

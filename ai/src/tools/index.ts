@@ -1,21 +1,21 @@
 import { handoffTool } from "./handoff.js";
 import { processStatusTool } from "./process.js";
 import { leadTriageTool } from "./triage.js";
+import { knowledgeSearchTool } from "./knowledge.js";
+import { StructuredToolInterface } from "@langchain/core/tools";
 
-export const tools = [
+export const tools: StructuredToolInterface[] = [
   handoffTool, 
   processStatusTool, 
-  leadTriageTool
+  leadTriageTool,
+  knowledgeSearchTool,
 ];
 
-export const toolsByName: Record<string, any> = {
+export const toolsByName: Record<string, StructuredToolInterface> = {
   ativar_atendimento_humano: handoffTool,
   consultar_processos: processStatusTool,
   registrar_triagem: leadTriageTool,
+  pesquisar_conhecimento: knowledgeSearchTool,
 };
 
-export { 
-  handoffTool, 
-  processStatusTool, 
-  leadTriageTool 
-};
+export { handoffTool, processStatusTool, leadTriageTool, knowledgeSearchTool };
