@@ -92,7 +92,7 @@ final class AppointmentRemoteDataSource {
       '/appointments/$id/reschedule-request',
       data: {'instruction': instruction},
     );
-    return json as Map<String, dynamic>;
+    return json;
   }
 
   Future<List<Map<String, dynamic>>> getRescheduleSuggestions(String id) async {

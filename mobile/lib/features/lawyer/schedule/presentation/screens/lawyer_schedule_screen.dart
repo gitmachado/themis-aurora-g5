@@ -32,11 +32,11 @@ class _LawyerScheduleScreenState extends ConsumerState<LawyerScheduleScreen>
   void initState() {
     super.initState();
     // Refresh pending count every 30 seconds
-    Future.delayed(const Duration(seconds: 30), () {
+    unawaited(Future.delayed(const Duration(seconds: 30), () {
       if (mounted) {
         ref.refresh(pendingAppointmentsCountProvider);
       }
-    });
+    }));
   }
 
   @override
@@ -94,7 +94,7 @@ class _LawyerScheduleScreenState extends ConsumerState<LawyerScheduleScreen>
         selectedDate.year == tomorrow.year &&
         selectedDate.month == tomorrow.month &&
         selectedDate.day == tomorrow.day;
-    final customDaySuffix = isToday
+    final daySuffix = isToday
         ? 'Hoje'
         : isTomorrow
         ? 'Amanhã'
@@ -738,7 +738,7 @@ class _CreateAppointmentSheetState
             if (procedures.isNotEmpty) ...[
               const SizedBox(height: 16),
               DropdownButtonFormField<String?>(
-                value: _selectedProcessId,
+                initialValue: _selectedProcessId,
                 decoration: InputDecoration(
                   labelText: 'Vincular a Processo (opcional)',
                   filled: true,

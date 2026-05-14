@@ -172,8 +172,9 @@ class WebSocketClient {
     });
 
     _socket!.on('pending:appointments:updated', (data) {
-      if (kDebugMode)
+      if (kDebugMode) {
         print('[WebSocket] Event received: pending:appointments:updated');
+      }
       _eventController.add(
         WebSocketEvent(type: 'pending:appointments:updated', data: data),
       );

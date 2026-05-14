@@ -193,12 +193,5 @@ CREATE TABLE IF NOT EXISTS appointments (
     updated_at TIMESTAMPTZ DEFAULT NOW()
 );
 
-CREATE INDEX IF NOT EXISTS idx_appointments_lawyer_id ON appointments(lawyer_id);
-CREATE INDEX IF NOT EXISTS idx_appointments_client_id ON appointments(client_id);
-CREATE INDEX IF NOT EXISTS idx_appointments_process_id ON appointments(process_id);
-CREATE INDEX IF NOT EXISTS idx_appointments_scheduled_at ON appointments(scheduled_at);
-CREATE INDEX IF NOT EXISTS idx_appointments_type_status ON appointments(type, status);
-CREATE INDEX IF NOT EXISTS idx_appointments_lawyer_scheduled ON appointments(lawyer_id, scheduled_at);
-
 DROP TRIGGER IF EXISTS update_appointments_updated_at ON appointments;
 CREATE TRIGGER update_appointments_updated_at BEFORE UPDATE ON appointments FOR EACH ROW EXECUTE PROCEDURE update_updated_at_column();

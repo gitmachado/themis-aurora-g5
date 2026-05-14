@@ -807,9 +807,9 @@ class _LawyerAppointmentDetailScreenState
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
             decoration: BoxDecoration(
-              color: Colors.amber.withOpacity(0.1),
+              color: Colors.amber.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(8),
-              border: Border.all(color: Colors.amber.withOpacity(0.3)),
+              border: Border.all(color: Colors.amber.withValues(alpha: 0.3)),
             ),
             child: Row(
               mainAxisSize: MainAxisSize.min,
@@ -1119,7 +1119,7 @@ class _EditAppointmentSheetState extends ConsumerState<EditAppointmentSheet> {
             ),
             const SizedBox(height: 16),
             DropdownButtonFormField<String>(
-              value: _selectedType,
+              initialValue: _selectedType,
               decoration: InputDecoration(
                 labelText: 'Tipo',
                 filled: true,
@@ -1144,7 +1144,7 @@ class _EditAppointmentSheetState extends ConsumerState<EditAppointmentSheet> {
             if (procedures.isNotEmpty) ...[
               const SizedBox(height: 16),
               DropdownButtonFormField<String?>(
-                value: _selectedProcessId,
+                initialValue: _selectedProcessId,
                 decoration: InputDecoration(
                   labelText: 'Vincular a Processo (opcional)',
                   filled: true,
