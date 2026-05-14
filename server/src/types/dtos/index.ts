@@ -1,3 +1,4 @@
+export * from './src/appointment.dto';
 export * from './src/auth.dto';
 export * from './src/document.dto';
 export * from './src/lead.dto';
