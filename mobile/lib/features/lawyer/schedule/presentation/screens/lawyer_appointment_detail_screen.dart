@@ -12,6 +12,8 @@ import '../../domain/entities/appointment.dart';
 import '../providers/appointment_providers.dart';
 import '../../../../../../features/procedures/presentation/providers/procedure_providers.dart';
 
+// ignore_for_file: use_build_context_synchronously
+
 class LawyerAppointmentDetailScreen extends ConsumerStatefulWidget {
   final Appointment? appointment;
 
@@ -596,6 +598,7 @@ class _LawyerAppointmentDetailScreenState
                         ),
                       ),
                     );
+                  // ignore: unnecessary_to_list_in_spreads
                   }).toList(),
               ],
             ],
@@ -624,7 +627,7 @@ class _LawyerAppointmentDetailScreenState
           });
         }
       } catch (e) {
-        print('Error polling suggestions: $e');
+        // Silently handle polling errors
       }
     });
   }

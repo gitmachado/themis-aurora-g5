@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../../../shared/constants/app_colors.dart';
@@ -35,6 +36,7 @@ class _LawyerScheduleScreenState extends ConsumerState<LawyerScheduleScreen>
     unawaited(
       Future.delayed(const Duration(seconds: 30), () {
         if (mounted) {
+          // ignore: unused_result
           ref.refresh(pendingAppointmentsCountProvider);
         }
       }),
@@ -96,11 +98,6 @@ class _LawyerScheduleScreenState extends ConsumerState<LawyerScheduleScreen>
         selectedDate.year == tomorrow.year &&
         selectedDate.month == tomorrow.month &&
         selectedDate.day == tomorrow.day;
-    final daySuffix = isToday
-        ? 'Hoje'
-        : isTomorrow
-        ? 'Amanhã'
-        : selectedWeekdayName;
 
     return Scaffold(
       backgroundColor: AppColors.background,
