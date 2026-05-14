@@ -72,6 +72,8 @@ class _LawyerLeadDetailScreenState extends ConsumerState<LawyerLeadDetailScreen>
 
     return AnnotatedRegion<SystemUiOverlayStyle>(
       value: const SystemUiOverlayStyle(
+        statusBarColor: Colors.transparent,
+        statusBarIconBrightness: Brightness.dark,
         systemNavigationBarColor: AppColors.white,
         systemNavigationBarIconBrightness: Brightness.dark,
       ),
