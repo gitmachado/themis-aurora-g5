@@ -143,6 +143,20 @@ router.get('/', authMiddleware, controller.list.bind(controller));
  *       404:
  *         description: Compromisso não encontrado
  */
+/**
+ * @openapi
+ * /appointments/pending:
+ *   get:
+ *     summary: Listar compromissos pendentes de aprovação
+ *     tags: [Agenda - Aprovação]
+ *     security:
+ *       - BearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Lista de compromissos pendentes
+ */
+router.get('/pending', authMiddleware, approvalController.getPendingApprovals.bind(approvalController));
+
 router.get('/:id', authMiddleware, controller.getById.bind(controller));
 
 /**
@@ -274,20 +288,6 @@ router.get(
  *         description: Lista de compromissos do processo
  */
 router.get('/by-process/:processId', authMiddleware, controller.getByProcessId.bind(controller));
-
-/**
- * @openapi
- * /appointments/pending:
- *   get:
- *     summary: Listar compromissos pendentes de aprovação
- *     tags: [Agenda - Aprovação]
- *     security:
- *       - BearerAuth: []
- *     responses:
- *       200:
- *         description: Lista de compromissos pendentes
- */
-router.get('/pending', authMiddleware, approvalController.getPendingApprovals.bind(approvalController));
 
 /**
  * @openapi
