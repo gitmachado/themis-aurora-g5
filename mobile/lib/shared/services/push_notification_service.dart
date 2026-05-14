@@ -1,4 +1,5 @@
 import 'dart:developer';
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import '../network/api_client.dart';
@@ -66,13 +67,18 @@ const _kHandoff = 'handoff';
 
 class PushNotificationService {
   final ApiClient _apiClient;
-  final FirebaseMessaging _firebaseMessaging = FirebaseMessaging.instance;
+  late final FirebaseMessaging _firebaseMessaging = FirebaseMessaging.instance;
   final FlutterLocalNotificationsPlugin _localNotificationsPlugin =
       FlutterLocalNotificationsPlugin();
 
   PushNotificationService(this._apiClient);
 
   Future<void> initializePushNotifications() async {
+    if (kIsWeb) {
+      log('Push notifications skipped: web platform not configured.');
+      return;
+    }
+
     // 1. Solicitar permissão
     final settings = await _firebaseMessaging.requestPermission(
       alert: true,

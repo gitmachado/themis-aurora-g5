@@ -6,6 +6,7 @@ import type { LegalProcess } from '@models';
 import type { CreateLegalProcessDTO, UpdateLegalProcessStatusDTO } from '@dtos';
 import { NotFoundError } from './errors';
 import { formatLegalProcessStatus } from './legal-process-i18n';
+import { eventBus } from '../communication/InternalEventBus';
 
 export class LegalProcessService implements ILegalProcessService {
   constructor(
@@ -33,6 +34,12 @@ export class LegalProcessService implements ILegalProcessService {
       content: `Processo registrado no sistema com status: ${process.currentStatus}`,
       type: 'PROCESS_CREATED',
     });
+
+    // Notify via WebSocket
+    eventBus.emitProcedureUpdate(process.clientId, process);
+    if (process.lawyerId) {
+      eventBus.emitProcedureUpdate(process.lawyerId, process);
+    }
 
     return process;
   }
@@ -87,6 +94,12 @@ export class LegalProcessService implements ILegalProcessService {
       });
     }
 
+    // Notify via WebSocket
+    eventBus.emitProcedureUpdate(updatedProcess.clientId, updatedProcess);
+    if (updatedProcess.lawyerId) {
+      eventBus.emitProcedureUpdate(updatedProcess.lawyerId, updatedProcess);
+    }
+
     return updatedProcess;
   }
 
@@ -97,7 +110,7 @@ export class LegalProcessService implements ILegalProcessService {
     }
 
     // Update last note in process
-    await this.legalProcessRepository.update(processId, {
+    const updatedProcess = await this.legalProcessRepository.update(processId, {
       lastNote: note,
       lastMovementDate: new Date(),
     });
@@ -117,6 +130,12 @@ export class LegalProcessService implements ILegalProcessService {
       body: `O advogado adicionou uma nova observação ao seu processo "${process.title}"`,
       type: 'NEW_NOTE',
     });
+
+    // Notify via WebSocket
+    eventBus.emitProcedureUpdate(updatedProcess.clientId, updatedProcess);
+    if (updatedProcess.lawyerId) {
+      eventBus.emitProcedureUpdate(updatedProcess.lawyerId, updatedProcess);
+    }
   }
 
   async requestDocument(processId: string, documentName: string, lawyerId: string): Promise<void> {
@@ -124,9 +143,9 @@ export class LegalProcessService implements ILegalProcessService {
     if (!process) throw new NotFoundError('Processo não encontrado');
 
     const content = `Solicitação de documento: ${documentName}`;
-    
+
     // Update last note
-    await this.legalProcessRepository.update(processId, {
+    const updatedProcess = await this.legalProcessRepository.update(processId, {
       lastNote: content,
       lastMovementDate: new Date(),
       currentStatus: 'AWAITING_DOCUMENT',
@@ -147,6 +166,12 @@ export class LegalProcessService implements ILegalProcessService {
       body: `O advogado solicitou o documento: ${documentName}`,
       type: 'DOCUMENT_REQUESTED',
     });
+
+    // Notify via WebSocket
+    eventBus.emitProcedureUpdate(updatedProcess.clientId, updatedProcess);
+    if (updatedProcess.lawyerId) {
+      eventBus.emitProcedureUpdate(updatedProcess.lawyerId, updatedProcess);
+    }
   }
 
   async scheduleEvent(processId: string, eventTitle: string, date: Date, lawyerId: string): Promise<void> {
@@ -171,6 +196,12 @@ export class LegalProcessService implements ILegalProcessService {
       body: `Um novo evento foi agendado no seu processo: ${eventTitle}`,
       type: 'STATUS_CHANGED',
     });
+
+    // Notify via WebSocket
+    eventBus.emitProcedureUpdate(process.clientId, process);
+    if (process.lawyerId) {
+      eventBus.emitProcedureUpdate(process.lawyerId, process);
+    }
   }
 
   async getByClientId(clientId: string): Promise<LegalProcess[]> {

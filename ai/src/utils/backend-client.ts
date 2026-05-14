@@ -1,16 +1,41 @@
 import axios, { AxiosInstance } from "axios";
+import jwt from "jsonwebtoken";
 
 const BACKEND_API_URL = process.env.BACKEND_API_URL || "http://localhost:3000";
-const BOT_API_KEY = process.env.BOT_API_KEY || "";
+const JWT_SECRET = process.env.JWT_SECRET || "development_secret_key_change_me";
+
+/**
+ * Gera um JWT válido para autenticar como SYSTEM (IA)
+ * Usado para todas as chamadas que requerem autenticação
+ */
+function generateSystemToken(): string {
+  return jwt.sign(
+    {
+      sub: "11111111-1111-4111-8111-111111111111",
+      id: "11111111-1111-4111-8111-111111111111",
+      email: "ai@themis.local",
+      role: "SYSTEM",
+    },
+    JWT_SECRET,
+    { expiresIn: "24h" }
+  );
+}
 
 /**
  * Cliente HTTP centralizado para comunicação AI → Backend.
- * Todas as chamadas ao backend passam por aqui com API Key.
+ * Todas as chamadas ao backend passam por aqui com JWT válido.
  */
 const client: AxiosInstance = axios.create({
   baseURL: `${BACKEND_API_URL}/api/v1`,
-  headers: { "x-api-key": BOT_API_KEY },
   timeout: 10000,
+});
+
+// Interceptor para adicionar JWT em todas as requisições
+client.interceptors.request.use((config) => {
+  const token = generateSystemToken();
+  config.headers.Authorization = `Bearer ${token}`;
+  config.headers["x-api-key"] = process.env.BOT_API_KEY || "development_bot_key_change_me";
+  return config;
 });
 
 /**
@@ -57,6 +82,12 @@ export async function getLeadByPhone(whatsappNumber: string): Promise<{
   id?: string;
   status?: string;
   name?: string;
+  email?: string;
+  cpf?: string;
+  caseType?: string;
+  caseDescription?: string;
+  urgency?: string;
+  contactAvailability?: string;
   isAIPaused?: boolean;
 }> {
   const res = await client.get(`/bot/leads/by-phone/${whatsappNumber}`);
@@ -235,4 +266,168 @@ export async function getBotConfig(): Promise<{
 }> {
   const res = await client.get("/bot/configurations");
   return res.data;
+}
+
+// ── Agenda/Compromissos ──
+
+export interface AvailableSlot {
+  time: string;
+  isoTime: string;
+}
+
+export async function getAvailableSlots(
+  lawyerId: string,
+  date: string
+): Promise<AvailableSlot[]> {
+  const res = await client.get(`/bot/appointments/slots`, {
+    params: {
+      lawyerId,
+      date,
+      slotDurationMinutes: 30,
+    },
+  });
+  return res.data.slots || [];
+}
+
+export async function getOpenAppointmentsByPhone(whatsappNumber: string): Promise<{
+  hasOpenAppointments: boolean;
+  count: number;
+  appointments: Array<{
+    id: string;
+    title: string;
+    scheduledAt: string;
+    status: string;
+    type: string;
+  }>;
+}> {
+  const res = await client.get(`/bot/appointments/by-phone/${whatsappNumber}`);
+  return res.data;
+}
+
+export async function scheduleAppointment(data: {
+  lawyerId: string;
+  clientId: string;
+  title: string;
+  description: string;
+  type: "MEETING" | "DEADLINE" | "HEARING" | "OTHER";
+  scheduledAt: string;
+  durationMinutes: number;
+  createdByAI?: boolean;
+  clientName?: string | null;
+  clientWhatsappNumber?: string | null;
+}): Promise<{ id: string; scheduledAt: string }> {
+  const res = await client.post("/bot/appointments", data);
+  return {
+    id: res.data.id,
+    scheduledAt: res.data.scheduledAt,
+  };
+}
+
+// ── Agenda/Compromissos (Autenticado) ──
+// Estas rotas usam autenticação JWT do advogado
+
+export interface AppointmentData {
+  id: string;
+  title: string;
+  description?: string;
+  type: string;
+  status: string;
+  scheduledAt: string;
+  durationMinutes: number;
+  clientId?: string;
+  processId?: string;
+  clientName?: string;
+  clientWhatsappNumber?: string;
+  createdByAI: boolean;
+  createdAt: string;
+  updatedAt?: string;
+}
+
+export async function getMyAppointments(
+  lawyerId: string,
+  filters?: {
+    startDate?: string;
+    endDate?: string;
+    type?: string;
+    status?: string;
+  }
+): Promise<AppointmentData[]> {
+  try {
+    const params: any = {};
+    if (filters?.startDate) params.startDate = filters.startDate;
+    if (filters?.endDate) params.endDate = filters.endDate;
+    if (filters?.type) params.type = filters.type;
+    if (filters?.status) params.status = filters.status;
+
+    const res = await client.get("/appointments", { params });
+    return res.data.items || res.data || [];
+  } catch (error: any) {
+    throwHttp(error);
+  }
+}
+
+export async function getAppointmentById(appointmentId: string): Promise<AppointmentData> {
+  try {
+    const res = await client.get(`/appointments/${appointmentId}`);
+    return res.data;
+  } catch (error: any) {
+    throwHttp(error);
+  }
+}
+
+export async function createAppointment(
+  lawyerId: string,
+  data: {
+    title: string;
+    type: "MEETING" | "DEADLINE" | "HEARING" | "OTHER";
+    scheduledAt: string;
+    durationMinutes?: number;
+    description?: string;
+    clientId?: string;
+    processId?: string;
+    createdByAI?: boolean;
+  }
+): Promise<{ id: string; scheduledAt: string }> {
+  try {
+    const payload = {
+      ...data,
+      durationMinutes: data.durationMinutes || 30,
+      createdByAI: data.createdByAI || true,
+    };
+    const res = await client.post("/appointments", payload);
+    return {
+      id: res.data.id,
+      scheduledAt: res.data.scheduledAt,
+    };
+  } catch (error: any) {
+    throwHttp(error);
+  }
+}
+
+export async function updateAppointment(
+  appointmentId: string,
+  data: {
+    title?: string;
+    description?: string;
+    scheduledAt?: string;
+    durationMinutes?: number;
+    status?: string;
+  }
+): Promise<AppointmentData> {
+  try {
+    const res = await client.patch(`/appointments/${appointmentId}`, data);
+    return res.data;
+  } catch (error: any) {
+    throwHttp(error);
+  }
+}
+
+export async function cancelAppointment(appointmentId: string): Promise<void> {
+  try {
+    await client.patch(`/appointments/${appointmentId}`, {
+      status: "CANCELED",
+    });
+  } catch (error: any) {
+    throwHttp(error);
+  }
 }

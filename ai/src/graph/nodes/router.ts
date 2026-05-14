@@ -4,7 +4,7 @@ import { ThemisStateType } from "../state.js";
 import { AGENT_PROMPT } from "../../config/prompts.js";
 import { tools, toolsByName } from "../../tools/index.js";
 import { searchKnowledge } from "../../utils/vector-store.js";
-import { getProcessesByPhone } from "../../utils/backend-client.js";
+import { getProcessesByPhone, getLeadByPhone, getOpenAppointmentsByPhone } from "../../utils/backend-client.js";
 
 /**
  * Nó principal — Agente Unificado.
@@ -14,7 +14,7 @@ import { getProcessesByPhone } from "../../utils/backend-client.js";
 export async function routerNode(
   state: ThemisStateType
 ): Promise<Partial<ThemisStateType>> {
-  const { whatsappNumber, messages, needsHandoff, triage } = state;
+  let { whatsappNumber, messages, needsHandoff, triage } = state;
 
   // 1. Blindagem de Handoff — se IA está pausada, não processa
   if (needsHandoff === true) {
@@ -22,17 +22,69 @@ export async function routerNode(
   }
 
   const lastMessage = String(messages.at(-1)?.content ?? "").trim();
-  
-  // 2. Modelo vinculado com as Tools modulares
+
+  // 2. NOVO: Carregar Lead Existente se Triage está vazia
+  // Soluciona o problema de perda de contexto entre mensagens
+  if (!triage.name && whatsappNumber) {
+    try {
+      const existingLead = await getLeadByPhone(whatsappNumber);
+      if (existingLead?.exists) {
+        triage = {
+          name: existingLead.name ?? null,
+          email: existingLead.email ?? null,
+          cpf: existingLead.cpf ?? null,
+          caseType: existingLead.caseType ?? null,
+          caseDescription: existingLead.caseDescription ?? null,
+          urgency: existingLead.urgency ?? null,
+          contactAvailability: existingLead.contactAvailability ?? null,
+          currentStep: "DONE",
+        };
+        console.log(`[Router Node] Lead ${existingLead.name} carregado do banco para restaurar contexto.`);
+      }
+    } catch (err) {
+      console.warn("[Router Node] Erro ao buscar lead existente (continuando sem):", err);
+    }
+  }
+
+  // 3. PRÉ-CHECK para Bloqueio de Reuniões Abertas (se cliente quer marcar)
+  let openAppointmentsContext = "";
+  const bookingKeywords = ["marcar", "agendar", "reunião", "consulta com advogado", "nova reunião", "outra reunião", "sim", "claro", "pode", "blz", "ok", "tudo bem"];
+  const wantsToBook = bookingKeywords.some(k => lastMessage.toLowerCase().includes(k));
+
+  console.log(`[Router Node] Message received: "${lastMessage}" | wantsToBook: ${wantsToBook}`);
+
+  if (triage.name && whatsappNumber && wantsToBook) {
+    console.log(`[Router Node] 🔍 PRÉ-CHECK: Detectado booking intent para ${triage.name}`);
+    try {
+      const open = await getOpenAppointmentsByPhone(whatsappNumber);
+      console.log(`[Router Node] ✅ getOpenAppointmentsByPhone retornou:`, open);
+
+      if (open.hasOpenAppointments) {
+        const details = open.appointments
+          .map((a: any) => `${a.title} (${a.status})`)
+          .join("; ");
+        openAppointmentsContext = `\n\n⚠️ ALERTA SISTEMA: Cliente "${triage.name}" tem ${open.count} reunião(ões) ABERTA(S): ${details}. BLOQUEIE novo agendamento imediatamente e ofereça HANDOFF.`;
+        console.log(`[Router Node] ❌ Cliente tem reunião aberta`);
+      } else {
+        openAppointmentsContext = `\n\n✅ SISTEMA: Cliente "${triage.name}" não tem reuniões abertas — PODE AGENDAR.`;
+        console.log(`[Router Node] ✅ Cliente sem reuniões abertas`);
+      }
+    } catch (err) {
+      console.error("[Router Node] ❌ Erro ao verificar reuniões:", err);
+      openAppointmentsContext = `\n\n⚠️ ERRO: Não consegui verificar reuniões. Continuando...`;
+    }
+  }
+
+  // 4. Modelo vinculado com as Tools modulares
   const model = new ChatOpenAI({
     model: process.env.OPENAI_MODEL || "gpt-4o-mini",
     temperature: 0.1,
   }).bindTools(tools);
 
-  // 3. Busca de Conhecimento (RAG) — REMOVIDO (IA agora usa a tool pesquisar_conhecimento)
+  // 5. Busca de Conhecimento (RAG) — REMOVIDO (IA agora usa a tool pesquisar_conhecimento)
   const knowledgeContext = "Use a tool 'pesquisar_conhecimento' se precisar de informações do escritório.";
 
-  // 4. Dados de Processos (se for cliente)
+  // 6. Dados de Processos (se for cliente)
   let processContext = "Nenhum processo encontrado.";
   try {
     const processes = await getProcessesByPhone(whatsappNumber);
@@ -43,8 +95,19 @@ export async function routerNode(
     console.warn("[Router Node] Erro ao buscar processos (continuando sem):", err);
   }
 
-  // 5. Monta o prompt do agente com dados dinâmicos
+  // 7. Monta o prompt do agente com dados dinâmicos
+  const now = new Date();
+  const todayStr = now.toLocaleDateString('pt-BR', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+  const todayISO = now.toISOString().split('T')[0];
+  // Calcula o próximo sábado
+  const daysUntilSaturday = (6 - now.getDay() + 7) % 7 || 7;
+  const nextSat = new Date(now);
+  nextSat.setDate(now.getDate() + daysUntilSaturday);
+  const nextSaturdayISO = nextSat.toISOString().split('T')[0];
+
   const agentPrompt = AGENT_PROMPT
+    .replace("{currentDate}", `${todayStr} (${todayISO})`)
+    .replace("{nextSaturday}", nextSaturdayISO)
     .replace("{triageName}", triage.name || "FALTANDO")
     .replace("{triageEmail}", triage.email || "FALTANDO")
     .replace("{triageCpf}", triage.cpf || "FALTANDO")
@@ -53,15 +116,16 @@ export async function routerNode(
     .replace("{triageDescription}", triage.caseDescription || "FALTANDO")
     .replace("{triageUrgency}", triage.urgency || "FALTANDO")
     .replace("{triageAvailability}", triage.contactAvailability || "FALTANDO")
-    .replace("{processContext}", processContext);
+    .replace("{processContext}", processContext)
+    + openAppointmentsContext;
 
-  // 6. Histórico recente (janela deslizante)
+  // 8. Histórico recente (janela deslizante)
   const history = messages.slice(-20).map((m: any) => ({
     role: (m._getType?.() === 'ai' || m.type === 'ai') ? 'assistant' : 'user',
     content: String(m.content),
   }));
 
-  // 7. Invoca o modelo
+  // 9. Invoca o modelo
   let response;
   try {
     response = await model.invoke([
@@ -77,32 +141,32 @@ export async function routerNode(
     };
   }
 
-  // 8. Execução de Tools Reais
+  // 10. Execução de Tools Reais
   if (response.tool_calls && response.tool_calls.length > 0) {
     const toolMessages: ToolMessage[] = [];
 
-    console.log(`[Router Node] Executando ${response.tool_calls.length} tool(s)...`);
-
+    console.log(`[Router Node] 🔧 LLM chamou ${response.tool_calls.length} ferramenta(s):`);
     for (const toolCall of response.tool_calls) {
+      console.log(`[Router Node]   - ${toolCall.name} com args:`, JSON.stringify(toolCall.args).substring(0, 150));
       const toolFn = toolsByName[toolCall.name];
       if (toolFn) {
         try {
           const args = { ...toolCall.args, whatsappNumber };
           const result = await toolFn.invoke(args);
-          console.log(`[Router Node] Tool ${toolCall.name} retornou: ${result}`);
+          console.log(`[Router Node]   ✅ ${toolCall.name} executada com sucesso`);
           toolMessages.push(new ToolMessage({
             tool_call_id: toolCall.id!,
             content: String(result),
           }));
         } catch (toolErr) {
-          console.error(`[Router Node] Erro na tool ${toolCall.name}:`, toolErr);
+          console.error(`[Router Node] ❌ Erro na tool ${toolCall.name}:`, toolErr);
           toolMessages.push(new ToolMessage({
             tool_call_id: toolCall.id!,
             content: "ERRO_TECNICO: Falha ao executar esta operação.",
           }));
         }
       } else {
-        console.warn(`[Router Node] Tool desconhecida: ${toolCall.name}`);
+        console.warn(`[Router Node] ❌ Tool desconhecida: ${toolCall.name}`);
         toolMessages.push(new ToolMessage({
           tool_call_id: toolCall.id!,
           content: `ERRO: Tool '${toolCall.name}' não encontrada.`,
@@ -110,17 +174,20 @@ export async function routerNode(
       }
     }
 
-    // 9. Reflexão: IA recebe o resultado das tools e gera o texto final
+    // 11. Reflexão: IA recebe o resultado das tools e gera o texto final
+    console.log(`[Router Node] 🔄 Iniciando reflexão pós-tool. Tool responses:`, toolMessages.map(m => String(m.content).substring(0, 100)));
     let finalResponse;
     try {
+      console.log(`[Router Node] 🤖 Invocando LLM para reflexão...`);
       finalResponse = await model.invoke([
         { role: "system", content: agentPrompt },
         ...history,
         response,
         ...toolMessages,
       ]);
+      console.log(`[Router Node] ✅ Reflexão concluída. Resposta: "${String(finalResponse.content).substring(0, 150)}..."`);
     } catch (err) {
-      console.error("[Router Node] Erro na reflexão pós-tool:", err);
+      console.error("[Router Node] ❌ Erro na reflexão pós-tool:", err);
       const { AIMessage } = await import("@langchain/core/messages");
       return {
         currentNode: "sync_node",
@@ -128,6 +195,24 @@ export async function routerNode(
       };
     }
 
+    // Garantir que finalResponse tem conteúdo
+    if (!finalResponse.content || String(finalResponse.content).trim().length === 0) {
+      console.warn(`[Router Node] ⚠️ Resposta vazia gerada pelo LLM!`);
+      console.warn(`[Router Node] Tool calls na resposta?`, (finalResponse as any).tool_calls?.length);
+      if ((finalResponse as any).tool_calls && (finalResponse as any).tool_calls.length > 0) {
+        console.warn(`[Router Node] ✅ LLM tentou chamar tools (responses vazias são normais neste caso)`);
+        return {
+          currentNode: "sync_node",
+          messages: [response, ...toolMessages, finalResponse],
+          needsHandoff: state.needsHandoff,
+        };
+      }
+      console.warn(`[Router Node] Usando fallback...`);
+      const { AIMessage } = await import("@langchain/core/messages");
+      finalResponse = new AIMessage("Deixa eu verificar os horários disponíveis para você...");
+    }
+
+    console.log(`[Router Node] 📤 Retornando ao sync_node com resposta`);
     return {
       currentNode: "sync_node",
       messages: [response, ...toolMessages, finalResponse],
@@ -135,7 +220,7 @@ export async function routerNode(
     };
   }
 
-  // 10. Resposta sem tools
+  // 11. Resposta sem tools
   return {
     currentNode: "sync_node",
     messages: [response],

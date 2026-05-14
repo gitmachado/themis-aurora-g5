@@ -44,8 +44,60 @@ class InternalEventBus extends EventEmitter {
     this.emit('lead:unlocked', { leadId, whatsappNumber });
   }
 
+  public emitLeadDeleted(leadId: string): void {
+    this.emit('lead:deleted', { leadId });
+  }
+
   public emitProcedureUpdate(userId: string, procedure: LegalProcess): void {
     this.emit('procedure:updated', { userId, procedure });
+  }
+
+  // Appointment events
+  public emitAppointmentCreated(userId: string, appointment: any): void {
+    this.emit('appointment:created', { userId, appointment });
+  }
+
+  public emitAppointmentUpdated(userId: string, appointment: any): void {
+    this.emit('appointment:updated', { userId, appointment });
+  }
+
+  public emitAppointmentDeleted(userId: string, appointmentId: string): void {
+    this.emit('appointment:deleted', { userId, appointmentId });
+  }
+
+  public emitAppointmentApproved(lawyerId: string, appointment: any): void {
+    this.emit('appointment:approved', { lawyerId, appointment });
+    this.emit('pending:appointments:updated', { lawyerId });
+  }
+
+  public emitAppointmentRejected(lawyerId: string, appointmentId: string): void {
+    this.emit('appointment:rejected', { lawyerId, appointmentId });
+    this.emit('pending:appointments:updated', { lawyerId });
+  }
+
+  public emitDeadlineReminder(userId: string, appointment: any): void {
+    this.emit('deadline:reminder', { userId, appointment });
+  }
+
+  public emitRescheduleRequested(lawyerId: string, suggestion: any): void {
+    this.emit('reschedule:requested', { lawyerId, suggestion });
+  }
+
+  public emitRescheduleAccepted(lawyerId: string, appointment: any): void {
+    this.emit('reschedule:accepted', { lawyerId, appointment });
+    this.emit('pending:appointments:updated', { lawyerId });
+  }
+
+  public emitRescheduleRejected(lawyerId: string, suggestionId: string): void {
+    this.emit('reschedule:rejected', { lawyerId, suggestionId });
+  }
+
+  public emitDocumentUploaded(userId: string, document: any): void {
+    this.emit('document:uploaded', { userId, document });
+  }
+
+  public emitDocumentDeleted(userId: string, documentId: string, processId: string): void {
+    this.emit('document:deleted', { userId, documentId, processId });
   }
 }
 

@@ -1,8 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:mobile/shared/constants/app_colors.dart';
 import 'package:mobile/shared/constants/app_text_styles.dart';
+import 'package:mobile/shared/constants/app_assets.dart';
+import 'package:mobile/shared/utils/api_formatters.dart';
+import 'package:mobile/shared/widgets/layout/custom_app_bar.dart';
 import '../../domain/entities/chat_message.dart';
 import '../providers/lawyer_chat_provider.dart';
 
@@ -106,45 +110,12 @@ class _LawyerChatPageState extends ConsumerState<LawyerChatPage> {
 
     return Scaffold(
       backgroundColor: AppColors.background,
-      appBar: AppBar(
-        backgroundColor: AppColors.surface,
-        elevation: 0,
-        scrolledUnderElevation: 0,
-        leading: IconButton(
-          icon: const Icon(
-            Icons.arrow_back_ios_new_rounded,
-            color: AppColors.ink,
-          ),
-          onPressed: () => Navigator.of(context).pop(),
-        ),
-        title: Row(
-          children: [
-            Container(
-              width: 10,
-              height: 10,
-              decoration: const BoxDecoration(
-                color: AppColors.success,
-                shape: BoxShape.circle,
-              ),
-            ),
-            const SizedBox(width: 8),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'Assistente Themis AI',
-                    style: AppTextStyles.h2.copyWith(fontSize: 16),
-                  ),
-                  Text(
-                    'Online • Advogados',
-                    style: AppTextStyles.tiny.copyWith(color: AppColors.ink3),
-                  ),
-                ],
-              ),
-            ),
-          ],
-        ),
+      appBar: CustomAppBar(
+        title: '',
+        showBackButton: true,
+        showDivider: true,
+        centerTitle: false,
+        backgroundColor: AppColors.white,
         actions: [
           IconButton(
             tooltip: 'Limpar conversa',
@@ -154,9 +125,55 @@ class _LawyerChatPageState extends ConsumerState<LawyerChatPage> {
                 : () => _confirmClearConversation(),
           ),
         ],
-        bottom: PreferredSize(
-          preferredSize: const Size.fromHeight(1.0),
-          child: Container(color: AppColors.border, height: 1.0),
+        titleWidget: Row(
+          children: [
+            Container(
+              width: 38,
+              height: 38,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: AppColors.yellowSoft,
+                border: Border.all(color: AppColors.yellow, width: 1.5),
+              ),
+              child: Center(
+                child: SvgPicture.asset(AppAssets.logo, width: 22, height: 22),
+              ),
+            ),
+            const SizedBox(width: 10),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  'Themis',
+                  style: AppTextStyles.h2.copyWith(
+                    fontSize: 15,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+                Row(
+                  children: [
+                    Container(
+                      width: 6,
+                      height: 6,
+                      decoration: const BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: AppColors.success,
+                      ),
+                    ),
+                    const SizedBox(width: 5),
+                    Text(
+                      'Para advogados',
+                      style: AppTextStyles.caption.copyWith(
+                        fontSize: 11,
+                        color: AppColors.textCaption,
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ],
         ),
       ),
       body: SafeArea(
@@ -284,14 +301,19 @@ class _LawyerChatPageState extends ConsumerState<LawyerChatPage> {
       bottomRight: Radius.circular(isMe ? 4 : 16),
     );
 
+    final isDark = isMe;
+    final secondaryTextColor = isDark
+        ? Colors.white.withValues(alpha: 0.7)
+        : AppColors.ink3;
+
     return Align(
       alignment: alignment,
       child: Container(
         margin: const EdgeInsets.only(bottom: 12),
         constraints: BoxConstraints(
-          maxWidth: MediaQuery.of(context).size.width * 0.75,
+          maxWidth: MediaQuery.of(context).size.width * 0.78,
         ),
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
         decoration: BoxDecoration(
           color: bubbleColor,
           borderRadius: borderRadius,
@@ -304,65 +326,104 @@ class _LawyerChatPageState extends ConsumerState<LawyerChatPage> {
               ),
           ],
         ),
-        child: isMe
-            ? Text(
-                message.content,
-                style: AppTextStyles.body.copyWith(
-                  color: textColor,
-                  fontSize: 15,
-                  height: 1.35,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Padding(
+              padding: const EdgeInsets.only(bottom: 4),
+              child: Text(
+                isMe ? 'ADVOGADO' : 'THEMIS AI',
+                style: TextStyle(
+                  fontSize: 9,
+                  fontWeight: FontWeight.w800,
+                  color: secondaryTextColor,
+                  letterSpacing: 0.5,
                 ),
-              )
-            : MarkdownBody(
-                data: message.content,
-                selectable: true,
-                styleSheet: MarkdownStyleSheet(
-                  p: AppTextStyles.body.copyWith(
-                    color: textColor,
-                    fontSize: 15,
-                    height: 1.35,
-                  ),
-                  strong: AppTextStyles.body.copyWith(
-                    color: textColor,
-                    fontSize: 15,
-                    height: 1.35,
-                    fontWeight: FontWeight.w700,
-                  ),
-                  em: AppTextStyles.body.copyWith(
-                    color: textColor,
-                    fontSize: 15,
-                    height: 1.35,
-                    fontStyle: FontStyle.italic,
-                  ),
-                  listBullet: AppTextStyles.body.copyWith(
-                    color: textColor,
-                    fontSize: 15,
-                    height: 1.35,
-                  ),
-                  h1: AppTextStyles.h2.copyWith(color: textColor, fontSize: 18),
-                  h2: AppTextStyles.h2.copyWith(color: textColor, fontSize: 17),
-                  h3: AppTextStyles.h2.copyWith(color: textColor, fontSize: 16),
-                  code: AppTextStyles.body.copyWith(
-                    color: textColor,
-                    fontSize: 14,
-                    fontFamily: 'monospace',
-                    backgroundColor: AppColors.surface,
-                  ),
-                  codeblockDecoration: BoxDecoration(
-                    color: AppColors.surface,
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  blockquote: AppTextStyles.body.copyWith(
-                    color: AppColors.ink3,
-                    fontSize: 15,
-                    fontStyle: FontStyle.italic,
-                  ),
-                  blockSpacing: 6,
-                ),
-                onTapLink: (_, href, _) async {
-                  // Could plug url_launcher here if we want clickable links.
-                },
               ),
+            ),
+            isMe
+                ? Text(
+                    message.content,
+                    style: AppTextStyles.body.copyWith(
+                      color: textColor,
+                      fontSize: 14.5,
+                      height: 1.4,
+                    ),
+                  )
+                : MarkdownBody(
+                    data: message.content,
+                    selectable: true,
+                    styleSheet: MarkdownStyleSheet(
+                      p: AppTextStyles.body.copyWith(
+                        color: textColor,
+                        fontSize: 14.5,
+                        height: 1.4,
+                      ),
+                      strong: AppTextStyles.body.copyWith(
+                        color: textColor,
+                        fontSize: 14.5,
+                        height: 1.4,
+                        fontWeight: FontWeight.w700,
+                      ),
+                      em: AppTextStyles.body.copyWith(
+                        color: textColor,
+                        fontSize: 14.5,
+                        height: 1.4,
+                        fontStyle: FontStyle.italic,
+                      ),
+                      listBullet: AppTextStyles.body.copyWith(
+                        color: textColor,
+                        fontSize: 14.5,
+                        height: 1.4,
+                      ),
+                      h1: AppTextStyles.h2.copyWith(
+                        color: textColor,
+                        fontSize: 18,
+                      ),
+                      h2: AppTextStyles.h2.copyWith(
+                        color: textColor,
+                        fontSize: 17,
+                      ),
+                      h3: AppTextStyles.h2.copyWith(
+                        color: textColor,
+                        fontSize: 16,
+                      ),
+                      code: AppTextStyles.body.copyWith(
+                        color: textColor,
+                        fontSize: 13,
+                        fontFamily: 'monospace',
+                        backgroundColor: AppColors.surface,
+                      ),
+                      codeblockDecoration: BoxDecoration(
+                        color: AppColors.surface,
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      blockquote: AppTextStyles.body.copyWith(
+                        color: AppColors.ink3,
+                        fontSize: 14.5,
+                        fontStyle: FontStyle.italic,
+                      ),
+                      blockSpacing: 6,
+                    ),
+                    onTapLink: (_, href, _) async {},
+                  ),
+            const SizedBox(height: 6),
+            Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Spacer(),
+                Text(
+                  formatTime(message.timestamp),
+                  style: AppTextStyles.caption.copyWith(
+                    fontSize: 9.5,
+                    color: secondaryTextColor,
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -409,58 +470,84 @@ class _LawyerChatPageState extends ConsumerState<LawyerChatPage> {
 
   Widget _buildInputArea(bool isLoading) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      padding: const EdgeInsets.fromLTRB(16, 12, 16, 12),
       decoration: BoxDecoration(
-        color: AppColors.surface,
-        border: const Border(top: BorderSide(color: AppColors.border)),
+        color: Colors.white,
+        border: Border(top: BorderSide(color: AppColors.divider)),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.05),
+            offset: const Offset(0, -4),
+            blurRadius: 10,
+          ),
+        ],
       ),
       child: Row(
+        crossAxisAlignment: CrossAxisAlignment.end,
         children: [
           Expanded(
-            child: Container(
-              decoration: BoxDecoration(
-                color: AppColors.surface2,
-                borderRadius: BorderRadius.circular(24),
-              ),
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              child: TextField(
-                controller: _textController,
-                focusNode: _focusNode,
-                enabled: !isLoading,
-                textInputAction: TextInputAction.send,
-                onSubmitted: isLoading ? null : (_) => _onSend(),
-                style: AppTextStyles.body.copyWith(
+            child: TextField(
+              controller: _textController,
+              focusNode: _focusNode,
+              enabled: !isLoading,
+              textInputAction: TextInputAction.send,
+              onSubmitted: isLoading ? null : (_) => _onSend(),
+              decoration: InputDecoration(
+                hintText: 'Pergunte ao assistente...',
+                hintStyle: AppTextStyles.body.copyWith(
+                  color: AppColors.textCaption,
                   fontSize: 15,
-                  color: AppColors.ink,
                 ),
-                decoration: InputDecoration(
-                  hintText: 'Pergunte ao assistente...',
-                  hintStyle: AppTextStyles.body.copyWith(
-                    fontSize: 15,
-                    color: AppColors.ink4,
+                filled: true,
+                fillColor: AppColors.background,
+                contentPadding: const EdgeInsets.symmetric(
+                  horizontal: 20,
+                  vertical: 12,
+                ),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(28),
+                  borderSide: BorderSide(color: AppColors.divider),
+                ),
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(28),
+                  borderSide: BorderSide(color: AppColors.divider),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(28),
+                  borderSide: const BorderSide(
+                    color: AppColors.primary,
+                    width: 1.5,
                   ),
-                  border: InputBorder.none,
-                  contentPadding: const EdgeInsets.symmetric(vertical: 12),
                 ),
+              ),
+              maxLines: 5,
+              minLines: 1,
+              textCapitalization: TextCapitalization.sentences,
+              style: AppTextStyles.body.copyWith(
+                fontSize: 15,
+                color: AppColors.ink,
               ),
             ),
           ),
-          const SizedBox(width: 8),
-          IconButton(
-            tooltip: 'Enviar',
-            onPressed: isLoading ? null : _onSend,
-            iconSize: 20,
-            // Forces a 48x48 minimum tap target per Material/WCAG guidance,
-            // and brings ripple feedback that GestureDetector lacked.
-            constraints: const BoxConstraints(minWidth: 48, minHeight: 48),
-            style: IconButton.styleFrom(
-              backgroundColor: AppColors.ink,
-              disabledBackgroundColor: AppColors.ink4,
-              foregroundColor: Colors.white,
+          const SizedBox(width: 12),
+          Padding(
+            padding: const EdgeInsets.only(bottom: 2),
+            child: Material(
+              color: AppColors.primary,
               shape: const CircleBorder(),
-              padding: const EdgeInsets.all(12),
+              clipBehavior: Clip.antiAlias,
+              child: InkWell(
+                onTap: isLoading ? null : _onSend,
+                child: const Padding(
+                  padding: EdgeInsets.all(12),
+                  child: Icon(
+                    Icons.send_rounded,
+                    color: Colors.white,
+                    size: 24,
+                  ),
+                ),
+              ),
             ),
-            icon: const Icon(Icons.send_rounded),
           ),
         ],
       ),

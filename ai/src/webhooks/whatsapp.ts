@@ -5,7 +5,9 @@ import { graph } from "../graph/index.js";
 import { INITIAL_TRIAGE, INITIAL_CONFIG } from "../graph/state.js";
 import { getBotConfig } from "../tools/config-loader.js";
 import { containsPromptInjection, DEFAULT_GUARDRAIL_RESPONSE } from "../utils/guardrails.js";
-import { validateMessageType } from "../utils/message-validator.js";
+import { downloadWhatsAppMedia } from "../utils/media-downloader.js";
+import { transcribeAudio } from "../utils/transcriber.js";
+import { describeImage } from "../utils/image-describer.js";
 import { syncMessage } from "../graph/nodes/sync.js";
 import { getLeadByPhone, notifyLawyer } from "../utils/backend-client.js";
 import { FALLBACK_ERROR_MESSAGE, NON_TEXT_MESSAGE } from "../config/prompts.js";
@@ -33,28 +35,59 @@ whatsappRouter.post("/webhook", async (req, res) => {
   try {
     const message = req.body?.entry?.[0]?.changes?.[0]?.value?.messages?.[0];
     
-    if (message) {
-      console.log(`[Webhook] Mensagem recebida de ${message.from}: ${message.text?.body || "(sem texto)"}`);
-    }
+
 
     if (!message) return;
 
     const whatsappNumber: string = message.from;
     const type: string = message.type;
 
-    console.log(`[Webhook] Processando mensagem de ${whatsappNumber}, tipo: ${type}`);
+    // 1. Resolve o corpo de texto — áudio é transcrito, imagens descritas
+    let textBody: string;
+    let messageType: "TEXT" | "IMAGE" | "DOCUMENT" = "TEXT";
 
-    // 1. Barreira de tipo de mensagem — rejeita áudio, imagem, etc.
-    const validation = validateMessageType(type);
-    if (!validation.isValid) {
-      console.log(`[Webhook] Mensagem não-texto ignorada (${type}) de ${whatsappNumber}`);
-      await sendWhatsAppMessage(whatsappNumber, NON_TEXT_MESSAGE);
+    if (type === "audio" && message.audio?.id) {
+      console.log(`[Webhook] Áudio recebido de ${whatsappNumber}, transcrevendo...`);
+      try {
+        const audioBuffer = await downloadWhatsAppMedia(message.audio.id);
+        textBody = await transcribeAudio(audioBuffer, message.audio.mime_type ?? "audio/ogg");
+        messageType = "DOCUMENT";
+        console.log(`[Webhook] Transcrição concluída para ${whatsappNumber}: "${textBody.substring(0, 60)}..."`);
+      } catch (transcriptionErr) {
+        console.error("[Webhook] Falha ao transcrever áudio:", transcriptionErr);
+        await sendWhatsAppMessage(
+          whatsappNumber,
+          "Não consegui entender o áudio. 😔 Poderia digitar sua mensagem?"
+        );
+        return;
+      }
+    } else if (type === "image" && message.image?.id) {
+      console.log(`[Webhook] Imagem recebida de ${whatsappNumber}, descrevendo...`);
+      try {
+        const imageBuffer = await downloadWhatsAppMedia(message.image.id);
+        textBody = await describeImage(imageBuffer, message.image.mime_type ?? "image/jpeg", message.image.caption);
+        messageType = "IMAGE";
+        console.log(`[Webhook] Descrição de imagem concluída para ${whatsappNumber}: "${textBody.substring(0, 60)}..."`);
+      } catch (imageErr) {
+        console.error("[Webhook] Falha ao descrever imagem:", imageErr);
+        await sendWhatsAppMessage(
+          whatsappNumber,
+          "Não consegui processar a imagem. 😔 Poderia descrever sua dúvida em texto ou áudio?"
+        );
+        return;
+      }
+    } else if (type === "text" && message.text?.body) {
+      textBody = message.text.body;
+      messageType = "TEXT";
+    } else {
+      console.log(`[Webhook] Tipo de mensagem não suportado (${type}) de ${whatsappNumber}`);
+      await sendWhatsAppMessage(
+        whatsappNumber,
+        "Por enquanto processo mensagens de texto, áudio e imagem. Por favor, envie sua dúvida nestes formatos. 😊"
+      );
       return;
     }
 
-    if (!message.text?.body) return;
-
-    const textBody: string = message.text.body;
     const messageId: string = message.id;
 
     // 2. Sincroniza mensagem do cliente com o backend imediatamente
@@ -63,7 +96,7 @@ whatsappRouter.post("/webhook", async (req, res) => {
         whatsappNumber,
         content: textBody,
         senderRole: "CLIENT",
-        messageType: "TEXT",
+        messageType,
         whatsappMessageId: messageId,
       });
     } catch (syncErr) {
@@ -115,13 +148,10 @@ whatsappRouter.post("/webhook", async (req, res) => {
       handoffReason: null,
       config,
     };
-
-    console.log(`[Webhook] Invocando grafo para ${whatsappNumber}... (Handoff: ${finalNeedsHandoff})`);
     const result = await graph.invoke(
       hasExistingState ? { messages: [new HumanMessage(textBody)], needsHandoff: finalNeedsHandoff } : initialState,
       graphConfig
     );
-    console.log(`[Webhook] Grafo finalizado para ${whatsappNumber}.`);
 
     // 8. Envia resposta do bot ao cliente
     const botMessages = result.messages || [];
@@ -133,12 +163,7 @@ whatsappRouter.post("/webhook", async (req, res) => {
       
       if (isAI) {
         await sendWhatsAppMessage(whatsappNumber, String(lastMessage.content));
-        console.log(`[Webhook] Resposta enviada para ${whatsappNumber}: ${String(lastMessage.content).substring(0, 80)}...`);
-      } else {
-        console.log(`[Webhook] Última mensagem não é AI (${(lastMessage as any).type}), pulando envio.`);
       }
-    } else {
-      console.log(`[Webhook] Grafo não retornou mensagens para enviar.`);
     }
   } catch (err) {
     console.error("[Webhook] Erro CRÍTICO ao processar mensagem:", err);

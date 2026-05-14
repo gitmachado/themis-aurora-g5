@@ -51,6 +51,7 @@ class LawyerClientsNotifier extends AsyncNotifier<List<LawyerClient>> {
 
   @override
   Future<List<LawyerClient>> build() async {
+    ref.watch(webSocketClientProvider); // Cria dependência reativa
     _listenToEvents();
     ref.onDispose(() => _subscription?.cancel());
     return _fetch();
@@ -58,7 +59,7 @@ class LawyerClientsNotifier extends AsyncNotifier<List<LawyerClient>> {
 
   void _listenToEvents() {
     _subscription?.cancel();
-    _subscription = ref.watch(webSocketClientProvider).events.listen((event) {
+    _subscription = ref.read(webSocketClientProvider).events.listen((event) {
       // Refresh when a lead is updated (e.g. converted to client)
       if (event.type == 'lead:updated' || event.type == 'connected') {
         refresh();
@@ -71,8 +72,12 @@ class LawyerClientsNotifier extends AsyncNotifier<List<LawyerClient>> {
   }
 
   Future<void> refresh() async {
-    state = const AsyncLoading();
-    state = AsyncData(await _fetch());
+    try {
+      final clients = await _fetch();
+      state = AsyncValue.data(clients);
+    } catch (e, st) {
+      state = AsyncValue.error(e, st);
+    }
   }
 }
 
