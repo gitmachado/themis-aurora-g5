@@ -32,11 +32,13 @@ class _LawyerScheduleScreenState extends ConsumerState<LawyerScheduleScreen>
   void initState() {
     super.initState();
     // Refresh pending count every 30 seconds
-    unawaited(Future.delayed(const Duration(seconds: 30), () {
-      if (mounted) {
-        ref.refresh(pendingAppointmentsCountProvider);
-      }
-    }));
+    unawaited(
+      Future.delayed(const Duration(seconds: 30), () {
+        if (mounted) {
+          ref.refresh(pendingAppointmentsCountProvider);
+        }
+      }),
+    );
   }
 
   @override
