@@ -31,6 +31,10 @@ final createAppointmentUseCaseProvider = Provider<CreateAppointmentUseCase>((ref
   return CreateAppointmentUseCase(ref.watch(appointmentRepositoryProvider));
 });
 
+final updateAppointmentStatusUseCaseProvider = Provider<UpdateAppointmentStatusUseCase>((ref) {
+  return UpdateAppointmentStatusUseCase(ref.watch(appointmentRepositoryProvider));
+});
+
 // Selected date
 final selectedDateProvider = StateProvider<DateTime>((ref) {
   return DateTime.now();
@@ -65,11 +69,12 @@ class AppointmentsNotifier extends AsyncNotifier<List<Appointment>> {
   }
 
   Future<List<Appointment>> _fetch() async {
-    final startOfWeek = _getStartOfWeek(DateTime.now());
-    final endOfWeek = startOfWeek.add(const Duration(days: 7));
+    final now = DateTime.now();
+    // Busca dos últimos 2 meses até os próximos 12 meses
+    final start = DateTime(now.year, now.month - 2, 1);
+    final end = DateTime(now.year + 1, now.month + 6, 1);
 
-    final result =
-        await ref.read(getAppointmentsUseCaseProvider)(startOfWeek, endOfWeek);
+    final result = await ref.read(getAppointmentsUseCaseProvider)(start, end);
     return result.getOrThrow();
   }
 
@@ -81,21 +86,36 @@ class AppointmentsNotifier extends AsyncNotifier<List<Appointment>> {
       state = AsyncValue.error(e, st);
     }
   }
-
-  DateTime _getStartOfWeek(DateTime date) {
-    return date.subtract(Duration(days: date.weekday - 1));
-  }
 }
 
-// Filtered appointments by selected date
+// View mode
+final scheduleViewModeProvider = StateProvider<String>((ref) => 'today');
+
+// Filtered appointments by selected date and view mode
 final appointmentsByDateProvider = Provider<List<Appointment>>((ref) {
   final appointments = ref.watch(appointmentsProvider).valueOrNull ?? const [];
   final selectedDate = ref.watch(selectedDateProvider);
+  final mode = ref.watch(scheduleViewModeProvider);
 
   return appointments.where((appointment) {
-    return appointment.scheduledAt.year == selectedDate.year &&
-        appointment.scheduledAt.month == selectedDate.month &&
-        appointment.scheduledAt.day == selectedDate.day;
+    final appDate = appointment.scheduledAt;
+    if (mode == 'week') {
+      final startOfWeek = DateTime(
+        selectedDate.year,
+        selectedDate.month,
+        selectedDate.day,
+      ).subtract(Duration(days: selectedDate.weekday - 1));
+      final endOfWeek = startOfWeek.add(const Duration(days: 7));
+      return appDate.isAfter(startOfWeek.subtract(const Duration(milliseconds: 1))) &&
+          appDate.isBefore(endOfWeek);
+    } else if (mode == 'month') {
+      return appDate.year == selectedDate.year && appDate.month == selectedDate.month;
+    } else {
+      // 'today', 'tomorrow', 'custom_day'
+      return appDate.year == selectedDate.year &&
+          appDate.month == selectedDate.month &&
+          appDate.day == selectedDate.day;
+    }
   }).toList()
     ..sort((a, b) => a.scheduledAt.compareTo(b.scheduledAt));
 });
@@ -111,6 +131,18 @@ final class AppointmentActions {
 
   Future<void> create(Map<String, dynamic> data) async {
     final result = await _ref.read(createAppointmentUseCaseProvider).call(data);
+    result.getOrThrow();
+    _ref.invalidate(appointmentsProvider);
+  }
+
+  Future<void> complete(String id) async {
+    final result = await _ref.read(updateAppointmentStatusUseCaseProvider).call(id, 'COMPLETED');
+    result.getOrThrow();
+    _ref.invalidate(appointmentsProvider);
+  }
+
+  Future<void> cancel(String id) async {
+    final result = await _ref.read(updateAppointmentStatusUseCaseProvider).call(id, 'CANCELED');
     result.getOrThrow();
     _ref.invalidate(appointmentsProvider);
   }

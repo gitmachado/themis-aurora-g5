@@ -27,4 +27,15 @@ final class AppointmentRemoteDataSource {
     final json = await _apiClient.postJson('/appointments', data: data);
     return AppointmentModel.fromJson(json);
   }
+
+  Future<AppointmentModel> updateAppointmentStatus(
+    String id,
+    String status,
+  ) async {
+    final json = await _apiClient.patchJson(
+      '/appointments/$id',
+      data: {'status': status},
+    );
+    return AppointmentModel.fromJson(json);
+  }
 }

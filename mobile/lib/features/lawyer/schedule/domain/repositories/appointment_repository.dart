@@ -11,4 +11,9 @@ abstract interface class AppointmentRepository {
   Future<Either<Failure, Appointment>> create(
     Map<String, dynamic> data,
   );
+
+  Future<Either<Failure, Appointment>> updateStatus(
+    String id,
+    String status,
+  );
 }
