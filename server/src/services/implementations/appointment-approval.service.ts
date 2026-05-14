@@ -4,6 +4,7 @@ import { AppointmentRepository } from '../../repositories/implementations/appoin
 import { RescheduleSuggestionRepository, ReschedulesSuggestion } from '../../repositories/implementations/reschedule-suggestion.repository';
 import { AppointmentValidators } from './appointment-validators';
 import { AppointmentAuditService } from './appointment-audit.service';
+import { AppointmentWhatsAppNotifier } from './appointment-whatsapp-notifier';
 import type { Appointment } from '@models';
 import type { UpdateAppointmentDTO } from '@dtos';
 import { NotFoundError, ConflictError } from './errors';
@@ -11,6 +12,7 @@ import { eventBus } from '../communication/InternalEventBus';
 
 export class AppointmentApprovalService {
   private readonly auditService: AppointmentAuditService;
+  private readonly whatsappNotifier: AppointmentWhatsAppNotifier;
 
   constructor(
     private readonly appointmentRepository: AppointmentRepository,
@@ -19,6 +21,7 @@ export class AppointmentApprovalService {
     private readonly notificationService: INotificationService
   ) {
     this.auditService = new AppointmentAuditService(appointmentRepository);
+    this.whatsappNotifier = new AppointmentWhatsAppNotifier();
   }
 
   async getPendingApprovals(lawyerId: string): Promise<Appointment[]> {
@@ -41,18 +44,39 @@ export class AppointmentApprovalService {
 
     // Notify client about approval
     if (updated.clientId) {
+      const hadEdits = !!edits;
+      const editDetails = hadEdits ? ' O advogado fez alguns ajustes no horário e detalhes da reunião.' : '';
+
+      // Enviar notificação push
       await this.notificationService.send({
         userId: updated.clientId,
         title: 'Reunião confirmada ✅',
-        body: `Sua reunião foi confirmada para ${this.formatDate(updated.scheduledAt)}. O advogado revisou seu agendamento e confirmou o compromisso.`,
+        body: `Sua reunião foi confirmada para ${this.formatDate(updated.scheduledAt)}.${editDetails}`,
         type: 'APPOINTMENT_SCHEDULED',
         metadata: {
           appointmentId: updated.id,
           scheduledAt: updated.scheduledAt.toISOString(),
           title: updated.title,
+          clientWhatsapp: updated.clientWhatsappNumber,
+          hadEdits,
           whatsappTemplate: 'APPOINTMENT_APPROVED',
         },
       });
+
+      // Enviar mensagem via WhatsApp (apenas para agendamentos criados pela IA)
+      if (updated.createdByAI && updated.clientWhatsappNumber && updated.clientName) {
+        try {
+          await this.whatsappNotifier.notifyAppointmentApproved({
+            clientWhatsapp: updated.clientWhatsappNumber,
+            clientName: updated.clientName,
+            appointmentTitle: updated.title,
+            scheduledAt: updated.scheduledAt,
+            hadEdits,
+          });
+        } catch (err) {
+          console.error('[AppointmentApprovalService] Erro ao enviar WhatsApp:', err);
+        }
+      }
     }
 
     // Add timeline event if linked to process
@@ -93,6 +117,19 @@ export class AppointmentApprovalService {
         },
       });
       this.auditService.logNotificationSent(appointment.clientId, 'APPOINTMENT_CHANGED', 'APPOINTMENT_REJECTED');
+
+      // Enviar mensagem de rejeição via WhatsApp (apenas para agendamentos criados pela IA)
+      if (appointment.createdByAI && appointment.clientWhatsappNumber && appointment.clientName) {
+        try {
+          await this.whatsappNotifier.notifyAppointmentRejected({
+            clientWhatsapp: appointment.clientWhatsappNumber,
+            clientName: appointment.clientName,
+            appointmentTitle: appointment.title,
+          });
+        } catch (err) {
+          console.error('[AppointmentApprovalService] Erro ao enviar WhatsApp de rejeição:', err);
+        }
+      }
     }
 
     // Log audit

@@ -56,7 +56,8 @@ export type NotificationType =
   | 'HUMAN_SUPPORT'
   | 'DEADLINE_WARNING'
   | 'APPOINTMENT_SCHEDULED'
-  | 'APPOINTMENT_CHANGED';
+  | 'APPOINTMENT_CHANGED'
+  | 'NEW_APPOINTMENT_AI';
 
 /** Who sent the message in the chat */
 export type MessageSender = 'BOT' | 'CLIENT' | 'LAWYER';

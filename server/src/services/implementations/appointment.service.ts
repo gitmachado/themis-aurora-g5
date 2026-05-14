@@ -73,6 +73,26 @@ export class AppointmentService implements IAppointmentService {
     eventBus.emitAppointmentCreated(dto.clientId || lawyerId, appointment);
     if (status === 'PENDING_APPROVAL') {
       eventBus.emitAppointmentCreated(lawyerId, appointment);
+
+      // Notificar advogado sobre novo agendamento da IA
+      if (dto.createdByAI && dto.clientName) {
+        try {
+          await this.notificationService.send({
+            userId: lawyerId,
+            title: '📋 Nova Consulta da IA',
+            body: `${dto.clientName} solicita consulta sobre ${dto.title}. Horário proposto: ${this.formatDate(scheduledAtDate)}`,
+            type: 'NEW_APPOINTMENT_AI',
+            extraData: {
+              appointmentId: appointment.id,
+              clientName: dto.clientName,
+              clientWhatsapp: dto.clientWhatsappNumber || null,
+              scheduledAt: scheduledAtDate.toISOString(),
+            },
+          });
+        } catch (err) {
+          console.error('[AppointmentService] Erro ao enviar notificação ao advogado:', err);
+        }
+      }
     }
 
     return appointment;
