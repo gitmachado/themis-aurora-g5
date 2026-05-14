@@ -103,8 +103,10 @@ final appointmentsByDateProvider = Provider<List<Appointment>>((ref) {
 
   return appointments.where((appointment) {
     // Filter by history visibility
-    if (!showHistory && (appointment.isCompleted || appointment.isCanceled)) {
-      return false;
+    if (showHistory) {
+      if (!appointment.isCompleted && !appointment.isCanceled) return false;
+    } else {
+      if (appointment.isCompleted || appointment.isCanceled) return false;
     }
 
     final appDate = appointment.scheduledAt;

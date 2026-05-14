@@ -58,6 +58,7 @@ class _LawyerScheduleScreenState extends State<LawyerScheduleScreen>
     final appointmentsByDate = ref.watch(appointmentsByDateProvider);
     final selectedDate = ref.watch(selectedDateProvider);
     final currentMode = ref.watch(scheduleViewModeProvider);
+    final showHistory = ref.watch(showHistoryProvider);
     final now = DateTime.now();
     final tomorrow = now.add(const Duration(days: 1));
     const shortWeekdays = [
@@ -89,71 +90,54 @@ class _LawyerScheduleScreenState extends State<LawyerScheduleScreen>
         showBackButton: true,
       ),
       body: SafeArea(
-        child: Stack(
+        child: Column(
           children: [
-            if (appointmentsByDate.isEmpty && appointments.valueOrNull != null)
-              Center(
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 32),
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      const Icon(
-                        Icons.event_busy_rounded,
-                        size: 48,
-                        color: AppColors.ink4,
-                      ),
-                      const SizedBox(height: 16),
-                      Text(
-                        currentMode == 'week'
-                            ? 'Nenhum compromisso na semana selecionada'
-                            : currentMode == 'month'
-                                ? 'Nenhum compromisso no mês selecionado'
-                                : 'Nenhum compromisso em ${_formatDatePt(selectedDate)}',
-                        style: AppTextStyles.body.copyWith(
-                          color: AppColors.ink3,
-                          fontWeight: FontWeight.w600,
-                        ),
-                        textAlign: TextAlign.center,
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            Column(
-              children: [
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
               child: ThemisSegmentedControl(
-                labels: const ['Pendentes', 'Processados'],
+                labels: const ['Pendentes', 'Finalizados'],
                 selectedIndex: _tabController.index,
                 controller: _tabController,
                 onChanged: (index) => _onFilterChanged(index, ref),
               ),
             ),
             Padding(
-              padding: const EdgeInsets.only(top: 8),
-              child: ScheduleCalendarStrip(
-                selectedDate: selectedDate,
-                appointments: appointments.valueOrNull ?? const [],
-                currentMode: currentMode,
-                onDateSelected: (date) {
-                  ref.read(selectedDateProvider.notifier).state = date;
-                  final nowLocal = DateTime.now();
-                  if (date.year == nowLocal.year &&
-                      date.month == nowLocal.month &&
-                      date.day == nowLocal.day) {
-                    ref.read(scheduleViewModeProvider.notifier).state = 'today';
-                  } else if (date.year == nowLocal.year &&
-                      date.month == nowLocal.month &&
-                      date.day == nowLocal.day + 1) {
-                    ref.read(scheduleViewModeProvider.notifier).state = 'tomorrow';
-                  } else {
-                    ref.read(scheduleViewModeProvider.notifier).state = 'custom_day';
-                  }
-                },
+              padding: const EdgeInsets.symmetric(horizontal: 24),
+              child: Align(
+                alignment: Alignment.centerLeft,
+                child: Padding(
+                  padding: const EdgeInsets.only(left: 4),
+                  child: Text(
+                    'SELECIONE O DIA',
+                    style: AppTextStyles.tiny.copyWith(
+                      color: AppColors.ink3,
+                      fontWeight: FontWeight.bold,
+                      letterSpacing: 0.5,
+                    ),
+                  ),
+                ),
               ),
+            ),
+            ScheduleCalendarStrip(
+              selectedDate: selectedDate,
+              appointments: appointments.valueOrNull ?? const [],
+              currentMode: currentMode,
+              showHistory: showHistory,
+              onDateSelected: (date) {
+                ref.read(selectedDateProvider.notifier).state = date;
+                final nowLocal = DateTime.now();
+                if (date.year == nowLocal.year &&
+                    date.month == nowLocal.month &&
+                    date.day == nowLocal.day) {
+                  ref.read(scheduleViewModeProvider.notifier).state = 'today';
+                } else if (date.year == nowLocal.year &&
+                    date.month == nowLocal.month &&
+                    date.day == nowLocal.day + 1) {
+                  ref.read(scheduleViewModeProvider.notifier).state = 'tomorrow';
+                } else {
+                  ref.read(scheduleViewModeProvider.notifier).state = 'custom_day';
+                }
+              },
             ),
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
@@ -216,7 +200,7 @@ class _LawyerScheduleScreenState extends State<LawyerScheduleScreen>
                                 const SizedBox(width: 8),
                                 Expanded(
                                   child: Text(
-                                    'Hoje (${now.day}/${now.month}) (${shortWeekdays[now.weekday - 1]})',
+                                    'Hoje - ${now.day.toString().padLeft(2, '0')}/${now.month.toString().padLeft(2, '0')}/${now.year} (${shortWeekdays[now.weekday - 1]})',
                                     style: AppTextStyles.body.copyWith(fontWeight: FontWeight.w600),
                                     maxLines: 1,
                                     overflow: TextOverflow.ellipsis,
@@ -233,7 +217,7 @@ class _LawyerScheduleScreenState extends State<LawyerScheduleScreen>
                                 const SizedBox(width: 8),
                                 Expanded(
                                   child: Text(
-                                    'Amanhã (${tomorrow.day}/${tomorrow.month}) (${shortWeekdays[tomorrow.weekday - 1]})',
+                                    'Amanhã - ${tomorrow.day.toString().padLeft(2, '0')}/${tomorrow.month.toString().padLeft(2, '0')}/${tomorrow.year} (${shortWeekdays[tomorrow.weekday - 1]})',
                                     style: AppTextStyles.body.copyWith(fontWeight: FontWeight.w600),
                                     maxLines: 1,
                                     overflow: TextOverflow.ellipsis,
@@ -285,7 +269,7 @@ class _LawyerScheduleScreenState extends State<LawyerScheduleScreen>
                                   const SizedBox(width: 8),
                                   Expanded(
                                     child: Text(
-                                      'Dia ${selectedDate.day}/${selectedDate.month}/${selectedDate.year} ($customDaySuffix)',
+                                      '${selectedDate.day.toString().padLeft(2, '0')}/${selectedDate.month.toString().padLeft(2, '0')}/${selectedDate.year} (${shortWeekdays[selectedDate.weekday - 1]})',
                                       style: AppTextStyles.body.copyWith(
                                         fontWeight: FontWeight.bold,
                                         color: AppColors.primary,
@@ -312,8 +296,40 @@ class _LawyerScheduleScreenState extends State<LawyerScheduleScreen>
                 child: appointments.when(
                   data: (items) {
                     if (appointmentsByDate.isEmpty) {
-                      return ListView(
+                      return CustomScrollView(
                         physics: const AlwaysScrollableScrollPhysics(),
+                        slivers: [
+                          SliverFillRemaining(
+                            hasScrollBody: false,
+                            child: Padding(
+                              padding: const EdgeInsets.symmetric(horizontal: 32),
+                              child: Column(
+                                children: [
+                                  const Spacer(flex: 4),
+                                  const Icon(
+                                    Icons.event_busy_rounded,
+                                    size: 48,
+                                    color: AppColors.ink4,
+                                  ),
+                                  const SizedBox(height: 16),
+                                  Text(
+                                    currentMode == 'week'
+                                        ? 'Nenhum compromisso na semana selecionada'
+                                        : currentMode == 'month'
+                                            ? 'Nenhum compromisso no mês selecionado'
+                                            : 'Nenhum compromisso em ${_formatDatePt(selectedDate)}',
+                                    style: AppTextStyles.body.copyWith(
+                                      color: AppColors.ink3,
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                                    textAlign: TextAlign.center,
+                                  ),
+                                  const Spacer(flex: 6),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ],
                       );
                     }
 
@@ -419,8 +435,6 @@ class _LawyerScheduleScreenState extends State<LawyerScheduleScreen>
             ),
           ],
         ),
-          ],
-        ),
       ),
       floatingActionButton: FloatingActionButton.extended(
         backgroundColor: AppColors.yellow,
@@ -503,14 +517,27 @@ class _CreateAppointmentSheetState
       padding: EdgeInsets.only(
         left: 24,
         right: 24,
-        top: 24,
-        bottom: MediaQuery.of(context).viewInsets.bottom + 24,
+        top: 12,
+        bottom: MediaQuery.of(context).viewInsets.bottom +
+            MediaQuery.of(context).padding.bottom +
+            24,
       ),
       child: SingleChildScrollView(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           mainAxisSize: MainAxisSize.min,
           children: [
+            Center(
+              child: Container(
+                width: 40,
+                height: 4,
+                decoration: BoxDecoration(
+                  color: AppColors.divider,
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              ),
+            ),
+            const SizedBox(height: 20),
             Text(
               'Novo Compromisso',
               style: AppTextStyles.h2,

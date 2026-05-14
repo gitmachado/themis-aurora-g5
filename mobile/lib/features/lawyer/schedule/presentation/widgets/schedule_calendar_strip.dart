@@ -8,6 +8,7 @@ class ScheduleCalendarStrip extends StatefulWidget {
   final List<Appointment> appointments;
   final ValueChanged<DateTime> onDateSelected;
   final String currentMode;
+  final bool showHistory;
 
   const ScheduleCalendarStrip({
     super.key,
@@ -15,6 +16,7 @@ class ScheduleCalendarStrip extends StatefulWidget {
     required this.appointments,
     required this.onDateSelected,
     required this.currentMode,
+    required this.showHistory,
   });
 
   @override
@@ -73,11 +75,18 @@ class _ScheduleCalendarStripState extends State<ScheduleCalendarStrip> {
   }
 
   bool _hasAppointmentOnDate(DateTime date) {
-    return widget.appointments.any((app) =>
-        app.status == 'SCHEDULED' &&
-        app.scheduledAt.year == date.year &&
-        app.scheduledAt.month == date.month &&
-        app.scheduledAt.day == date.day);
+    return widget.appointments.any((app) {
+      final isSameDate = app.scheduledAt.year == date.year &&
+          app.scheduledAt.month == date.month &&
+          app.scheduledAt.day == date.day;
+      if (!isSameDate) return false;
+
+      if (widget.showHistory) {
+        return app.status == 'COMPLETED' || app.status == 'CANCELED';
+      } else {
+        return app.status == 'SCHEDULED';
+      }
+    });
   }
 
   @override
@@ -128,7 +137,16 @@ class _ScheduleCalendarStripState extends State<ScheduleCalendarStrip> {
                           style: AppTextStyles.tiny.copyWith(
                             color: AppColors.ink,
                             fontWeight: FontWeight.bold,
-                            fontSize: 10,
+                            fontSize: 11,
+                          ),
+                          textAlign: TextAlign.center,
+                        ),
+                        Text(
+                          days[i].year.toString(),
+                          style: AppTextStyles.tiny.copyWith(
+                            color: AppColors.ink,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 9,
                           ),
                           textAlign: TextAlign.center,
                         ),
