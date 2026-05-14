@@ -85,20 +85,32 @@ O WhatsApp do cliente já está registrado — NÃO é necessário informá-lo.`
 );
 
 async function handleCheckOpenAppointments(whatsappNumber: string): Promise<string> {
+  console.log(`[Tool: Appointment] CHECK_OPEN_APPOINTMENTS iniciado para ${whatsappNumber}`);
+
   if (!whatsappNumber) {
+    console.warn(`[Tool: Appointment] WhatsAppNumber não fornecido`);
     return "ERRO: Número do WhatsApp não encontrado. Não é possível verificar reuniões abertas.";
   }
 
   try {
+    console.log(`[Tool: Appointment] Chamando getOpenAppointmentsByPhone(${whatsappNumber})...`);
     const result = await getOpenAppointmentsByPhone(whatsappNumber);
+    console.log(`[Tool: Appointment] Resultado recebido:`, result);
+
     if (result.hasOpenAppointments) {
       const statusList = result.appointments
         .map((a: any) => `• ${a.title} (${a.status}) — ${a.scheduledAt ? new Date(a.scheduledAt).toLocaleDateString('pt-BR') : 'sem data'}`)
         .join('\n');
-      return `REUNIAO_ABERTA: Este cliente já possui ${result.count} reunião(ões) pendente(s):\n${statusList}\n\nNão é permitido agendar nova reunião. Faça HANDOFF para atendimento humano.`;
+      const response = `REUNIAO_ABERTA: Este cliente já possui ${result.count} reunião(ões) pendente(s):\n${statusList}\n\nNão é permitido agendar nova reunião. Faça HANDOFF para atendimento humano.`;
+      console.log(`[Tool: Appointment] Retornando BLOQUEIO (reunião aberta)`);
+      return response;
     }
-    return `NENHUMA_REUNIAO_ABERTA: Este cliente não tem reuniões abertas. Pode prosseguir com o agendamento.`;
+
+    const response = `NENHUMA_REUNIAO_ABERTA: Este cliente não tem reuniões abertas. Pode prosseguir com o agendamento.`;
+    console.log(`[Tool: Appointment] Retornando SUCESSO (sem reunião aberta)`);
+    return response;
   } catch (err: any) {
+    console.error(`[Tool: Appointment] ERRO ao verificar reuniões abertas:`, err);
     throw new Error(`Falha ao verificar reuniões abertas: ${err.message}`);
   }
 }

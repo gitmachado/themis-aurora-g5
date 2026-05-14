@@ -48,24 +48,30 @@ export async function routerNode(
 
   // 3. PRÉ-CHECK para Bloqueio de Reuniões Abertas (se cliente quer marcar)
   let openAppointmentsContext = "";
-  if (triage.name && whatsappNumber) {
-    const bookingKeywords = ["marcar", "agendar", "reunião", "consulta com advogado", "nova reunião", "outra reunião"];
-    const wantsToBook = bookingKeywords.some(k => lastMessage.toLowerCase().includes(k));
-    if (wantsToBook) {
-      try {
-        const open = await getOpenAppointmentsByPhone(whatsappNumber);
-        if (open.hasOpenAppointments) {
-          const details = open.appointments
-            .map((a: any) => `${a.title} (${a.status})`)
-            .join("; ");
-          openAppointmentsContext = `\n\n⚠️ ALERTA SISTEMA: Cliente "${triage.name}" tem ${open.count} reunião(ões) ABERTA(S): ${details}. BLOQUEIE novo agendamento imediatamente e suira HANDOFF.`;
-          console.log(`[Router Node] PRÉ-CHECK: ${triage.name} tem reunião aberta — bloqueando.`);
-        } else {
-          openAppointmentsContext = `\n\n✅ SISTEMA: Cliente não tem reuniões abertas — pode agendar.`;
-        }
-      } catch (err) {
-        console.warn("[Router Node] Erro no pré-check de reuniões abertas:", err);
+  const bookingKeywords = ["marcar", "agendar", "reunião", "consulta com advogado", "nova reunião", "outra reunião", "sim", "claro", "pode", "blz", "ok", "tudo bem"];
+  const wantsToBook = bookingKeywords.some(k => lastMessage.toLowerCase().includes(k));
+
+  console.log(`[Router Node] Message received: "${lastMessage}" | wantsToBook: ${wantsToBook}`);
+
+  if (triage.name && whatsappNumber && wantsToBook) {
+    console.log(`[Router Node] 🔍 PRÉ-CHECK: Detectado booking intent para ${triage.name}`);
+    try {
+      const open = await getOpenAppointmentsByPhone(whatsappNumber);
+      console.log(`[Router Node] ✅ getOpenAppointmentsByPhone retornou:`, open);
+
+      if (open.hasOpenAppointments) {
+        const details = open.appointments
+          .map((a: any) => `${a.title} (${a.status})`)
+          .join("; ");
+        openAppointmentsContext = `\n\n⚠️ ALERTA SISTEMA: Cliente "${triage.name}" tem ${open.count} reunião(ões) ABERTA(S): ${details}. BLOQUEIE novo agendamento imediatamente e ofereça HANDOFF.`;
+        console.log(`[Router Node] ❌ Cliente tem reunião aberta`);
+      } else {
+        openAppointmentsContext = `\n\n✅ SISTEMA: Cliente "${triage.name}" não tem reuniões abertas — PODE AGENDAR.`;
+        console.log(`[Router Node] ✅ Cliente sem reuniões abertas`);
       }
+    } catch (err) {
+      console.error("[Router Node] ❌ Erro ao verificar reuniões:", err);
+      openAppointmentsContext = `\n\n⚠️ ERRO: Não consegui verificar reuniões. Continuando...`;
     }
   }
 
