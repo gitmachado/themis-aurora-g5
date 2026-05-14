@@ -1,10 +1,12 @@
 import { Router } from 'express';
 import { AppointmentController } from '../../controllers/implementations/appointment.controller';
 import { AppointmentApprovalController } from '../../controllers/implementations/appointment-approval.controller';
+import { RescheduleController } from '../../controllers/implementations/reschedule.controller';
 import { AppointmentService } from '../../services/implementations/appointment.service';
 import { AppointmentApprovalService } from '../../services/implementations/appointment-approval.service';
 import { AppointmentRepository } from '../../repositories/implementations/appointment.repository';
 import { RescheduleSuggestionRepository } from '../../repositories/implementations/reschedule-suggestion.repository';
+import { RescheduleProcessorService } from '../../services/implementations/reschedule-processor-service';
 import { TimelineService } from '../../services/implementations/timeline.service';
 import { TimelineEventRepository } from '../../repositories/implementations/timeline-event.repository';
 import { NotificationService } from '../../services/implementations/notification.service';
@@ -54,6 +56,8 @@ const appointmentApprovalService = new AppointmentApprovalService(
 );
 const controller = new AppointmentController(appointmentService);
 const approvalController = new AppointmentApprovalController(appointmentApprovalService);
+const rescheduleService = new RescheduleProcessorService();
+const rescheduleController = new RescheduleController(rescheduleService);
 
 /**
  * @openapi

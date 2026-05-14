@@ -27,6 +27,8 @@ export class AppointmentService implements IAppointmentService {
       throw new ConflictError('Horário indisponível: conflito com outro compromisso');
     }
 
+    const status = dto.createdByAI ? 'PENDING_APPROVAL' : (dto.status || 'SCHEDULED');
+
     const appointment = await this.appointmentRepository.create({
       lawyerId,
       clientId: dto.clientId || null,
@@ -36,8 +38,16 @@ export class AppointmentService implements IAppointmentService {
       type: dto.type,
       scheduledAt: scheduledAtDate,
       durationMinutes,
-      status: 'SCHEDULED',
+      status,
       reminded: false,
+      createdByAI: dto.createdByAI,
+      aiCreatedAt: dto.createdByAI ? new Date() : undefined,
+      aiOriginalData: dto.createdByAI ? {
+        title: dto.title,
+        description: dto.description,
+        scheduledAt: scheduledAtDate,
+        durationMinutes,
+      } : undefined,
     });
 
     if (dto.processId) {

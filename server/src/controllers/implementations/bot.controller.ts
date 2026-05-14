@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction, RequestHandler } from 'express';
-import { IUserService } from '@services';
+import { IUserService, IAppointmentService } from '@services';
 import { ILegalProcessService } from '@services';
 import { ITimelineService } from '../../services/interfaces/timeline.service';
 import { IConfigurationService } from '../../services/interfaces/configuration.service';
@@ -20,6 +20,7 @@ export class BotController {
     private readonly notificationService: INotificationService,
     private readonly leadRepository: ILeadRepository,
     private readonly timelineService: ITimelineService,
+    private readonly appointmentService: IAppointmentService,
   ) {}
 
   /**

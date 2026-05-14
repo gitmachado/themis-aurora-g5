@@ -8,6 +8,9 @@ export interface CreateAppointmentDTO {
   type: AppointmentType;
   scheduledAt: Date;
   durationMinutes?: number;
+  status?: AppointmentStatus;
+  createdByAI?: boolean;
+  aiOriginalData?: any;
 }
 
 export interface UpdateAppointmentDTO {

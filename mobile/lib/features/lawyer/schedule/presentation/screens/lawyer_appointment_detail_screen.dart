@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'dart:async';
 import '../../../../../../app/routes/app_router.dart';
 import '../../../../../../shared/constants/app_colors.dart';
 import '../../../../../../shared/constants/app_text_styles.dart';
@@ -27,6 +28,9 @@ class LawyerAppointmentDetailScreen extends ConsumerStatefulWidget {
 class _LawyerAppointmentDetailScreenState
     extends ConsumerState<LawyerAppointmentDetailScreen> {
   bool _isLoading = false;
+  List<dynamic> _rescheduleSuggestions = [];
+  bool _waitingForSuggestions = false;
+  Timer? _suggestionPoller;
 
   Future<void> _handleComplete() async {
     setState(() => _isLoading = true);
@@ -330,63 +334,225 @@ class _LawyerAppointmentDetailScreenState
 
   Widget _buildRescheduleSheet(Appointment appointment) {
     final instructionController = TextEditingController();
+    bool isSubmitting = false;
 
-    return Container(
-      padding: const EdgeInsets.all(24),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            'Reagendar com a IA',
-            style: AppTextStyles.h2.copyWith(fontSize: 18),
+    return StatefulBuilder(
+      builder: (context, setSheetState) => SingleChildScrollView(
+        child: Container(
+          padding: EdgeInsets.only(
+            left: 24,
+            right: 24,
+            top: 24,
+            bottom: MediaQuery.of(context).viewInsets.bottom + 16,
           ),
-          const SizedBox(height: 16),
-          Text(
-            'Descreva suas preferências para reagendamento:',
-            style: AppTextStyles.body,
-          ),
-          const SizedBox(height: 12),
-          TextField(
-            controller: instructionController,
-            minLines: 3,
-            maxLines: 3,
-            decoration: InputDecoration(
-              hintText: 'Ex: Não quero segunda, veja a partir de terça',
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(8),
-              ),
-            ),
-          ),
-          const SizedBox(height: 16),
-          Row(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Expanded(
-                child: OutlinedButton(
-                  onPressed: () => Navigator.pop(context),
-                  child: const Text('Cancelar'),
+              if (!_waitingForSuggestions) ...[
+                Text(
+                  'Reagendar com a IA',
+                  style: AppTextStyles.h2.copyWith(fontSize: 18),
                 ),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: PrimaryButton(
-                  label: 'Enviar',
-                  onPressed: () {
-                    // TODO: Send reschedule request
-                    Navigator.pop(context);
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                        content: Text('Agendando nova sugestão da IA...'),
+                const SizedBox(height: 16),
+                Text(
+                  'Descreva suas preferências para reagendamento:',
+                  style: AppTextStyles.body,
+                ),
+                const SizedBox(height: 12),
+                TextField(
+                  controller: instructionController,
+                  minLines: 3,
+                  maxLines: 3,
+                  enabled: !isSubmitting,
+                  decoration: InputDecoration(
+                    hintText: 'Ex: Não quero segunda, veja a partir de terça',
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 16),
+                Row(
+                  children: [
+                    Expanded(
+                      child: OutlinedButton(
+                        onPressed: isSubmitting ? null : () => Navigator.pop(context),
+                        child: const Text('Cancelar'),
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: PrimaryButton(
+                        label: isSubmitting ? 'Enviando...' : 'Enviar',
+                        onPressed: isSubmitting
+                            ? null
+                            : () async {
+                                if (instructionController.text.isEmpty) {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    const SnackBar(
+                                      content: Text('Por favor, descreva sua preferência'),
+                                    ),
+                                  );
+                                  return;
+                                }
+
+                                setSheetState(() => isSubmitting = true);
+
+                                try {
+                                  // TODO: Call API endpoint
+                                  // await ref.read(appointmentActionsProvider).requestReschedule(
+                                  //   appointment.id,
+                                  //   instructionController.text,
+                                  // );
+
+                                  setSheetState(() {
+                                    _waitingForSuggestions = true;
+                                    isSubmitting = false;
+                                  });
+
+                                  // Start polling for suggestions
+                                  _startSuggestionPolling(appointment.id);
+
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    const SnackBar(
+                                      content: Text('Solicitação enviada! Aguardando sugestões da IA...'),
+                                    ),
+                                  );
+                                } catch (e) {
+                                  setSheetState(() => isSubmitting = false);
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(content: Text('Erro: $e')),
+                                  );
+                                }
+                              },
+                      ),
+                    ),
+                  ],
+                ),
+              ] else ...[
+                const Center(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      CircularProgressIndicator(),
+                      SizedBox(height: 16),
+                      Text('Aguardando sugestões da IA...'),
+                      SizedBox(height: 16),
+                      Text(
+                        'Isso geralmente leva alguns segundos',
+                        style: TextStyle(fontSize: 12, color: Colors.grey),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 16),
+                if (_rescheduleSuggestions.isNotEmpty)
+                  ..._rescheduleSuggestions.map((suggestion) {
+                    return Card(
+                      margin: const EdgeInsets.only(bottom: 12),
+                      child: Padding(
+                        padding: const EdgeInsets.all(12),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              suggestion['suggestedTitle'] ?? 'Sugestão',
+                              style: AppTextStyles.body.copyWith(fontWeight: FontWeight.bold),
+                            ),
+                            const SizedBox(height: 8),
+                            Text(
+                              _formatDateTime(suggestion['suggestedDatetime'] as DateTime),
+                              style: AppTextStyles.caption,
+                            ),
+                            if (suggestion['suggestedDescription'] != null) ...[
+                              const SizedBox(height: 8),
+                              Text(
+                                suggestion['suggestedDescription'] as String,
+                                style: AppTextStyles.caption,
+                              ),
+                            ],
+                            const SizedBox(height: 12),
+                            Row(
+                              children: [
+                                Expanded(
+                                  child: OutlinedButton(
+                                    onPressed: () {
+                                      Navigator.pop(context);
+                                      _stopSuggestionPolling();
+                                    },
+                                    child: const Text('Rejeitar'),
+                                  ),
+                                ),
+                                const SizedBox(width: 12),
+                                Expanded(
+                                  child: PrimaryButton(
+                                    label: 'Aceitar',
+                                    onPressed: () {
+                                      Navigator.pop(context);
+                                      _stopSuggestionPolling();
+                                      ScaffoldMessenger.of(context).showSnackBar(
+                                        const SnackBar(
+                                          content: Text('Sugestão aceita!'),
+                                        ),
+                                      );
+                                    },
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
                       ),
                     );
-                  },
-                ),
-              ),
+                  }).toList(),
+              ],
             ],
           ),
-        ],
+        ),
       ),
     );
+  }
+
+  void _startSuggestionPolling(String appointmentId) {
+    _suggestionPoller = Timer.periodic(const Duration(seconds: 5), (timer) async {
+      try {
+        // TODO: Fetch suggestions from API
+        // final suggestions = await ref.read(appointmentActionsProvider)
+        //     .getRescheduleSuggestions(appointmentId);
+
+        if (mounted && _rescheduleSuggestions.isNotEmpty) {
+          setState(() {
+            _waitingForSuggestions = false;
+          });
+          timer.cancel();
+        }
+      } catch (e) {
+        print('Error polling suggestions: $e');
+      }
+    });
+  }
+
+  void _stopSuggestionPolling() {
+    _suggestionPoller?.cancel();
+    setState(() {
+      _waitingForSuggestions = false;
+      _rescheduleSuggestions = [];
+    });
+  }
+
+  @override
+  void dispose() {
+    _suggestionPoller?.cancel();
+    super.dispose();
+  }
+
+  String _formatDateTime(DateTime dateTime) {
+    final day = dateTime.day.toString().padLeft(2, '0');
+    final month = dateTime.month.toString().padLeft(2, '0');
+    final hour = dateTime.hour.toString().padLeft(2, '0');
+    final minute = dateTime.minute.toString().padLeft(2, '0');
+    return '$day/$month às $hour:$minute';
   }
 
   @override

@@ -25,11 +25,36 @@ class _LawyerScheduleScreenState extends State<LawyerScheduleScreen>
     with SingleTickerProviderStateMixin {
   late final TabController _tabController =
       TabController(length: 2, vsync: this);
+  int _pendingCount = 0;
+  bool _loadingBadge = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadPendingCount();
+    // Refresh badge every 30 seconds
+    Future.delayed(const Duration(seconds: 30), _loadPendingCount);
+  }
 
   @override
   void dispose() {
     _tabController.dispose();
     super.dispose();
+  }
+
+  Future<void> _loadPendingCount() async {
+    try {
+      // TODO: Fetch from API endpoint GET /appointments/pending
+      // For now, this is a placeholder
+      setState(() {
+        _loadingBadge = false;
+      });
+    } catch (e) {
+      print('Error loading pending count: $e');
+      setState(() {
+        _loadingBadge = false;
+      });
+    }
   }
 
   void _onFilterChanged(int index, WidgetRef ref) {
@@ -108,8 +133,8 @@ class _LawyerScheduleScreenState extends State<LawyerScheduleScreen>
                   padding: EdgeInsets.zero,
                 ),
               ),
-              // Exibe o badge apenas se houver agendamentos pendentes (> 0)
-              if (0 > 0)
+              // Badge mostra apenas se há agendamentos pendentes (> 0)
+              if (_pendingCount > 0)
                 Positioned(
                   right: 0,
                   top: 0,
@@ -120,9 +145,9 @@ class _LawyerScheduleScreenState extends State<LawyerScheduleScreen>
                       shape: BoxShape.circle,
                     ),
                     constraints: const BoxConstraints(minWidth: 14, minHeight: 14),
-                    child: const Text(
-                      '0',
-                      style: TextStyle(
+                    child: Text(
+                      _pendingCount > 99 ? '99+' : _pendingCount.toString(),
+                      style: const TextStyle(
                         color: AppColors.ink,
                         fontSize: 8,
                         fontWeight: FontWeight.bold,
