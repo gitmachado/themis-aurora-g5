@@ -25,7 +25,7 @@ export type LegalProcessStatus =
   | 'ARCHIVED';
 
 /** System access roles */
-export type UserRole = 'LAWYER' | 'CLIENT' | 'LAWYER_ADMIN';
+export type UserRole = 'LAWYER' | 'CLIENT' | 'LAWYER_ADMIN' | 'SYSTEM';
 
 /** Permissions configurable by the head lawyer for each team member */
 export type TeamPermissionKey =

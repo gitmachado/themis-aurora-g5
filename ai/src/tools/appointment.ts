@@ -2,6 +2,8 @@ import { tool } from "@langchain/core/tools";
 import { z } from "zod";
 import { getAvailableSlots, scheduleAppointment, getUserByPhone } from "../utils/backend-client.js";
 
+const DEFAULT_LAWYER_ID = process.env.DEFAULT_LAWYER_ID || "11111111-1111-1111-1111-111111111111";
+
 /**
  * Tool para consultar disponibilidade do advogado e agendar compromissos.
  * Permite que o bot WhatsApp:
@@ -10,12 +12,14 @@ import { getAvailableSlots, scheduleAppointment, getUserByPhone } from "../utils
  */
 export const appointmentTool = tool(
   async ({ action, lawyerId, clientPhone, date, title, description, time, durationMinutes }) => {
+    // Usar advogado padrão se não for fornecido um ID
+    const effectiveLawyerId = lawyerId || DEFAULT_LAWYER_ID;
     try {
       if (action === "check_availability") {
-        return await handleCheckAvailability(lawyerId, date);
+        return await handleCheckAvailability(effectiveLawyerId, date);
       } else if (action === "schedule") {
         return await handleScheduleAppointment(
-          lawyerId,
+          effectiveLawyerId,
           clientPhone,
           date,
           time,

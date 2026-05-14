@@ -1,16 +1,39 @@
 import axios, { AxiosInstance } from "axios";
+import jwt from "jsonwebtoken";
 
 const BACKEND_API_URL = process.env.BACKEND_API_URL || "http://localhost:3000";
-const BOT_API_KEY = process.env.BOT_API_KEY || "";
+const JWT_SECRET = process.env.JWT_SECRET || "development_secret_key_change_me";
+
+/**
+ * Gera um JWT válido para autenticar como SYSTEM (IA)
+ * Usado para todas as chamadas que requerem autenticação
+ */
+function generateSystemToken(): string {
+  return jwt.sign(
+    {
+      id: "ai-system",
+      email: "ai@themis.local",
+      role: "SYSTEM",
+    },
+    JWT_SECRET,
+    { expiresIn: "24h" }
+  );
+}
 
 /**
  * Cliente HTTP centralizado para comunicação AI → Backend.
- * Todas as chamadas ao backend passam por aqui com API Key.
+ * Todas as chamadas ao backend passam por aqui com JWT válido.
  */
 const client: AxiosInstance = axios.create({
   baseURL: `${BACKEND_API_URL}/api/v1`,
-  headers: { "x-api-key": BOT_API_KEY },
   timeout: 10000,
+});
+
+// Interceptor para adicionar JWT em todas as requisições
+client.interceptors.request.use((config) => {
+  const token = generateSystemToken();
+  config.headers.Authorization = `Bearer ${token}`;
+  return config;
 });
 
 // ── Usuários ──
