@@ -5,6 +5,7 @@ import app from './app';
 import { validateRuntimeEnv } from './config/runtime';
 import { socketService } from './services/communication/SocketService';
 import { DeadlineRemindersJob } from './jobs/deadline-reminders.job';
+import { initializeScheduler } from './jobs/scheduler';
 import { AppointmentService } from './services/implementations/appointment.service';
 import { AppointmentRepository } from './repositories/implementations/appointment.repository';
 import { TimelineService } from './services/implementations/timeline.service';
@@ -48,6 +49,9 @@ const appointmentService = new AppointmentService(
 
 const deadlineRemindersJob = new DeadlineRemindersJob(appointmentService);
 deadlineRemindersJob.start();
+
+// Initialize reschedule suggestions scheduler
+initializeScheduler();
 
 server.listen(PORT, HOST, () => {
   console.log(`🚀 Server ready at http://localhost:${PORT}`);

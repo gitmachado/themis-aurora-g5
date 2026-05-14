@@ -2,17 +2,23 @@ import { ITimelineService } from '../interfaces/timeline.service';
 import { INotificationService } from '../interfaces/notification.service';
 import { AppointmentRepository } from '../../repositories/implementations/appointment.repository';
 import { RescheduleSuggestionRepository, ReschedulesSuggestion } from '../../repositories/implementations/reschedule-suggestion.repository';
+import { AppointmentValidators } from './appointment-validators';
+import { AppointmentAuditService } from './appointment-audit.service';
 import type { Appointment } from '@models';
 import type { UpdateAppointmentDTO } from '@dtos';
 import { NotFoundError, ConflictError } from './errors';
 
 export class AppointmentApprovalService {
+  private readonly auditService: AppointmentAuditService;
+
   constructor(
     private readonly appointmentRepository: AppointmentRepository,
     private readonly rescheduleSuggestionRepository: RescheduleSuggestionRepository,
     private readonly timelineService: ITimelineService,
     private readonly notificationService: INotificationService
-  ) {}
+  ) {
+    this.auditService = new AppointmentAuditService(appointmentRepository);
+  }
 
   async getPendingApprovals(lawyerId: string): Promise<Appointment[]> {
     return this.appointmentRepository.findPendingApprovals(lawyerId);
@@ -24,17 +30,7 @@ export class AppointmentApprovalService {
     edits?: UpdateAppointmentDTO
   ): Promise<Appointment> {
     const appointment = await this.appointmentRepository.findById(appointmentId);
-    if (!appointment) {
-      throw new NotFoundError('Compromisso não encontrado');
-    }
-
-    if (appointment.lawyerId !== lawyerId) {
-      throw new ConflictError('Você não pode aprovar um compromisso que não é seu');
-    }
-
-    if (appointment.status !== 'PENDING_APPROVAL') {
-      throw new ConflictError('Este compromisso não está pendente de aprovação');
-    }
+    AppointmentValidators.validateApprovalPermission(appointment, lawyerId);
 
     const updated = await this.appointmentRepository.approveAppointment(
       appointmentId,
@@ -46,9 +42,15 @@ export class AppointmentApprovalService {
     if (updated.clientId) {
       await this.notificationService.send({
         userId: updated.clientId,
-        title: 'Reunião confirmada',
-        body: `Sua reunião foi confirmada para ${this.formatDate(updated.scheduledAt)}`,
+        title: 'Reunião confirmada ✅',
+        body: `Sua reunião foi confirmada para ${this.formatDate(updated.scheduledAt)}. O advogado revisou seu agendamento e confirmou o compromisso.`,
         type: 'APPOINTMENT_SCHEDULED',
+        metadata: {
+          appointmentId: updated.id,
+          scheduledAt: updated.scheduledAt.toISOString(),
+          title: updated.title,
+          whatsappTemplate: 'APPOINTMENT_APPROVED',
+        },
       });
     }
 
@@ -61,22 +63,15 @@ export class AppointmentApprovalService {
       });
     }
 
+    // Log audit
+    this.auditService.logApproval(appointmentId, lawyerId, !!edits);
+
     return updated;
   }
 
   async rejectAppointment(appointmentId: string, lawyerId: string): Promise<void> {
     const appointment = await this.appointmentRepository.findById(appointmentId);
-    if (!appointment) {
-      throw new NotFoundError('Compromisso não encontrado');
-    }
-
-    if (appointment.lawyerId !== lawyerId) {
-      throw new ConflictError('Você não pode rejeitar um compromisso que não é seu');
-    }
-
-    if (appointment.status !== 'PENDING_APPROVAL') {
-      throw new ConflictError('Este compromisso não está pendente de aprovação');
-    }
+    AppointmentValidators.validateRejectionPermission(appointment, lawyerId);
 
     await this.appointmentRepository.rejectAppointment(appointmentId, lawyerId);
 
@@ -84,26 +79,25 @@ export class AppointmentApprovalService {
     if (appointment.clientId) {
       await this.notificationService.send({
         userId: appointment.clientId,
-        title: 'Reunião não confirmada',
-        body: 'Sua solicitação de reunião foi revista. Por favor, contate-nos para agendar.',
+        title: 'Reunião não confirmada ⚠️',
+        body: 'Sua solicitação de reunião foi revista pelo advogado e não foi confirmada. Entre em contato conosco para reagendar para um melhor horário.',
         type: 'APPOINTMENT_CHANGED',
+        metadata: {
+          appointmentId: appointment.id,
+          action: 'REJECTION',
+          whatsappTemplate: 'APPOINTMENT_REJECTED',
+        },
       });
+      this.auditService.logNotificationSent(appointment.clientId, 'APPOINTMENT_CHANGED', 'APPOINTMENT_REJECTED');
     }
+
+    // Log audit
+    this.auditService.logRejection(appointmentId, lawyerId);
   }
 
   async resetToAIVersion(appointmentId: string, lawyerId: string): Promise<Appointment> {
     const appointment = await this.appointmentRepository.findById(appointmentId);
-    if (!appointment) {
-      throw new NotFoundError('Compromisso não encontrado');
-    }
-
-    if (appointment.lawyerId !== lawyerId) {
-      throw new ConflictError('Você não pode resetar um compromisso que não é seu');
-    }
-
-    if (appointment.status !== 'PENDING_APPROVAL') {
-      throw new ConflictError('Este compromisso não está pendente de aprovação');
-    }
+    AppointmentValidators.validateResetPermission(appointment, lawyerId);
 
     return this.appointmentRepository.resetToAIVersion(appointmentId, lawyerId);
   }
@@ -113,20 +107,12 @@ export class AppointmentApprovalService {
     lawyerId: string,
     instruction: string
   ): Promise<ReschedulesSuggestion> {
+    AppointmentValidators.validateRescheduleInstruction(instruction);
+
     const appointment = await this.appointmentRepository.findById(appointmentId);
-    if (!appointment) {
-      throw new NotFoundError('Compromisso não encontrado');
-    }
+    AppointmentValidators.validateReschedulePermission(appointment, lawyerId);
 
-    if (appointment.lawyerId !== lawyerId) {
-      throw new ConflictError('Você não pode reagendar um compromisso que não é seu');
-    }
-
-    if (appointment.status !== 'PENDING_APPROVAL') {
-      throw new ConflictError('Este compromisso não está pendente de aprovação');
-    }
-
-    return this.rescheduleSuggestionRepository.create({
+    const suggestion = await this.rescheduleSuggestionRepository.create({
       appointmentId,
       lawyerId,
       instruction,
@@ -135,6 +121,11 @@ export class AppointmentApprovalService {
       suggestedDescription: null,
       status: 'PENDING'
     });
+
+    // Log audit
+    this.auditService.logRescheduleRequest(appointmentId, lawyerId, instruction);
+
+    return suggestion;
   }
 
   async getRescheduleSuggestions(appointmentId: string, lawyerId: string): Promise<ReschedulesSuggestion[]> {
