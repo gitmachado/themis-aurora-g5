@@ -152,6 +152,7 @@ export async function scheduleAppointment(data: {
   type: "MEETING" | "DEADLINE" | "HEARING" | "OTHER";
   scheduledAt: string;
   durationMinutes: number;
+  createdByAI?: boolean;
 }): Promise<{ id: string; scheduledAt: string }> {
   const res = await client.post("/appointments", data);
   return {

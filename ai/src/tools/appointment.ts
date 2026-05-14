@@ -116,9 +116,10 @@ async function handleScheduleAppointment(
       type: "MEETING",
       scheduledAt: isoDateTime,
       durationMinutes,
+      createdByAI: true,
     });
 
-    return `✅ Compromisso agendado com sucesso!\n\nDetalhes:\n- Título: ${title}\n- Data/Hora: ${date} às ${time}\n- Duração: ${durationMinutes} minutos\n- ID: ${appointment.id}\n\nO cliente receberá uma notificação no app.`;
+    return `✅ Agendamento pré-reservado!\n\nO advogado revisará sua solicitação em breve para confirmação final.\n\nDetalhes:\n- Título: ${title}\n- Data/Hora: ${date} às ${time}\n- Duração: ${durationMinutes} minutos`;
   } catch (err: any) {
     throw new Error(`Falha ao agendar: ${err.response?.data?.message || err.message}`);
   }

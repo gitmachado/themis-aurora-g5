@@ -68,6 +68,7 @@ export const createAppointmentSchema = z.object({
     type: z.enum(['MEETING', 'DEADLINE', 'HEARING', 'OTHER']),
     scheduledAt: z.coerce.date(),
     durationMinutes: z.number().int().min(15).optional(),
+    createdByAI: z.boolean().default(false).optional(),
   }),
 });
 
@@ -77,7 +78,7 @@ export const updateAppointmentSchema = z.object({
     description: z.string().optional(),
     scheduledAt: z.coerce.date().optional(),
     durationMinutes: z.number().int().min(15).optional(),
-    status: z.enum(['SCHEDULED', 'COMPLETED', 'CANCELED']).optional(),
+    status: z.enum(['SCHEDULED', 'COMPLETED', 'CANCELED', 'PENDING_APPROVAL']).optional(),
   }),
 });
 
@@ -94,4 +95,35 @@ export const getAvailableSlotsSchema = z.object({
     slotDurationMinutes: z.coerce.number().int().min(15).optional(),
     lawyerId: z.string().uuid().optional(),
   }),
+});
+
+export const approveAppointmentSchema = z.object({
+  body: z.object({
+    title: z.string().min(3).optional(),
+    description: z.string().optional(),
+    scheduledAt: z.coerce.date().optional(),
+    durationMinutes: z.number().int().min(15).optional(),
+  }).optional(),
+});
+
+export const rejectAppointmentSchema = z.object({
+  body: z.object({}).optional(),
+});
+
+export const resetAppointmentSchema = z.object({
+  body: z.object({}).optional(),
+});
+
+export const requestRescheduleSchema = z.object({
+  body: z.object({
+    instruction: z.string().min(5),
+  }),
+});
+
+export const acceptRescheduleSchema = z.object({
+  body: z.object({}).optional(),
+});
+
+export const rejectRescheduleSchema = z.object({
+  body: z.object({}).optional(),
 });

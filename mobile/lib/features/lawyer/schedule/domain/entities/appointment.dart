@@ -11,6 +11,8 @@ class Appointment extends Equatable {
   final String? clientId;
   final String? processId;
   final bool reminded;
+  final bool createdByAI;
+  final Map<String, dynamic>? aiOriginalData;
   final DateTime createdAt;
   final DateTime? updatedAt;
 
@@ -25,6 +27,8 @@ class Appointment extends Equatable {
     this.clientId,
     this.processId,
     required this.reminded,
+    this.createdByAI = false,
+    this.aiOriginalData,
     required this.createdAt,
     this.updatedAt,
   });
@@ -38,6 +42,7 @@ class Appointment extends Equatable {
   bool get isCompleted => status == 'COMPLETED';
   bool get isCanceled => status == 'CANCELED';
   bool get isScheduled => status == 'SCHEDULED';
+  bool get isPendingApproval => status == 'PENDING_APPROVAL';
 
   bool get isUpcoming => scheduledAt.isAfter(DateTime.now());
 
@@ -60,6 +65,7 @@ class Appointment extends Equatable {
     'SCHEDULED' => 'Agendado',
     'COMPLETED' => 'Concluído',
     'CANCELED' => 'Cancelado',
+    'PENDING_APPROVAL' => 'Pendente de Aprovação',
     _ => 'Desconhecido',
   };
 
@@ -75,6 +81,8 @@ class Appointment extends Equatable {
     clientId,
     processId,
     reminded,
+    createdByAI,
+    aiOriginalData,
     createdAt,
     updatedAt,
   ];

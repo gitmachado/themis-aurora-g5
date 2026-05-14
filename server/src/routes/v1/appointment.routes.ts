@@ -1,7 +1,10 @@
 import { Router } from 'express';
 import { AppointmentController } from '../../controllers/implementations/appointment.controller';
+import { AppointmentApprovalController } from '../../controllers/implementations/appointment-approval.controller';
 import { AppointmentService } from '../../services/implementations/appointment.service';
+import { AppointmentApprovalService } from '../../services/implementations/appointment-approval.service';
 import { AppointmentRepository } from '../../repositories/implementations/appointment.repository';
+import { RescheduleSuggestionRepository } from '../../repositories/implementations/reschedule-suggestion.repository';
 import { TimelineService } from '../../services/implementations/timeline.service';
 import { TimelineEventRepository } from '../../repositories/implementations/timeline-event.repository';
 import { NotificationService } from '../../services/implementations/notification.service';
@@ -15,11 +18,18 @@ import {
   updateAppointmentSchema,
   checkConflictsSchema,
   getAvailableSlotsSchema,
+  approveAppointmentSchema,
+  rejectAppointmentSchema,
+  resetAppointmentSchema,
+  requestRescheduleSchema,
+  acceptRescheduleSchema,
+  rejectRescheduleSchema,
 } from '../../types/dtos/schemas';
 
 const router = Router();
 
 const appointmentRepository = new AppointmentRepository();
+const rescheduleSuggestionRepository = new RescheduleSuggestionRepository();
 const timelineEventRepository = new TimelineEventRepository();
 const notificationRepository = new NotificationRepository();
 const userRepository = new UserRepository();
@@ -36,7 +46,14 @@ const appointmentService = new AppointmentService(
   timelineService,
   notificationService
 );
+const appointmentApprovalService = new AppointmentApprovalService(
+  appointmentRepository,
+  rescheduleSuggestionRepository,
+  timelineService,
+  notificationService
+);
 const controller = new AppointmentController(appointmentService);
+const approvalController = new AppointmentApprovalController(appointmentApprovalService);
 
 /**
  * @openapi
@@ -253,5 +270,209 @@ router.get(
  *         description: Lista de compromissos do processo
  */
 router.get('/by-process/:processId', authMiddleware, controller.getByProcessId.bind(controller));
+
+/**
+ * @openapi
+ * /appointments/pending:
+ *   get:
+ *     summary: Listar compromissos pendentes de aprovação
+ *     tags: [Agenda - Aprovação]
+ *     security:
+ *       - BearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Lista de compromissos pendentes
+ */
+router.get('/pending', authMiddleware, approvalController.getPendingApprovals.bind(approvalController));
+
+/**
+ * @openapi
+ * /appointments/{id}/approve:
+ *   patch:
+ *     summary: Aprovar um compromisso pendente
+ *     tags: [Agenda - Aprovação]
+ *     security:
+ *       - BearerAuth: []
+ *     parameters:
+ *       - name: id
+ *         in: path
+ *         required: true
+ *         schema:
+ *           type: string
+ *     requestBody:
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/ApproveAppointmentRequest'
+ *     responses:
+ *       200:
+ *         description: Compromisso aprovado com sucesso
+ */
+router.patch(
+  '/:id/approve',
+  authMiddleware,
+  validate(approveAppointmentSchema),
+  approvalController.approveAppointment.bind(approvalController)
+);
+
+/**
+ * @openapi
+ * /appointments/{id}/reject:
+ *   patch:
+ *     summary: Rejeitar um compromisso pendente
+ *     tags: [Agenda - Aprovação]
+ *     security:
+ *       - BearerAuth: []
+ *     parameters:
+ *       - name: id
+ *         in: path
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Compromisso rejeitado com sucesso
+ */
+router.patch(
+  '/:id/reject',
+  authMiddleware,
+  validate(rejectAppointmentSchema),
+  approvalController.rejectAppointment.bind(approvalController)
+);
+
+/**
+ * @openapi
+ * /appointments/{id}/reset-to-ai-version:
+ *   patch:
+ *     summary: Resetar compromisso para versão original da IA
+ *     tags: [Agenda - Aprovação]
+ *     security:
+ *       - BearerAuth: []
+ *     parameters:
+ *       - name: id
+ *         in: path
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Compromisso resetado com sucesso
+ */
+router.patch(
+  '/:id/reset-to-ai-version',
+  authMiddleware,
+  validate(resetAppointmentSchema),
+  approvalController.resetToAIVersion.bind(approvalController)
+);
+
+/**
+ * @openapi
+ * /appointments/{id}/reschedule-request:
+ *   post:
+ *     summary: Solicitar reagendamento pela IA
+ *     tags: [Agenda - Aprovação]
+ *     security:
+ *       - BearerAuth: []
+ *     parameters:
+ *       - name: id
+ *         in: path
+ *         required: true
+ *         schema:
+ *           type: string
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/RequestRescheduleSchema'
+ *     responses:
+ *       201:
+ *         description: Solicitação de reagendamento criada
+ */
+router.post(
+  '/:id/reschedule-request',
+  authMiddleware,
+  validate(requestRescheduleSchema),
+  approvalController.requestReschedule.bind(approvalController)
+);
+
+/**
+ * @openapi
+ * /appointments/{id}/reschedule-suggestions:
+ *   get:
+ *     summary: Obter sugestões de reagendamento
+ *     tags: [Agenda - Aprovação]
+ *     security:
+ *       - BearerAuth: []
+ *     parameters:
+ *       - name: id
+ *         in: path
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Lista de sugestões pendentes
+ */
+router.get(
+  '/:id/reschedule-suggestions',
+  authMiddleware,
+  approvalController.getRescheduleSuggestions.bind(approvalController)
+);
+
+/**
+ * @openapi
+ * /reschedule-suggestions/{suggestionId}/accept:
+ *   patch:
+ *     summary: Aceitar sugestão de reagendamento
+ *     tags: [Agenda - Aprovação]
+ *     security:
+ *       - BearerAuth: []
+ *     parameters:
+ *       - name: suggestionId
+ *         in: path
+ *         required: true
+ *         schema:
+ *           type: string
+ *       - name: appointmentId
+ *         in: query
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Sugestão aceita com sucesso
+ */
+router.patch(
+  '/reschedule-suggestions/:suggestionId/accept',
+  authMiddleware,
+  validate(acceptRescheduleSchema),
+  approvalController.acceptReschedule.bind(approvalController)
+);
+
+/**
+ * @openapi
+ * /reschedule-suggestions/{suggestionId}/reject:
+ *   patch:
+ *     summary: Rejeitar sugestão de reagendamento
+ *     tags: [Agenda - Aprovação]
+ *     security:
+ *       - BearerAuth: []
+ *     parameters:
+ *       - name: suggestionId
+ *         in: path
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Sugestão rejeitada com sucesso
+ */
+router.patch(
+  '/reschedule-suggestions/:suggestionId/reject',
+  authMiddleware,
+  validate(rejectRescheduleSchema),
+  approvalController.rejectReschedule.bind(approvalController)
+);
 
 export default router;

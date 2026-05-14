@@ -109,6 +109,286 @@ class _LawyerAppointmentDetailScreenState
     }
   }
 
+  Future<void> _handleApprove() async {
+    setState(() => _isLoading = true);
+    try {
+      // TODO: Call approve endpoint
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Compromisso aprovado com sucesso!'),
+            backgroundColor: Colors.green,
+          ),
+        );
+        Navigator.pop(context);
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Erro ao aprovar: $e'),
+            backgroundColor: AppColors.error,
+          ),
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() => _isLoading = false);
+      }
+    }
+  }
+
+  Future<void> _handleRejectApproval() async {
+    final confirm = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Rejeitar agendamento?'),
+        content: const Text(
+          'O cliente será notificado que sua solicitação não foi confirmada.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('Não'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(context, true),
+            style: TextButton.styleFrom(foregroundColor: AppColors.error),
+            child: const Text('Sim, rejeitar'),
+          ),
+        ],
+      ),
+    );
+
+    if (confirm != true) return;
+
+    setState(() => _isLoading = true);
+    try {
+      // TODO: Call reject endpoint
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Agendamento rejeitado'),
+            backgroundColor: AppColors.error,
+          ),
+        );
+        Navigator.pop(context);
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Erro ao rejeitar: $e'),
+            backgroundColor: AppColors.error,
+          ),
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() => _isLoading = false);
+      }
+    }
+  }
+
+  Widget _buildApprovalButtons(Appointment target) {
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        if (target.createdByAI) ...[
+          SizedBox(
+            height: 40,
+            child: OutlinedButton.icon(
+              onPressed: _isLoading ? null : () {
+                // TODO: Implement reset to AI version
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('Revertendo para versão original...')),
+                );
+              },
+              icon: const Icon(Icons.refresh, size: 18),
+              label: const Text('Reverter à Proposta Original'),
+              style: OutlinedButton.styleFrom(
+                side: const BorderSide(color: AppColors.ink),
+              ),
+            ),
+          ),
+          const SizedBox(height: 12),
+          SizedBox(
+            height: 40,
+            child: OutlinedButton.icon(
+              onPressed: _isLoading ? null : () {
+                // TODO: Implement reschedule request
+                showModalBottomSheet(
+                  context: context,
+                  builder: (context) => _buildRescheduleSheet(target),
+                );
+              },
+              icon: const Icon(Icons.schedule, size: 18),
+              label: const Text('Pedir IA Reagendar'),
+              style: OutlinedButton.styleFrom(
+                side: const BorderSide(color: AppColors.ink),
+              ),
+            ),
+          ),
+          const SizedBox(height: 12),
+        ],
+        Row(
+          children: [
+            Expanded(
+              child: SizedBox(
+                height: 56,
+                child: OutlinedButton(
+                  onPressed: _isLoading ? null : _handleRejectApproval,
+                  style: OutlinedButton.styleFrom(
+                    side: const BorderSide(color: AppColors.error),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(999),
+                    ),
+                  ),
+                  child: _isLoading
+                      ? const SizedBox(
+                          height: 24,
+                          width: 24,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            valueColor: AlwaysStoppedAnimation<Color>(
+                              AppColors.error,
+                            ),
+                          ),
+                        )
+                      : Text(
+                          'Rejeitar',
+                          style: AppTextStyles.body.copyWith(
+                            fontWeight: FontWeight.bold,
+                            color: AppColors.error,
+                          ),
+                        ),
+                ),
+              ),
+            ),
+            const SizedBox(width: 16),
+            Expanded(
+              child: PrimaryButton(
+                label: 'Aprovar',
+                onPressed: _isLoading ? null : _handleApprove,
+              ),
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+
+  Widget _buildStandardButtons() {
+    return Stack(
+      children: [
+        Row(
+          children: [
+            Expanded(
+              child: SizedBox(
+                height: 56,
+                child: OutlinedButton(
+                  onPressed: _isLoading ? null : _handleCancel,
+                  style: OutlinedButton.styleFrom(
+                    side: const BorderSide(color: AppColors.error),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(999),
+                    ),
+                  ),
+                  child: _isLoading
+                      ? const SizedBox(
+                          height: 24,
+                          width: 24,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            valueColor: AlwaysStoppedAnimation<Color>(
+                              AppColors.error,
+                            ),
+                          ),
+                        )
+                      : Text(
+                          'Cancelar',
+                          style: AppTextStyles.body.copyWith(
+                            fontWeight: FontWeight.bold,
+                            color: AppColors.error,
+                          ),
+                        ),
+                ),
+              ),
+            ),
+            const SizedBox(width: 16),
+            Expanded(
+              child: PrimaryButton(
+                label: 'Concluir',
+                onPressed: _isLoading ? null : _handleComplete,
+              ),
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+
+  Widget _buildRescheduleSheet(Appointment appointment) {
+    final instructionController = TextEditingController();
+
+    return Container(
+      padding: const EdgeInsets.all(24),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'Reagendar com a IA',
+            style: AppTextStyles.h2.copyWith(fontSize: 18),
+          ),
+          const SizedBox(height: 16),
+          Text(
+            'Descreva suas preferências para reagendamento:',
+            style: AppTextStyles.body,
+          ),
+          const SizedBox(height: 12),
+          TextField(
+            controller: instructionController,
+            minLines: 3,
+            maxLines: 3,
+            decoration: InputDecoration(
+              hintText: 'Ex: Não quero segunda, veja a partir de terça',
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(8),
+              ),
+            ),
+          ),
+          const SizedBox(height: 16),
+          Row(
+            children: [
+              Expanded(
+                child: OutlinedButton(
+                  onPressed: () => Navigator.pop(context),
+                  child: const Text('Cancelar'),
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: PrimaryButton(
+                  label: 'Enviar',
+                  onPressed: () {
+                    // TODO: Send reschedule request
+                    Navigator.pop(context);
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text('Agendando nova sugestão da IA...'),
+                      ),
+                    );
+                  },
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final target = widget.appointment;
@@ -123,7 +403,7 @@ class _LawyerAppointmentDetailScreenState
         appBar: CustomAppBar(
           title: 'Detalhes do Evento',
           showBackButton: true,
-          actions: target != null && target.status == 'SCHEDULED'
+          actions: target != null && (target.status == 'SCHEDULED' || target.isPendingApproval)
               ? [
                   IconButton(
                     icon: const Icon(Icons.edit_rounded, color: AppColors.ink),
@@ -227,53 +507,9 @@ class _LawyerAppointmentDetailScreenState
             : SafeArea(
                 child: Padding(
                   padding: const EdgeInsets.fromLTRB(24, 12, 24, 16),
-                  child: Stack(
-                    children: [
-                      Row(
-                        children: [
-                          Expanded(
-                            child: SizedBox(
-                              height: 56,
-                              child: OutlinedButton(
-                                onPressed: _isLoading ? null : _handleCancel,
-                                style: OutlinedButton.styleFrom(
-                                  side: const BorderSide(color: AppColors.error),
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(999),
-                                  ),
-                                ),
-                                child: _isLoading
-                                    ? const SizedBox(
-                                        height: 24,
-                                        width: 24,
-                                        child: CircularProgressIndicator(
-                                          strokeWidth: 2,
-                                          valueColor:
-                                              AlwaysStoppedAnimation<Color>(
-                                                  AppColors.error),
-                                        ),
-                                      )
-                                    : Text(
-                                        'Cancelar',
-                                        style: AppTextStyles.body.copyWith(
-                                          fontWeight: FontWeight.bold,
-                                          color: AppColors.error,
-                                        ),
-                                      ),
-                              ),
-                            ),
-                          ),
-                          const SizedBox(width: 16),
-                          Expanded(
-                            child: PrimaryButton(
-                              label: 'Concluir',
-                              onPressed: _isLoading ? null : _handleComplete,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
+                  child: target.isPendingApproval
+                      ? _buildApprovalButtons(target)
+                      : _buildStandardButtons(),
                 ),
               ),
       ),
@@ -284,6 +520,30 @@ class _LawyerAppointmentDetailScreenState
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
+        if (target.createdByAI)
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+            decoration: BoxDecoration(
+              color: Colors.amber.withOpacity(0.1),
+              borderRadius: BorderRadius.circular(8),
+              border: Border.all(color: Colors.amber.withOpacity(0.3)),
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Icon(Icons.auto_awesome, size: 16, color: Colors.amber),
+                const SizedBox(width: 8),
+                Text(
+                  'Proposta da IA',
+                  style: AppTextStyles.caption.copyWith(
+                    color: Colors.amber[700],
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        if (target.createdByAI) const SizedBox(height: 12),
         Row(
           children: [
             AppBadge(
@@ -293,11 +553,13 @@ class _LawyerAppointmentDetailScreenState
             const SizedBox(width: 8),
             AppBadge(
               label: target.statusLabel.toUpperCase(),
-              type: target.status == 'COMPLETED'
-                  ? BadgeType.success
-                  : target.status == 'CANCELED'
-                      ? BadgeType.error
-                      : BadgeType.neutral,
+              type: target.isPendingApproval
+                  ? BadgeType.warning
+                  : target.status == 'COMPLETED'
+                      ? BadgeType.success
+                      : target.status == 'CANCELED'
+                          ? BadgeType.error
+                          : BadgeType.neutral,
             ),
           ],
         ),

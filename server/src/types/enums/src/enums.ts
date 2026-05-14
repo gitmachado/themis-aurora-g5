@@ -65,5 +65,5 @@ export type MessageSender = 'BOT' | 'CLIENT' | 'LAWYER';
 export type AppointmentType = 'MEETING' | 'DEADLINE' | 'HEARING' | 'OTHER';
 
 /** Status of an appointment */
-export type AppointmentStatus = 'SCHEDULED' | 'COMPLETED' | 'CANCELED';
+export type AppointmentStatus = 'SCHEDULED' | 'COMPLETED' | 'CANCELED' | 'PENDING_APPROVAL';
 
