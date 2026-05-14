@@ -1,45 +1,44 @@
 {
   "project_info": {
-    "project_number": "47630056934",
-    "project_id": "omniconnect-aurora-g5",
-    "storage_bucket": "omniconnect-aurora-g5.firebasestorage.app"
+    "project_number": "726117555634",
+    "project_id": "themis-1a8b1",
+    "storage_bucket": "themis-1a8b1.firebasestorage.app"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:47630056934:android:10519465ba45c9c1af2a27",
-        "android_client_info": {
-          "package_name": "com.example.mobile"
-        }
-      },
-      "oauth_client": [],
-      "api_key": [
-        {
-          "current_key": "AIzaSyDsZRwjVSqETONWvNtZUKbU1mA7rB7QOfk"
-        }
-      ],
-      "services": {
-        "appinvite_service": {
-          "other_platform_oauth_client": []
-        }
-      }
-    },
-    {
-      "client_info": {
-        "mobilesdk_app_id": "1:47630056934:android:7a94cd4a6df9f308af2a27",
+        "mobilesdk_app_id": "1:726117555634:android:ece2b07100d8da706918ab",
         "android_client_info": {
           "package_name": "com.themis.mobile"
         }
       },
-      "oauth_client": [],
+      "oauth_client": [
+        {
+          "client_id": "726117555634-alkikmg6f84hlkl9lkg008jqf1v24d9j.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.themis.mobile",
+            "certificate_hash": "8cf99f4dff6295c6f0d308e96a8197df9f6439c1"
+          }
+        },
+        {
+          "client_id": "726117555634-v9p8rcatfaghfnftuar0mpc3qkr1qc2i.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
       "api_key": [
         {
-          "current_key": "AIzaSyDsZRwjVSqETONWvNtZUKbU1mA7rB7QOfk"
+          "current_key": "AIzaSyBzWoJnT1toV4wHqwjAxmOu-ntyZiT__vk"
         }
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": []
+          "other_platform_oauth_client": [
+            {
+              "client_id": "726117555634-v9p8rcatfaghfnftuar0mpc3qkr1qc2i.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
         }
       }
     }

@@ -42,7 +42,7 @@ export class AppointmentApprovalService {
       edits as any
     );
 
-    // Notify client about approval
+    // Notify client about approval via Push Notification (if registered in-app)
     if (updated.clientId) {
       const hadEdits = !!edits;
       const editDetails = hadEdits ? ' O advogado fez alguns ajustes no horário e detalhes da reunião.' : '';
@@ -62,20 +62,21 @@ export class AppointmentApprovalService {
           whatsappTemplate: 'APPOINTMENT_APPROVED',
         },
       });
+    }
 
-      // Enviar mensagem via WhatsApp (apenas para agendamentos criados pela IA)
-      if (updated.createdByAI && updated.clientWhatsappNumber && updated.clientName) {
-        try {
-          await this.whatsappNotifier.notifyAppointmentApproved({
-            clientWhatsapp: updated.clientWhatsappNumber,
-            clientName: updated.clientName,
-            appointmentTitle: updated.title,
-            scheduledAt: updated.scheduledAt,
-            hadEdits,
-          });
-        } catch (err) {
-          console.error('[AppointmentApprovalService] Erro ao enviar WhatsApp:', err);
-        }
+    // Enviar mensagem via WhatsApp (apenas para agendamentos criados pela IA)
+    if (updated.createdByAI && updated.clientWhatsappNumber && updated.clientName) {
+      const hadEdits = !!edits;
+      try {
+        await this.whatsappNotifier.notifyAppointmentApproved({
+          clientWhatsapp: updated.clientWhatsappNumber,
+          clientName: updated.clientName,
+          appointmentTitle: updated.title,
+          scheduledAt: updated.scheduledAt,
+          hadEdits,
+        });
+      } catch (err) {
+        console.error('[AppointmentApprovalService] Erro ao enviar WhatsApp:', err);
       }
     }
 
@@ -103,7 +104,7 @@ export class AppointmentApprovalService {
 
     await this.appointmentRepository.rejectAppointment(appointmentId, lawyerId);
 
-    // Notify client about rejection
+    // Notify client about rejection via Push Notification (if registered in-app)
     if (appointment.clientId) {
       await this.notificationService.send({
         userId: appointment.clientId,
@@ -117,18 +118,18 @@ export class AppointmentApprovalService {
         },
       });
       this.auditService.logNotificationSent(appointment.clientId, 'APPOINTMENT_CHANGED', 'APPOINTMENT_REJECTED');
+    }
 
-      // Enviar mensagem de rejeição via WhatsApp (apenas para agendamentos criados pela IA)
-      if (appointment.createdByAI && appointment.clientWhatsappNumber && appointment.clientName) {
-        try {
-          await this.whatsappNotifier.notifyAppointmentRejected({
-            clientWhatsapp: appointment.clientWhatsappNumber,
-            clientName: appointment.clientName,
-            appointmentTitle: appointment.title,
-          });
-        } catch (err) {
-          console.error('[AppointmentApprovalService] Erro ao enviar WhatsApp de rejeição:', err);
-        }
+    // Enviar mensagem de rejeição via WhatsApp (apenas para agendamentos criados pela IA)
+    if (appointment.createdByAI && appointment.clientWhatsappNumber && appointment.clientName) {
+      try {
+        await this.whatsappNotifier.notifyAppointmentRejected({
+          clientWhatsapp: appointment.clientWhatsappNumber,
+          clientName: appointment.clientName,
+          appointmentTitle: appointment.title,
+        });
+      } catch (err) {
+        console.error('[AppointmentApprovalService] Erro ao enviar WhatsApp de rejeição:', err);
       }
     }
 

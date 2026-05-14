@@ -145,26 +145,28 @@ export async function routerNode(
   if (response.tool_calls && response.tool_calls.length > 0) {
     const toolMessages: ToolMessage[] = [];
 
-
+    console.log(`[Router Node] 🔧 LLM chamou ${response.tool_calls.length} ferramenta(s):`);
     for (const toolCall of response.tool_calls) {
+      console.log(`[Router Node]   - ${toolCall.name} com args:`, JSON.stringify(toolCall.args).substring(0, 150));
       const toolFn = toolsByName[toolCall.name];
       if (toolFn) {
         try {
           const args = { ...toolCall.args, whatsappNumber };
           const result = await toolFn.invoke(args);
+          console.log(`[Router Node]   ✅ ${toolCall.name} executada com sucesso`);
           toolMessages.push(new ToolMessage({
             tool_call_id: toolCall.id!,
             content: String(result),
           }));
         } catch (toolErr) {
-          console.error(`[Router Node] Erro na tool ${toolCall.name}:`, toolErr);
+          console.error(`[Router Node] ❌ Erro na tool ${toolCall.name}:`, toolErr);
           toolMessages.push(new ToolMessage({
             tool_call_id: toolCall.id!,
             content: "ERRO_TECNICO: Falha ao executar esta operação.",
           }));
         }
       } else {
-        console.warn(`[Router Node] Tool desconhecida: ${toolCall.name}`);
+        console.warn(`[Router Node] ❌ Tool desconhecida: ${toolCall.name}`);
         toolMessages.push(new ToolMessage({
           tool_call_id: toolCall.id!,
           content: `ERRO: Tool '${toolCall.name}' não encontrada.`,

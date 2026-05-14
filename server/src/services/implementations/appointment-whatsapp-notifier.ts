@@ -24,11 +24,8 @@ export class AppointmentWhatsAppNotifier {
 
     try {
       const formattedDate = this.formatDatePT(options.scheduledAt);
-      const editNota = options.hadEdits
-        ? '\n\nℹ️ O advogado fez alguns ajustes no horário e detalhes da reunião.'
-        : '';
 
-      const message = `✅ *Reunião Confirmada!*\n\nOlá ${options.clientName}!\n\nSua reunião foi *confirmada com sucesso*.\n\n📅 *Data/Hora:* ${formattedDate}\n📋 *Assunto:* ${options.appointmentTitle}${editNota}\n\nO advogado revisará todos os detalhes e estará pronto para sua reunião.`;
+      const message = `✅ *Reunião Confirmada!*\n\nOlá ${options.clientName}!\n\nSua reunião foi *confirmada com sucesso*.\n\n📅 *Data/Hora:* ${formattedDate}\n📋 *Assunto:* ${options.appointmentTitle}\n\nO advogado revisará todos os detalhes e estará pronto para sua reunião.`;
 
       await this.sendMessage(options.clientWhatsapp, message);
     } catch (err) {
