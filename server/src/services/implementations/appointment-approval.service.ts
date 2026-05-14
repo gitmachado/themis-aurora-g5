@@ -7,6 +7,7 @@ import { AppointmentAuditService } from './appointment-audit.service';
 import type { Appointment } from '@models';
 import type { UpdateAppointmentDTO } from '@dtos';
 import { NotFoundError, ConflictError } from './errors';
+import { eventBus } from '../communication/InternalEventBus';
 
 export class AppointmentApprovalService {
   private readonly auditService: AppointmentAuditService;
@@ -66,6 +67,9 @@ export class AppointmentApprovalService {
     // Log audit
     this.auditService.logApproval(appointmentId, lawyerId, !!edits);
 
+    // Emit socket events
+    eventBus.emitAppointmentApproved(lawyerId, updated);
+
     return updated;
   }
 
@@ -93,6 +97,9 @@ export class AppointmentApprovalService {
 
     // Log audit
     this.auditService.logRejection(appointmentId, lawyerId);
+
+    // Emit socket events
+    eventBus.emitAppointmentRejected(lawyerId, appointmentId);
   }
 
   async resetToAIVersion(appointmentId: string, lawyerId: string): Promise<Appointment> {
@@ -178,6 +185,9 @@ export class AppointmentApprovalService {
 
     await this.rescheduleSuggestionRepository.markOtherSuggestionsAsSuperseded(appointmentId, suggestionId);
 
+    // Emit socket events
+    eventBus.emitRescheduleAccepted(lawyerId, updated);
+
     return updated;
   }
 
@@ -198,6 +208,9 @@ export class AppointmentApprovalService {
     await this.rescheduleSuggestionRepository.update(suggestionId, {
       status: 'REJECTED'
     });
+
+    // Emit socket events
+    eventBus.emitRescheduleRejected(lawyerId, suggestionId);
   }
 
   private formatDate(date: Date): string {

@@ -5,6 +5,7 @@ import { INotificationService } from '../interfaces/notification.service';
 import type { Appointment } from '@models';
 import type { CreateAppointmentDTO, UpdateAppointmentDTO } from '@dtos';
 import { NotFoundError, ConflictError } from './errors';
+import { eventBus } from '../communication/InternalEventBus';
 
 export class AppointmentService implements IAppointmentService {
   constructor(
@@ -67,6 +68,11 @@ export class AppointmentService implements IAppointmentService {
       });
     }
 
+    eventBus.emitAppointmentCreated(dto.clientId || lawyerId, appointment);
+    if (status === 'PENDING_APPROVAL') {
+      eventBus.emitAppointmentCreated(lawyerId, appointment);
+    }
+
     return appointment;
   }
 
@@ -116,6 +122,9 @@ export class AppointmentService implements IAppointmentService {
       });
     }
 
+    eventBus.emitAppointmentUpdated(appointment.clientId || lawyerId, updated);
+    eventBus.emitAppointmentUpdated(lawyerId, updated);
+
     return updated;
   }
 
@@ -139,6 +148,9 @@ export class AppointmentService implements IAppointmentService {
     }
 
     await this.appointmentRepository.delete(id);
+
+    eventBus.emitAppointmentDeleted(appointment.clientId || lawyerId, id);
+    eventBus.emitAppointmentDeleted(lawyerId, id);
   }
 
   async getByLawyerId(lawyerId: string, startDate?: Date, endDate?: Date): Promise<Appointment[]> {
@@ -226,6 +238,7 @@ export class AppointmentService implements IAppointmentService {
           body: `${reminder.title}${reminder.processId ? ' - Processo vinculado' : ''}`,
           type: 'DEADLINE_WARNING',
         });
+        eventBus.emitDeadlineReminder(reminder.lawyerId, reminder);
       }
 
       await this.appointmentRepository.update(reminder.id, {

@@ -66,6 +66,10 @@ class AppointmentsNotifier extends AsyncNotifier<List<Appointment>> {
       if (event.type == 'appointment:created' ||
           event.type == 'appointment:updated' ||
           event.type == 'appointment:deleted' ||
+          event.type == 'appointment:approved' ||
+          event.type == 'appointment:rejected' ||
+          event.type == 'reschedule:accepted' ||
+          event.type == 'pending:appointments:updated' ||
           event.type == 'connected') {
         refresh();
         ref.invalidate(pendingAppointmentsProvider);
@@ -182,6 +186,29 @@ final pendingAppointmentsCountProvider =
     FutureProvider<int>((ref) async {
   final pending = await ref.watch(pendingAppointmentsProvider.future);
   return pending.length;
+});
+
+// Deadline reminder listener
+final deadlineReminderProvider =
+    StreamProvider<Map<String, dynamic>?>((ref) {
+  final socketClient = ref.watch(webSocketClientProvider);
+
+  final controller = StreamController<Map<String, dynamic>?>();
+
+  final listener = (dynamic data) {
+    if (data is Map) {
+      controller.add(Map<String, dynamic>.from(data));
+    }
+  };
+
+  socketClient.on('deadline:reminder', listener);
+
+  ref.onDispose(() {
+    controller.close();
+    socketClient.off('deadline:reminder', listener);
+  });
+
+  return controller.stream;
 });
 
 // Appointments actions
