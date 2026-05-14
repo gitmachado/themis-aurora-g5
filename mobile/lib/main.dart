@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter/services.dart';
@@ -10,13 +11,11 @@ import 'shared/services/push_notification_service.dart';
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  await Firebase.initializeApp();
-
-  // Registra o handler de background ANTES do runApp.
-  // Deve ser uma função top-level (restrição de isolate do FCM).
-  FirebaseMessaging.onBackgroundMessage(firebaseBackgroundMessageHandler);
-
-  // Configura a barra de navegação e status nativa para modo edge-to-edge
+  if (!kIsWeb) {
+    await Firebase.initializeApp();
+    FirebaseMessaging.onBackgroundMessage(firebaseBackgroundMessageHandler);
+  }
+  
   SystemChrome.setSystemUIOverlayStyle(
     const SystemUiOverlayStyle(
       statusBarColor: Colors.transparent,
