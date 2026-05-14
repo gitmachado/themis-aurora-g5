@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import '../../../../../../app/routes/app_router.dart';
 import '../../../../../../shared/constants/app_colors.dart';
 import '../../../../../../shared/constants/app_text_styles.dart';
 import '../../../../../../shared/constants/app_assets.dart';
@@ -36,12 +37,39 @@ class _LawyerAIManagerScreenState extends State<LawyerAIManagerScreen> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               _buildStatusCard(),
+              const SizedBox(height: 16),
+              _buildTestChatButton(context),
               const SizedBox(height: 24),
               _buildConfigurationSection(),
               const SizedBox(height: 24),
               _buildKnowledgeBaseSection(),
             ],
           ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildTestChatButton(BuildContext context) {
+    return SizedBox(
+      width: double.infinity,
+      child: ElevatedButton.icon(
+        onPressed: () {
+          Navigator.pushNamed(context, AppRouter.lawyerAIChatRoute);
+        },
+        icon: const Icon(Icons.forum_rounded, color: AppColors.white),
+        label: const Text(
+          'Conversar com Assistente IA',
+          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
+        ),
+        style: ElevatedButton.styleFrom(
+          backgroundColor: AppColors.ink,
+          foregroundColor: AppColors.white,
+          padding: const EdgeInsets.symmetric(vertical: 16),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20),
+          ),
+          elevation: 0,
         ),
       ),
     );

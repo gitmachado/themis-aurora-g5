@@ -13,6 +13,23 @@ const client: AxiosInstance = axios.create({
   timeout: 10000,
 });
 
+/**
+ * Re-lança erros do backend como Error com .status e a melhor mensagem
+ * disponível. O backend responde indistintamente com { error } (rotas REST
+ * novas) ou { message } (algumas rotas antigas), por isso checamos ambos.
+ */
+function throwHttp(error: any): never {
+  const status = error.response?.status || 500;
+  const message =
+    error.response?.data?.error ||
+    error.response?.data?.message ||
+    error.message ||
+    "Erro desconhecido";
+  const err = new Error(message) as any;
+  err.status = status;
+  throw err;
+}
+
 // ── Usuários ──
 
 export async function checkUserByCpf(cpf: string): Promise<{
@@ -85,6 +102,102 @@ export async function getProcessesByPhone(whatsappNumber: string): Promise<Proce
     lastNote: p.lawyerNote || p.lastNote || null,
     recentTimeline: p.recentTimeline || [],
   }));
+}
+
+// Tipo esperado de retorno de getProcessById:
+export interface ProcessDetail {
+  id: string;
+  status: string;
+  cliente: { nome: string; email: string } | null;
+  recentTimeline: Array<{ data: string; descricao: string }>;
+}
+
+export async function getProcessesByLawyer(lawyerId: string): Promise<any[]> {
+  try {
+    const res = await client.get("/process", {
+      params: { lawyerId },
+    });
+    return res.data;
+  } catch (error: any) {
+    throwHttp(error);
+  }
+}
+
+export async function getProcessById(processId: string): Promise<ProcessDetail> {
+  try {
+    const res = await client.get(`/process/${processId}`);
+    return res.data;
+  } catch (error: any) {
+    throwHttp(error);
+  }
+}
+
+// ── Mutation helpers (AI write actions) ──
+//
+// All four routes hit the bot-protected backend (apiKey auth). The backend
+// re-validates that `lawyerId` actually owns the target process, so a
+// hallucinated lawyerId here translates to a 404, not a silent cross-tenant
+// write.
+
+export async function updateProcessStatus(
+  processId: string,
+  lawyerId: string,
+  newStatus: string,
+  lawyerNote?: string
+): Promise<void> {
+  try {
+    await client.patch(`/bot/process/${processId}/status`, {
+      newStatus,
+      lawyerId,
+      lawyerNote: lawyerNote ?? null,
+    });
+  } catch (error: any) {
+    throwHttp(error);
+  }
+}
+
+export async function addProcessNote(
+  processId: string,
+  lawyerId: string,
+  note: string
+): Promise<void> {
+  try {
+    await client.post(`/bot/process/${processId}/note`, { note, lawyerId });
+  } catch (error: any) {
+    throwHttp(error);
+  }
+}
+
+export async function requestProcessDocument(
+  processId: string,
+  lawyerId: string,
+  documentName: string
+): Promise<void> {
+  try {
+    await client.post(`/bot/process/${processId}/request-document`, {
+      documentName,
+      lawyerId,
+    });
+  } catch (error: any) {
+    throwHttp(error);
+  }
+}
+
+export async function scheduleProcessEvent(
+  processId: string,
+  lawyerId: string,
+  eventTitle: string,
+  dateIso: string
+): Promise<void> {
+  try {
+    await client.post(`/bot/process/${processId}/schedule-event`, {
+      eventTitle,
+      date: dateIso,
+      lawyerId,
+    });
+  } catch (error: any) {
+    throwHttp(error);
+  }
 }
 
 // ── Mensagens ──

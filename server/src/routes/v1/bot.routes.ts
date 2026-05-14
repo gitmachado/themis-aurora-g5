@@ -251,4 +251,64 @@ router.post('/handoff/start', apiKeyMiddleware, controller.startHandoff);
  */
 router.post('/handoff/resume', apiKeyMiddleware, controller.resumeAI);
 
+/**
+ * @openapi
+ * /bot/process/{id}/status:
+ *   patch:
+ *     summary: AI-driven status change for a process (validates lawyer ownership server-side).
+ *     tags: [Bot Integration]
+ *     security:
+ *       - apiKeyAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema: { type: string }
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required: [newStatus, lawyerId]
+ *             properties:
+ *               newStatus: { type: string }
+ *               lawyerId: { type: string }
+ *               lawyerNote: { type: string, nullable: true }
+ */
+router.patch('/process/:id/status', apiKeyMiddleware, controller.updateProcessStatus);
+
+/**
+ * @openapi
+ * /bot/process/{id}/note:
+ *   post:
+ *     summary: AI adds a note to a process the lawyer owns.
+ *     tags: [Bot Integration]
+ *     security:
+ *       - apiKeyAuth: []
+ */
+router.post('/process/:id/note', apiKeyMiddleware, controller.addProcessNote);
+
+/**
+ * @openapi
+ * /bot/process/{id}/request-document:
+ *   post:
+ *     summary: AI requests a document from the process client.
+ *     tags: [Bot Integration]
+ *     security:
+ *       - apiKeyAuth: []
+ */
+router.post('/process/:id/request-document', apiKeyMiddleware, controller.requestProcessDocument);
+
+/**
+ * @openapi
+ * /bot/process/{id}/schedule-event:
+ *   post:
+ *     summary: AI schedules an event in the process timeline.
+ *     tags: [Bot Integration]
+ *     security:
+ *       - apiKeyAuth: []
+ */
+router.post('/process/:id/schedule-event', apiKeyMiddleware, controller.scheduleProcessEvent);
+
 export default router;

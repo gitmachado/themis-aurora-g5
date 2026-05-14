@@ -5,6 +5,7 @@ import { INotificationService } from '../interfaces/notification.service';
 import type { LegalProcess } from '@models';
 import type { CreateLegalProcessDTO, UpdateLegalProcessStatusDTO } from '@dtos';
 import { NotFoundError } from './errors';
+import { formatLegalProcessStatus } from './legal-process-i18n';
 
 export class LegalProcessService implements ILegalProcessService {
   constructor(
@@ -66,13 +67,25 @@ export class LegalProcessService implements ILegalProcessService {
       });
     }
 
+    const statusLabel = formatLegalProcessStatus(dto.newStatus);
+
     // Side-effect: Notification for Client
     await this.notificationService.send({
       userId: updatedProcess.clientId,
       title: 'Atualização no seu processo',
-      body: `Seu processo "${updatedProcess.title}" foi atualizado para: ${dto.newStatus}`,
+      body: `Seu processo "${updatedProcess.title}" foi atualizado para: ${statusLabel}`,
       type: 'STATUS_CHANGED',
     });
+
+    // Side-effect: Notification for the assigned lawyer (skip if the lawyer triggered the change themselves)
+    if (updatedProcess.lawyerId && updatedProcess.lawyerId !== dto.updatedById) {
+      await this.notificationService.send({
+        userId: updatedProcess.lawyerId,
+        title: 'Status do processo atualizado',
+        body: `O processo "${updatedProcess.title}" mudou de status para: ${statusLabel}`,
+        type: 'STATUS_CHANGED',
+      });
+    }
 
     return updatedProcess;
   }

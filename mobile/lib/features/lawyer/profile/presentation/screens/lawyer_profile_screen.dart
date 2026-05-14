@@ -10,6 +10,7 @@ import '../../../../../../shared/constants/app_dimensions.dart';
 import '../../../../../../shared/constants/app_text_styles.dart';
 import '../../../../../../shared/widgets/app_app_bar_actions.dart';
 import '../../../../../../shared/widgets/cards/app_card.dart';
+import '../../../../../../app/routes/app_router.dart';
 import '../../../../../../shared/widgets/layout/custom_app_bar.dart';
 import '../../../../../../shared/widgets/layout/lawyer_main_layout.dart';
 import '../../../../../../shared/widgets/layout/loading_skeleton.dart';
@@ -407,6 +408,12 @@ class _LawyerProfileScreenState extends ConsumerState<LawyerProfileScreen>
               Icons.chat_bubble_outline_rounded,
               'Mensagens e Handoffs',
               () => Navigator.pushNamed(context, '/lawyer-chats'),
+            ),
+            _buildActionTile(
+              Icons.smart_toy_rounded,
+              'Assistente IA Themis',
+              () =>
+                  Navigator.pushNamed(context, AppRouter.lawyerAIManagerRoute),
             ),
           ],
         ),

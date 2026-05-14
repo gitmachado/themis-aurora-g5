@@ -280,5 +280,167 @@ export class BotController {
       next(error);
     }
   };
+
+  /**
+   * Verifies the process exists and is assigned to the given lawyer.
+   * The AI passes `lawyerId` as a tool argument; the model could hallucinate
+   * an ID, so we always re-check ownership server-side to prevent one lawyer
+   * mutating another lawyer's process via a wrong tool call.
+   */
+  private async assertLawyerOwnsProcess(
+    processId: string,
+    lawyerId: string
+  ): Promise<LegalProcess> {
+    const process = await this.legalProcessService.getById(processId);
+    if (!process) {
+      throw new NotFoundError('Processo não encontrado');
+    }
+    if (process.lawyerId !== lawyerId) {
+      // Surface as 404 (not 403) so we don't leak the process's existence to
+      // a caller that has no authority over it.
+      throw new NotFoundError('Processo não encontrado');
+    }
+    return process;
+  }
+
+  /**
+   * B09 — PATCH /process/:id/status
+   * AI-driven status change. Requires lawyerId in body to scope ownership.
+   */
+  updateProcessStatus: RequestHandler<{ id: string }> = async (
+    req: Request<{ id: string }>,
+    res: Response,
+    next: NextFunction
+  ) => {
+    try {
+      const { id } = req.params;
+      const { newStatus, lawyerId, lawyerNote } = req.body as {
+        newStatus?: string;
+        lawyerId?: string;
+        lawyerNote?: string;
+      };
+      if (!newStatus || !lawyerId) {
+        return res.status(400).json({
+          error: 'Os campos newStatus e lawyerId são obrigatórios',
+        });
+      }
+
+      await this.assertLawyerOwnsProcess(id, lawyerId);
+
+      const updated = await this.legalProcessService.updateStatus({
+        legalProcessId: id,
+        newStatus: newStatus as any,
+        updatedById: lawyerId,
+        lawyerNote: lawyerNote || null,
+      } as any);
+
+      return res.status(200).json(updated);
+    } catch (error) {
+      next(error);
+    }
+  };
+
+  /**
+   * B10 — POST /process/:id/note
+   * AI-driven note addition.
+   */
+  addProcessNote: RequestHandler<{ id: string }> = async (
+    req: Request<{ id: string }>,
+    res: Response,
+    next: NextFunction
+  ) => {
+    try {
+      const { id } = req.params;
+      const { note, lawyerId } = req.body as {
+        note?: string;
+        lawyerId?: string;
+      };
+      if (!note || !lawyerId) {
+        return res.status(400).json({
+          error: 'Os campos note e lawyerId são obrigatórios',
+        });
+      }
+
+      await this.assertLawyerOwnsProcess(id, lawyerId);
+      await this.legalProcessService.addNote(id, note, lawyerId);
+
+      return res.status(200).json({ success: true });
+    } catch (error) {
+      next(error);
+    }
+  };
+
+  /**
+   * B11 — POST /process/:id/request-document
+   * AI-driven document request to the client.
+   */
+  requestProcessDocument: RequestHandler<{ id: string }> = async (
+    req: Request<{ id: string }>,
+    res: Response,
+    next: NextFunction
+  ) => {
+    try {
+      const { id } = req.params;
+      const { documentName, lawyerId } = req.body as {
+        documentName?: string;
+        lawyerId?: string;
+      };
+      if (!documentName || !lawyerId) {
+        return res.status(400).json({
+          error: 'Os campos documentName e lawyerId são obrigatórios',
+        });
+      }
+
+      await this.assertLawyerOwnsProcess(id, lawyerId);
+      await this.legalProcessService.requestDocument(id, documentName, lawyerId);
+
+      return res.status(200).json({ success: true });
+    } catch (error) {
+      next(error);
+    }
+  };
+
+  /**
+   * B12 — POST /process/:id/schedule-event
+   * AI-driven event scheduling in the process timeline.
+   */
+  scheduleProcessEvent: RequestHandler<{ id: string }> = async (
+    req: Request<{ id: string }>,
+    res: Response,
+    next: NextFunction
+  ) => {
+    try {
+      const { id } = req.params;
+      const { eventTitle, date, lawyerId } = req.body as {
+        eventTitle?: string;
+        date?: string;
+        lawyerId?: string;
+      };
+      if (!eventTitle || !date || !lawyerId) {
+        return res.status(400).json({
+          error: 'Os campos eventTitle, date e lawyerId são obrigatórios',
+        });
+      }
+
+      const parsedDate = new Date(date);
+      if (Number.isNaN(parsedDate.getTime())) {
+        return res.status(400).json({
+          error: 'O campo date deve ser uma data ISO válida',
+        });
+      }
+
+      await this.assertLawyerOwnsProcess(id, lawyerId);
+      await this.legalProcessService.scheduleEvent(
+        id,
+        eventTitle,
+        parsedDate,
+        lawyerId
+      );
+
+      return res.status(200).json({ success: true });
+    } catch (error) {
+      next(error);
+    }
+  };
 }
 
