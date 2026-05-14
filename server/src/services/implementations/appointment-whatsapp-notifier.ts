@@ -1,5 +1,3 @@
-import axios from 'axios';
-
 /**
  * Serviço para enviar notificações via WhatsApp quando agendamentos são aprovados.
  * Integra com a IA para comunicar ao cliente a confirmação da reunião.
@@ -67,39 +65,47 @@ export class AppointmentWhatsAppNotifier {
     }
 
     try {
-      await axios.post(
-        this.WA_API_URL,
-        {
+      const response = await fetch(this.WA_API_URL, {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${this.WA_ACCESS_TOKEN}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
           messaging_product: 'whatsapp',
           recipient_type: 'individual',
           to,
           type: 'text',
           text: { body: text },
-        },
-        {
-          headers: {
-            Authorization: `Bearer ${this.WA_ACCESS_TOKEN}`,
-            'Content-Type': 'application/json',
-          },
-        }
-      );
-      console.log(`[AppointmentWhatsAppNotifier] Mensagem enviada para ${to}`);
-    } catch (err: any) {
-      const status = err.response?.status;
+        }),
+      });
 
-      // Retry com backoff exponencial para rate limit (429)
-      if (status === 429 && attempt <= 3) {
-        const delay = 1000 * Math.pow(2, attempt - 1);
-        console.warn(
-          `[AppointmentWhatsAppNotifier] Rate limit (429). Retry ${attempt}/3 em ${delay}ms`
+      if (!response.ok) {
+        const status = response.status;
+        const data = await response.json();
+
+        // Retry com backoff exponencial para rate limit (429)
+        if (status === 429 && attempt <= 3) {
+          const delay = 1000 * Math.pow(2, attempt - 1);
+          console.warn(
+            `[AppointmentWhatsAppNotifier] Rate limit (429). Retry ${attempt}/3 em ${delay}ms`
+          );
+          await new Promise(resolve => setTimeout(resolve, delay));
+          return this.sendMessage(to, text, attempt + 1);
+        }
+
+        console.error(
+          `[AppointmentWhatsAppNotifier] Erro ao enviar para ${to} (status ${status}):`,
+          data
         );
-        await new Promise(resolve => setTimeout(resolve, delay));
-        return this.sendMessage(to, text, attempt + 1);
+        return;
       }
 
+      console.log(`[AppointmentWhatsAppNotifier] Mensagem enviada para ${to}`);
+    } catch (err: any) {
       console.error(
-        `[AppointmentWhatsAppNotifier] Erro ao enviar para ${to} (status ${status}):`,
-        err.response?.data ?? err.message
+        `[AppointmentWhatsAppNotifier] Erro ao enviar para ${to}:`,
+        err.message
       );
     }
   }
