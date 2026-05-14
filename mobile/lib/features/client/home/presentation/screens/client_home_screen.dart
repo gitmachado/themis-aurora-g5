@@ -243,7 +243,7 @@ class ClientHomeScreen extends ConsumerWidget {
             iconBackground: AppColors.successBackground,
             iconColor: AppColors.success,
             onTap: () => launchUrl(
-              Uri.parse('https://wa.me/558487922092'),
+              Uri.parse('https://wa.me/5584887922092'),
               mode: LaunchMode.externalApplication,
             ),
           ),
