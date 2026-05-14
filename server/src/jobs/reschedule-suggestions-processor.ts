@@ -11,7 +11,7 @@ import type { Appointment } from '@models';
 export class RescheduleSuggestionsProcessor {
   private readonly suggestionsRepo: RescheduleSuggestionRepository;
   private readonly appointmentRepo: AppointmentRepository;
-  private readonly aiModel: ChatOpenAI;
+  private readonly aiModel: ChatOpenAI | null;
 
   constructor(
     suggestionsRepo?: RescheduleSuggestionRepository,
@@ -19,10 +19,16 @@ export class RescheduleSuggestionsProcessor {
   ) {
     this.suggestionsRepo = suggestionsRepo || new RescheduleSuggestionRepository();
     this.appointmentRepo = appointmentRepo || new AppointmentRepository();
-    this.aiModel = new ChatOpenAI({
-      modelName: 'gpt-4o-mini',
-      temperature: 0.3,
-    });
+
+    try {
+      this.aiModel = new ChatOpenAI({
+        modelName: 'gpt-4o-mini',
+        temperature: 0.3,
+      });
+    } catch (error) {
+      console.warn('[RescheduleSuggestionsProcessor] ⚠️ OpenAI API key not configured. Suggestion generation will be disabled.');
+      this.aiModel = null;
+    }
   }
 
   /**
@@ -107,6 +113,11 @@ export class RescheduleSuggestionsProcessor {
     suggestion: ReschedulesSuggestion
   ): Promise<Array<{ datetime: Date; title: string; description: string }>> {
     try {
+      if (!this.aiModel) {
+        console.warn('[Reschedule] OpenAI model not initialized. Cannot generate suggestions.');
+        return [];
+      }
+
       const prompt = `
 Você é um assistente de agendamento de um escritório de advocacia.
 
