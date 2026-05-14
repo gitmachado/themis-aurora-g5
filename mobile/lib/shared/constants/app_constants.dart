@@ -11,7 +11,7 @@ final class AppConstants {
 
   static const String officeWhatsApp = String.fromEnvironment(
     'THEMIS_OFFICE_WHATSAPP',
-    defaultValue: '5584887922092',
+    defaultValue: '558487922092',
   );
 
   static const Duration requestConnectTimeout = Duration(seconds: 15);

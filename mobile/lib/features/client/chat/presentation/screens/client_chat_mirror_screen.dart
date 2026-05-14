@@ -581,7 +581,7 @@ class _ClientChatMirrorScreenState
           child: WhatsAppButton(
             label: 'Continuar no WhatsApp',
             onPressed: () => launchUrl(
-              Uri.parse('https://wa.me/5584887922092'),
+              Uri.parse('https://wa.me/558487922092'),
               mode: LaunchMode.externalApplication,
             ),
           ),

@@ -265,7 +265,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   Future<void> _launchWhatsapp() async {
     const message = 'Olá! Gostaria de solicitar meu acesso como cliente.';
     final url = Uri.parse(
-      'https://wa.me/5584887922092?text=${Uri.encodeComponent(message)}',
+      'https://wa.me/558487922092?text=${Uri.encodeComponent(message)}',
     );
     if (await canLaunchUrl(url)) {
       await launchUrl(url, mode: LaunchMode.externalApplication);
