@@ -19,10 +19,13 @@ export const appointmentTool = tool(
         }
         return await handleCheckAvailability(effectiveLawyerId, date);
       } else if (action === "check_open_appointments") {
-        if (!whatsappNumber) {
-          return "ERRO: Número do WhatsApp não encontrado no sistema.";
+        // Tentar pegar whatsappNumber de múltiplas fontes
+        const finalWhatsapp = whatsappNumber || (triageData as any)?.whatsappNumber;
+        if (!finalWhatsapp) {
+          console.error("[Tool: Appointment] WhatsApp não encontrado em nenhuma fonte");
+          return "ERRO: Número do WhatsApp não encontrado no sistema. Não é possível verificar reuniões abertas.";
         }
-        return await handleCheckOpenAppointments(whatsappNumber);
+        return await handleCheckOpenAppointments(finalWhatsapp);
       } else if (action === "schedule") {
         const triageValidation = validateTriageDataForScheduling(triageData);
         if (!triageValidation.valid) {
