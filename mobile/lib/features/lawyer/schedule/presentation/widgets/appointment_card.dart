@@ -46,76 +46,88 @@ class AppointmentCard extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Row(
-                                children: [
-                                  Expanded(
-                                    child: Text(
-                                      appointment.title,
-                                      style: AppTextStyles.body.copyWith(
-                                        fontWeight: FontWeight.w600,
-                                        color: isCanceled ? AppColors.ink3 : AppColors.ink,
-                                        decoration: isCanceled
-                                            ? TextDecoration.lineThrough
-                                            : TextDecoration.none,
-                                      ),
-                                      maxLines: 2,
-                                      overflow: TextOverflow.ellipsis,
-                                    ),
-                                  ),
-                                  const SizedBox(width: 8),
-                                  _buildStatusIcon(),
-                                ],
-                              ),
-                              const SizedBox(height: 4),
-                              Text(
-                                _formatTime(),
-                                style: AppTextStyles.caption.copyWith(
-                                  color: AppColors.textCaption,
-                                ),
-                              ),
-                              if (appointment.clientId != null) ...[
-                                const SizedBox(height: 4),
-                                Row(
-                                  children: [
-                                    Icon(
-                                      Icons.person_outline_rounded,
-                                      size: 12,
-                                      color: AppColors.ink3,
-                                    ),
-                                    const SizedBox(width: 4),
-                                    Expanded(
-                                      child: Text(
-                                        '${appointment.durationMinutes} min',
-                                        style: AppTextStyles.caption.copyWith(
-                                          fontSize: 11,
-                                          color: AppColors.ink3,
-                                        ),
-                                        maxLines: 1,
-                                        overflow: TextOverflow.ellipsis,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ],
-                            ],
+                          child: Text(
+                            appointment.title,
+                            style: AppTextStyles.body.copyWith(
+                              fontWeight: FontWeight.w600,
+                              color: isCanceled ? AppColors.ink3 : AppColors.ink,
+                              decoration: isCanceled
+                                  ? TextDecoration.lineThrough
+                                  : TextDecoration.none,
+                            ),
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
                           ),
                         ),
-                        const SizedBox(width: 12),
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.end,
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            AppBadge(
-                              label: appointment.typeLabel.toUpperCase(),
-                              type: _badgeTypeForType(),
-                            ),
-                          ],
+                        if (appointment.status == 'COMPLETED' || appointment.status == 'CANCELED') ...[
+                          const SizedBox(width: 8),
+                          _buildStatusIcon(),
+                        ],
+                        const SizedBox(width: 8),
+                        AppBadge(
+                          label: appointment.typeLabel.toUpperCase(),
+                          type: _badgeTypeForType(),
                         ),
                       ],
                     ),
+                    const SizedBox(height: 8),
+                    Row(
+                      children: [
+                        Icon(
+                          Icons.access_time_rounded,
+                          size: 13,
+                          color: AppColors.textCaption,
+                        ),
+                        const SizedBox(width: 4),
+                        Expanded(
+                          child: Text(
+                            '${_formatTime()} (${appointment.durationMinutes} min)',
+                            style: AppTextStyles.caption.copyWith(
+                              color: AppColors.textCaption,
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                      ],
+                    ),
+                    if (appointment.description != null &&
+                        appointment.description!.isNotEmpty) ...[
+                      const SizedBox(height: 6),
+                      Text(
+                        appointment.description!,
+                        style: AppTextStyles.caption.copyWith(
+                          color: isCanceled ? AppColors.ink3 : AppColors.ink2,
+                        ),
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ],
+                    if (appointment.processId != null) ...[
+                      const SizedBox(height: 6),
+                      Row(
+                        children: [
+                          Icon(
+                            Icons.folder_open_rounded,
+                            size: 13,
+                            color: AppColors.primary,
+                          ),
+                          const SizedBox(width: 4),
+                          Expanded(
+                            child: Text(
+                              'Processo Vinculado',
+                              style: AppTextStyles.caption.copyWith(
+                                fontSize: 11,
+                                color: AppColors.primary,
+                                fontWeight: FontWeight.w600,
+                              ),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
                     if ((appointment.isDeadline || appointment.isHearing) &&
                         _showCountdown() &&
                         !isCompleted &&

@@ -11,6 +11,7 @@ import '../../../../../../app/routes/app_router.dart';
 import '../providers/appointment_providers.dart';
 import '../widgets/appointment_card.dart';
 import '../widgets/schedule_calendar_strip.dart';
+import '../../../../../../features/procedures/presentation/providers/procedure_providers.dart';
 
 class LawyerScheduleScreen extends StatefulWidget {
   const LawyerScheduleScreen({super.key});
@@ -488,24 +489,30 @@ class CreateAppointmentSheet extends ConsumerStatefulWidget {
 class _CreateAppointmentSheetState
     extends ConsumerState<CreateAppointmentSheet> {
   late TextEditingController _titleController;
+  late TextEditingController _descriptionController;
   String _selectedType = 'MEETING';
   DateTime? _selectedDateTime;
+  String? _selectedProcessId;
 
   @override
   void initState() {
     super.initState();
     _titleController = TextEditingController();
+    _descriptionController = TextEditingController();
     _selectedDateTime = DateTime.now().add(const Duration(hours: 1));
   }
 
   @override
   void dispose() {
     _titleController.dispose();
+    _descriptionController.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
+    final procedures = ref.watch(myProceduresProvider).valueOrNull ?? const [];
+
     return Container(
       decoration: const BoxDecoration(
         color: AppColors.surface,
@@ -563,6 +570,27 @@ class _CreateAppointmentSheetState
               ),
             ),
             const SizedBox(height: 16),
+            TextField(
+              controller: _descriptionController,
+              maxLines: 3,
+              decoration: InputDecoration(
+                hintText: 'Descrição (opcional)',
+                filled: true,
+                fillColor: AppColors.surface2,
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(14),
+                  borderSide: const BorderSide(color: AppColors.line),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(14),
+                  borderSide: const BorderSide(
+                    color: AppColors.yellow,
+                    width: 2,
+                  ),
+                ),
+              ),
+            ),
+            const SizedBox(height: 16),
             DropdownButtonFormField<String>(
               initialValue: _selectedType,
               decoration: InputDecoration(
@@ -584,6 +612,38 @@ class _CreateAppointmentSheetState
                 setState(() => _selectedType = value ?? 'MEETING');
               },
             ),
+            if (procedures.isNotEmpty) ...[
+              const SizedBox(height: 16),
+              DropdownButtonFormField<String?>(
+                value: _selectedProcessId,
+                decoration: InputDecoration(
+                  labelText: 'Vincular a Processo (opcional)',
+                  filled: true,
+                  fillColor: AppColors.surface2,
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(14),
+                    borderSide: const BorderSide(color: AppColors.line),
+                  ),
+                ),
+                items: [
+                  const DropdownMenuItem(value: null, child: Text('Nenhum')),
+                  ...procedures.map(
+                    (p) => DropdownMenuItem(
+                      value: p.id,
+                      child: Text(
+                        p.title,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                  ),
+                ],
+                onChanged: (value) {
+                  setState(() => _selectedProcessId = value);
+                },
+                isExpanded: true,
+              ),
+            ],
             const SizedBox(height: 16),
             GestureDetector(
               onTap: () => _pickDateTime(),
@@ -687,6 +747,9 @@ class _CreateAppointmentSheetState
     try {
       await ref.read(appointmentActionsProvider).create({
         'title': _titleController.text,
+        if (_descriptionController.text.isNotEmpty)
+          'description': _descriptionController.text,
+        if (_selectedProcessId != null) 'processId': _selectedProcessId,
         'type': _selectedType,
         'scheduledAt': _selectedDateTime!.toIso8601String(),
         'durationMinutes': 60,
