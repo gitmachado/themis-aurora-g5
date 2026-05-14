@@ -87,7 +87,7 @@ class _LawyerScheduleScreenState extends State<LawyerScheduleScreen>
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: const CustomAppBar(
-        title: 'Agenda',
+        title: 'Agenda do escritório',
         showBackButton: true,
         showDivider: false,
       ),
