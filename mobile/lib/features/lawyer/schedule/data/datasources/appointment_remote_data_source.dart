@@ -15,15 +15,14 @@ final class AppointmentRemoteDataSource {
     );
 
     return list
-        .map((json) => AppointmentModel.fromJson(
-              Map<String, dynamic>.from(json as Map),
-            ))
+        .map(
+          (json) =>
+              AppointmentModel.fromJson(Map<String, dynamic>.from(json as Map)),
+        )
         .toList();
   }
 
-  Future<AppointmentModel> createAppointment(
-    Map<String, dynamic> data,
-  ) async {
+  Future<AppointmentModel> createAppointment(Map<String, dynamic> data) async {
     final json = await _apiClient.postJson('/appointments', data: data);
     return AppointmentModel.fromJson(json);
   }
@@ -43,10 +42,7 @@ final class AppointmentRemoteDataSource {
     String id,
     Map<String, dynamic> data,
   ) async {
-    final json = await _apiClient.patchJson(
-      '/appointments/$id',
-      data: data,
-    );
+    final json = await _apiClient.patchJson('/appointments/$id', data: data);
     return AppointmentModel.fromJson(json);
   }
 
@@ -77,10 +73,7 @@ final class AppointmentRemoteDataSource {
   }
 
   Future<void> rejectAppointment(String id) async {
-    await _apiClient.patchJson(
-      '/appointments/$id/reject',
-      data: {},
-    );
+    await _apiClient.patchJson('/appointments/$id/reject', data: {});
   }
 
   Future<AppointmentModel> resetToAIVersion(String id) async {
@@ -102,15 +95,16 @@ final class AppointmentRemoteDataSource {
     return json as Map<String, dynamic>;
   }
 
-  Future<List<Map<String, dynamic>>> getRescheduleSuggestions(
-    String id,
-  ) async {
+  Future<List<Map<String, dynamic>>> getRescheduleSuggestions(String id) async {
     final response = await _apiClient.getJson(
       '/appointments/$id/reschedule-suggestions',
     );
 
     final items = response['items'] as List?;
-    return items?.map((item) => Map<String, dynamic>.from(item as Map)).toList() ?? [];
+    return items
+            ?.map((item) => Map<String, dynamic>.from(item as Map))
+            .toList() ??
+        [];
   }
 
   Future<AppointmentModel> acceptRescheduleSuggestion(

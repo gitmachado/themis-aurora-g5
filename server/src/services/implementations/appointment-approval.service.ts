@@ -53,7 +53,7 @@ export class AppointmentApprovalService {
         title: 'Reunião confirmada ✅',
         body: `Sua reunião foi confirmada para ${this.formatDate(updated.scheduledAt)}.${editDetails}`,
         type: 'APPOINTMENT_SCHEDULED',
-        metadata: {
+        extraData: {
           appointmentId: updated.id,
           scheduledAt: updated.scheduledAt.toISOString(),
           title: updated.title,
@@ -105,13 +105,13 @@ export class AppointmentApprovalService {
     await this.appointmentRepository.rejectAppointment(appointmentId, lawyerId);
 
     // Notify client about rejection via Push Notification (if registered in-app)
-    if (appointment.clientId) {
+    if (appointment && appointment.clientId) {
       await this.notificationService.send({
         userId: appointment.clientId,
         title: 'Reunião não confirmada ⚠️',
         body: 'Sua solicitação de reunião foi revista pelo advogado e não foi confirmada. Entre em contato conosco para reagendar para um melhor horário.',
         type: 'APPOINTMENT_CHANGED',
-        metadata: {
+        extraData: {
           appointmentId: appointment.id,
           action: 'REJECTION',
           whatsappTemplate: 'APPOINTMENT_REJECTED',
@@ -121,7 +121,7 @@ export class AppointmentApprovalService {
     }
 
     // Enviar mensagem de rejeição via WhatsApp (apenas para agendamentos criados pela IA)
-    if (appointment.createdByAI && appointment.clientWhatsappNumber && appointment.clientName) {
+    if (appointment && appointment.createdByAI && appointment.clientWhatsappNumber && appointment.clientName) {
       try {
         await this.whatsappNotifier.notifyAppointmentRejected({
           clientWhatsapp: appointment.clientWhatsappNumber,

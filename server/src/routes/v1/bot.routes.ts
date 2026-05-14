@@ -319,7 +319,9 @@ router.get('/appointments/slots', apiKeyMiddleware, async (req: Request, res: Re
  */
 router.get('/appointments/by-phone/:whatsappNumber', apiKeyMiddleware, async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const { whatsappNumber } = req.params;
+    const whatsappNumber = Array.isArray(req.params.whatsappNumber)
+      ? req.params.whatsappNumber[0]
+      : req.params.whatsappNumber;
     if (!whatsappNumber) {
       return res.status(400).json({ error: 'whatsappNumber is required' });
     }

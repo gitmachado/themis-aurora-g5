@@ -24,18 +24,15 @@ final class AppointmentRepositoryImpl implements AppointmentRepository {
   }
 
   @override
-  Future<Either<Failure, Appointment>> create(
-    Map<String, dynamic> data,
-  ) {
+  Future<Either<Failure, Appointment>> create(Map<String, dynamic> data) {
     return guardRepository(() => _remoteDataSource.createAppointment(data));
   }
 
   @override
-  Future<Either<Failure, Appointment>> updateStatus(
-    String id,
-    String status,
-  ) {
-    return guardRepository(() => _remoteDataSource.updateAppointmentStatus(id, status));
+  Future<Either<Failure, Appointment>> updateStatus(String id, String status) {
+    return guardRepository(
+      () => _remoteDataSource.updateAppointmentStatus(id, status),
+    );
   }
 
   @override

@@ -15,10 +15,7 @@ import '../../../../../../features/procedures/presentation/providers/procedure_p
 class LawyerAppointmentDetailScreen extends ConsumerStatefulWidget {
   final Appointment? appointment;
 
-  const LawyerAppointmentDetailScreen({
-    super.key,
-    required this.appointment,
-  });
+  const LawyerAppointmentDetailScreen({super.key, required this.appointment});
 
   @override
   ConsumerState<LawyerAppointmentDetailScreen> createState() =>
@@ -35,7 +32,9 @@ class _LawyerAppointmentDetailScreenState
   Future<void> _handleComplete() async {
     setState(() => _isLoading = true);
     try {
-      await ref.read(appointmentActionsProvider).complete(widget.appointment!.id);
+      await ref
+          .read(appointmentActionsProvider)
+          .complete(widget.appointment!.id);
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
@@ -66,9 +65,7 @@ class _LawyerAppointmentDetailScreenState
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Cancelar evento?'),
-        content: const Text(
-          'Esta ação não pode ser desfeita. Tem certeza?',
-        ),
+        content: const Text('Esta ação não pode ser desfeita. Tem certeza?'),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
@@ -116,7 +113,9 @@ class _LawyerAppointmentDetailScreenState
   Future<void> _handleApprove() async {
     setState(() => _isLoading = true);
     try {
-      await ref.read(appointmentActionsProvider).approve(widget.appointment!.id);
+      await ref
+          .read(appointmentActionsProvider)
+          .approve(widget.appointment!.id);
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
@@ -197,7 +196,9 @@ class _LawyerAppointmentDetailScreenState
   Future<void> _handleResetToAIVersion() async {
     setState(() => _isLoading = true);
     try {
-      await ref.read(appointmentActionsProvider).resetToAIVersion(widget.appointment!.id);
+      await ref
+          .read(appointmentActionsProvider)
+          .resetToAIVersion(widget.appointment!.id);
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
@@ -242,13 +243,15 @@ class _LawyerAppointmentDetailScreenState
           SizedBox(
             height: 40,
             child: OutlinedButton.icon(
-              onPressed: _isLoading ? null : () {
-                // TODO: Implement reschedule request
-                showModalBottomSheet(
-                  context: context,
-                  builder: (context) => _buildRescheduleSheet(target),
-                );
-              },
+              onPressed: _isLoading
+                  ? null
+                  : () {
+                      // TODO: Implement reschedule request
+                      showModalBottomSheet(
+                        context: context,
+                        builder: (context) => _buildRescheduleSheet(target),
+                      );
+                    },
               icon: const Icon(Icons.schedule, size: 18),
               label: const Text('Pedir IA Reagendar'),
               style: OutlinedButton.styleFrom(
@@ -400,7 +403,9 @@ class _LawyerAppointmentDetailScreenState
                   children: [
                     Expanded(
                       child: OutlinedButton(
-                        onPressed: isSubmitting ? null : () => Navigator.pop(context),
+                        onPressed: isSubmitting
+                            ? null
+                            : () => Navigator.pop(context),
                         child: const Text('Cancelar'),
                       ),
                     ),
@@ -414,7 +419,9 @@ class _LawyerAppointmentDetailScreenState
                                 if (instructionController.text.isEmpty) {
                                   ScaffoldMessenger.of(context).showSnackBar(
                                     const SnackBar(
-                                      content: Text('Por favor, descreva sua preferência'),
+                                      content: Text(
+                                        'Por favor, descreva sua preferência',
+                                      ),
                                     ),
                                   );
                                   return;
@@ -423,10 +430,12 @@ class _LawyerAppointmentDetailScreenState
                                 setSheetState(() => isSubmitting = true);
 
                                 try {
-                                  await ref.read(appointmentActionsProvider).requestReschedule(
-                                    appointment.id,
-                                    instructionController.text,
-                                  );
+                                  await ref
+                                      .read(appointmentActionsProvider)
+                                      .requestReschedule(
+                                        appointment.id,
+                                        instructionController.text,
+                                      );
 
                                   setSheetState(() {
                                     _waitingForSuggestions = true;
@@ -438,7 +447,9 @@ class _LawyerAppointmentDetailScreenState
 
                                   ScaffoldMessenger.of(context).showSnackBar(
                                     const SnackBar(
-                                      content: Text('Solicitação enviada! Aguardando sugestões da IA...'),
+                                      content: Text(
+                                        'Solicitação enviada! Aguardando sugestões da IA...',
+                                      ),
                                     ),
                                   );
                                 } catch (e) {
@@ -482,11 +493,15 @@ class _LawyerAppointmentDetailScreenState
                           children: [
                             Text(
                               suggestion['suggestedTitle'] ?? 'Sugestão',
-                              style: AppTextStyles.body.copyWith(fontWeight: FontWeight.bold),
+                              style: AppTextStyles.body.copyWith(
+                                fontWeight: FontWeight.bold,
+                              ),
                             ),
                             const SizedBox(height: 8),
                             Text(
-                              _formatDateTime(suggestion['suggestedDatetime'] as DateTime),
+                              _formatDateTime(
+                                suggestion['suggestedDatetime'] as DateTime,
+                              ),
                               style: AppTextStyles.caption,
                             ),
                             if (suggestion['suggestedDescription'] != null) ...[
@@ -503,19 +518,32 @@ class _LawyerAppointmentDetailScreenState
                                   child: OutlinedButton(
                                     onPressed: () async {
                                       try {
-                                        await ref.read(appointmentActionsProvider)
-                                            .rejectRescheduleSuggestion(suggestion['id'] as String);
+                                        await ref
+                                            .read(appointmentActionsProvider)
+                                            .rejectRescheduleSuggestion(
+                                              suggestion['id'] as String,
+                                            );
                                         if (mounted) {
                                           setState(() {
-                                            _rescheduleSuggestions.removeAt(idx);
+                                            _rescheduleSuggestions.removeAt(
+                                              idx,
+                                            );
                                           });
-                                          ScaffoldMessenger.of(context).showSnackBar(
-                                            const SnackBar(content: Text('Sugestão rejeitada')),
+                                          ScaffoldMessenger.of(
+                                            context,
+                                          ).showSnackBar(
+                                            const SnackBar(
+                                              content: Text(
+                                                'Sugestão rejeitada',
+                                              ),
+                                            ),
                                           );
                                         }
                                       } catch (e) {
                                         if (mounted) {
-                                          ScaffoldMessenger.of(context).showSnackBar(
+                                          ScaffoldMessenger.of(
+                                            context,
+                                          ).showSnackBar(
                                             SnackBar(content: Text('Erro: $e')),
                                           );
                                         }
@@ -530,7 +558,8 @@ class _LawyerAppointmentDetailScreenState
                                     label: 'Aceitar',
                                     onPressed: () async {
                                       try {
-                                        await ref.read(appointmentActionsProvider)
+                                        await ref
+                                            .read(appointmentActionsProvider)
                                             .acceptRescheduleSuggestion(
                                               suggestion['id'] as String,
                                               appointment.id,
@@ -538,16 +567,22 @@ class _LawyerAppointmentDetailScreenState
                                         if (mounted) {
                                           Navigator.pop(context);
                                           _stopSuggestionPolling();
-                                          ScaffoldMessenger.of(context).showSnackBar(
+                                          ScaffoldMessenger.of(
+                                            context,
+                                          ).showSnackBar(
                                             const SnackBar(
-                                              content: Text('Sugestão aceita! Pronto para aprovação.'),
+                                              content: Text(
+                                                'Sugestão aceita! Pronto para aprovação.',
+                                              ),
                                               backgroundColor: Colors.green,
                                             ),
                                           );
                                         }
                                       } catch (e) {
                                         if (mounted) {
-                                          ScaffoldMessenger.of(context).showSnackBar(
+                                          ScaffoldMessenger.of(
+                                            context,
+                                          ).showSnackBar(
                                             SnackBar(content: Text('Erro: $e')),
                                           );
                                         }
@@ -571,9 +606,12 @@ class _LawyerAppointmentDetailScreenState
   }
 
   void _startSuggestionPolling(String appointmentId) {
-    _suggestionPoller = Timer.periodic(const Duration(seconds: 5), (timer) async {
+    _suggestionPoller = Timer.periodic(const Duration(seconds: 5), (
+      timer,
+    ) async {
       try {
-        final suggestions = await ref.read(appointmentActionsProvider)
+        final suggestions = await ref
+            .read(appointmentActionsProvider)
             .getRescheduleSuggestions(appointmentId);
 
         if (mounted) {
@@ -627,7 +665,9 @@ class _LawyerAppointmentDetailScreenState
         appBar: CustomAppBar(
           title: 'Detalhes do Evento',
           showBackButton: true,
-          actions: target != null && (target.status == 'SCHEDULED' || target.isPendingApproval)
+          actions:
+              target != null &&
+                  (target.status == 'SCHEDULED' || target.isPendingApproval)
               ? [
                   IconButton(
                     icon: const Icon(Icons.edit_rounded, color: AppColors.ink),
@@ -646,7 +686,8 @@ class _LawyerAppointmentDetailScreenState
                     children: [
                       _buildHeaderSection(target),
                       const SizedBox(height: 24),
-                      if (target.clientName != null || target.clientWhatsappNumber != null)
+                      if (target.clientName != null ||
+                          target.clientWhatsappNumber != null)
                         _buildInfoCard(
                           title: 'Informações do Cliente',
                           icon: Icons.person_rounded,
@@ -654,12 +695,17 @@ class _LawyerAppointmentDetailScreenState
                             if (target.clientName != null)
                               _buildDetailRow('Nome', target.clientName!),
                             if (target.clientWhatsappNumber != null) ...[
-                              if (target.clientName != null) const SizedBox(height: 8),
-                              _buildDetailRow('WhatsApp', _formatWhatsApp(target.clientWhatsappNumber!)),
+                              if (target.clientName != null)
+                                const SizedBox(height: 8),
+                              _buildDetailRow(
+                                'WhatsApp',
+                                _formatWhatsApp(target.clientWhatsappNumber!),
+                              ),
                             ],
                           ],
                         ),
-                      if (target.clientName != null || target.clientWhatsappNumber != null)
+                      if (target.clientName != null ||
+                          target.clientWhatsappNumber != null)
                         const SizedBox(height: 24),
                       _buildInfoCard(
                         title: 'Data e Hora',
@@ -669,10 +715,7 @@ class _LawyerAppointmentDetailScreenState
                             'Data programada',
                             _formatDate(target.scheduledAt),
                           ),
-                          _buildDetailRow(
-                            'Horário',
-                            _formatInterval(target),
-                          ),
+                          _buildDetailRow('Horário', _formatInterval(target)),
                           _buildDetailRow(
                             'Duração',
                             '${target.durationMinutes} minutos',
@@ -701,7 +744,8 @@ class _LawyerAppointmentDetailScreenState
                         ],
                       ),
                       const SizedBox(height: 32),
-                      if (target.clientId != null || target.processId != null) ...[
+                      if (target.clientId != null ||
+                          target.processId != null) ...[
                         Text(
                           'Vínculos do Evento',
                           style: AppTextStyles.h2.copyWith(fontSize: 16),
@@ -795,10 +839,10 @@ class _LawyerAppointmentDetailScreenState
               type: target.isPendingApproval
                   ? BadgeType.warning
                   : target.status == 'COMPLETED'
-                      ? BadgeType.success
-                      : target.status == 'CANCELED'
-                          ? BadgeType.error
-                          : BadgeType.neutral,
+                  ? BadgeType.success
+                  : target.status == 'CANCELED'
+                  ? BadgeType.error
+                  : BadgeType.neutral,
             ),
           ],
         ),
@@ -960,10 +1004,7 @@ class _LawyerAppointmentDetailScreenState
 class EditAppointmentSheet extends ConsumerStatefulWidget {
   final Appointment appointment;
 
-  const EditAppointmentSheet({
-    super.key,
-    required this.appointment,
-  });
+  const EditAppointmentSheet({super.key, required this.appointment});
 
   @override
   ConsumerState<EditAppointmentSheet> createState() =>
@@ -982,7 +1023,9 @@ class _EditAppointmentSheetState extends ConsumerState<EditAppointmentSheet> {
     super.initState();
     final target = widget.appointment;
     _titleController = TextEditingController(text: target.title);
-    _descriptionController = TextEditingController(text: target.description ?? '');
+    _descriptionController = TextEditingController(
+      text: target.description ?? '',
+    );
     _selectedType = target.type;
     _selectedDateTime = target.scheduledAt;
     _selectedProcessId = target.processId;
@@ -1011,7 +1054,8 @@ class _EditAppointmentSheetState extends ConsumerState<EditAppointmentSheet> {
         left: 24,
         right: 24,
         top: 12,
-        bottom: MediaQuery.of(context).viewInsets.bottom +
+        bottom:
+            MediaQuery.of(context).viewInsets.bottom +
             MediaQuery.of(context).padding.bottom +
             24,
       ),
@@ -1031,10 +1075,7 @@ class _EditAppointmentSheetState extends ConsumerState<EditAppointmentSheet> {
               ),
             ),
             const SizedBox(height: 20),
-            Text(
-              'Editar Evento',
-              style: AppTextStyles.h2,
-            ),
+            Text('Editar Evento', style: AppTextStyles.h2),
             const SizedBox(height: 24),
             TextField(
               controller: _titleController,
@@ -1223,24 +1264,21 @@ class _EditAppointmentSheetState extends ConsumerState<EditAppointmentSheet> {
 
   void _updateAppointment() async {
     if (_titleController.text.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('O título é obrigatório')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('O título é obrigatório')));
       return;
     }
 
     try {
-      await ref.read(appointmentActionsProvider).update(
-        widget.appointment.id,
-        {
-          'title': _titleController.text,
-          'description': _descriptionController.text,
-          if (_selectedProcessId != null) 'processId': _selectedProcessId,
-          'type': _selectedType,
-          'scheduledAt': _selectedDateTime.toIso8601String(),
-          'durationMinutes': widget.appointment.durationMinutes,
-        },
-      );
+      await ref.read(appointmentActionsProvider).update(widget.appointment.id, {
+        'title': _titleController.text,
+        'description': _descriptionController.text,
+        if (_selectedProcessId != null) 'processId': _selectedProcessId,
+        'type': _selectedType,
+        'scheduledAt': _selectedDateTime.toIso8601String(),
+        'durationMinutes': widget.appointment.durationMinutes,
+      });
 
       if (mounted) {
         Navigator.pop(context); // Fecha sheet
@@ -1251,9 +1289,9 @@ class _EditAppointmentSheetState extends ConsumerState<EditAppointmentSheet> {
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Erro ao atualizar: $e')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Erro ao atualizar: $e')));
       }
     }
   }

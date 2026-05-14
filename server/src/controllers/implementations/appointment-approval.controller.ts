@@ -31,7 +31,7 @@ export class AppointmentApprovalController {
   };
 
   approveAppointment: RequestHandler = async (
-    req: AuthRequest<{ id: string }, Appointment, UpdateAppointmentDTO>,
+    req: AuthRequest,
     res: Response,
     next: NextFunction
   ) => {
@@ -55,7 +55,7 @@ export class AppointmentApprovalController {
   };
 
   rejectAppointment: RequestHandler = async (
-    req: AuthRequest<{ id: string }>,
+    req: AuthRequest,
     res: Response,
     next: NextFunction
   ) => {
@@ -75,7 +75,7 @@ export class AppointmentApprovalController {
   };
 
   resetToAIVersion: RequestHandler = async (
-    req: AuthRequest<{ id: string }>,
+    req: AuthRequest,
     res: Response,
     next: NextFunction
   ) => {
@@ -95,7 +95,7 @@ export class AppointmentApprovalController {
   };
 
   requestReschedule: RequestHandler = async (
-    req: AuthRequest<{ id: string }, any, { instruction: string }>,
+    req: AuthRequest,
     res: Response,
     next: NextFunction
   ) => {
@@ -119,7 +119,7 @@ export class AppointmentApprovalController {
   };
 
   getRescheduleSuggestions: RequestHandler = async (
-    req: AuthRequest<{ id: string }>,
+    req: AuthRequest,
     res: Response,
     next: NextFunction
   ) => {
@@ -145,7 +145,7 @@ export class AppointmentApprovalController {
   };
 
   acceptReschedule: RequestHandler = async (
-    req: AuthRequest<{ suggestionId: string }>,
+    req: AuthRequest,
     res: Response,
     next: NextFunction
   ) => {
@@ -174,7 +174,7 @@ export class AppointmentApprovalController {
   };
 
   rejectReschedule: RequestHandler = async (
-    req: AuthRequest<{ suggestionId: string }>,
+    req: AuthRequest,
     res: Response,
     next: NextFunction
   ) => {

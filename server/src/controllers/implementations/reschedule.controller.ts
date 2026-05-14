@@ -7,7 +7,7 @@ export class RescheduleController {
   constructor(private readonly rescheduleService: RescheduleProcessorService) {}
 
   initiateReschedule: RequestHandler = async (
-    req: AuthRequest<{ id: string }>,
+    req: AuthRequest,
     res: Response,
     next: NextFunction
   ) => {
@@ -33,7 +33,7 @@ export class RescheduleController {
   };
 
   getSuggestions: RequestHandler = async (
-    req: AuthRequest<{ id: string }>,
+    req: AuthRequest,
     res: Response,
     next: NextFunction
   ) => {

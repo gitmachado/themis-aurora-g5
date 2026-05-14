@@ -1,8 +1,8 @@
-import cron from 'node-cron';
+import cron, { type ScheduledTask } from 'node-cron';
 import { RescheduleSuggestionsProcessor } from './reschedule-suggestions-processor';
 
 let rescheduleProcessor: RescheduleSuggestionsProcessor | null = null;
-let cronJobHandle: cron.ScheduledTask | null = null;
+let cronJobHandle: ScheduledTask | null = null;
 
 /**
  * Inicializa o scheduler de jobs

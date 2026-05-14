@@ -23,8 +23,10 @@ class LawyerScheduleScreen extends ConsumerStatefulWidget {
 
 class _LawyerScheduleScreenState extends ConsumerState<LawyerScheduleScreen>
     with SingleTickerProviderStateMixin {
-  late final TabController _tabController =
-      TabController(length: 2, vsync: this);
+  late final TabController _tabController = TabController(
+    length: 2,
+    vsync: this,
+  );
 
   @override
   void initState() {
@@ -84,17 +86,19 @@ class _LawyerScheduleScreenState extends ConsumerState<LawyerScheduleScreen>
       'Domingo',
     ];
     final selectedWeekdayName = shortWeekdays[selectedDate.weekday - 1];
-    final isToday = selectedDate.year == now.year &&
+    final isToday =
+        selectedDate.year == now.year &&
         selectedDate.month == now.month &&
         selectedDate.day == now.day;
-    final isTomorrow = selectedDate.year == tomorrow.year &&
+    final isTomorrow =
+        selectedDate.year == tomorrow.year &&
         selectedDate.month == tomorrow.month &&
         selectedDate.day == tomorrow.day;
     final customDaySuffix = isToday
         ? 'Hoje'
         : isTomorrow
-            ? 'Amanhã'
-            : selectedWeekdayName;
+        ? 'Amanhã'
+        : selectedWeekdayName;
 
     return Scaffold(
       backgroundColor: AppColors.background,
@@ -110,7 +114,11 @@ class _LawyerScheduleScreenState extends ConsumerState<LawyerScheduleScreen>
                 width: 40,
                 height: 40,
                 child: IconButton(
-                  icon: const Icon(Icons.edit_calendar_rounded, size: 24, color: AppColors.ink),
+                  icon: const Icon(
+                    Icons.edit_calendar_rounded,
+                    size: 24,
+                    color: AppColors.ink,
+                  ),
                   onPressed: () {
                     Navigator.pushNamed(
                       context,
@@ -133,7 +141,10 @@ class _LawyerScheduleScreenState extends ConsumerState<LawyerScheduleScreen>
                           color: AppColors.yellow,
                           shape: BoxShape.circle,
                         ),
-                        constraints: const BoxConstraints(minWidth: 14, minHeight: 14),
+                        constraints: const BoxConstraints(
+                          minWidth: 14,
+                          minHeight: 14,
+                        ),
                         child: Text(
                           count > 99 ? '99+' : count.toString(),
                           style: const TextStyle(
@@ -200,9 +211,11 @@ class _LawyerScheduleScreenState extends ConsumerState<LawyerScheduleScreen>
                 } else if (date.year == nowLocal.year &&
                     date.month == nowLocal.month &&
                     date.day == nowLocal.day + 1) {
-                  ref.read(scheduleViewModeProvider.notifier).state = 'tomorrow';
+                  ref.read(scheduleViewModeProvider.notifier).state =
+                      'tomorrow';
                 } else {
-                  ref.read(scheduleViewModeProvider.notifier).state = 'custom_day';
+                  ref.read(scheduleViewModeProvider.notifier).state =
+                      'custom_day';
                 }
               },
             ),
@@ -223,7 +236,10 @@ class _LawyerScheduleScreenState extends ConsumerState<LawyerScheduleScreen>
                     ),
                   ),
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 2),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 2,
+                    ),
                     decoration: BoxDecoration(
                       color: AppColors.white,
                       borderRadius: BorderRadius.circular(16),
@@ -240,7 +256,10 @@ class _LawyerScheduleScreenState extends ConsumerState<LawyerScheduleScreen>
                       child: DropdownButton<String>(
                         value: currentMode,
                         isExpanded: true,
-                        icon: const Icon(Icons.keyboard_arrow_down_rounded, color: AppColors.ink3),
+                        icon: const Icon(
+                          Icons.keyboard_arrow_down_rounded,
+                          color: AppColors.ink3,
+                        ),
                         borderRadius: BorderRadius.circular(16),
                         dropdownColor: AppColors.white,
                         style: AppTextStyles.body.copyWith(
@@ -249,10 +268,12 @@ class _LawyerScheduleScreenState extends ConsumerState<LawyerScheduleScreen>
                         ),
                         onChanged: (val) {
                           if (val == null) return;
-                          ref.read(scheduleViewModeProvider.notifier).state = val;
+                          ref.read(scheduleViewModeProvider.notifier).state =
+                              val;
                           final nowLocal = DateTime.now();
                           if (val == 'today') {
-                            ref.read(selectedDateProvider.notifier).state = nowLocal;
+                            ref.read(selectedDateProvider.notifier).state =
+                                nowLocal;
                           } else if (val == 'tomorrow') {
                             ref.read(selectedDateProvider.notifier).state =
                                 nowLocal.add(const Duration(days: 1));
@@ -263,12 +284,18 @@ class _LawyerScheduleScreenState extends ConsumerState<LawyerScheduleScreen>
                             value: 'today',
                             child: Row(
                               children: [
-                                const Icon(Icons.calendar_today_rounded, size: 18, color: AppColors.ink3),
+                                const Icon(
+                                  Icons.calendar_today_rounded,
+                                  size: 18,
+                                  color: AppColors.ink3,
+                                ),
                                 const SizedBox(width: 8),
                                 Expanded(
                                   child: Text(
                                     'Hoje - ${now.day.toString().padLeft(2, '0')}/${now.month.toString().padLeft(2, '0')}/${now.year} (${shortWeekdays[now.weekday - 1]})',
-                                    style: AppTextStyles.body.copyWith(fontWeight: FontWeight.w600),
+                                    style: AppTextStyles.body.copyWith(
+                                      fontWeight: FontWeight.w600,
+                                    ),
                                     maxLines: 1,
                                     overflow: TextOverflow.ellipsis,
                                   ),
@@ -280,12 +307,18 @@ class _LawyerScheduleScreenState extends ConsumerState<LawyerScheduleScreen>
                             value: 'tomorrow',
                             child: Row(
                               children: [
-                                const Icon(Icons.calendar_today_rounded, size: 18, color: AppColors.ink3),
+                                const Icon(
+                                  Icons.calendar_today_rounded,
+                                  size: 18,
+                                  color: AppColors.ink3,
+                                ),
                                 const SizedBox(width: 8),
                                 Expanded(
                                   child: Text(
                                     'Amanhã - ${tomorrow.day.toString().padLeft(2, '0')}/${tomorrow.month.toString().padLeft(2, '0')}/${tomorrow.year} (${shortWeekdays[tomorrow.weekday - 1]})',
-                                    style: AppTextStyles.body.copyWith(fontWeight: FontWeight.w600),
+                                    style: AppTextStyles.body.copyWith(
+                                      fontWeight: FontWeight.w600,
+                                    ),
                                     maxLines: 1,
                                     overflow: TextOverflow.ellipsis,
                                   ),
@@ -297,12 +330,18 @@ class _LawyerScheduleScreenState extends ConsumerState<LawyerScheduleScreen>
                             value: 'week',
                             child: Row(
                               children: [
-                                const Icon(Icons.date_range_rounded, size: 18, color: AppColors.ink3),
+                                const Icon(
+                                  Icons.date_range_rounded,
+                                  size: 18,
+                                  color: AppColors.ink3,
+                                ),
                                 const SizedBox(width: 8),
                                 Expanded(
                                   child: Text(
                                     'Esta Semana',
-                                    style: AppTextStyles.body.copyWith(fontWeight: FontWeight.w600),
+                                    style: AppTextStyles.body.copyWith(
+                                      fontWeight: FontWeight.w600,
+                                    ),
                                     maxLines: 1,
                                     overflow: TextOverflow.ellipsis,
                                   ),
@@ -314,12 +353,18 @@ class _LawyerScheduleScreenState extends ConsumerState<LawyerScheduleScreen>
                             value: 'month',
                             child: Row(
                               children: [
-                                const Icon(Icons.date_range_rounded, size: 18, color: AppColors.ink3),
+                                const Icon(
+                                  Icons.date_range_rounded,
+                                  size: 18,
+                                  color: AppColors.ink3,
+                                ),
                                 const SizedBox(width: 8),
                                 Expanded(
                                   child: Text(
                                     'Este Mês',
-                                    style: AppTextStyles.body.copyWith(fontWeight: FontWeight.w600),
+                                    style: AppTextStyles.body.copyWith(
+                                      fontWeight: FontWeight.w600,
+                                    ),
                                     maxLines: 1,
                                     overflow: TextOverflow.ellipsis,
                                   ),
@@ -332,7 +377,11 @@ class _LawyerScheduleScreenState extends ConsumerState<LawyerScheduleScreen>
                               value: 'custom_day',
                               child: Row(
                                 children: [
-                                  const Icon(Icons.calendar_today_rounded, size: 18, color: AppColors.primary),
+                                  const Icon(
+                                    Icons.calendar_today_rounded,
+                                    size: 18,
+                                    color: AppColors.primary,
+                                  ),
                                   const SizedBox(width: 8),
                                   Expanded(
                                     child: Text(
@@ -356,7 +405,12 @@ class _LawyerScheduleScreenState extends ConsumerState<LawyerScheduleScreen>
               ),
             ),
             Padding(
-              padding: const EdgeInsets.only(left: 28, right: 24, top: 16, bottom: 4),
+              padding: const EdgeInsets.only(
+                left: 28,
+                right: 24,
+                top: 16,
+                bottom: 4,
+              ),
               child: Align(
                 alignment: Alignment.centerLeft,
                 child: Text(
@@ -383,7 +437,9 @@ class _LawyerScheduleScreenState extends ConsumerState<LawyerScheduleScreen>
                           SliverFillRemaining(
                             hasScrollBody: false,
                             child: Padding(
-                              padding: const EdgeInsets.symmetric(horizontal: 32),
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 32,
+                              ),
                               child: Column(
                                 children: [
                                   const Spacer(flex: 4),
@@ -397,8 +453,8 @@ class _LawyerScheduleScreenState extends ConsumerState<LawyerScheduleScreen>
                                     currentMode == 'week'
                                         ? 'Nenhum compromisso na semana selecionada'
                                         : currentMode == 'month'
-                                            ? 'Nenhum compromisso no mês selecionado'
-                                            : 'Nenhum compromisso em ${_formatDatePt(selectedDate)}',
+                                        ? 'Nenhum compromisso no mês selecionado'
+                                        : 'Nenhum compromisso em ${_formatDatePt(selectedDate)}',
                                     style: AppTextStyles.body.copyWith(
                                       color: AppColors.ink3,
                                       fontWeight: FontWeight.w600,
@@ -594,7 +650,8 @@ class _CreateAppointmentSheetState
         left: 24,
         right: 24,
         top: 12,
-        bottom: MediaQuery.of(context).viewInsets.bottom +
+        bottom:
+            MediaQuery.of(context).viewInsets.bottom +
             MediaQuery.of(context).padding.bottom +
             24,
       ),
@@ -614,10 +671,7 @@ class _CreateAppointmentSheetState
               ),
             ),
             const SizedBox(height: 20),
-            Text(
-              'Novo evento',
-              style: AppTextStyles.h2,
-            ),
+            Text('Novo evento', style: AppTextStyles.h2),
             const SizedBox(height: 24),
             TextField(
               controller: _titleController,
@@ -788,8 +842,7 @@ class _CreateAppointmentSheetState
 
     final time = await showTimePicker(
       context: context,
-      initialTime:
-          TimeOfDay.fromDateTime(_selectedDateTime ?? DateTime.now()),
+      initialTime: TimeOfDay.fromDateTime(_selectedDateTime ?? DateTime.now()),
     );
 
     if (mounted && time != null) {
@@ -807,9 +860,9 @@ class _CreateAppointmentSheetState
 
   void _createAppointment() async {
     if (_titleController.text.isEmpty || _selectedDateTime == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Preencha todos os campos')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Preencha todos os campos')));
       return;
     }
 
@@ -832,9 +885,9 @@ class _CreateAppointmentSheetState
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Erro ao criar: $e')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Erro ao criar: $e')));
       }
     }
   }

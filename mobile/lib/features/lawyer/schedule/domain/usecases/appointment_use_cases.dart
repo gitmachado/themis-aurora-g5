@@ -11,8 +11,7 @@ final class GetAppointmentsUseCase {
   Future<Either<Failure, List<Appointment>>> call(
     DateTime startDate,
     DateTime endDate,
-  ) =>
-      _repository.getByDateRange(startDate, endDate);
+  ) => _repository.getByDateRange(startDate, endDate);
 }
 
 final class CreateAppointmentUseCase {
@@ -20,9 +19,7 @@ final class CreateAppointmentUseCase {
 
   const CreateAppointmentUseCase(this._repository);
 
-  Future<Either<Failure, Appointment>> call(
-    Map<String, dynamic> data,
-  ) =>
+  Future<Either<Failure, Appointment>> call(Map<String, dynamic> data) =>
       _repository.create(data);
 }
 
@@ -31,10 +28,7 @@ final class UpdateAppointmentStatusUseCase {
 
   const UpdateAppointmentStatusUseCase(this._repository);
 
-  Future<Either<Failure, Appointment>> call(
-    String id,
-    String status,
-  ) =>
+  Future<Either<Failure, Appointment>> call(String id, String status) =>
       _repository.updateStatus(id, status);
 }
 
@@ -46,6 +40,5 @@ final class UpdateAppointmentUseCase {
   Future<Either<Failure, Appointment>> call(
     String id,
     Map<String, dynamic> data,
-  ) =>
-      _repository.update(id, data);
+  ) => _repository.update(id, data);
 }

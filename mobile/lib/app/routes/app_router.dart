@@ -56,8 +56,10 @@ final class AppRouter {
   static const String lawyerAIChatRoute = '/lawyer-ai-chat';
   static const String lawyerChatHandoffRoute = '/lawyer-chat-handoff';
   static const String lawyerScheduleRoute = '/lawyer-schedule';
-  static const String lawyerAppointmentDetailRoute = '/lawyer-appointment-detail';
-  static const String lawyerAppointmentApprovalRoute = '/lawyer-appointment-approval';
+  static const String lawyerAppointmentDetailRoute =
+      '/lawyer-appointment-detail';
+  static const String lawyerAppointmentApprovalRoute =
+      '/lawyer-appointment-approval';
   static const String procedureListRoute = '/procedure-list';
   static const String procedureTimelineRoute = '/procedure-timeline';
   static const String filesRoute = '/files';
@@ -258,7 +260,8 @@ final class AppRouter {
       case lawyerAppointmentDetailRoute:
         final appointment = settings.arguments as Appointment?;
         return MaterialPageRoute<void>(
-          builder: (_) => LawyerAppointmentDetailScreen(appointment: appointment),
+          builder: (_) =>
+              LawyerAppointmentDetailScreen(appointment: appointment),
           settings: settings,
         );
       case lawyerAppointmentApprovalRoute:

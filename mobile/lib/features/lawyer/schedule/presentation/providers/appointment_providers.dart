@@ -12,8 +12,8 @@ import '../../domain/usecases/appointment_use_cases.dart';
 // Data source
 final appointmentRemoteDataSourceProvider =
     Provider<AppointmentRemoteDataSource>((ref) {
-  return AppointmentRemoteDataSource(ref.watch(apiClientProvider));
-});
+      return AppointmentRemoteDataSource(ref.watch(apiClientProvider));
+    });
 
 // Repository
 final appointmentRepositoryProvider = Provider<AppointmentRepository>((ref) {
@@ -27,15 +27,22 @@ final getAppointmentsUseCaseProvider = Provider<GetAppointmentsUseCase>((ref) {
   return GetAppointmentsUseCase(ref.watch(appointmentRepositoryProvider));
 });
 
-final createAppointmentUseCaseProvider = Provider<CreateAppointmentUseCase>((ref) {
+final createAppointmentUseCaseProvider = Provider<CreateAppointmentUseCase>((
+  ref,
+) {
   return CreateAppointmentUseCase(ref.watch(appointmentRepositoryProvider));
 });
 
-final updateAppointmentStatusUseCaseProvider = Provider<UpdateAppointmentStatusUseCase>((ref) {
-  return UpdateAppointmentStatusUseCase(ref.watch(appointmentRepositoryProvider));
-});
+final updateAppointmentStatusUseCaseProvider =
+    Provider<UpdateAppointmentStatusUseCase>((ref) {
+      return UpdateAppointmentStatusUseCase(
+        ref.watch(appointmentRepositoryProvider),
+      );
+    });
 
-final updateAppointmentUseCaseProvider = Provider<UpdateAppointmentUseCase>((ref) {
+final updateAppointmentUseCaseProvider = Provider<UpdateAppointmentUseCase>((
+  ref,
+) {
   return UpdateAppointmentUseCase(ref.watch(appointmentRepositoryProvider));
 });
 
@@ -47,8 +54,8 @@ final selectedDateProvider = StateProvider<DateTime>((ref) {
 // Appointments provider
 final appointmentsProvider =
     AsyncNotifierProvider<AppointmentsNotifier, List<Appointment>>(
-  AppointmentsNotifier.new,
-);
+      AppointmentsNotifier.new,
+    );
 
 class AppointmentsNotifier extends AsyncNotifier<List<Appointment>> {
   StreamSubscription? _subscription;
@@ -128,22 +135,24 @@ final appointmentsByDateProvider = Provider<List<Appointment>>((ref) {
         selectedDate.day,
       ).subtract(Duration(days: selectedDate.weekday - 1));
       final endOfWeek = startOfWeek.add(const Duration(days: 7));
-      return appDate.isAfter(startOfWeek.subtract(const Duration(milliseconds: 1))) &&
+      return appDate.isAfter(
+            startOfWeek.subtract(const Duration(milliseconds: 1)),
+          ) &&
           appDate.isBefore(endOfWeek);
     } else if (mode == 'month') {
-      return appDate.year == selectedDate.year && appDate.month == selectedDate.month;
+      return appDate.year == selectedDate.year &&
+          appDate.month == selectedDate.month;
     } else {
       // 'today', 'tomorrow', 'custom_day'
       return appDate.year == selectedDate.year &&
           appDate.month == selectedDate.month &&
           appDate.day == selectedDate.day;
     }
-  }).toList()
-    ..sort((a, b) {
-      final diffA = a.scheduledAt.difference(now).abs();
-      final diffB = b.scheduledAt.difference(now).abs();
-      return diffA.compareTo(diffB);
-    });
+  }).toList()..sort((a, b) {
+    final diffA = a.scheduledAt.difference(now).abs();
+    final diffB = b.scheduledAt.difference(now).abs();
+    return diffA.compareTo(diffB);
+  });
 });
 
 // Only history (completed/canceled)
@@ -166,41 +175,44 @@ final appointmentHistoryProvider = Provider<List<Appointment>>((ref) {
         selectedDate.day,
       ).subtract(Duration(days: selectedDate.weekday - 1));
       final endOfWeek = startOfWeek.add(const Duration(days: 7));
-      return appDate.isAfter(startOfWeek.subtract(const Duration(milliseconds: 1))) &&
+      return appDate.isAfter(
+            startOfWeek.subtract(const Duration(milliseconds: 1)),
+          ) &&
           appDate.isBefore(endOfWeek);
     } else if (mode == 'month') {
-      return appDate.year == selectedDate.year && appDate.month == selectedDate.month;
+      return appDate.year == selectedDate.year &&
+          appDate.month == selectedDate.month;
     } else {
       return appDate.year == selectedDate.year &&
           appDate.month == selectedDate.month &&
           appDate.day == selectedDate.day;
     }
-  }).toList()
-    ..sort((a, b) {
-      final diffA = a.scheduledAt.difference(now).abs();
-      final diffB = b.scheduledAt.difference(now).abs();
-      return diffA.compareTo(diffB);
-    });
+  }).toList()..sort((a, b) {
+    final diffA = a.scheduledAt.difference(now).abs();
+    final diffB = b.scheduledAt.difference(now).abs();
+    return diffA.compareTo(diffB);
+  });
 });
 
 // Pending appointments list
-final pendingAppointmentsProvider =
-    FutureProvider<List<Appointment>>((ref) async {
+final pendingAppointmentsProvider = FutureProvider<List<Appointment>>((
+  ref,
+) async {
   final dataSource = ref.watch(appointmentRemoteDataSourceProvider);
   final pending = await dataSource.getPendingAppointments();
   return pending.map((model) => Appointment.fromModel(model)).toList();
 });
 
 // Pending appointments count
-final pendingAppointmentsCountProvider =
-    FutureProvider<int>((ref) async {
+final pendingAppointmentsCountProvider = FutureProvider<int>((ref) async {
   final pending = await ref.watch(pendingAppointmentsProvider.future);
   return pending.length;
 });
 
 // Appointments actions
-final appointmentActionsProvider =
-    Provider<AppointmentActions>((ref) => AppointmentActions(ref));
+final appointmentActionsProvider = Provider<AppointmentActions>(
+  (ref) => AppointmentActions(ref),
+);
 
 final class AppointmentActions {
   final Ref _ref;
@@ -214,19 +226,25 @@ final class AppointmentActions {
   }
 
   Future<void> complete(String id) async {
-    final result = await _ref.read(updateAppointmentStatusUseCaseProvider).call(id, 'COMPLETED');
+    final result = await _ref
+        .read(updateAppointmentStatusUseCaseProvider)
+        .call(id, 'COMPLETED');
     result.getOrThrow();
     _ref.invalidate(appointmentsProvider);
   }
 
   Future<void> cancel(String id) async {
-    final result = await _ref.read(updateAppointmentStatusUseCaseProvider).call(id, 'CANCELED');
+    final result = await _ref
+        .read(updateAppointmentStatusUseCaseProvider)
+        .call(id, 'CANCELED');
     result.getOrThrow();
     _ref.invalidate(appointmentsProvider);
   }
 
   Future<void> update(String id, Map<String, dynamic> data) async {
-    final result = await _ref.read(updateAppointmentUseCaseProvider).call(id, data);
+    final result = await _ref
+        .read(updateAppointmentUseCaseProvider)
+        .call(id, data);
     result.getOrThrow();
     _ref.invalidate(appointmentsProvider);
   }
@@ -249,7 +267,10 @@ final class AppointmentActions {
     _ref.invalidate(appointmentsProvider);
   }
 
-  Future<Map<String, dynamic>> requestReschedule(String id, String instruction) async {
+  Future<Map<String, dynamic>> requestReschedule(
+    String id,
+    String instruction,
+  ) async {
     final dataSource = _ref.read(appointmentRemoteDataSourceProvider);
     return await dataSource.requestReschedule(id, instruction);
   }
@@ -259,7 +280,10 @@ final class AppointmentActions {
     return await dataSource.getRescheduleSuggestions(id);
   }
 
-  Future<void> acceptRescheduleSuggestion(String suggestionId, String appointmentId) async {
+  Future<void> acceptRescheduleSuggestion(
+    String suggestionId,
+    String appointmentId,
+  ) async {
     final dataSource = _ref.read(appointmentRemoteDataSourceProvider);
     await dataSource.acceptRescheduleSuggestion(suggestionId, appointmentId);
     _ref.invalidate(appointmentsProvider);

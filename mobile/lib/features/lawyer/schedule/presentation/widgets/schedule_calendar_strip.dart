@@ -54,8 +54,11 @@ class _ScheduleCalendarStripState extends State<ScheduleCalendarStrip> {
 
   void _buildStripItems() {
     final baseDate = DateTime.now();
-    final startDate = DateTime(baseDate.year, baseDate.month, baseDate.day)
-        .subtract(const Duration(days: 60));
+    final startDate = DateTime(
+      baseDate.year,
+      baseDate.month,
+      baseDate.day,
+    ).subtract(const Duration(days: 60));
     _stripItems = [];
     _dateToIndex = {};
 
@@ -202,16 +205,21 @@ class _ScheduleCalendarStripState extends State<ScheduleCalendarStrip> {
     bool isSelected = false;
 
     if (widget.currentMode == 'week') {
-      final startOfWeek = DateTime(selected.year, selected.month, selected.day)
-          .subtract(Duration(days: selected.weekday - 1));
+      final startOfWeek = DateTime(
+        selected.year,
+        selected.month,
+        selected.day,
+      ).subtract(Duration(days: selected.weekday - 1));
       final endOfWeek = startOfWeek.add(const Duration(days: 6));
       final d = DateTime(date.year, date.month, date.day);
-      isSelected = d.isAfter(startOfWeek.subtract(const Duration(days: 1))) &&
+      isSelected =
+          d.isAfter(startOfWeek.subtract(const Duration(days: 1))) &&
           d.isBefore(endOfWeek.add(const Duration(days: 1)));
     } else if (widget.currentMode == 'month') {
       isSelected = date.year == selected.year && date.month == selected.month;
     } else {
-      isSelected = date.year == selected.year &&
+      isSelected =
+          date.year == selected.year &&
           date.month == selected.month &&
           date.day == selected.day;
     }
@@ -273,28 +281,21 @@ class _ScheduleCalendarStripState extends State<ScheduleCalendarStrip> {
     );
   }
 
-  String _getDayName(int weekday) => const [
-        'Seg',
-        'Ter',
-        'Qua',
-        'Qui',
-        'Sex',
-        'Sab',
-        'Dom',
-      ][weekday - 1];
+  String _getDayName(int weekday) =>
+      const ['Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sab', 'Dom'][weekday - 1];
 
   String _getMonthShortName(int month) => const [
-        'Jan',
-        'Fev',
-        'Mar',
-        'Abr',
-        'Mai',
-        'Jun',
-        'Jul',
-        'Ago',
-        'Set',
-        'Out',
-        'Nov',
-        'Dez',
-      ][month - 1];
+    'Jan',
+    'Fev',
+    'Mar',
+    'Abr',
+    'Mai',
+    'Jun',
+    'Jul',
+    'Ago',
+    'Set',
+    'Out',
+    'Nov',
+    'Dez',
+  ][month - 1];
 }

@@ -119,18 +119,25 @@ class LawyerAppointmentApprovalScreen extends ConsumerWidget {
     if (appointment.clientName != null && appointment.clientName!.isNotEmpty) {
       clientName = appointment.clientName!;
     }
-    if (appointment.clientWhatsappNumber != null && appointment.clientWhatsappNumber!.isNotEmpty) {
+    if (appointment.clientWhatsappNumber != null &&
+        appointment.clientWhatsappNumber!.isNotEmpty) {
       whatsappNumber = appointment.clientWhatsappNumber!;
     }
 
     // 1. Se ainda vazio, tenta buscar pelo ID direto
-    if (clientName.isEmpty && appointment.clientId != null && appointment.clientId!.isNotEmpty) {
-      final c = clients.where((item) => item.id == appointment.clientId).firstOrNull;
+    if (clientName.isEmpty &&
+        appointment.clientId != null &&
+        appointment.clientId!.isNotEmpty) {
+      final c = clients
+          .where((item) => item.id == appointment.clientId)
+          .firstOrNull;
       if (c != null) {
         clientName = c.name;
         whatsappNumber = c.whatsappNumber;
       } else {
-        final l = leads.where((item) => item.id == appointment.clientId).firstOrNull;
+        final l = leads
+            .where((item) => item.id == appointment.clientId)
+            .firstOrNull;
         if (l != null) {
           clientName = l.name ?? '';
           whatsappNumber = l.whatsappNumber;
@@ -146,8 +153,12 @@ class LawyerAppointmentApprovalScreen extends ConsumerWidget {
       ];
       for (final item in combined) {
         if (item.name.isNotEmpty &&
-            (appointment.title.toLowerCase().contains(item.name.toLowerCase()) ||
-                (appointment.description ?? '').toLowerCase().contains(item.name.toLowerCase()))) {
+            (appointment.title.toLowerCase().contains(
+                  item.name.toLowerCase(),
+                ) ||
+                (appointment.description ?? '').toLowerCase().contains(
+                  item.name.toLowerCase(),
+                ))) {
           clientName = item.name;
           whatsappNumber = item.phone;
           break;
@@ -309,12 +320,7 @@ class LawyerAppointmentApprovalScreen extends ConsumerWidget {
         ),
         trailing: const Column(
           mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(
-              Icons.chevron_right_rounded,
-              color: AppColors.ink2,
-            ),
-          ],
+          children: [Icon(Icons.chevron_right_rounded, color: AppColors.ink2)],
         ),
       ),
     );

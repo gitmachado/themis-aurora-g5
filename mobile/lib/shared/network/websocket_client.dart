@@ -138,52 +138,73 @@ class WebSocketClient {
     // Appointment events
     _socket!.on('appointment:created', (data) {
       if (kDebugMode) print('[WebSocket] Event received: appointment:created');
-      _eventController.add(WebSocketEvent(type: 'appointment:created', data: data));
+      _eventController.add(
+        WebSocketEvent(type: 'appointment:created', data: data),
+      );
     });
 
     _socket!.on('appointment:updated', (data) {
       if (kDebugMode) print('[WebSocket] Event received: appointment:updated');
-      _eventController.add(WebSocketEvent(type: 'appointment:updated', data: data));
+      _eventController.add(
+        WebSocketEvent(type: 'appointment:updated', data: data),
+      );
     });
 
     _socket!.on('appointment:deleted', (data) {
       if (kDebugMode) print('[WebSocket] Event received: appointment:deleted');
-      _eventController.add(WebSocketEvent(type: 'appointment:deleted', data: data));
+      _eventController.add(
+        WebSocketEvent(type: 'appointment:deleted', data: data),
+      );
     });
 
     _socket!.on('appointment:approved', (data) {
       if (kDebugMode) print('[WebSocket] Event received: appointment:approved');
-      _eventController.add(WebSocketEvent(type: 'appointment:approved', data: data));
+      _eventController.add(
+        WebSocketEvent(type: 'appointment:approved', data: data),
+      );
     });
 
     _socket!.on('appointment:rejected', (data) {
       if (kDebugMode) print('[WebSocket] Event received: appointment:rejected');
-      _eventController.add(WebSocketEvent(type: 'appointment:rejected', data: data));
+      _eventController.add(
+        WebSocketEvent(type: 'appointment:rejected', data: data),
+      );
     });
 
     _socket!.on('pending:appointments:updated', (data) {
-      if (kDebugMode) print('[WebSocket] Event received: pending:appointments:updated');
-      _eventController.add(WebSocketEvent(type: 'pending:appointments:updated', data: data));
+      if (kDebugMode)
+        print('[WebSocket] Event received: pending:appointments:updated');
+      _eventController.add(
+        WebSocketEvent(type: 'pending:appointments:updated', data: data),
+      );
     });
 
     _socket!.on('deadline:reminder', (data) {
       if (kDebugMode) print('[WebSocket] Event received: deadline:reminder');
-      _eventController.add(WebSocketEvent(type: 'deadline:reminder', data: data));
+      _eventController.add(
+        WebSocketEvent(type: 'deadline:reminder', data: data),
+      );
     });
 
     _socket!.on('reschedule:requested', (data) {
       if (kDebugMode) print('[WebSocket] Event received: reschedule:requested');
-      _eventController.add(WebSocketEvent(type: 'reschedule:requested', data: data));
+      _eventController.add(
+        WebSocketEvent(type: 'reschedule:requested', data: data),
+      );
     });
 
     _socket!.on('reschedule:accepted', (data) {
       if (kDebugMode) print('[WebSocket] Event received: reschedule:accepted');
-      _eventController.add(WebSocketEvent(type: 'reschedule:accepted', data: data));
+      _eventController.add(
+        WebSocketEvent(type: 'reschedule:accepted', data: data),
+      );
     });
 
     _socket!.on('reschedule:rejected', (data) {
       if (kDebugMode) print('[WebSocket] Event received: reschedule:rejected');
-      _eventController.add(WebSocketEvent(type: 'reschedule:rejected', data: data));
+      _eventController.add(
+        WebSocketEvent(type: 'reschedule:rejected', data: data),
+      );
     });
   }
 

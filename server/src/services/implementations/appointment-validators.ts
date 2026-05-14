@@ -1,4 +1,4 @@
-import { ConflictError, NotFoundError, ValidationError } from './errors';
+import { ConflictError, NotFoundError } from './errors';
 import type { Appointment } from '@models';
 
 /**
@@ -98,11 +98,11 @@ export class AppointmentValidators {
    */
   static validateRescheduleInstruction(instruction: string): void {
     if (!instruction || instruction.trim().length === 0) {
-      throw new ValidationError('Instrução de reagendamento não pode estar vazia');
+      throw new Error('Instrução de reagendamento não pode estar vazia');
     }
 
     if (instruction.length > 500) {
-      throw new ValidationError('Instrução de reagendamento não pode ter mais de 500 caracteres');
+      throw new Error('Instrução de reagendamento não pode ter mais de 500 caracteres');
     }
   }
 
@@ -132,10 +132,3 @@ export class AppointmentValidators {
   }
 }
 
-// Erro de validação customizado
-export class ValidationError extends Error {
-  constructor(message: string) {
-    super(message);
-    this.name = 'ValidationError';
-  }
-}

@@ -11,11 +11,7 @@ class AppointmentCard extends ConsumerWidget {
   final Appointment appointment;
   final VoidCallback? onTap;
 
-  const AppointmentCard({
-    super.key,
-    required this.appointment,
-    this.onTap,
-  });
+  const AppointmentCard({super.key, required this.appointment, this.onTap});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -24,9 +20,10 @@ class AppointmentCard extends ConsumerWidget {
     final procedures = ref.watch(myProceduresProvider).valueOrNull ?? const [];
     final processName = appointment.processId != null
         ? procedures
-            .where((p) => p.id == appointment.processId)
-            .map((p) => p.title)
-            .firstOrNull ?? 'Processo Vinculado'
+                  .where((p) => p.id == appointment.processId)
+                  .map((p) => p.title)
+                  .firstOrNull ??
+              'Processo Vinculado'
         : null;
 
     return AppCard(
@@ -47,7 +44,12 @@ class AppointmentCard extends ConsumerWidget {
             ),
             Expanded(
               child: Padding(
-                padding: const EdgeInsets.only(left: 12, top: 12, right: 16, bottom: 12),
+                padding: const EdgeInsets.only(
+                  left: 12,
+                  top: 12,
+                  right: 16,
+                  bottom: 12,
+                ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -59,7 +61,9 @@ class AppointmentCard extends ConsumerWidget {
                             appointment.title,
                             style: AppTextStyles.body.copyWith(
                               fontWeight: FontWeight.w600,
-                              color: isCanceled ? AppColors.ink3 : AppColors.ink,
+                              color: isCanceled
+                                  ? AppColors.ink3
+                                  : AppColors.ink,
                               decoration: isCanceled
                                   ? TextDecoration.lineThrough
                                   : TextDecoration.none,
@@ -68,7 +72,8 @@ class AppointmentCard extends ConsumerWidget {
                             overflow: TextOverflow.ellipsis,
                           ),
                         ),
-                        if (appointment.status == 'COMPLETED' || appointment.status == 'CANCELED') ...[
+                        if (appointment.status == 'COMPLETED' ||
+                            appointment.status == 'CANCELED') ...[
                           const SizedBox(width: 8),
                           _buildStatusIcon(),
                         ],
@@ -79,7 +84,8 @@ class AppointmentCard extends ConsumerWidget {
                         ),
                       ],
                     ),
-                    if (appointment.clientName != null || appointment.clientWhatsappNumber != null) ...[
+                    if (appointment.clientName != null ||
+                        appointment.clientWhatsappNumber != null) ...[
                       const SizedBox(height: 6),
                       Row(
                         children: [
@@ -95,7 +101,9 @@ class AppointmentCard extends ConsumerWidget {
                                 if (appointment.clientName != null)
                                   appointment.clientName!,
                                 if (appointment.clientWhatsappNumber != null)
-                                  _formatWhatsApp(appointment.clientWhatsappNumber!),
+                                  _formatWhatsApp(
+                                    appointment.clientWhatsappNumber!,
+                                  ),
                               ].join(' • '),
                               style: AppTextStyles.caption.copyWith(
                                 color: AppColors.textCaption,
@@ -140,7 +148,8 @@ class AppointmentCard extends ConsumerWidget {
                         overflow: TextOverflow.ellipsis,
                       ),
                     ],
-                    if (appointment.processId != null && processName != null) ...[
+                    if (appointment.processId != null &&
+                        processName != null) ...[
                       const SizedBox(height: 6),
                       Row(
                         children: [
