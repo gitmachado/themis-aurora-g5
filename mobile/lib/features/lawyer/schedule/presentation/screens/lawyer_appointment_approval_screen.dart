@@ -115,8 +115,16 @@ class LawyerAppointmentApprovalScreen extends ConsumerWidget {
     String clientName = '';
     String whatsappNumber = '';
 
-    // 1. Tenta buscar pelo ID direto
-    if (appointment.clientId != null && appointment.clientId!.isNotEmpty) {
+    // NOVO: Prioriza dados vindo direto do agendamento (backend)
+    if (appointment.clientName != null && appointment.clientName!.isNotEmpty) {
+      clientName = appointment.clientName!;
+    }
+    if (appointment.clientWhatsappNumber != null && appointment.clientWhatsappNumber!.isNotEmpty) {
+      whatsappNumber = appointment.clientWhatsappNumber!;
+    }
+
+    // 1. Se ainda vazio, tenta buscar pelo ID direto
+    if (clientName.isEmpty && appointment.clientId != null && appointment.clientId!.isNotEmpty) {
       final c = clients.where((item) => item.id == appointment.clientId).firstOrNull;
       if (c != null) {
         clientName = c.name;

@@ -646,6 +646,21 @@ class _LawyerAppointmentDetailScreenState
                     children: [
                       _buildHeaderSection(target),
                       const SizedBox(height: 24),
+                      if (target.clientName != null || target.clientWhatsappNumber != null)
+                        _buildInfoCard(
+                          title: 'Informações do Cliente',
+                          icon: Icons.person_rounded,
+                          children: [
+                            if (target.clientName != null)
+                              _buildDetailRow('Nome', target.clientName!),
+                            if (target.clientWhatsappNumber != null) ...[
+                              if (target.clientName != null) const SizedBox(height: 8),
+                              _buildDetailRow('WhatsApp', _formatWhatsApp(target.clientWhatsappNumber!)),
+                            ],
+                          ],
+                        ),
+                      if (target.clientName != null || target.clientWhatsappNumber != null)
+                        const SizedBox(height: 24),
                       _buildInfoCard(
                         title: 'Data e Hora',
                         icon: Icons.calendar_today_rounded,
@@ -922,6 +937,14 @@ class _LawyerAppointmentDetailScreenState
     final start = target.scheduledAt;
     final end = target.endTime;
     return '${start.hour.toString().padLeft(2, '0')}:${start.minute.toString().padLeft(2, '0')} - ${end.hour.toString().padLeft(2, '0')}:${end.minute.toString().padLeft(2, '0')}';
+  }
+
+  String _formatWhatsApp(String number) {
+    final clean = number.replaceAll(RegExp(r'\D'), '');
+    if (clean.length == 11) {
+      return '(${clean.substring(0, 2)}) ${clean.substring(2, 7)}-${clean.substring(7)}';
+    }
+    return number;
   }
 
   void _showEditSheet(Appointment target) {
