@@ -125,6 +125,10 @@ export class SocketService {
       this.io?.to('lobby:lawyers').emit('lead:deleted', { leadId });
     });
 
+    eventBus.on('leads:reset', () => {
+      this.io?.to('lobby:lawyers').emit('leads:reset', {});
+    });
+
     eventBus.on('procedure:updated', ({ userId, procedure }) => {
       this.io?.to(`user:${userId}`).emit('procedure:updated', procedure);
     });

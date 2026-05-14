@@ -78,6 +78,7 @@ class PendingLeadsNotifier extends AsyncNotifier<List<Lead>> {
           event.type == 'lead:locked' ||
           event.type == 'lead:unlocked' ||
           event.type == 'lead:deleted' ||
+          event.type == 'leads:reset' ||
           event.type == 'connected') {
         refresh();
       }
@@ -120,6 +121,7 @@ class AllLeadsNotifier extends AsyncNotifier<List<Lead>> {
           event.type == 'lead:locked' ||
           event.type == 'lead:unlocked' ||
           event.type == 'lead:deleted' ||
+          event.type == 'leads:reset' ||
           event.type == 'connected') {
         refresh();
       }

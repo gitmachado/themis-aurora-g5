@@ -134,6 +134,11 @@ class WebSocketClient {
       _eventController.add(WebSocketEvent(type: 'lead:deleted', data: data));
     });
 
+    _socket!.on('leads:reset', (data) {
+      if (kDebugMode) print('[WebSocket] Event received: leads:reset');
+      _eventController.add(WebSocketEvent(type: 'leads:reset', data: data));
+    });
+
     _socket!.on('procedure:updated', (data) {
       _eventController.add(
         WebSocketEvent(type: 'procedure:updated', data: data),

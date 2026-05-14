@@ -197,6 +197,9 @@ export class LeadService implements ILeadService {
 
     eventBus.emitLeadUpdate(updatedLead);
 
+    // Emit leads:reset so all lawyers refresh their pending leads list
+    eventBus.emitLeadsReset();
+
     return user;
   }
 
@@ -213,6 +216,9 @@ export class LeadService implements ILeadService {
 
     // Notify update via Socket
     eventBus.emitLeadUpdate(updatedLead);
+
+    // Emit leads:reset so all lawyers refresh their pending leads list
+    eventBus.emitLeadsReset();
 
     return updatedLead;
   }
@@ -359,5 +365,8 @@ export class LeadService implements ILeadService {
 
     // 4. Notify via WebSocket
     eventBus.emitLeadDeleted(id);
+
+    // 5. Emit leads:reset so all lawyers refresh their leads list
+    eventBus.emitLeadsReset();
   }
 }
