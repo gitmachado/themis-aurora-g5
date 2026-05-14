@@ -78,6 +78,27 @@ class _LawyerScheduleScreenState extends ConsumerState<LawyerScheduleScreen>
     final currentMode = ref.watch(scheduleViewModeProvider);
     final showHistory = ref.watch(showHistoryProvider);
     final pendingCount = ref.watch(pendingAppointmentsCountProvider);
+    final now = DateTime.now();
+    final tomorrow = now.add(const Duration(days: 1));
+    const shortWeekdays = [
+      'Segunda',
+      'Terça',
+      'Quarta',
+      'Quinta',
+      'Sexta',
+      'Sábado',
+      'Domingo',
+    ];
+    final selectedWeekdayName = shortWeekdays[selectedDate.weekday - 1];
+    final isToday =
+        selectedDate.year == now.year &&
+        selectedDate.month == now.month &&
+        selectedDate.day == now.day;
+    final isTomorrow =
+        selectedDate.year == tomorrow.year &&
+        selectedDate.month == tomorrow.month &&
+        selectedDate.day == tomorrow.day;
+
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: CustomAppBar(
