@@ -70,6 +70,7 @@ class MyNotificationsNotifier extends AsyncNotifier<List<AppNotification>> {
     // are never served to a different user after switching accounts.
     await ref.watch(currentAccountProvider.future);
 
+    ref.watch(webSocketClientProvider); // Cria dependência reativa
     _listenToEvents();
     ref.onDispose(() => _subscription?.cancel());
     return _fetch();
@@ -77,7 +78,7 @@ class MyNotificationsNotifier extends AsyncNotifier<List<AppNotification>> {
 
   void _listenToEvents() {
     _subscription?.cancel();
-    _subscription = ref.watch(webSocketClientProvider).events.listen((event) {
+    _subscription = ref.read(webSocketClientProvider).events.listen((event) {
       if (event.type == 'notification:new') {
         final notification = AppNotificationModel.fromJson(event.data);
         state = AsyncData([notification, ...state.value ?? []]);

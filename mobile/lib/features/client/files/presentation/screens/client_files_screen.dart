@@ -712,10 +712,16 @@ class _ClientFilesScreenState extends ConsumerState<ClientFilesScreen> {
     List<LegalProcess> procedures,
     String? initialProcessId,
   ) {
-    LegalProcess selectedProcess = procedures.firstWhere(
-      (p) => p.id == initialProcessId,
-      orElse: () => procedures.first,
-    );
+    if (procedures.isEmpty) return Future.value(null);
+
+    late LegalProcess selectedProcess;
+    try {
+      selectedProcess = procedures.firstWhere(
+        (p) => p.id == initialProcessId,
+      );
+    } catch (e) {
+      selectedProcess = procedures.first;
+    }
 
     return showModalBottomSheet<LegalProcess>(
       context: context,

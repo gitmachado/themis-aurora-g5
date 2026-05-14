@@ -44,6 +44,10 @@ class InternalEventBus extends EventEmitter {
     this.emit('lead:unlocked', { leadId, whatsappNumber });
   }
 
+  public emitLeadDeleted(leadId: string): void {
+    this.emit('lead:deleted', { leadId });
+  }
+
   public emitProcedureUpdate(userId: string, procedure: LegalProcess): void {
     this.emit('procedure:updated', { userId, procedure });
   }
@@ -86,6 +90,14 @@ class InternalEventBus extends EventEmitter {
 
   public emitRescheduleRejected(lawyerId: string, suggestionId: string): void {
     this.emit('reschedule:rejected', { lawyerId, suggestionId });
+  }
+
+  public emitDocumentUploaded(userId: string, document: any): void {
+    this.emit('document:uploaded', { userId, document });
+  }
+
+  public emitDocumentDeleted(userId: string, documentId: string, processId: string): void {
+    this.emit('document:deleted', { userId, documentId, processId });
   }
 }
 

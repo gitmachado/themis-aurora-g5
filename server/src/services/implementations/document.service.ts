@@ -1,17 +1,22 @@
 import { IDocumentService, ALLOWED_MIME_TYPES, MAX_FILE_SIZE_BYTES } from '../interfaces/document.service';
 import { IDocumentRepository } from '../../repositories/interfaces/document.repository';
+import { ILegalProcessRepository } from '../../repositories/interfaces/legal-process.repository';
 import type { Document } from '@models';
 import type { CreateDocumentDTO } from '@dtos';
 import { ValidationError, NotFoundError } from './errors';
+import { eventBus } from '../communication/InternalEventBus';
 
 export class DocumentService implements IDocumentService {
-  constructor(private readonly documentRepository: IDocumentRepository) {}
+  constructor(
+    private readonly documentRepository: IDocumentRepository,
+    private readonly legalProcessRepository?: ILegalProcessRepository,
+  ) {}
 
   async upload(dto: CreateDocumentDTO): Promise<Document> {
-    // In a real scenario, the file would be handled by a middleware (like multer) 
+    // In a real scenario, the file would be handled by a middleware (like multer)
     // and its metadata passed here. We assume validation happened or we do it here.
-    
-    return this.documentRepository.create({
+
+    const document = await this.documentRepository.create({
       legalProcessId: dto.legalProcessId,
       fileName: dto.fileName,
       fileUrl: dto.fileUrl,
@@ -19,6 +24,19 @@ export class DocumentService implements IDocumentService {
       sizeBytes: dto.sizeBytes || null,
       sentById: dto.sentById,
     });
+
+    // Emit event to both client and lawyer
+    if (this.legalProcessRepository) {
+      const process = await this.legalProcessRepository.findById(dto.legalProcessId);
+      if (process) {
+        eventBus.emitDocumentUploaded(process.clientId, document);
+        if (process.lawyerId) {
+          eventBus.emitDocumentUploaded(process.lawyerId, document);
+        }
+      }
+    }
+
+    return document;
   }
 
   validateFile(sizeBytes: number, mimeType: string): boolean {
@@ -54,5 +72,16 @@ export class DocumentService implements IDocumentService {
     }
     // In a real scenario, we would also delete the file from storage (S3, etc.)
     await this.documentRepository.delete(id);
+
+    // Emit event to both client and lawyer
+    if (this.legalProcessRepository) {
+      const process = await this.legalProcessRepository.findById(document.legalProcessId);
+      if (process) {
+        eventBus.emitDocumentDeleted(process.clientId, id, process.id);
+        if (process.lawyerId) {
+          eventBus.emitDocumentDeleted(process.lawyerId, id, process.id);
+        }
+      }
+    }
   }
 }

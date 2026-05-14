@@ -356,5 +356,8 @@ export class LeadService implements ILeadService {
     // 3. Deletar o lead
     await this.leadRepository.delete(id);
     console.log(`[LeadService] Lead ${id} removido do sistema`);
+
+    // 4. Notify via WebSocket
+    eventBus.emitLeadDeleted(id);
   }
 }

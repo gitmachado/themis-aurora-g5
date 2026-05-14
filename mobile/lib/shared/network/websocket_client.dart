@@ -129,6 +129,11 @@ class WebSocketClient {
       _eventController.add(WebSocketEvent(type: 'lead:unlocked', data: data));
     });
 
+    _socket!.on('lead:deleted', (data) {
+      if (kDebugMode) print('[WebSocket] Event received: lead:deleted');
+      _eventController.add(WebSocketEvent(type: 'lead:deleted', data: data));
+    });
+
     _socket!.on('procedure:updated', (data) {
       _eventController.add(
         WebSocketEvent(type: 'procedure:updated', data: data),
@@ -205,6 +210,20 @@ class WebSocketClient {
       if (kDebugMode) print('[WebSocket] Event received: reschedule:rejected');
       _eventController.add(
         WebSocketEvent(type: 'reschedule:rejected', data: data),
+      );
+    });
+
+    _socket!.on('document:uploaded', (data) {
+      if (kDebugMode) print('[WebSocket] Event received: document:uploaded');
+      _eventController.add(
+        WebSocketEvent(type: 'document:uploaded', data: data),
+      );
+    });
+
+    _socket!.on('document:deleted', (data) {
+      if (kDebugMode) print('[WebSocket] Event received: document:deleted');
+      _eventController.add(
+        WebSocketEvent(type: 'document:deleted', data: data),
       );
     });
   }
