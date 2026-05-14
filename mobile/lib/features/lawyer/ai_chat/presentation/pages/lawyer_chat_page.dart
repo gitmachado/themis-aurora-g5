@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:mobile/shared/constants/app_colors.dart';
 import 'package:mobile/shared/constants/app_text_styles.dart';
+import 'package:mobile/shared/constants/app_assets.dart';
 import 'package:mobile/shared/utils/api_formatters.dart';
+import 'package:mobile/shared/widgets/layout/custom_app_bar.dart';
 import '../../domain/entities/chat_message.dart';
 import '../providers/lawyer_chat_provider.dart';
 
@@ -107,45 +110,12 @@ class _LawyerChatPageState extends ConsumerState<LawyerChatPage> {
 
     return Scaffold(
       backgroundColor: AppColors.background,
-      appBar: AppBar(
-        backgroundColor: AppColors.surface,
-        elevation: 0,
-        scrolledUnderElevation: 0,
-        leading: IconButton(
-          icon: const Icon(
-            Icons.arrow_back_ios_new_rounded,
-            color: AppColors.ink,
-          ),
-          onPressed: () => Navigator.of(context).pop(),
-        ),
-        title: Row(
-          children: [
-            Container(
-              width: 10,
-              height: 10,
-              decoration: const BoxDecoration(
-                color: AppColors.success,
-                shape: BoxShape.circle,
-              ),
-            ),
-            const SizedBox(width: 8),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'Assistente Themis AI',
-                    style: AppTextStyles.h2.copyWith(fontSize: 16),
-                  ),
-                  Text(
-                    'Online • Advogados',
-                    style: AppTextStyles.tiny.copyWith(color: AppColors.ink3),
-                  ),
-                ],
-              ),
-            ),
-          ],
-        ),
+      appBar: CustomAppBar(
+        title: '',
+        showBackButton: true,
+        showDivider: true,
+        centerTitle: false,
+        backgroundColor: AppColors.white,
         actions: [
           IconButton(
             tooltip: 'Limpar conversa',
@@ -155,9 +125,55 @@ class _LawyerChatPageState extends ConsumerState<LawyerChatPage> {
                 : () => _confirmClearConversation(),
           ),
         ],
-        bottom: PreferredSize(
-          preferredSize: const Size.fromHeight(1.0),
-          child: Container(color: AppColors.border, height: 1.0),
+        titleWidget: Row(
+          children: [
+            Container(
+              width: 38,
+              height: 38,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: AppColors.yellowSoft,
+                border: Border.all(color: AppColors.yellow, width: 1.5),
+              ),
+              child: Center(
+                child: SvgPicture.asset(AppAssets.logo, width: 22, height: 22),
+              ),
+            ),
+            const SizedBox(width: 10),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  'Themis',
+                  style: AppTextStyles.h2.copyWith(
+                    fontSize: 15,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+                Row(
+                  children: [
+                    Container(
+                      width: 6,
+                      height: 6,
+                      decoration: const BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: AppColors.success,
+                      ),
+                    ),
+                    const SizedBox(width: 5),
+                    Text(
+                      'Para advogados',
+                      style: AppTextStyles.caption.copyWith(
+                        fontSize: 11,
+                        color: AppColors.textCaption,
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ],
         ),
       ),
       body: SafeArea(
