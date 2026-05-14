@@ -20,8 +20,8 @@ export class NotificationService implements INotificationService {
       title: dto.title,
       body: dto.body,
       isRead: false,
-      type: (dto as any).type || 'SYSTEM',
-      extraData: (dto as any).extraData || null,
+      type: dto.type || 'SYSTEM',
+      extraData: dto.extraData || null,
     });
 
     // Notify via Socket.io

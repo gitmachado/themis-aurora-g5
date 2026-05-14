@@ -269,11 +269,11 @@ VALUES
 -- 7. Notificações
 -- -----------------------------------------------------------------------------
 -- Para o admin
-INSERT INTO notifications (user_id, type, title, body, is_read, created_at)
+INSERT INTO notifications (user_id, type, title, body, is_read, created_at, extra_data)
 VALUES
-  ('11111111-1111-4111-8111-111111111111', 'NEW_LEAD',       'Novo lead recebido',     'Maria Trabalhadora enviou uma solicitação via WhatsApp.', FALSE, NOW() - INTERVAL '50 minutes'),
-  ('11111111-1111-4111-8111-111111111111', 'HUMAN_SUPPORT',  'Atendimento humano',     'Pedro Investidor pediu para falar com um advogado.',      FALSE, NOW() - INTERVAL '3 hours'),
-  ('11111111-1111-4111-8111-111111111111', 'NEW_NOTE',       'Nova nota no processo',  'Você adicionou uma nota em "Ação de Divórcio Consensual".', TRUE,  NOW() - INTERVAL '1 day');
+  ('11111111-1111-4111-8111-111111111111', 'NEW_LEAD',       'Novo lead recebido',     'Maria Trabalhadora enviou uma solicitação via WhatsApp.', FALSE, NOW() - INTERVAL '50 minutes', NULL),
+  ('11111111-1111-4111-8111-111111111111', 'HUMAN_SUPPORT',  'Atendimento humano',     'Pedro Investidor pediu para falar com um advogado.',      FALSE, NOW() - INTERVAL '3 hours', '{"whatsappNumber": "5511999999999", "name": "Pedro Investidor"}'),
+  ('11111111-1111-4111-8111-111111111111', 'NEW_NOTE',       'Nova nota no processo',  'Você adicionou uma nota em "Ação de Divórcio Consensual".', TRUE,  NOW() - INTERVAL '1 day', NULL);
 
 -- Para a Dra. Ana
 INSERT INTO notifications (user_id, type, title, body, is_read, created_at)

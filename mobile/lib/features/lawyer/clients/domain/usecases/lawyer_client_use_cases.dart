@@ -23,3 +23,13 @@ final class GetLawyerClientByIdUseCase {
     return _repository.getById(id);
   }
 }
+
+final class DeleteLawyerClientUseCase {
+  final LawyerClientRepository _repository;
+
+  const DeleteLawyerClientUseCase(this._repository);
+
+  Future<Either<Failure, void>> call(String id) {
+    return _repository.deleteClient(id);
+  }
+}

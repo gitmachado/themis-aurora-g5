@@ -281,8 +281,8 @@ class _FirstLoginBanner extends StatelessWidget {
                 ),
                 const SizedBox(height: 4),
                 Text(
-                  'Você entrou com uma senha temporária fornecida pelo chefe do '
-                  'escritório. Defina agora uma senha sua para continuar.',
+                  'Você entrou com uma senha temporária. '
+                  'Defina agora uma senha pessoal para continuar.',
                   style: AppTextStyles.caption.copyWith(fontSize: 12.5),
                 ),
               ],

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import '../../../../../../shared/constants/app_colors.dart';
 import '../../../../../../shared/constants/app_text_styles.dart';
@@ -21,20 +22,26 @@ class _LawyerAIManagerScreenState extends State<LawyerAIManagerScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: AppColors.background,
-      appBar: const CustomAppBar(title: 'Themis IA', showBackButton: true),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(24),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            _buildStatusCard(),
-            const SizedBox(height: 24),
-            _buildConfigurationSection(),
-            const SizedBox(height: 24),
-            _buildKnowledgeBaseSection(),
-          ],
+    return AnnotatedRegion<SystemUiOverlayStyle>(
+      value: const SystemUiOverlayStyle(
+        systemNavigationBarColor: AppColors.white,
+        systemNavigationBarIconBrightness: Brightness.dark,
+      ),
+      child: Scaffold(
+        backgroundColor: AppColors.background,
+        appBar: const CustomAppBar(title: 'Themis IA', showBackButton: true),
+        body: SingleChildScrollView(
+          padding: const EdgeInsets.all(24),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              _buildStatusCard(),
+              const SizedBox(height: 24),
+              _buildConfigurationSection(),
+              const SizedBox(height: 24),
+              _buildKnowledgeBaseSection(),
+            ],
+          ),
         ),
       ),
     );

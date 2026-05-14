@@ -64,4 +64,22 @@ export class ClientController {
       next(error);
     }
   };
+
+  delete: RequestHandler<{ id: string }> = async (
+    req: AuthRequest<{ id: string }>,
+    res: Response,
+    next: NextFunction
+  ) => {
+    try {
+      if (req.user!.role !== 'LAWYER' && req.user!.role !== 'LAWYER_ADMIN') {
+        throw new ForbiddenError('Apenas advogados podem deletar clientes');
+      }
+
+      await this.userService.hardDeleteClient(req.user!.id, req.params.id);
+
+      return res.status(204).send();
+    } catch (error) {
+      next(error);
+    }
+  };
 }

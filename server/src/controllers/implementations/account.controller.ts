@@ -132,7 +132,15 @@ export class AccountController {
     res: Response,
     next: NextFunction
   ) => {
-    const file = (req as any).file;
+    // Multer popula `req.file` em uploads single-file. Tipamos localmente para
+    // evitar dependencia ambient de @types/multer no controller.
+    type MulterFile = {
+      path: string;
+      originalname: string;
+      mimetype: string;
+      size: number;
+    };
+    const file = (req as unknown as { file?: MulterFile }).file;
     try {
       if (!file) {
         throw new ValidationError('Nenhuma imagem enviada');

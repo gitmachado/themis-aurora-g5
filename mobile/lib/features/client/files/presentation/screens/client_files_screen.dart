@@ -1,6 +1,7 @@
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:image_picker/image_picker.dart';
 
 import '../../../../../../features/auth/presentation/providers/auth_providers.dart';
 import '../../../../../../features/procedures/domain/entities/legal_process.dart';
@@ -206,7 +207,7 @@ class _ClientFilesScreenState extends ConsumerState<ClientFilesScreen> {
       ),
       floatingActionButton: FloatingActionButton(
         heroTag: 'client_file_fab',
-        onPressed: _isUploading ? null : () => _pickAndUpload(procedures),
+        onPressed: _isUploading ? null : () => _showUploadOptions(procedures),
         backgroundColor: _isUploading
             ? AppColors.textCaption
             : AppColors.yellow,
@@ -487,7 +488,7 @@ class _ClientFilesScreenState extends ConsumerState<ClientFilesScreen> {
     return 'Outros';
   }
 
-  Future<void> _pickAndUpload(List<LegalProcess> procedures) async {
+  Future<void> _showUploadOptions(List<LegalProcess> procedures) async {
     if (procedures.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
@@ -499,6 +500,105 @@ class _ClientFilesScreenState extends ConsumerState<ClientFilesScreen> {
       return;
     }
 
+    final source = await showModalBottomSheet<_UploadSource>(
+      context: context,
+      backgroundColor: AppColors.white,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (context) {
+        return SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.all(24),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Center(
+                  child: Container(
+                    width: 40,
+                    height: 4,
+                    decoration: BoxDecoration(
+                      color: AppColors.divider,
+                      borderRadius: BorderRadius.circular(2),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 24),
+                Text(
+                  'Enviar documento',
+                  style: AppTextStyles.h2.copyWith(fontSize: 18),
+                ),
+                const SizedBox(height: 24),
+                _buildUploadOption(
+                  Icons.camera_alt_outlined,
+                  'Tirar Foto',
+                  () => Navigator.pop(context, _UploadSource.camera),
+                ),
+                const SizedBox(height: 12),
+                _buildUploadOption(
+                  Icons.image_outlined,
+                  'Galeria de Fotos',
+                  () => Navigator.pop(context, _UploadSource.gallery),
+                ),
+                const SizedBox(height: 12),
+                _buildUploadOption(
+                  Icons.description_outlined,
+                  'Arquivos do Dispositivo',
+                  () => Navigator.pop(context, _UploadSource.files),
+                ),
+                const SizedBox(height: 24),
+                SizedBox(
+                  width: double.infinity,
+                  child: TextButton(
+                    onPressed: () => Navigator.pop(context),
+                    style: TextButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(vertical: 16),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(16),
+                        side: BorderSide(
+                          color: AppColors.divider.withValues(alpha: 0.5),
+                        ),
+                      ),
+                    ),
+                    child: Text(
+                      'Cancelar',
+                      style: AppTextStyles.body.copyWith(
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+
+    if (source == null) return;
+    await _pickAndUpload(procedures, source);
+  }
+
+  Widget _buildUploadOption(IconData icon, String label, VoidCallback onTap) {
+    return ListTile(
+      leading: Icon(icon, color: AppColors.primary),
+      title: Text(
+        label,
+        style: AppTextStyles.body.copyWith(fontWeight: FontWeight.w600),
+      ),
+      onTap: onTap,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12),
+        side: BorderSide(color: AppColors.divider.withValues(alpha: 0.5)),
+      ),
+    );
+  }
+
+  Future<void> _pickAndUpload(
+    List<LegalProcess> procedures,
+    _UploadSource source,
+  ) async {
     final process = procedures.cast<LegalProcess>().firstWhere(
       (p) => p.id == _selectedProcessId,
       orElse: () => procedures.first,
@@ -509,29 +609,12 @@ class _ClientFilesScreenState extends ConsumerState<ClientFilesScreen> {
 
     if (confirmed != true) return;
 
-    final result = await FilePicker.pickFiles(
-      type: FileType.custom,
-      allowedExtensions: const [
-        'pdf',
-        'png',
-        'jpg',
-        'jpeg',
-        'heic',
-        'heif',
-        'doc',
-        'docx',
-        'xls',
-        'xlsx',
-      ],
-      withData: false,
-    );
-
-    final file = result?.files.single;
-    if (file == null || file.path == null) return;
+    final picked = await _pickFromSource(source);
+    if (picked == null) return;
 
     // Validacao de tamanho (10MB) - PRD 2.2
     const maxBytes = 10 * 1024 * 1024;
-    if (file.size > maxBytes) {
+    if (picked.size > maxBytes) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('O arquivo excede o limite de 10MB.')),
@@ -549,8 +632,8 @@ class _ClientFilesScreenState extends ConsumerState<ClientFilesScreen> {
           .read(procedureActionsProvider)
           .uploadDocument(
             processId: process.id,
-            filePath: file.path!,
-            fileName: file.name,
+            filePath: picked.path,
+            fileName: picked.name,
             onSendProgress: (count, total) {
               if (total > 0) {
                 setState(() => _uploadProgress = count / total);
@@ -575,6 +658,43 @@ class _ClientFilesScreenState extends ConsumerState<ClientFilesScreen> {
           _uploadProgress = 0.0;
         });
       }
+    }
+  }
+
+  Future<_PickedFile?> _pickFromSource(_UploadSource source) async {
+    switch (source) {
+      case _UploadSource.camera:
+      case _UploadSource.gallery:
+        final picker = ImagePicker();
+        final image = await picker.pickImage(
+          source: source == _UploadSource.camera
+              ? ImageSource.camera
+              : ImageSource.gallery,
+          imageQuality: 85,
+        );
+        if (image == null) return null;
+        final length = await image.length();
+        return _PickedFile(path: image.path, name: image.name, size: length);
+      case _UploadSource.files:
+        final result = await FilePicker.pickFiles(
+          type: FileType.custom,
+          allowedExtensions: const [
+            'pdf',
+            'png',
+            'jpg',
+            'jpeg',
+            'heic',
+            'heif',
+            'doc',
+            'docx',
+            'xls',
+            'xlsx',
+          ],
+          withData: false,
+        );
+        final file = result?.files.single;
+        if (file == null || file.path == null) return null;
+        return _PickedFile(path: file.path!, name: file.name, size: file.size);
     }
   }
 
@@ -726,4 +846,18 @@ class _ClientFilesScreenState extends ConsumerState<ClientFilesScreen> {
       );
     }
   }
+}
+
+enum _UploadSource { camera, gallery, files }
+
+class _PickedFile {
+  final String path;
+  final String name;
+  final int size;
+
+  const _PickedFile({
+    required this.path,
+    required this.name,
+    required this.size,
+  });
 }

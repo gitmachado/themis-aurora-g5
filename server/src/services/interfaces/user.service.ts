@@ -12,6 +12,7 @@ export interface IUserService {
   getAllLawyers(): Promise<User[]>;
   update(id: string, dto: UpdateUserDTO): Promise<User>;
   delete(id: string): Promise<void>;
+  hardDeleteClient(lawyerId: string, clientId: string): Promise<void>;
   changePassword(
     id: string,
     newPassword: string,

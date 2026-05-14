@@ -57,7 +57,7 @@ class AppBottomNavigationBar extends StatelessWidget {
       height: 98,
       padding: const EdgeInsets.fromLTRB(8, 8, 8, 12),
       decoration: BoxDecoration(
-        color: AppColors.background,
+        color: AppColors.white,
         border: Border(top: BorderSide(color: AppColors.line2, width: 1)),
       ),
       child: Padding(

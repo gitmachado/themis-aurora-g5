@@ -119,4 +119,23 @@ final class ProcedureRepositoryImpl implements ProcedureRepository {
       ),
     );
   }
+
+  @override
+  Future<Either<Failure, LegalProcess>> createProcess({
+    required String clientId,
+    required String title,
+    required String caseType,
+    String? description,
+    String? processNumber,
+  }) {
+    return guardRepository(
+      () => _remoteDataSource.createProcess(
+        clientId: clientId,
+        title: title,
+        caseType: caseType,
+        description: description,
+        processNumber: processNumber,
+      ),
+    );
+  }
 }

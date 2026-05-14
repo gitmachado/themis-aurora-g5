@@ -37,4 +37,11 @@ abstract interface class ProcedureRepository {
     required String title,
     required DateTime date,
   });
+  Future<Either<Failure, LegalProcess>> createProcess({
+    required String clientId,
+    required String title,
+    required String caseType,
+    String? description,
+    String? processNumber,
+  });
 }

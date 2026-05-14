@@ -41,141 +41,156 @@ class _TeamAddScreenState extends ConsumerState<TeamAddScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: AppColors.background,
-      appBar: CustomAppBar(
-        title: 'Adicionar Advogado',
-        showBackButton: true,
-        showDivider: false,
+    return AnnotatedRegion<SystemUiOverlayStyle>(
+      value: const SystemUiOverlayStyle(
+        systemNavigationBarColor: AppColors.white,
+        systemNavigationBarIconBrightness: Brightness.dark,
+        systemNavigationBarDividerColor: Colors.transparent,
+        statusBarColor: Colors.transparent,
+        statusBarIconBrightness: Brightness.dark,
       ),
-      body: SafeArea(
-        top: false,
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.fromLTRB(20, 8, 20, 32),
-          child: Form(
-            key: _formKey,
-            autovalidateMode: AutovalidateMode.onUserInteraction,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                Text(
-                  'Cadastre um novo advogado para integrar à sua equipe.',
-                  style: AppTextStyles.body.copyWith(
-                    color: AppColors.textCaption,
-                    fontSize: 14,
+      child: Scaffold(
+        backgroundColor: AppColors.background,
+        appBar: CustomAppBar(title: 'Adicionar Advogado', showBackButton: true),
+        body: SafeArea(
+          top: false,
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.fromLTRB(20, 8, 20, 32),
+            child: Form(
+              key: _formKey,
+              autovalidateMode: AutovalidateMode.onUserInteraction,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Text(
+                    'Cadastre um novo advogado para integrar à sua equipe.',
+                    style: AppTextStyles.body.copyWith(
+                      color: AppColors.textCaption,
+                      fontSize: 14,
+                    ),
                   ),
-                ),
-                const SizedBox(height: 24),
-                AppCard(
-                  padding: const EdgeInsets.all(16),
-                  child: Column(
-                    children: [
-                      _LabeledField(
-                        label: 'Nome completo',
-                        child: TextFormField(
-                          controller: _nameController,
-                          textInputAction: TextInputAction.next,
-                          textCapitalization: TextCapitalization.words,
-                          decoration: _decoration(hint: 'Ex.: Dra. Ana Souza'),
-                          validator: (value) {
-                            final v = value?.trim() ?? '';
-                            if (v.isEmpty) return 'Informe o nome completo';
-                            if (v.length < 3) return 'Nome muito curto';
-                            return null;
-                          },
+                  const SizedBox(height: 24),
+                  AppCard(
+                    padding: const EdgeInsets.all(16),
+                    child: Column(
+                      children: [
+                        _LabeledField(
+                          label: 'Nome completo',
+                          child: TextFormField(
+                            controller: _nameController,
+                            textInputAction: TextInputAction.next,
+                            textCapitalization: TextCapitalization.words,
+                            decoration: _decoration(
+                              hint: 'Ex.: Dra. Ana Souza',
+                            ),
+                            validator: (value) {
+                              final v = value?.trim() ?? '';
+                              if (v.isEmpty) return 'Informe o nome completo';
+                              if (v.length < 3) return 'Nome muito curto';
+                              return null;
+                            },
+                          ),
                         ),
-                      ),
-                      const SizedBox(height: 16),
-                      _LabeledField(
-                        label: 'E-mail',
-                        child: TextFormField(
-                          controller: _emailController,
-                          keyboardType: TextInputType.emailAddress,
-                          textInputAction: TextInputAction.next,
-                          autocorrect: false,
-                          decoration: _decoration(hint: 'nome@escritorio.com'),
-                          validator: (value) {
-                            final v = value?.trim() ?? '';
-                            if (v.isEmpty) return 'Informe o e-mail';
-                            final regex = RegExp(r'^[^@\s]+@[^@\s]+\.[^@\s]+$');
-                            if (!regex.hasMatch(v)) return 'E-mail inválido';
-                            return null;
-                          },
+                        const SizedBox(height: 16),
+                        _LabeledField(
+                          label: 'E-mail',
+                          child: TextFormField(
+                            controller: _emailController,
+                            keyboardType: TextInputType.emailAddress,
+                            textInputAction: TextInputAction.next,
+                            autocorrect: false,
+                            decoration: _decoration(
+                              hint: 'nome@escritorio.com',
+                            ),
+                            validator: (value) {
+                              final v = value?.trim() ?? '';
+                              if (v.isEmpty) return 'Informe o e-mail';
+                              final regex = RegExp(
+                                r'^[^@\s]+@[^@\s]+\.[^@\s]+$',
+                              );
+                              if (!regex.hasMatch(v)) return 'E-mail inválido';
+                              return null;
+                            },
+                          ),
                         ),
-                      ),
-                      const SizedBox(height: 16),
-                      _LabeledField(
-                        label: 'WhatsApp',
-                        child: TextFormField(
-                          controller: _whatsappController,
-                          keyboardType: TextInputType.phone,
-                          textInputAction: TextInputAction.next,
-                          inputFormatters: [
-                            FilteringTextInputFormatter.digitsOnly,
-                            LengthLimitingTextInputFormatter(13),
-                          ],
-                          decoration: _decoration(hint: '5511999999999'),
-                          validator: (value) {
-                            final v = value?.trim() ?? '';
-                            if (v.isEmpty) return 'Informe o WhatsApp';
-                            if (v.length < 10) return 'Número incompleto';
-                            return null;
-                          },
+                        const SizedBox(height: 16),
+                        _LabeledField(
+                          label: 'WhatsApp',
+                          child: TextFormField(
+                            controller: _whatsappController,
+                            keyboardType: TextInputType.phone,
+                            textInputAction: TextInputAction.next,
+                            inputFormatters: [
+                              FilteringTextInputFormatter.digitsOnly,
+                              LengthLimitingTextInputFormatter(13),
+                            ],
+                            decoration: _decoration(hint: '5511999999999'),
+                            validator: (value) {
+                              final v = value?.trim() ?? '';
+                              if (v.isEmpty) return 'Informe o WhatsApp';
+                              if (v.length < 10) return 'Número incompleto';
+                              return null;
+                            },
+                          ),
                         ),
-                      ),
-                      const SizedBox(height: 16),
-                      _LabeledField(
-                        label: 'OAB',
-                        child: TextFormField(
-                          controller: _oabController,
-                          textInputAction: TextInputAction.next,
-                          decoration: _decoration(hint: 'Ex.: SP123456'),
-                          validator: (value) {
-                            final v = value?.trim() ?? '';
-                            if (v.isEmpty) return 'Informe o número da OAB';
-                            if (v.length < 3) return 'OAB inválida';
-                            return null;
-                          },
+                        const SizedBox(height: 16),
+                        _LabeledField(
+                          label: 'OAB',
+                          child: TextFormField(
+                            controller: _oabController,
+                            textInputAction: TextInputAction.next,
+                            decoration: _decoration(hint: 'Ex.: SP123456'),
+                            validator: (value) {
+                              final v = value?.trim() ?? '';
+                              if (v.isEmpty) return 'Informe o número da OAB';
+                              if (v.length < 3) return 'OAB inválida';
+                              return null;
+                            },
+                          ),
                         ),
-                      ),
-                      const SizedBox(height: 16),
-                      _LabeledField(
-                        label: 'Especialidade',
-                        child: DropdownButtonFormField<TeamSpecialty>(
-                          initialValue: _specialty,
-                          decoration: _decoration(hint: 'Selecione a área'),
-                          items: TeamSpecialty.values
-                              .map(
-                                (s) => DropdownMenuItem(
-                                  value: s,
-                                  child: Text(s.label),
-                                ),
-                              )
-                              .toList(),
-                          onChanged: (value) {
-                            if (value != null) {
-                              setState(() => _specialty = value);
-                            }
-                          },
+                        const SizedBox(height: 16),
+                        _LabeledField(
+                          label: 'Especialidade',
+                          child: DropdownButtonFormField<TeamSpecialty>(
+                            initialValue: _specialty,
+                            decoration: _decoration(hint: 'Selecione a área'),
+                            items: TeamSpecialty.values
+                                .map(
+                                  (s) => DropdownMenuItem(
+                                    value: s,
+                                    child: Text(s.label),
+                                  ),
+                                )
+                                .toList(),
+                            onChanged: (value) {
+                              if (value != null) {
+                                setState(() => _specialty = value);
+                              }
+                            },
+                          ),
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
-                ),
-                if (_submitError != null) ...[
-                  const SizedBox(height: 16),
-                  _ErrorBanner(message: _submitError!),
+                  if (_submitError != null) ...[
+                    const SizedBox(height: 16),
+                    _ErrorBanner(message: _submitError!),
+                  ],
+                  const SizedBox(height: 24),
+                  PrimaryButton(
+                    label: 'Cadastrar advogado',
+                    isLoading: _isSubmitting,
+                    onPressed: _submit,
+                  ),
+                  SizedBox(height: AppDimensions.spacing32),
                 ],
-                const SizedBox(height: 24),
-                PrimaryButton(
-                  label: 'Cadastrar advogado',
-                  isLoading: _isSubmitting,
-                  onPressed: _submit,
-                ),
-                SizedBox(height: AppDimensions.spacing32),
-              ],
+              ),
             ),
           ),
+        ),
+        bottomNavigationBar: Container(
+          height: MediaQuery.of(context).padding.bottom,
+          color: AppColors.white,
         ),
       ),
     );

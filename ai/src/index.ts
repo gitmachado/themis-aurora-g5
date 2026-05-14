@@ -3,6 +3,8 @@ import express from "express";
 import { setupCheckpointer } from "./config/checkpointer.js";
 import { whatsappRouter } from "./webhooks/whatsapp.js";
 import { graph } from "./graph/index.js";
+import { sendWhatsAppMessage } from "./webhooks/send-message.js";
+import { syncMessage } from "./graph/nodes/sync.js";
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -10,8 +12,7 @@ const PORT = process.env.PORT || 3001;
 app.use(express.json());
 app.use(whatsappRouter);
 
-import { sendWhatsAppMessage } from "./webhooks/send-message.js";
-import { syncMessage } from "./graph/nodes/sync.js";
+// ── Handoff Endpoints ──
 
 app.post("/handoff/resume", async (req, res) => {
   const { whatsappNumber } = req.body;
@@ -25,14 +26,10 @@ app.post("/handoff/resume", async (req, res) => {
       needsHandoff: false,
       currentNode: "router_node"
     });
-    console.log(`[AI Module] Estado do Grafo atualizado: needsHandoff = false para ${whatsappNumber}`);
     
     const message = "Olá! O atendimento automatizado foi retomado. Qualquer dúvida, estou aqui para ajudar!";
     
-    console.log(`[AI Module] Tentando enviar mensagem de boas-vindas para ${whatsappNumber}...`);
     await sendWhatsAppMessage(whatsappNumber, message);
-    
-    console.log(`[AI Module] Sincronizando mensagem de retomada no banco...`);
     await syncMessage({
       whatsappNumber,
       content: message,
@@ -61,14 +58,10 @@ app.post("/handoff/start", async (req, res) => {
       needsHandoff: true,
       currentNode: "sync_node"
     });
-    console.log(`[AI Module] Estado do Grafo atualizado: needsHandoff = true para ${whatsappNumber}`);
     
     const message = "Estou transferindo você para um de nossos advogados especialistas. Ele(a) entrará em contato em instantes por aqui mesmo.";
     
-    console.log(`[AI Module] Tentando enviar mensagem de despedida para ${whatsappNumber}...`);
     await sendWhatsAppMessage(whatsappNumber, message);
-    
-    console.log(`[AI Module] Sincronizando mensagem de handoff no banco...`);
     await syncMessage({
       whatsappNumber,
       content: message,
@@ -85,7 +78,11 @@ app.post("/handoff/start", async (req, res) => {
   }
 });
 
+// ── Health Check ──
+
 app.get("/health", (_req, res) => res.json({ status: "ok" }));
+
+// ── Startup ──
 
 (async () => {
   try {

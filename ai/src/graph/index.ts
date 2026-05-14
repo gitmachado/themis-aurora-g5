@@ -3,18 +3,15 @@ import { AIMessage } from "@langchain/core/messages";
 import { ThemisState, ThemisStateType } from "./state.js";
 import { checkpointer } from "../config/checkpointer.js";
 import { routerNode } from "./nodes/router.js";
-import { triageNode } from "./nodes/triage.js";
-import { statusNode } from "./nodes/status.js";
-import { ragNode } from "./nodes/rag.js";
-import { handoffNode } from "./nodes/handoff.js";
-import { greetingNode } from "./nodes/greeting.js";
 import { syncMessage } from "./nodes/sync.js";
 
-// Wrapper do syncMessage (utilitário) para interface de nó LangGraph
+/**
+ * Wrapper do syncMessage (utilitário) para interface de nó LangGraph.
+ * Sincroniza apenas mensagens da IA (BOT) — mensagens do cliente
+ * são sincronizadas diretamente no webhook para garantir tempo real.
+ */
 async function syncNode(state: ThemisStateType): Promise<Partial<ThemisStateType>> {
   const lastMsg = state.messages.at(-1);
-  // Sincroniza apenas se for uma mensagem da IA (BOT). 
-  // Mensagens do CLIENTE agora são sincronizadas pelo Webhook para garantir tempo real.
   if (lastMsg && lastMsg instanceof AIMessage) {
     await syncMessage({
       whatsappNumber: state.whatsappNumber,
@@ -27,44 +24,22 @@ async function syncNode(state: ThemisStateType): Promise<Partial<ThemisStateType
   return {};
 }
 
-// Função de roteamento: lê o próximo nó a partir do state
-const routeByCurrentNode = (state: ThemisStateType): string => state.currentNode;
-
-// Encadeamento para inferência correta dos tipos de nó no TypeScript
+/**
+ * Grafo LangGraph — Arquitetura Agent Unificado.
+ * 
+ * Fluxo: START → router_node → sync_node → END
+ * 
+ * O Router é o agente central que:
+ * - Responde cumprimentos e dúvidas
+ * - Coleta dados de triagem conversacionalmente
+ * - Usa Tools para registrar leads, consultar processos e acionar handoff
+ * - Busca conhecimento via RAG automaticamente
+ */
 const graphBuilder = new StateGraph(ThemisState)
   .addNode("router_node", routerNode)
-  .addNode("triage_node", triageNode)
-  .addNode("status_node", statusNode)
-  .addNode("rag_node", ragNode)
-  .addNode("handoff_node", handoffNode)
-  .addNode("greeting_node", greetingNode)
   .addNode("sync_node", syncNode)
-  // Entrada
   .addEdge(START, "router_node")
-  // Arestas condicionais
-  .addConditionalEdges("router_node", routeByCurrentNode, {
-    triage_node: "triage_node",
-    status_node: "status_node",
-    rag_node: "rag_node",
-    handoff_node: "handoff_node",
-    greeting_node: "greeting_node",
-    sync_node: "sync_node",
-  })
-  .addConditionalEdges("triage_node", routeByCurrentNode, {
-    triage_node: "triage_node",
-    sync_node: "sync_node",
-  })
-  .addConditionalEdges("status_node", routeByCurrentNode, {
-    status_node: "status_node",
-    sync_node: "sync_node",
-  })
-  .addConditionalEdges("rag_node", routeByCurrentNode, {
-    handoff_node: "handoff_node",
-    sync_node: "sync_node",
-  })
-  // Arestas fixas
-  .addEdge("greeting_node", "sync_node")
-  .addEdge("handoff_node", "sync_node")
+  .addEdge("router_node", "sync_node")
   .addEdge("sync_node", END);
 
 // Compila com checkpointer PostgreSQL (persistência de estado por thread)

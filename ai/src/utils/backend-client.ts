@@ -15,21 +15,21 @@ const client: AxiosInstance = axios.create({
 
 // ── Usuários ──
 
-export async function checkUserByPhone(whatsappNumber: string): Promise<{
-  exists: boolean;
-  userId?: string;
-  name?: string;
-}> {
-  const res = await client.get(`/bot/users/by-phone/${whatsappNumber}`);
-  return res.data;
-}
-
 export async function checkUserByCpf(cpf: string): Promise<{
   exists: boolean;
   userId?: string;
   name?: string;
 }> {
   const res = await client.get(`/bot/users/by-cpf/${cpf}`);
+  return res.data;
+}
+
+export async function getUserByPhone(whatsappNumber: string): Promise<{
+  exists: boolean;
+  userId?: string;
+  name?: string;
+}> {
+  const res = await client.get(`/bot/users/by-phone/${whatsappNumber}`);
   return res.data;
 }
 
@@ -48,6 +48,7 @@ export async function getLeadByPhone(whatsappNumber: string): Promise<{
 
 export async function createLead(data: {
   name: string;
+  email: string;
   whatsappNumber: string;
   cpf: string;
   caseType: string;
@@ -61,13 +62,28 @@ export async function createLead(data: {
 
 // ── Processos ──
 
-export async function getProcessesByPhone(whatsappNumber: string): Promise<any[]> {
+export interface ProcessData {
+  title: string;
+  processNumber: string | null;
+  currentStatus: string;
+  lastMovementDate: string | null;
+  lastNote: string | null;
+  recentTimeline?: {
+    date: string;
+    type: string;
+    content: string;
+  }[];
+}
+
+export async function getProcessesByPhone(whatsappNumber: string): Promise<ProcessData[]> {
   const res = await client.get(`/bot/processes/by-phone/${whatsappNumber}`);
   return (res.data.processes || []).map((p: any) => ({
-    ...p,
+    title: p.title,
+    processNumber: p.processNumber || null,
     currentStatus: p.status || p.currentStatus,
-    lastMovementDate: p.lastUpdate || p.lastMovementDate,
-    lastNote: p.lawyerNote || p.lastNote,
+    lastMovementDate: p.lastUpdate || p.lastMovementDate || null,
+    lastNote: p.lawyerNote || p.lastNote || null,
+    recentTimeline: p.recentTimeline || [],
   }));
 }
 
@@ -99,21 +115,10 @@ export async function notifyLawyer(data: {
   await client.post("/bot/notifications", data);
 }
 
-export async function startHandoff(whatsappNumber: string): Promise<void> {
-  await client.post("/bot/handoff/start", { whatsappNumber });
-}
-
-export async function resumeAI(whatsappNumber: string): Promise<void> {
-  await client.post("/bot/handoff/resume", { whatsappNumber });
-}
-
 // ── Configurações ──
 
 export async function getBotConfig(): Promise<{
   toneOfVoice: string;
-  serviceHoursStart: string;
-  serviceHoursEnd: string;
-  awayMessage: string;
 }> {
   const res = await client.get("/bot/configurations");
   return res.data;

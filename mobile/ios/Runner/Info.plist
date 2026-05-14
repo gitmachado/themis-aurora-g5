@@ -4,6 +4,10 @@
 <dict>
 	<key>CADisableMinimumFrameDurationOnPhone</key>
 	<true/>
+	<key>NSCameraUsageDescription</key>
+	<string>Precisamos da câmera para você tirar foto de documentos a enviar.</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>Precisamos do acesso à galeria para você anexar imagens de documentos.</string>
 	<key>CFBundleDevelopmentRegion</key>
 	<string>$(DEVELOPMENT_LANGUAGE)</string>
 	<key>CFBundleDisplayName</key>

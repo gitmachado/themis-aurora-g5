@@ -12,5 +12,6 @@ const controller = new ClientController(userService);
 
 router.get('/my', authMiddleware, controller.listMyClients);
 router.get('/:id', authMiddleware, controller.getById);
+router.delete('/:id', authMiddleware, controller.delete);
 
 export default router;
