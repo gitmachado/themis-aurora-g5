@@ -20,6 +20,7 @@ import '../../features/lawyer/files/presentation/screens/lawyer_file_review_scre
 import '../../features/lawyer/files/presentation/screens/lawyer_file_list_screen.dart';
 import '../../features/lawyer/chat/presentation/screens/lawyer_chat_list_screen.dart';
 import '../../features/lawyer/ai_manager/presentation/screens/lawyer_ai_manager_screen.dart';
+import '../../features/lawyer/ai_chat/presentation/pages/lawyer_chat_page.dart';
 import '../../features/lawyer/chat/presentation/screens/lawyer_chat_handoff_screen.dart';
 import '../../features/lawyer/clients/presentation/screens/lawyer_client_detail_screen.dart';
 import '../../features/lawyer/team/presentation/screens/team_add_screen.dart';
@@ -52,6 +53,7 @@ final class AppRouter {
   static const String lawyerFileReviewRoute = '/lawyer-file-review';
   static const String lawyerChatsRoute = '/lawyer-chats';
   static const String lawyerAIManagerRoute = '/lawyer-ai-manager';
+  static const String lawyerAIChatRoute = '/lawyer-ai-chat';
   static const String lawyerChatHandoffRoute = '/lawyer-chat-handoff';
   static const String lawyerScheduleRoute = '/lawyer-schedule';
   static const String lawyerAppointmentDetailRoute = '/lawyer-appointment-detail';
@@ -232,6 +234,11 @@ final class AppRouter {
       case lawyerAIManagerRoute:
         return MaterialPageRoute<void>(
           builder: (_) => const LawyerAIManagerScreen(),
+          settings: settings,
+        );
+      case lawyerAIChatRoute:
+        return MaterialPageRoute<void>(
+          builder: (_) => const LawyerChatPage(),
           settings: settings,
         );
       case lawyerChatHandoffRoute:
