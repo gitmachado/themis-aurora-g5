@@ -92,38 +92,48 @@ class _LawyerScheduleScreenState extends State<LawyerScheduleScreen>
         showDivider: false,
         actions: [
           Stack(
-            alignment: Alignment.topRight,
+            alignment: Alignment.center,
             children: [
-              IconButton(
-                icon: const Icon(Icons.auto_awesome_rounded, color: AppColors.ink),
-                onPressed: () {
-                  Navigator.pushNamed(
-                    context,
-                    AppRouter.lawyerAppointmentApprovalRoute,
-                  );
-                },
+              SizedBox(
+                width: 40,
+                height: 40,
+                child: IconButton(
+                  icon: const Icon(Icons.edit_calendar_rounded, size: 24, color: AppColors.ink),
+                  onPressed: () {
+                    Navigator.pushNamed(
+                      context,
+                      AppRouter.lawyerAppointmentApprovalRoute,
+                    );
+                  },
+                  padding: EdgeInsets.zero,
+                ),
               ),
-              Positioned(
-                right: 8,
-                top: 8,
-                child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                  decoration: BoxDecoration(
-                    color: Colors.amber,
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                  child: Text(
-                    '0',
-                    style: AppTextStyles.caption.copyWith(
-                      color: Colors.white,
-                      fontWeight: FontWeight.bold,
-                      fontSize: 10,
+              // Exibe o badge apenas se houver agendamentos pendentes (> 0)
+              if (0 > 0)
+                Positioned(
+                  right: 0,
+                  top: 0,
+                  child: Container(
+                    padding: const EdgeInsets.all(2),
+                    decoration: const BoxDecoration(
+                      color: AppColors.yellow,
+                      shape: BoxShape.circle,
+                    ),
+                    constraints: const BoxConstraints(minWidth: 14, minHeight: 14),
+                    child: const Text(
+                      '0',
+                      style: TextStyle(
+                        color: AppColors.ink,
+                        fontSize: 8,
+                        fontWeight: FontWeight.bold,
+                      ),
+                      textAlign: TextAlign.center,
                     ),
                   ),
                 ),
-              ),
             ],
           ),
+          const SizedBox(width: 8),
         ],
       ),
       body: SafeArea(
@@ -132,7 +142,7 @@ class _LawyerScheduleScreenState extends State<LawyerScheduleScreen>
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
               child: ThemisSegmentedControl(
-                labels: const ['Pendentes', 'Finalizados'],
+                labels: const ['Abertos', 'Fechados'],
                 selectedIndex: _tabController.index,
                 controller: _tabController,
                 onChanged: (index) => _onFilterChanged(index, ref),
@@ -325,6 +335,20 @@ class _LawyerScheduleScreenState extends State<LawyerScheduleScreen>
                 ],
               ),
             ),
+            Padding(
+              padding: const EdgeInsets.only(left: 28, right: 24, top: 16, bottom: 4),
+              child: Align(
+                alignment: Alignment.centerLeft,
+                child: Text(
+                  'EVENTOS (${appointmentsByDate.length})',
+                  style: AppTextStyles.tiny.copyWith(
+                    color: AppColors.ink3,
+                    fontWeight: FontWeight.bold,
+                    letterSpacing: 0.5,
+                  ),
+                ),
+              ),
+            ),
             Expanded(
               child: RefreshIndicator(
                 onRefresh: () async {
@@ -374,22 +398,11 @@ class _LawyerScheduleScreenState extends State<LawyerScheduleScreen>
                       physics: const AlwaysScrollableScrollPhysics(),
                       padding: const EdgeInsets.symmetric(
                         horizontal: 24,
-                        vertical: 16,
+                        vertical: 8,
                       ),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Padding(
-                            padding: const EdgeInsets.only(left: 4, bottom: 12),
-                            child: Text(
-                              'EVENTOS',
-                              style: AppTextStyles.tiny.copyWith(
-                                color: AppColors.ink3,
-                                fontWeight: FontWeight.bold,
-                                letterSpacing: 0.5,
-                              ),
-                            ),
-                          ),
                           for (final appointment in appointmentsByDate) ...[
                             AppointmentCard(
                               appointment: appointment,

@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import '../../../../../app/routes/app_router.dart';
+import '../../../../../shared/constants/app_colors.dart';
+import '../../../../../shared/constants/app_text_styles.dart';
+import '../../../../../shared/widgets/layout/custom_app_bar.dart';
 import '../../domain/entities/appointment.dart';
 
 class LawyerAppointmentApprovalScreen extends StatefulWidget {
@@ -42,12 +45,14 @@ class _LawyerAppointmentApprovalScreenState
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Aprovação de Agendamentos'),
-        elevation: 0,
+      backgroundColor: AppColors.background,
+      appBar: const CustomAppBar(
+        title: 'Agendamentos da IA',
+        showBackButton: true,
+        showDivider: false,
       ),
       body: isLoading
-          ? const Center(child: CircularProgressIndicator())
+          ? const Center(child: CircularProgressIndicator(color: AppColors.primary))
           : _buildContent(),
     );
   }
@@ -58,11 +63,12 @@ class _LawyerAppointmentApprovalScreenState
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Text('Erro: $errorMessage'),
+            Text('Erro: $errorMessage', style: AppTextStyles.body),
             const SizedBox(height: 16),
             ElevatedButton(
+              style: ElevatedButton.styleFrom(backgroundColor: AppColors.primary),
               onPressed: _refreshAppointments,
-              child: const Text('Tentar Novamente'),
+              child: Text('Tentar Novamente', style: AppTextStyles.body.copyWith(color: AppColors.white)),
             ),
           ],
         ),
@@ -70,20 +76,27 @@ class _LawyerAppointmentApprovalScreenState
     }
 
     if (pendingAppointments.isEmpty) {
-      return Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            const Icon(Icons.check_circle_outline, size: 64, color: Colors.grey),
-            const SizedBox(height: 16),
-            const Text(
-              'Nenhum agendamento pendente',
-              style: TextStyle(fontSize: 16, color: Colors.grey),
-            ),
-            const SizedBox(height: 16),
-            ElevatedButton(
-              onPressed: _refreshAppointments,
-              child: const Text('Atualizar'),
+      return RefreshIndicator(
+        onRefresh: _refreshAppointments,
+        color: AppColors.primary,
+        child: CustomScrollView(
+          physics: const AlwaysScrollableScrollPhysics(),
+          slivers: [
+            SliverFillRemaining(
+              hasScrollBody: false,
+              child: Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    const Icon(Icons.edit_calendar_rounded, size: 64, color: AppColors.ink4),
+                    const SizedBox(height: 16),
+                    Text(
+                      'Nenhum agendamento pendente',
+                      style: AppTextStyles.body.copyWith(color: AppColors.ink3),
+                    ),
+                  ],
+                ),
+              ),
             ),
           ],
         ),
@@ -92,7 +105,9 @@ class _LawyerAppointmentApprovalScreenState
 
     return RefreshIndicator(
       onRefresh: _refreshAppointments,
+      color: AppColors.primary,
       child: ListView.builder(
+        physics: const AlwaysScrollableScrollPhysics(),
         itemCount: pendingAppointments.length,
         itemBuilder: (context, index) {
           final appointment = pendingAppointments[index];
@@ -107,8 +122,12 @@ class _LawyerAppointmentApprovalScreenState
     Appointment appointment,
   ) {
     return Card(
-      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      margin: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      elevation: 0,
+      color: AppColors.white,
       child: ListTile(
+        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
         onTap: () {
           Navigator.pushNamed(
             context,
@@ -116,13 +135,20 @@ class _LawyerAppointmentApprovalScreenState
             arguments: appointment,
           );
         },
-        leading: const Icon(Icons.auto_awesome, color: Colors.amber),
-        title: Text(appointment.title),
+        leading: Container(
+          padding: const EdgeInsets.all(10),
+          decoration: BoxDecoration(
+            color: AppColors.yellow.withValues(alpha: 0.2),
+            shape: BoxShape.circle,
+          ),
+          child: const Icon(Icons.edit_calendar_rounded, color: AppColors.ink),
+        ),
+        title: Text(appointment.title, style: AppTextStyles.body.copyWith(fontWeight: FontWeight.bold)),
         subtitle: Text(
           _formatDateTime(appointment.scheduledAt),
-          style: const TextStyle(fontSize: 12),
+          style: AppTextStyles.caption.copyWith(color: AppColors.ink3),
         ),
-        trailing: const Icon(Icons.arrow_forward_ios, size: 16),
+        trailing: const Icon(Icons.arrow_forward_ios_rounded, size: 16, color: AppColors.ink3),
       ),
     );
   }
