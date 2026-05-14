@@ -15,10 +15,11 @@ export class AppointmentService implements IAppointmentService {
 
   async create(dto: CreateAppointmentDTO, lawyerId: string): Promise<Appointment> {
     const durationMinutes = dto.durationMinutes || 60;
+    const scheduledAtDate = typeof dto.scheduledAt === 'string' ? new Date(dto.scheduledAt) : dto.scheduledAt;
 
     const conflicts = await this.appointmentRepository.findConflicts(
       lawyerId,
-      dto.scheduledAt,
+      scheduledAtDate,
       durationMinutes
     );
 
@@ -33,7 +34,7 @@ export class AppointmentService implements IAppointmentService {
       title: dto.title,
       description: dto.description || null,
       type: dto.type,
-      scheduledAt: dto.scheduledAt,
+      scheduledAt: scheduledAtDate,
       durationMinutes,
       status: 'SCHEDULED',
       reminded: false,
@@ -51,7 +52,7 @@ export class AppointmentService implements IAppointmentService {
       await this.notificationService.send({
         userId: dto.clientId,
         title: 'Reunião agendada',
-        body: `Sua reunião foi marcada para ${this.formatDate(dto.scheduledAt)}`,
+        body: `Sua reunião foi marcada para ${this.formatDate(scheduledAtDate)}`,
         type: 'APPOINTMENT_SCHEDULED',
       });
     }
@@ -69,10 +70,14 @@ export class AppointmentService implements IAppointmentService {
       throw new ConflictError('Acesso negado: compromisso não pertence a você');
     }
 
-    if (dto.scheduledAt && dto.durationMinutes !== undefined) {
+    const scheduledAtDate = dto.scheduledAt
+      ? (typeof dto.scheduledAt === 'string' ? new Date(dto.scheduledAt) : dto.scheduledAt)
+      : undefined;
+
+    if (scheduledAtDate && dto.durationMinutes !== undefined) {
       const conflicts = await this.appointmentRepository.findConflicts(
         lawyerId,
-        dto.scheduledAt,
+        scheduledAtDate,
         dto.durationMinutes
       );
 
@@ -84,6 +89,7 @@ export class AppointmentService implements IAppointmentService {
 
     const updated = await this.appointmentRepository.update(id, {
       ...dto,
+      scheduledAt: scheduledAtDate ?? dto.scheduledAt,
       updatedAt: new Date(),
     });
 
