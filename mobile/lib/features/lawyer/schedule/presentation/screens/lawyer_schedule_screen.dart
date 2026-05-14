@@ -13,48 +13,34 @@ import '../widgets/appointment_card.dart';
 import '../widgets/schedule_calendar_strip.dart';
 import '../../../../../../features/procedures/presentation/providers/procedure_providers.dart';
 
-class LawyerScheduleScreen extends StatefulWidget {
+class LawyerScheduleScreen extends ConsumerStatefulWidget {
   const LawyerScheduleScreen({super.key});
 
   @override
-  State<LawyerScheduleScreen> createState() =>
+  ConsumerState<LawyerScheduleScreen> createState() =>
       _LawyerScheduleScreenState();
 }
 
-class _LawyerScheduleScreenState extends State<LawyerScheduleScreen>
+class _LawyerScheduleScreenState extends ConsumerState<LawyerScheduleScreen>
     with SingleTickerProviderStateMixin {
   late final TabController _tabController =
       TabController(length: 2, vsync: this);
-  int _pendingCount = 0;
-  bool _loadingBadge = true;
 
   @override
   void initState() {
     super.initState();
-    _loadPendingCount();
-    // Refresh badge every 30 seconds
-    Future.delayed(const Duration(seconds: 30), _loadPendingCount);
+    // Refresh pending count every 30 seconds
+    Future.delayed(const Duration(seconds: 30), () {
+      if (mounted) {
+        ref.refresh(pendingAppointmentsCountProvider);
+      }
+    });
   }
 
   @override
   void dispose() {
     _tabController.dispose();
     super.dispose();
-  }
-
-  Future<void> _loadPendingCount() async {
-    try {
-      // TODO: Fetch from API endpoint GET /appointments/pending
-      // For now, this is a placeholder
-      setState(() {
-        _loadingBadge = false;
-      });
-    } catch (e) {
-      print('Error loading pending count: $e');
-      setState(() {
-        _loadingBadge = false;
-      });
-    }
   }
 
   void _onFilterChanged(int index, WidgetRef ref) {
@@ -85,6 +71,7 @@ class _LawyerScheduleScreenState extends State<LawyerScheduleScreen>
     final selectedDate = ref.watch(selectedDateProvider);
     final currentMode = ref.watch(scheduleViewModeProvider);
     final showHistory = ref.watch(showHistoryProvider);
+    final pendingCount = ref.watch(pendingAppointmentsCountProvider);
     final now = DateTime.now();
     final tomorrow = now.add(const Duration(days: 1));
     const shortWeekdays = [
@@ -134,28 +121,36 @@ class _LawyerScheduleScreenState extends State<LawyerScheduleScreen>
                 ),
               ),
               // Badge mostra apenas se há agendamentos pendentes (> 0)
-              if (_pendingCount > 0)
-                Positioned(
-                  right: 0,
-                  top: 0,
-                  child: Container(
-                    padding: const EdgeInsets.all(2),
-                    decoration: const BoxDecoration(
-                      color: AppColors.yellow,
-                      shape: BoxShape.circle,
-                    ),
-                    constraints: const BoxConstraints(minWidth: 14, minHeight: 14),
-                    child: Text(
-                      _pendingCount > 99 ? '99+' : _pendingCount.toString(),
-                      style: const TextStyle(
-                        color: AppColors.ink,
-                        fontSize: 8,
-                        fontWeight: FontWeight.bold,
+              pendingCount.when(
+                data: (count) {
+                  if (count > 0) {
+                    return Positioned(
+                      right: 0,
+                      top: 0,
+                      child: Container(
+                        padding: const EdgeInsets.all(2),
+                        decoration: const BoxDecoration(
+                          color: AppColors.yellow,
+                          shape: BoxShape.circle,
+                        ),
+                        constraints: const BoxConstraints(minWidth: 14, minHeight: 14),
+                        child: Text(
+                          count > 99 ? '99+' : count.toString(),
+                          style: const TextStyle(
+                            color: AppColors.ink,
+                            fontSize: 8,
+                            fontWeight: FontWeight.bold,
+                          ),
+                          textAlign: TextAlign.center,
+                        ),
                       ),
-                      textAlign: TextAlign.center,
-                    ),
-                  ),
-                ),
+                    );
+                  }
+                  return const SizedBox.shrink();
+                },
+                loading: () => const SizedBox.shrink(),
+                error: (err, st) => const SizedBox.shrink(),
+              ),
             ],
           ),
           const SizedBox(width: 8),

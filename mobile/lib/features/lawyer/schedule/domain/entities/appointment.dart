@@ -33,6 +33,26 @@ class Appointment extends Equatable {
     this.updatedAt,
   });
 
+  factory Appointment.fromModel(dynamic model) {
+    if (model is Appointment) return model;
+    return Appointment(
+      id: model.id as String,
+      title: model.title as String,
+      description: model.description as String?,
+      type: model.type as String,
+      status: model.status as String,
+      scheduledAt: model.scheduledAt as DateTime,
+      durationMinutes: model.durationMinutes as int,
+      clientId: model.clientId as String?,
+      processId: model.processId as String?,
+      reminded: model.reminded as bool,
+      createdByAI: model.createdByAI as bool? ?? false,
+      aiOriginalData: model.aiOriginalData as Map<String, dynamic>?,
+      createdAt: model.createdAt as DateTime,
+      updatedAt: model.updatedAt as DateTime?,
+    );
+  }
+
   DateTime get endTime => scheduledAt.add(Duration(minutes: durationMinutes));
 
   bool get isDeadline => type == 'DEADLINE';

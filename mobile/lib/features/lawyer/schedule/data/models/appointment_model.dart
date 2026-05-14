@@ -17,6 +17,8 @@ final class AppointmentModel extends Appointment {
     required super.reminded,
     required super.createdAt,
     super.updatedAt,
+    super.createdByAI,
+    super.aiOriginalData,
   });
 
   factory AppointmentModel.fromJson(Map<String, dynamic> json) {
@@ -33,6 +35,8 @@ final class AppointmentModel extends Appointment {
       reminded: json['reminded'] as bool? ?? false,
       createdAt: _dateTime(json['createdAt']) ?? DateTime.now(),
       updatedAt: _dateTime(json['updatedAt']),
+      createdByAI: json['created_by_ai'] as bool? ?? false,
+      aiOriginalData: json['ai_original_data'] as Map<String, dynamic>?,
     );
   }
 
@@ -49,5 +53,7 @@ final class AppointmentModel extends Appointment {
     'reminded': reminded,
     'createdAt': createdAt.toIso8601String(),
     'updatedAt': updatedAt?.toIso8601String(),
+    'created_by_ai': createdByAI,
+    'ai_original_data': aiOriginalData,
   };
 }

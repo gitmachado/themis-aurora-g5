@@ -116,7 +116,7 @@ class _LawyerAppointmentDetailScreenState
   Future<void> _handleApprove() async {
     setState(() => _isLoading = true);
     try {
-      // TODO: Call approve endpoint
+      await ref.read(appointmentActionsProvider).approve(widget.appointment!.id);
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
@@ -168,7 +168,7 @@ class _LawyerAppointmentDetailScreenState
 
     setState(() => _isLoading = true);
     try {
-      // TODO: Call reject endpoint
+      await ref.read(appointmentActionsProvider).reject(widget.appointment!.id);
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
@@ -194,6 +194,34 @@ class _LawyerAppointmentDetailScreenState
     }
   }
 
+  Future<void> _handleResetToAIVersion() async {
+    setState(() => _isLoading = true);
+    try {
+      await ref.read(appointmentActionsProvider).resetToAIVersion(widget.appointment!.id);
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Revertido para proposta original'),
+            backgroundColor: Colors.green,
+          ),
+        );
+        setState(() => _isLoading = false);
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Erro ao reverter: $e'),
+            backgroundColor: AppColors.error,
+          ),
+        );
+      }
+      if (mounted) {
+        setState(() => _isLoading = false);
+      }
+    }
+  }
+
   Widget _buildApprovalButtons(Appointment target) {
     return Column(
       mainAxisSize: MainAxisSize.min,
@@ -202,12 +230,7 @@ class _LawyerAppointmentDetailScreenState
           SizedBox(
             height: 40,
             child: OutlinedButton.icon(
-              onPressed: _isLoading ? null : () {
-                // TODO: Implement reset to AI version
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('Revertendo para versão original...')),
-                );
-              },
+              onPressed: _isLoading ? null : _handleResetToAIVersion,
               icon: const Icon(Icons.refresh, size: 18),
               label: const Text('Reverter à Proposta Original'),
               style: OutlinedButton.styleFrom(
@@ -400,11 +423,10 @@ class _LawyerAppointmentDetailScreenState
                                 setSheetState(() => isSubmitting = true);
 
                                 try {
-                                  // TODO: Call API endpoint
-                                  // await ref.read(appointmentActionsProvider).requestReschedule(
-                                  //   appointment.id,
-                                  //   instructionController.text,
-                                  // );
+                                  await ref.read(appointmentActionsProvider).requestReschedule(
+                                    appointment.id,
+                                    instructionController.text,
+                                  );
 
                                   setSheetState(() {
                                     _waitingForSuggestions = true;
@@ -448,7 +470,9 @@ class _LawyerAppointmentDetailScreenState
                 ),
                 const SizedBox(height: 16),
                 if (_rescheduleSuggestions.isNotEmpty)
-                  ..._rescheduleSuggestions.map((suggestion) {
+                  ..._rescheduleSuggestions.asMap().entries.map((entry) {
+                    final idx = entry.key;
+                    final suggestion = entry.value;
                     return Card(
                       margin: const EdgeInsets.only(bottom: 12),
                       child: Padding(
@@ -477,9 +501,25 @@ class _LawyerAppointmentDetailScreenState
                               children: [
                                 Expanded(
                                   child: OutlinedButton(
-                                    onPressed: () {
-                                      Navigator.pop(context);
-                                      _stopSuggestionPolling();
+                                    onPressed: () async {
+                                      try {
+                                        await ref.read(appointmentActionsProvider)
+                                            .rejectRescheduleSuggestion(suggestion['id'] as String);
+                                        if (mounted) {
+                                          setState(() {
+                                            _rescheduleSuggestions.removeAt(idx);
+                                          });
+                                          ScaffoldMessenger.of(context).showSnackBar(
+                                            const SnackBar(content: Text('Sugestão rejeitada')),
+                                          );
+                                        }
+                                      } catch (e) {
+                                        if (mounted) {
+                                          ScaffoldMessenger.of(context).showSnackBar(
+                                            SnackBar(content: Text('Erro: $e')),
+                                          );
+                                        }
+                                      }
                                     },
                                     child: const Text('Rejeitar'),
                                   ),
@@ -488,14 +528,30 @@ class _LawyerAppointmentDetailScreenState
                                 Expanded(
                                   child: PrimaryButton(
                                     label: 'Aceitar',
-                                    onPressed: () {
-                                      Navigator.pop(context);
-                                      _stopSuggestionPolling();
-                                      ScaffoldMessenger.of(context).showSnackBar(
-                                        const SnackBar(
-                                          content: Text('Sugestão aceita!'),
-                                        ),
-                                      );
+                                    onPressed: () async {
+                                      try {
+                                        await ref.read(appointmentActionsProvider)
+                                            .acceptRescheduleSuggestion(
+                                              suggestion['id'] as String,
+                                              appointment.id,
+                                            );
+                                        if (mounted) {
+                                          Navigator.pop(context);
+                                          _stopSuggestionPolling();
+                                          ScaffoldMessenger.of(context).showSnackBar(
+                                            const SnackBar(
+                                              content: Text('Sugestão aceita! Pronto para aprovação.'),
+                                              backgroundColor: Colors.green,
+                                            ),
+                                          );
+                                        }
+                                      } catch (e) {
+                                        if (mounted) {
+                                          ScaffoldMessenger.of(context).showSnackBar(
+                                            SnackBar(content: Text('Erro: $e')),
+                                          );
+                                        }
+                                      }
                                     },
                                   ),
                                 ),
@@ -517,15 +573,17 @@ class _LawyerAppointmentDetailScreenState
   void _startSuggestionPolling(String appointmentId) {
     _suggestionPoller = Timer.periodic(const Duration(seconds: 5), (timer) async {
       try {
-        // TODO: Fetch suggestions from API
-        // final suggestions = await ref.read(appointmentActionsProvider)
-        //     .getRescheduleSuggestions(appointmentId);
+        final suggestions = await ref.read(appointmentActionsProvider)
+            .getRescheduleSuggestions(appointmentId);
 
-        if (mounted && _rescheduleSuggestions.isNotEmpty) {
+        if (mounted) {
           setState(() {
-            _waitingForSuggestions = false;
+            _rescheduleSuggestions = suggestions;
+            if (suggestions.isNotEmpty) {
+              _waitingForSuggestions = false;
+              timer.cancel();
+            }
           });
-          timer.cancel();
         }
       } catch (e) {
         print('Error polling suggestions: $e');

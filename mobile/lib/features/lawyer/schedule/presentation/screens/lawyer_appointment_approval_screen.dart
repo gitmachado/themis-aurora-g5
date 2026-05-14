@@ -1,49 +1,19 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../../app/routes/app_router.dart';
 import '../../../../../shared/constants/app_colors.dart';
 import '../../../../../shared/constants/app_text_styles.dart';
 import '../../../../../shared/widgets/layout/custom_app_bar.dart';
 import '../../domain/entities/appointment.dart';
+import '../providers/appointment_providers.dart';
 
-class LawyerAppointmentApprovalScreen extends StatefulWidget {
+class LawyerAppointmentApprovalScreen extends ConsumerWidget {
   const LawyerAppointmentApprovalScreen({Key? key}) : super(key: key);
 
   @override
-  State<LawyerAppointmentApprovalScreen> createState() =>
-      _LawyerAppointmentApprovalScreenState();
-}
+  Widget build(BuildContext context, WidgetRef ref) {
+    final pendingAsync = ref.watch(pendingAppointmentsProvider);
 
-class _LawyerAppointmentApprovalScreenState
-    extends State<LawyerAppointmentApprovalScreen> {
-  late List<Appointment> pendingAppointments = [];
-  bool isLoading = true;
-  String? errorMessage;
-
-  @override
-  void initState() {
-    super.initState();
-    _loadPendingAppointments();
-  }
-
-  Future<void> _loadPendingAppointments() async {
-    setState(() {
-      isLoading = true;
-      errorMessage = null;
-    });
-
-    // TODO: Fetch pending appointments from API
-    // For now, showing empty state
-    setState(() {
-      isLoading = false;
-    });
-  }
-
-  Future<void> _refreshAppointments() async {
-    await _loadPendingAppointments();
-  }
-
-  @override
-  Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: const CustomAppBar(
@@ -51,33 +21,31 @@ class _LawyerAppointmentApprovalScreenState
         showBackButton: true,
         showDivider: false,
       ),
-      body: isLoading
-          ? const Center(child: CircularProgressIndicator(color: AppColors.primary))
-          : _buildContent(),
+      body: pendingAsync.when(
+        data: (pending) => _buildContent(context, ref, pending),
+        loading: () => const Center(child: CircularProgressIndicator(color: AppColors.primary)),
+        error: (err, st) => Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Text('Erro ao carregar: $err', style: AppTextStyles.body),
+              const SizedBox(height: 16),
+              ElevatedButton(
+                style: ElevatedButton.styleFrom(backgroundColor: AppColors.primary),
+                onPressed: () => ref.refresh(pendingAppointmentsProvider),
+                child: Text('Tentar Novamente', style: AppTextStyles.body.copyWith(color: AppColors.white)),
+              ),
+            ],
+          ),
+        ),
+      ),
     );
   }
 
-  Widget _buildContent() {
-    if (errorMessage != null) {
-      return Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Text('Erro: $errorMessage', style: AppTextStyles.body),
-            const SizedBox(height: 16),
-            ElevatedButton(
-              style: ElevatedButton.styleFrom(backgroundColor: AppColors.primary),
-              onPressed: _refreshAppointments,
-              child: Text('Tentar Novamente', style: AppTextStyles.body.copyWith(color: AppColors.white)),
-            ),
-          ],
-        ),
-      );
-    }
-
+  Widget _buildContent(BuildContext context, WidgetRef ref, List<Appointment> pendingAppointments) {
     if (pendingAppointments.isEmpty) {
       return RefreshIndicator(
-        onRefresh: _refreshAppointments,
+        onRefresh: () => ref.refresh(pendingAppointmentsProvider.future),
         color: AppColors.primary,
         child: CustomScrollView(
           physics: const AlwaysScrollableScrollPhysics(),
@@ -104,7 +72,7 @@ class _LawyerAppointmentApprovalScreenState
     }
 
     return RefreshIndicator(
-      onRefresh: _refreshAppointments,
+      onRefresh: () => ref.refresh(pendingAppointmentsProvider.future),
       color: AppColors.primary,
       child: ListView.builder(
         physics: const AlwaysScrollableScrollPhysics(),

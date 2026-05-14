@@ -167,6 +167,21 @@ final appointmentHistoryProvider = Provider<List<Appointment>>((ref) {
     ..sort((a, b) => b.scheduledAt.compareTo(a.scheduledAt));
 });
 
+// Pending appointments list
+final pendingAppointmentsProvider =
+    FutureProvider<List<Appointment>>((ref) async {
+  final dataSource = ref.watch(appointmentRemoteDataSourceProvider);
+  final pending = await dataSource.getPendingAppointments();
+  return pending.map((model) => Appointment.fromModel(model)).toList();
+});
+
+// Pending appointments count
+final pendingAppointmentsCountProvider =
+    FutureProvider<int>((ref) async {
+  final pending = await ref.watch(pendingAppointmentsProvider.future);
+  return pending.length;
+});
+
 // Appointments actions
 final appointmentActionsProvider =
     Provider<AppointmentActions>((ref) => AppointmentActions(ref));
@@ -198,5 +213,44 @@ final class AppointmentActions {
     final result = await _ref.read(updateAppointmentUseCaseProvider).call(id, data);
     result.getOrThrow();
     _ref.invalidate(appointmentsProvider);
+  }
+
+  Future<void> approve(String id, {Map<String, dynamic>? edits}) async {
+    final dataSource = _ref.read(appointmentRemoteDataSourceProvider);
+    await dataSource.approveAppointment(id, edits: edits);
+    _ref.invalidate(appointmentsProvider);
+  }
+
+  Future<void> reject(String id) async {
+    final dataSource = _ref.read(appointmentRemoteDataSourceProvider);
+    await dataSource.rejectAppointment(id);
+    _ref.invalidate(appointmentsProvider);
+  }
+
+  Future<void> resetToAIVersion(String id) async {
+    final dataSource = _ref.read(appointmentRemoteDataSourceProvider);
+    await dataSource.resetToAIVersion(id);
+    _ref.invalidate(appointmentsProvider);
+  }
+
+  Future<Map<String, dynamic>> requestReschedule(String id, String instruction) async {
+    final dataSource = _ref.read(appointmentRemoteDataSourceProvider);
+    return await dataSource.requestReschedule(id, instruction);
+  }
+
+  Future<List<Map<String, dynamic>>> getRescheduleSuggestions(String id) async {
+    final dataSource = _ref.read(appointmentRemoteDataSourceProvider);
+    return await dataSource.getRescheduleSuggestions(id);
+  }
+
+  Future<void> acceptRescheduleSuggestion(String suggestionId, String appointmentId) async {
+    final dataSource = _ref.read(appointmentRemoteDataSourceProvider);
+    await dataSource.acceptRescheduleSuggestion(suggestionId, appointmentId);
+    _ref.invalidate(appointmentsProvider);
+  }
+
+  Future<void> rejectRescheduleSuggestion(String suggestionId) async {
+    final dataSource = _ref.read(appointmentRemoteDataSourceProvider);
+    await dataSource.rejectRescheduleSuggestion(suggestionId);
   }
 }
