@@ -5,6 +5,7 @@ export interface IAppointmentRepository {
   findByLawyerId(lawyerId: string, startDate?: Date, endDate?: Date): Promise<Appointment[]>;
   findByClientId(clientId: string): Promise<Appointment[]>;
   findByProcessId(processId: string): Promise<Appointment[]>;
+  findByClientWhatsapp(whatsappNumber: string): Promise<Appointment[]>;
   findConflicts(lawyerId: string, scheduledAt: Date, durationMinutes: number): Promise<Appointment[]>;
   findPendingDeadlineReminders(hoursThreshold?: number): Promise<Appointment[]>;
   create(appointment: Omit<Appointment, 'id' | 'createdAt' | 'updatedAt'>): Promise<Appointment>;

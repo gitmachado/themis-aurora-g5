@@ -1,6 +1,6 @@
 import { tool } from "@langchain/core/tools";
 import { z } from "zod";
-import { getAvailableSlots, scheduleAppointment } from "../utils/backend-client.js";
+import { getAvailableSlots, scheduleAppointment, getOpenAppointmentsByPhone } from "../utils/backend-client.js";
 
 const DEFAULT_LAWYER_ID = process.env.DEFAULT_LAWYER_ID || "11111111-1111-1111-1111-111111111111";
 
@@ -141,6 +141,23 @@ async function handleScheduleAppointment(
 ): Promise<string> {
   if (!time) {
     return "Para agendar, preciso que o cliente escolha um horário (formato HH:mm). Pergunte qual horário ele prefere.";
+  }
+
+  // NOVO: Verificar se cliente já tem reunião aberta
+  try {
+    const whatsappNumber = triageData?.whatsappNumber;
+    if (whatsappNumber) {
+      const openAppointments = await getOpenAppointmentsByPhone(whatsappNumber);
+      if (openAppointments.hasOpenAppointments) {
+        return `⚠️ AGENDAMENTO_BLOQUEADO: Este cliente já possui ${openAppointments.count} reunião(ões) aberta(s) no sistema (status: ${openAppointments.appointments[0]?.status || 'pendente'}).
+
+Não é possível agendar uma nova reunião enquanto houver reuniões abertas.
+
+👤 Como proceder: Faça um HANDOFF para atendimento humano para que o advogado analise a situação com o cliente. Use a ferramenta apropriada de handoff.`;
+      }
+    }
+  } catch (err: any) {
+    console.warn("[Tool: Appointment] Erro ao verificar reuniões abertas (continuando):", err.message);
   }
 
   // Montar datetime com offset de Brasília (-03:00)

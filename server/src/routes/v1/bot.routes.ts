@@ -301,6 +301,53 @@ router.get('/appointments/slots', apiKeyMiddleware, async (req: Request, res: Re
 
 /**
  * @openapi
+ * /bot/appointments/by-phone/{whatsappNumber}:
+ *   get:
+ *     summary: Lista agendamentos abertos (não concluídos/cancelados) por número de WhatsApp
+ *     tags: [Bot Integration]
+ *     security:
+ *       - apiKeyAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: whatsappNumber
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Lista de agendamentos abertos
+ */
+router.get('/appointments/by-phone/:whatsappNumber', apiKeyMiddleware, async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const { whatsappNumber } = req.params;
+    if (!whatsappNumber) {
+      return res.status(400).json({ error: 'whatsappNumber is required' });
+    }
+
+    // Get all appointments for this phone number where status is not COMPLETED or CANCELED
+    const appointments = await appointmentRepository.findByClientWhatsapp(whatsappNumber);
+    const openAppointments = appointments.filter(
+      a => a.status !== 'COMPLETED' && a.status !== 'CANCELED'
+    );
+
+    return res.status(200).json({
+      hasOpenAppointments: openAppointments.length > 0,
+      count: openAppointments.length,
+      appointments: openAppointments.map(a => ({
+        id: a.id,
+        title: a.title,
+        scheduledAt: a.scheduledAt,
+        status: a.status,
+        type: a.type,
+      })),
+    });
+  } catch (error) {
+    next(error);
+  }
+});
+
+/**
+ * @openapi
  * /bot/appointments:
  *   post:
  *     summary: Cria um agendamento pelo Bot (uso exclusivo da IA)

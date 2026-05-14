@@ -62,6 +62,15 @@ export class AppointmentRepository implements IAppointmentRepository {
     );
   }
 
+  async findByClientWhatsapp(whatsappNumber: string): Promise<Appointment[]> {
+    return dbAll<Appointment>(
+      `SELECT ${this.appointmentSelect} FROM appointments
+       WHERE client_whatsapp_number = $1
+       ORDER BY scheduled_at DESC`,
+      [whatsappNumber]
+    );
+  }
+
   async findConflicts(
     lawyerId: string,
     scheduledAt: Date,

@@ -176,6 +176,21 @@ export async function getAvailableSlots(
   return res.data.slots || [];
 }
 
+export async function getOpenAppointmentsByPhone(whatsappNumber: string): Promise<{
+  hasOpenAppointments: boolean;
+  count: number;
+  appointments: Array<{
+    id: string;
+    title: string;
+    scheduledAt: string;
+    status: string;
+    type: string;
+  }>;
+}> {
+  const res = await client.get(`/bot/appointments/by-phone/${whatsappNumber}`);
+  return res.data;
+}
+
 export async function scheduleAppointment(data: {
   lawyerId: string;
   clientId: string;
