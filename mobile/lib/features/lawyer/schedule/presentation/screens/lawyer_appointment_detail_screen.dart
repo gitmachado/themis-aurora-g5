@@ -598,7 +598,7 @@ class _LawyerAppointmentDetailScreenState
                         ),
                       ),
                     );
-                  // ignore: unnecessary_to_list_in_spreads
+                    // ignore: unnecessary_to_list_in_spreads
                   }).toList(),
               ],
             ],
