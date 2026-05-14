@@ -45,18 +45,24 @@ class WebSocketClient {
     final token = await _tokenStorage.readToken();
     if (token == null) return;
 
-    final baseUrl = AppConstants.apiBaseUrl.replaceFirst('/api/v1', '');
+    final apiUri = Uri.parse(AppConstants.apiBaseUrl);
+    final basePath = apiUri.path.replaceFirst(RegExp(r'/api/v1/?$'), '');
+    final origin =
+        '${apiUri.scheme}://${apiUri.host}'
+        '${apiUri.hasPort ? ':${apiUri.port}' : ''}';
+    final socketPath = '$basePath/socket.io';
 
     _socket?.dispose();
     if (kDebugMode) {
       print(
-        '[WebSocket] Connecting to $baseUrl with token length: ${token.length}',
+        '[WebSocket] Connecting to $origin (path=$socketPath) with token length: ${token.length}',
       );
     }
 
     _socket = io.io(
-      baseUrl,
+      origin,
       io.OptionBuilder()
+          .setPath(socketPath)
           .setTransports([
             'websocket',
           ]) // Use 'websocket' for better stability if supported
@@ -69,7 +75,7 @@ class WebSocketClient {
     );
 
     _socket!.onConnect((_) {
-      if (kDebugMode) print('[WebSocket] Connected successfully to $baseUrl');
+      if (kDebugMode) print('[WebSocket] Connected successfully to $origin');
       _eventController.add(const WebSocketEvent(type: 'connected'));
     });
 
