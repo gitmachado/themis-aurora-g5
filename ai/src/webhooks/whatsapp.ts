@@ -44,14 +44,14 @@ whatsappRouter.post("/webhook", async (req, res) => {
 
     // 1. Resolve o corpo de texto — áudio é transcrito, imagens descritas
     let textBody: string;
-    let messageType: "TEXT" | "AUDIO" | "IMAGE" = "TEXT";
+    let messageType: "TEXT" | "IMAGE" | "DOCUMENT" = "TEXT";
 
     if (type === "audio" && message.audio?.id) {
       console.log(`[Webhook] Áudio recebido de ${whatsappNumber}, transcrevendo...`);
       try {
         const audioBuffer = await downloadWhatsAppMedia(message.audio.id);
         textBody = await transcribeAudio(audioBuffer, message.audio.mime_type ?? "audio/ogg");
-        messageType = "AUDIO";
+        messageType = "DOCUMENT";
         console.log(`[Webhook] Transcrição concluída para ${whatsappNumber}: "${textBody.substring(0, 60)}..."`);
       } catch (transcriptionErr) {
         console.error("[Webhook] Falha ao transcrever áudio:", transcriptionErr);
@@ -96,7 +96,7 @@ whatsappRouter.post("/webhook", async (req, res) => {
         whatsappNumber,
         content: textBody,
         senderRole: "CLIENT",
-        messageType: messageType as "TEXT" | "AUDIO" | "IMAGE",
+        messageType,
         whatsappMessageId: messageId,
       });
     } catch (syncErr) {
