@@ -10,11 +10,13 @@ const DEFAULT_LAWYER_ID = process.env.DEFAULT_LAWYER_ID || "11111111-1111-1111-1
  * pois o lead já contém todas as informações do cliente.
  */
 export const appointmentTool = tool(
-  async ({ action, date, title, description, time, durationMinutes, triageData }) => {
+  async ({ action, date, title, description, time, durationMinutes, triageData, whatsappNumber }) => {
     const effectiveLawyerId = DEFAULT_LAWYER_ID;
     try {
       if (action === "check_availability") {
         return await handleCheckAvailability(effectiveLawyerId, date);
+      } else if (action === "check_open_appointments") {
+        return await handleCheckOpenAppointments(whatsappNumber || "");
       } else if (action === "schedule") {
         const triageValidation = validateTriageDataForScheduling(triageData);
         if (!triageValidation.valid) {
@@ -31,7 +33,7 @@ export const appointmentTool = tool(
           triageData
         );
       }
-      return "Ação desconhecida. Use 'check_availability' ou 'schedule'.";
+      return "Ação desconhecida. Use 'check_availability', 'check_open_appointments' ou 'schedule'.";
     } catch (err: any) {
       console.error("[Tool: Appointment]", err.message);
       return `Erro: ${err.message}. NÃO peça os dados novamente ao cliente — informe que houve uma falha técnica.`;
@@ -42,12 +44,13 @@ export const appointmentTool = tool(
     description: `Ferramenta para consultar disponibilidade de agenda do advogado e agendar compromissos.
 
 Ações:
-1. **check_availability**: Lista horários disponíveis em uma data
-2. **schedule**: Cria um novo compromisso com data e hora específicas
+1. **check_open_appointments**: Verifica se cliente já tem reunião aberta (SEMPRE fazer primeiro!)
+2. **check_availability**: Lista horários disponíveis em uma data
+3. **schedule**: Cria um novo compromisso com data e hora específicas
 
 O WhatsApp do cliente já está registrado — NÃO é necessário informá-lo.`,
     schema: z.object({
-      action: z.enum(["check_availability", "schedule"])
+      action: z.enum(["check_availability", "check_open_appointments", "schedule"])
         .describe("Ação a executar: verificar disponibilidade ou agendar"),
       date: z.string().describe("Data no formato YYYY-MM-DD. Use a data real de hoje — nunca invente datas do passado."),
       title: z.string().nullable().optional()
@@ -68,9 +71,30 @@ O WhatsApp do cliente já está registrado — NÃO é necessário informá-lo.`
         whatsappNumber: z.string().nullable().optional(),
       }).nullable().optional()
         .describe("Dados de triagem do cliente já coletados — automaticamente compilado pelo agente"),
+      whatsappNumber: z.string().nullable().optional()
+        .describe("WhatsApp do cliente (injetado pelo router)"),
     }),
   }
 );
+
+async function handleCheckOpenAppointments(whatsappNumber: string): Promise<string> {
+  if (!whatsappNumber) {
+    return "ERRO: Número do WhatsApp não encontrado. Não é possível verificar reuniões abertas.";
+  }
+
+  try {
+    const result = await getOpenAppointmentsByPhone(whatsappNumber);
+    if (result.hasOpenAppointments) {
+      const statusList = result.appointments
+        .map((a: any) => `• ${a.title} (${a.status}) — ${a.scheduledAt ? new Date(a.scheduledAt).toLocaleDateString('pt-BR') : 'sem data'}`)
+        .join('\n');
+      return `REUNIAO_ABERTA: Este cliente já possui ${result.count} reunião(ões) pendente(s):\n${statusList}\n\nNão é permitido agendar nova reunião. Faça HANDOFF para atendimento humano.`;
+    }
+    return `NENHUMA_REUNIAO_ABERTA: Este cliente não tem reuniões abertas. Pode prosseguir com o agendamento.`;
+  } catch (err: any) {
+    throw new Error(`Falha ao verificar reuniões abertas: ${err.message}`);
+  }
+}
 
 async function handleCheckAvailability(lawyerId: string, date: string): Promise<string> {
   try {

@@ -4,7 +4,7 @@ import { ThemisStateType } from "../state.js";
 import { AGENT_PROMPT } from "../../config/prompts.js";
 import { tools, toolsByName } from "../../tools/index.js";
 import { searchKnowledge } from "../../utils/vector-store.js";
-import { getProcessesByPhone, getLeadByPhone } from "../../utils/backend-client.js";
+import { getProcessesByPhone, getLeadByPhone, getOpenAppointmentsByPhone } from "../../utils/backend-client.js";
 
 /**
  * Nó principal — Agente Unificado.
@@ -46,16 +46,39 @@ export async function routerNode(
     }
   }
 
-  // 3. Modelo vinculado com as Tools modulares
+  // 3. PRÉ-CHECK para Bloqueio de Reuniões Abertas (se cliente quer marcar)
+  let openAppointmentsContext = "";
+  if (triage.name && whatsappNumber) {
+    const bookingKeywords = ["marcar", "agendar", "reunião", "consulta com advogado", "nova reunião", "outra reunião"];
+    const wantsToBook = bookingKeywords.some(k => lastMessage.toLowerCase().includes(k));
+    if (wantsToBook) {
+      try {
+        const open = await getOpenAppointmentsByPhone(whatsappNumber);
+        if (open.hasOpenAppointments) {
+          const details = open.appointments
+            .map((a: any) => `${a.title} (${a.status})`)
+            .join("; ");
+          openAppointmentsContext = `\n\n⚠️ ALERTA SISTEMA: Cliente "${triage.name}" tem ${open.count} reunião(ões) ABERTA(S): ${details}. BLOQUEIE novo agendamento imediatamente e suira HANDOFF.`;
+          console.log(`[Router Node] PRÉ-CHECK: ${triage.name} tem reunião aberta — bloqueando.`);
+        } else {
+          openAppointmentsContext = `\n\n✅ SISTEMA: Cliente não tem reuniões abertas — pode agendar.`;
+        }
+      } catch (err) {
+        console.warn("[Router Node] Erro no pré-check de reuniões abertas:", err);
+      }
+    }
+  }
+
+  // 4. Modelo vinculado com as Tools modulares
   const model = new ChatOpenAI({
     model: process.env.OPENAI_MODEL || "gpt-4o-mini",
     temperature: 0.1,
   }).bindTools(tools);
 
-  // 4. Busca de Conhecimento (RAG) — REMOVIDO (IA agora usa a tool pesquisar_conhecimento)
+  // 5. Busca de Conhecimento (RAG) — REMOVIDO (IA agora usa a tool pesquisar_conhecimento)
   const knowledgeContext = "Use a tool 'pesquisar_conhecimento' se precisar de informações do escritório.";
 
-  // 5. Dados de Processos (se for cliente)
+  // 6. Dados de Processos (se for cliente)
   let processContext = "Nenhum processo encontrado.";
   try {
     const processes = await getProcessesByPhone(whatsappNumber);
@@ -66,7 +89,7 @@ export async function routerNode(
     console.warn("[Router Node] Erro ao buscar processos (continuando sem):", err);
   }
 
-  // 6. Monta o prompt do agente com dados dinâmicos
+  // 7. Monta o prompt do agente com dados dinâmicos
   const now = new Date();
   const todayStr = now.toLocaleDateString('pt-BR', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
   const todayISO = now.toISOString().split('T')[0];
@@ -87,15 +110,16 @@ export async function routerNode(
     .replace("{triageDescription}", triage.caseDescription || "FALTANDO")
     .replace("{triageUrgency}", triage.urgency || "FALTANDO")
     .replace("{triageAvailability}", triage.contactAvailability || "FALTANDO")
-    .replace("{processContext}", processContext);
+    .replace("{processContext}", processContext)
+    + openAppointmentsContext;
 
-  // 7. Histórico recente (janela deslizante)
+  // 8. Histórico recente (janela deslizante)
   const history = messages.slice(-20).map((m: any) => ({
     role: (m._getType?.() === 'ai' || m.type === 'ai') ? 'assistant' : 'user',
     content: String(m.content),
   }));
 
-  // 8. Invoca o modelo
+  // 9. Invoca o modelo
   let response;
   try {
     response = await model.invoke([
@@ -111,7 +135,7 @@ export async function routerNode(
     };
   }
 
-  // 9. Execução de Tools Reais
+  // 10. Execução de Tools Reais
   if (response.tool_calls && response.tool_calls.length > 0) {
     const toolMessages: ToolMessage[] = [];
 
@@ -142,7 +166,7 @@ export async function routerNode(
       }
     }
 
-    // 10. Reflexão: IA recebe o resultado das tools e gera o texto final
+    // 11. Reflexão: IA recebe o resultado das tools e gera o texto final
     let finalResponse;
     try {
       finalResponse = await model.invoke([
@@ -167,7 +191,7 @@ export async function routerNode(
     };
   }
 
-  // 10. Resposta sem tools
+  // 11. Resposta sem tools
   return {
     currentNode: "sync_node",
     messages: [response],
