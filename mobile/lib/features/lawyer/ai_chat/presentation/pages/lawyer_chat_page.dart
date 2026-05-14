@@ -409,58 +409,84 @@ class _LawyerChatPageState extends ConsumerState<LawyerChatPage> {
 
   Widget _buildInputArea(bool isLoading) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      padding: const EdgeInsets.fromLTRB(16, 12, 16, 12),
       decoration: BoxDecoration(
-        color: AppColors.surface,
-        border: const Border(top: BorderSide(color: AppColors.border)),
+        color: Colors.white,
+        border: Border(top: BorderSide(color: AppColors.divider)),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.05),
+            offset: const Offset(0, -4),
+            blurRadius: 10,
+          ),
+        ],
       ),
       child: Row(
+        crossAxisAlignment: CrossAxisAlignment.end,
         children: [
           Expanded(
-            child: Container(
-              decoration: BoxDecoration(
-                color: AppColors.surface2,
-                borderRadius: BorderRadius.circular(24),
-              ),
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              child: TextField(
-                controller: _textController,
-                focusNode: _focusNode,
-                enabled: !isLoading,
-                textInputAction: TextInputAction.send,
-                onSubmitted: isLoading ? null : (_) => _onSend(),
-                style: AppTextStyles.body.copyWith(
+            child: TextField(
+              controller: _textController,
+              focusNode: _focusNode,
+              enabled: !isLoading,
+              textInputAction: TextInputAction.send,
+              onSubmitted: isLoading ? null : (_) => _onSend(),
+              decoration: InputDecoration(
+                hintText: 'Pergunte ao assistente...',
+                hintStyle: AppTextStyles.body.copyWith(
+                  color: AppColors.textCaption,
                   fontSize: 15,
-                  color: AppColors.ink,
                 ),
-                decoration: InputDecoration(
-                  hintText: 'Pergunte ao assistente...',
-                  hintStyle: AppTextStyles.body.copyWith(
-                    fontSize: 15,
-                    color: AppColors.ink4,
+                filled: true,
+                fillColor: AppColors.background,
+                contentPadding: const EdgeInsets.symmetric(
+                  horizontal: 20,
+                  vertical: 12,
+                ),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(28),
+                  borderSide: BorderSide(color: AppColors.divider),
+                ),
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(28),
+                  borderSide: BorderSide(color: AppColors.divider),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(28),
+                  borderSide: const BorderSide(
+                    color: AppColors.primary,
+                    width: 1.5,
                   ),
-                  border: InputBorder.none,
-                  contentPadding: const EdgeInsets.symmetric(vertical: 12),
                 ),
+              ),
+              maxLines: 5,
+              minLines: 1,
+              textCapitalization: TextCapitalization.sentences,
+              style: AppTextStyles.body.copyWith(
+                fontSize: 15,
+                color: AppColors.ink,
               ),
             ),
           ),
-          const SizedBox(width: 8),
-          IconButton(
-            tooltip: 'Enviar',
-            onPressed: isLoading ? null : _onSend,
-            iconSize: 20,
-            // Forces a 48x48 minimum tap target per Material/WCAG guidance,
-            // and brings ripple feedback that GestureDetector lacked.
-            constraints: const BoxConstraints(minWidth: 48, minHeight: 48),
-            style: IconButton.styleFrom(
-              backgroundColor: AppColors.ink,
-              disabledBackgroundColor: AppColors.ink4,
-              foregroundColor: Colors.white,
+          const SizedBox(width: 12),
+          Padding(
+            padding: const EdgeInsets.only(bottom: 2),
+            child: Material(
+              color: AppColors.primary,
               shape: const CircleBorder(),
-              padding: const EdgeInsets.all(12),
+              clipBehavior: Clip.antiAlias,
+              child: InkWell(
+                onTap: isLoading ? null : _onSend,
+                child: const Padding(
+                  padding: EdgeInsets.all(12),
+                  child: Icon(
+                    Icons.send_rounded,
+                    color: Colors.white,
+                    size: 24,
+                  ),
+                ),
+              ),
             ),
-            icon: const Icon(Icons.send_rounded),
           ),
         ],
       ),
