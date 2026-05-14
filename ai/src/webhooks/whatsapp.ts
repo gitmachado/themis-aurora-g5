@@ -10,6 +10,7 @@ import {
 } from "../utils/guardrails.js";
 import { downloadWhatsAppMedia } from "../utils/media-downloader.js";
 import { transcribeAudio } from "../utils/transcriber.js";
+import { describeImage } from "../utils/image-describer.js";
 import { syncMessage } from "../graph/nodes/sync.js";
 import { getLeadByPhone, notifyLawyer } from "../utils/backend-client.js";
 import { FALLBACK_ERROR_MESSAGE } from "../config/prompts.js";
@@ -64,13 +65,27 @@ whatsappRouter.post("/webhook", async (req, res) => {
         );
         return;
       }
+    } else if (type === "image" && message.image?.id) {
+      console.log(`[Webhook] Imagem recebida de ${whatsappNumber}, descrevendo...`);
+      try {
+        const imageBuffer = await downloadWhatsAppMedia(message.image.id);
+        textBody = await describeImage(imageBuffer, message.image.mime_type ?? "image/jpeg", message.image.caption);
+        console.log(`[Webhook] Descrição de imagem concluída para ${whatsappNumber}: "${textBody.substring(0, 60)}..."`);
+      } catch (imageErr) {
+        console.error("[Webhook] Falha ao descrever imagem:", imageErr);
+        await sendWhatsAppMessage(
+          whatsappNumber,
+          "Não consegui processar a imagem. 😔 Poderia descrever sua dúvida em texto ou áudio?"
+        );
+        return;
+      }
     } else if (type === "text" && message.text?.body) {
       textBody = message.text.body;
     } else {
       console.log(`[Webhook] Tipo de mensagem não suportado (${type}) de ${whatsappNumber}`);
       await sendWhatsAppMessage(
         whatsappNumber,
-        "Por enquanto só processo mensagens de texto e áudio. Por favor, envie sua dúvida escrita ou em áudio. 😊"
+        "Por enquanto processo mensagens de texto, áudio e imagem. Por favor, envie sua dúvida nestes formatos. 😊"
       );
       return;
     }
