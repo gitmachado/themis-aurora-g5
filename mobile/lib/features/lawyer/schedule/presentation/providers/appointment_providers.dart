@@ -188,29 +188,6 @@ final pendingAppointmentsCountProvider =
   return pending.length;
 });
 
-// Deadline reminder listener
-final deadlineReminderProvider =
-    StreamProvider<Map<String, dynamic>?>((ref) {
-  final socketClient = ref.watch(webSocketClientProvider);
-
-  final controller = StreamController<Map<String, dynamic>?>();
-
-  final listener = (dynamic data) {
-    if (data is Map) {
-      controller.add(Map<String, dynamic>.from(data));
-    }
-  };
-
-  socketClient.on('deadline:reminder', listener);
-
-  ref.onDispose(() {
-    controller.close();
-    socketClient.off('deadline:reminder', listener);
-  });
-
-  return controller.stream;
-});
-
 // Appointments actions
 final appointmentActionsProvider =
     Provider<AppointmentActions>((ref) => AppointmentActions(ref));
